@@ -91,8 +91,5 @@ Usage
 buildozer.spec
 --------------
 
-See buildozer/default.spec for an up-to-date spec file.
-
-.. include:: buildozer/default.spec
-    :code: ini
+See `buildozer/default.spec <https://raw.github.com/kivy/buildozer/master/buildozer/default.spec>`_ for an up-to-date spec file.
 
