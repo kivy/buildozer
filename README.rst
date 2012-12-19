@@ -13,7 +13,6 @@ Usage example
 -------------
 
 #. Add buildozer repo into your PYTHONPATH.
-#. Create a .spec
 #. Go into your application directory and do::
 
     buildozer.py init
