@@ -28,16 +28,21 @@ buildozer.spec
     # Title of your application
     title = My Application
 
-    # Source code variables
+    # Source code where the main.py live
     source.dir = .
-    source.include_ext = py,png,jpg
+
+    # Source files to include (let empty to include all the files)
+    source.include_exts = py,png,jpg
+
+    # Source files to exclude (let empty to not excluding anything)
+    #source.exclude_exts = spec
 
     # Application versionning
     version.regex = __version__ = '(.*)'
     version.filename = %(source.dir)s/main.py
 
     # Application requirements
-    requirements = twisted kivy
+    requirements = twisted,kivy
 
     # Android specific
     android.permissions = INTERNET

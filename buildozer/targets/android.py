@@ -1,10 +1,16 @@
-ANDROID_API = '16'
+#
+# Android target
+# Thanks for Renpy (again) for its install_sdk.py and plat.py in the PGS4A
+# project!
+# 
+
+
+ANDROID_API = '14'
 ANDROID_SDK_VERSION = '21'
 ANDROID_NDK_VERSION = '8c'
 APACHE_ANT_VERSION = '1.8.4'
 
-import tarfile
-import zipfile
+
 import traceback
 from sys import platform
 from buildozer.target import Target
@@ -72,13 +78,10 @@ class TargetAndroid(Target):
         archive = 'apache-ant-{0}-bin.tar.gz'.format(APACHE_ANT_VERSION)
         unpacked = 'apache-ant-{0}'.format(APACHE_ANT_VERSION)
         url = 'http://archive.apache.org/dist/ant/binaries/'
-        archive = self.buildozer.download(url, archive,
+        self.buildozer.download(url, archive,
                 cwd=self.buildozer.platform_dir)
 
-        tf = tarfile.open(archive, 'r:*')
-        tf.extractall(path=self.buildozer.platform_dir)
-        tf.close()
-
+        self.buildozer.file_extract(archive, cwd=self.buildozer.platform_dir)
         self.buildozer.file_rename(unpacked, 'apache-ant',
                 cwd=self.buildozer.platform_dir)
         self.buildozer.log('Apache ANT installation done.')
@@ -105,19 +108,11 @@ class TargetAndroid(Target):
 
         archive = archive.format(ANDROID_SDK_VERSION)
         url = 'http://dl.google.com/android/'
-        archive = self.buildozer.download(url, archive,
+        self.buildozer.download(url, archive,
                 cwd=self.buildozer.platform_dir)
 
         self.buildozer.log('Unpacking Android SDK')
-        if archive.endswith('.tgz'):
-            tf = tarfile.open(archive, 'r:*')
-            tf.extractall(path=self.buildozer.platform_dir)
-            tf.close()
-        else:
-            zf = zipfile.ZipFile(archive)
-            zf.extractall(path=self.buildozer.platform_dir)
-            zf.close()
-
+        self.buildozer.file_extract(archive, cwd=self.buildozer.platform_dir)
         self.buildozer.file_rename(unpacked, 'android-sdk',
                 cwd=self.buildozer.platform_dir)
         self.buildozer.log('Android SDK installation done.')
@@ -143,19 +138,11 @@ class TargetAndroid(Target):
         archive = archive.format(ANDROID_NDK_VERSION)
         unpacked = unpacked.format(ANDROID_NDK_VERSION)
         url = 'http://dl.google.com/android/ndk/'
-        archive = self.buildozer.download(url, archive,
+        self.buildozer.download(url, archive,
                 cwd=self.buildozer.platform_dir)
 
         self.buildozer.log('Unpacking Android NDK')
-        if archive.endswith('.tar.bz2'):
-            tf = tarfile.open(archive, 'r:*')
-            tf.extractall(path=self.buildozer.platform_dir)
-            tf.close()
-        else:
-            zf = zipfile.ZipFile(archive)
-            zf.extractall(path=self.buildozer.platform_dir)
-            zf.close()
-
+        self.buildozer.file_extract(archive, cwd=self.buildozer.platform_dir)
         self.buildozer.file_rename(unpacked, 'android-ndk',
                 cwd=self.buildozer.platform_dir)
         self.buildozer.log('Android NDK installation done.')
@@ -172,11 +159,9 @@ class TargetAndroid(Target):
         if not packages:
             self.buildozer.log('Android packages already installed.')
             return
-        ret = self.buildozer.cmd('{0} update sdk -u -a -t {1}'.format(
+        self.buildozer.cmd('{0} update sdk -u -a -t {1}'.format(
             self.android_cmd, ','.join(packages)),
             cwd=self.buildozer.platform_dir)
-        print ret[0]
-        print ret[1]
         self.buildozer.log('Android packages installation done.')
 
     def install_platform(self):
@@ -192,7 +177,7 @@ class TargetAndroid(Target):
             cmd('git pull origin master', cwd=pa_dir)
         '''
 
-        self.ant_dir = ant_dir = self._install_apache_ant()
+        self._install_apache_ant()
         self.sdk_dir = sdk_dir = self._install_android_sdk()
         self.ndk_dir = ndk_dir = self._install_android_ndk()
         self._install_android_packages()
@@ -206,8 +191,8 @@ class TargetAndroid(Target):
         # for android, the compilation depends really on the app requirements.
         # compile the distribution only if the requirements changed.
         last_requirements = self.buildozer.state.get('android.requirements', '')
-        app_requirements = self.buildozer.config.get('app',
-                'requirements', '').split()
+        app_requirements = self.buildozer.config.getlist('app',
+                'requirements', '')
 
         # we need to extract the requirements that python-for-android knows
         # about
@@ -244,7 +229,14 @@ class TargetAndroid(Target):
         cmd('./distribute.sh -m "{0}"'.format(modules_str), cwd=self.pa_dir)
         self.buildozer.log('Distribution compiled.')
 
+        # ensure we will not compile again
+        self.buildozer.state['android.requirements'] = android_requirements
+        self.buildozer.state.sync()
 
+    def build_package(self):
+        dist_dir = join(self.pa_dir, 'dist', 'default')
+        #cmd('./build.py --name {0} --private {1} '
+        #    '--version {2} 
 
 
 def get_target(buildozer):
