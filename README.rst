@@ -22,6 +22,7 @@ buildozer.spec
 --------------
 
 ::
+
     [app]
 
     # Title of your application
@@ -40,3 +41,4 @@ buildozer.spec
 
     # Android specific
     android.permissions = INTERNET
+
