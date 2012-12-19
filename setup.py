@@ -10,6 +10,7 @@ setup(
     packages=[
         'buildozer',
         'buildozer.targets'],
+    package_data={'buildozer': ['default.spec']},
     scripts=['tools/buildozer'],
     description='Generic Python packager for Android / iOS and Desktop'
 )
