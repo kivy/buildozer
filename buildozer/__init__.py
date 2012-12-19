@@ -376,7 +376,10 @@ class Buildozer(object):
     def cmd_init(self, *args):
         '''Create a initial buildozer.spec in the current directory
         '''
-        copyfile((dirname(__file__), 'default.spec'), 'buildozer.spec')
+        if exists('buildozer.spec'):
+            print 'ERROR: You already have a buildozer.spec file.'
+            exit(1)
+        copyfile(join(dirname(__file__), 'default.spec'), 'buildozer.spec')
         print 'File buildozer.spec created, ready to customize!'
 
     def cmd_clean(self, *args):

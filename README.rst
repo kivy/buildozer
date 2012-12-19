@@ -46,7 +46,7 @@ Example of commands::
     buildozer android debug install
 
     # set the default command if nothing set
-    buildozer setdefault android debug install
+    buildozer setdefault android debug install run
 
 
 Usage
