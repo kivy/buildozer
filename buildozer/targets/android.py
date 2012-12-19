@@ -12,9 +12,11 @@ APACHE_ANT_VERSION = '1.8.4'
 
 
 import traceback
-from sys import platform
+from pipes import quote
+from sys import platform, executable
 from buildozer.target import Target
 from os.path import join, realpath
+from shutil import copyfile
 
 
 class TargetAndroid(Target):
@@ -235,8 +237,53 @@ class TargetAndroid(Target):
 
     def build_package(self):
         dist_dir = join(self.pa_dir, 'dist', 'default')
-        #cmd('./build.py --name {0} --private {1} '
-        #    '--version {2} 
+        config = self.buildozer.config
+        package_domain = config.getdefault('app', 'package.domain', '')
+        package = config.get('app', 'package.name')
+        if package_domain:
+            package = package_domain + '.' + package
+        version = self.buildozer.get_version()
+
+        build_cmd = (
+            '{python} build.py --name {name}'
+            ' --version {version}'
+            ' --package {package}'
+            ' --private {appdir}'
+            ' --sdk {androidsdk}'
+            ' --minsdk {androidminsdk}').format(
+            python=executable,
+            name=quote(config.get('app', 'title')),
+            version=version,
+            package=package,
+            appdir=self.buildozer.app_dir,
+            androidminsdk=config.getdefault(
+                'app', 'android.minsdk', 8),
+            androidsdk=config.getdefault(
+                'app', 'android.sdk', ANDROID_API))
+
+        # add permissions
+        permissions = config.getlist('app',
+                'android.permissions', [])
+        for permission in permissions:
+            build_cmd += ' --permission {0}'.format(permission)
+
+        # build only in debug right now.
+        build_cmd += ' debug'
+        self.buildozer.cmd(build_cmd, cwd=dist_dir)
+
+        # XXX found how the apk name is really built from the title
+        bl = '\'" ,'
+        apktitle = ''.join([x for x in config.get('app', 'title') if x not in
+            bl])
+        apk = '{title}-{version}-debug.apk'.format(
+            title=apktitle, version=version)
+
+        # copy to our place
+        copyfile(join(dist_dir, 'bin', apk),
+                join(self.buildozer.bin_dir, apk))
+
+        self.buildozer.log('Android packaging done!')
+        self.buildozer.log('APK {0} available in the bin directory'.format(apk))
 
 
 def get_target(buildozer):

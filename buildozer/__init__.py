@@ -22,10 +22,6 @@ from os import environ, mkdir, unlink, rename, walk, sep
 from copy import copy
 from shutil import copyfile
 
-class ConfigDict(dict):
-    def get(self, key, value, default):
-        print 'hello'
-
 
 class Buildozer(object):
 
@@ -35,7 +31,7 @@ class Buildozer(object):
         self.targetname = target
         self.specfilename = filename
         self.state = None
-        self.config = SafeConfigParser({}, ConfigDict, allow_no_value=True)
+        self.config = SafeConfigParser()
         self.config.getlist = self._get_config_list
         self.config.getdefault = self._get_config_default
         self.config.read(filename)
@@ -123,6 +119,7 @@ class Buildozer(object):
         self.mkdir(join(specdir, '.buildozer', self.targetname))
         self.mkdir(join(specdir, '.buildozer', self.targetname, 'platform'))
         self.mkdir(join(specdir, '.buildozer', self.targetname, 'app'))
+        self.mkdir(join(specdir, 'bin'))
         self.state = shelve.open(join(self.platform_dir, 'state.db'))
 
     def mkdir(self, dn):
@@ -201,15 +198,17 @@ class Buildozer(object):
             if has_filename and not has_regex:
                 raise Exception('version.regex is missing')
 
-            fn = c.get('app', 'filename')
-            with fn as fd:
+            fn = c.get('app', 'version.filename')
+            with open(fn) as fd:
                 data = fd.read()
                 regex = c.get('app', 'version.regex')
                 match = search(regex, data)
                 if not match:
                     raise Exception(
                         'Unable to found capture version in %r' % fn)
-                return match[0]
+                version = match.groups()[0]
+                self.log('Captured version: {0}'.format(version))
+                return version
 
         raise Exception('Missing version or version.regex + version.filename')
 
@@ -252,13 +251,20 @@ class Buildozer(object):
 
     @property
     def platform_dir(self):
-        return join(dirname(self.specfilename), '.buildozer',
-                self.targetname, 'platform')
+        return realpath(
+            join(dirname(self.specfilename), '.buildozer',
+            self.targetname, 'platform'))
 
     @property
     def app_dir(self):
-        return join(dirname(self.specfilename), '.buildozer',
-                self.targetname, 'app')
+        return realpath(join(
+            dirname(self.specfilename), '.buildozer',
+            self.targetname, 'app'))
+
+    @property
+    def bin_dir(self):
+        return realpath(join(
+            dirname(self.specfilename), 'bin'))
 
 def run():
     from optparse import OptionParser
