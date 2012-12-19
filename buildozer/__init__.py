@@ -329,7 +329,7 @@ class Buildozer(object):
             print 'Use "buildozer setdefault <command args...>"'
             exit(1)
         cmd = self.state['buildozer:defaultcommand']
-        self.run_command(*cmd)
+        self.run_command(cmd)
 
     def run_command(self, args):
         if '-h' in args or '--help' in args:
