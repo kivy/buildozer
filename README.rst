@@ -29,7 +29,7 @@ Usage example
 
     buildozer init
     # edit the buildozer.spec, then
-    buildozer android build
+    buildozer android debug install run
 
 Example of commands::
 
