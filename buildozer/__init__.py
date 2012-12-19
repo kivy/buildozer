@@ -103,6 +103,7 @@ class Buildozer(object):
             exit(1)
 
         specdir = dirname(self.specfilename)
+        self.mkdir(join(specdir, '.buildozer'))
         self.mkdir(join(specdir, '.buildozer', self.targetname))
         self.mkdir(join(specdir, '.buildozer', self.targetname, 'platform'))
         self.mkdir(join(specdir, '.buildozer', self.targetname, 'app'))
