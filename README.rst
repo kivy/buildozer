@@ -9,17 +9,78 @@ The goal is to have one "buildozer.spec" file in your app directory: it
 describe your application requirements, titles, etc.  Buildozer will use that
 spec for create package for Android, iOS, Windows, OSX and Linux.
 
-Usage
------
+Usage example
+-------------
 
 #. Add buildozer repo into your PYTHONPATH.
 #. Create a .spec
 #. Go into your application directory and do::
 
-    buildozer.py -t android
+    buildozer.py init
+    # edit the buildozer.spec, then
+    buildozer.py android build
+
+Example of commands::
+
+    # buildozer commands
+    buildozer.py clean
+
+    # buildozer target command
+    buildozer.py android update
+    buildozer.py android install
+    buildozer.py android debug
+    buildozer.py android release
+
+    # or all in one (compile in debug, install on device)
+    buildozer.py android debug install
+
+    # set the default command if nothing set
+    buildozer.py setdefault android debug install
+
+
+Usage
+-----
+
+::
+
+    Usage: buildozer [target] [command1] [command2]
+
+    Available targets:
+      android
+        Android target, based on python-for-android project
+      ios
+        iOS target, based on kivy-ios project. (not working yet.)
+
+    Global commands (without target):
+      clean
+        Clean the whole Buildozer environment.
+      help
+        Show the Buildozer help.
+      init
+        Create a initial buildozer.spec in the current directory
+      setdefault
+        Set the default command to do when to arguments are given
+
+    Target commands:
+      clean
+        Clean the target environment
+      update
+        Update the target dependencies
+      debug
+        Build the application in debug mode
+      release
+        Build the application in release mode
+      deploy
+        Install the application on the device
+      run
+        Run the application on the device
+
+
 
 buildozer.spec
 --------------
+
+See buildozer/default.spec for an up-to-date spec file.
 
 ::
 
@@ -65,4 +126,7 @@ buildozer.spec
 
     # (int) Android SDK to use
     #android.sdk = 16
+
+    # (str) Android entry point, default is ok for Kivy-based app
+    #android.entrypoint = org.renpy.android.PythonActivity
 

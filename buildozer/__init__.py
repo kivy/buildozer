@@ -12,23 +12,23 @@ Layout directory for buildozer:
 
 import shelve
 import zipfile
+import sys
 from sys import stdout, exit
 from urllib import urlretrieve
 from re import search
 from ConfigParser import SafeConfigParser
 from os.path import join, exists, dirname, realpath, splitext
 from subprocess import Popen, PIPE
-from os import environ, mkdir, unlink, rename, walk, sep
+from os import environ, mkdir, unlink, rename, walk, sep, listdir
 from copy import copy
-from shutil import copyfile
+from shutil import copyfile, rmtree
 
 
 class Buildozer(object):
 
-    def __init__(self, filename, target):
+    def __init__(self, filename='buildozer.spec', target=None):
         super(Buildozer, self).__init__()
         self.environ = {}
-        self.targetname = target
         self.specfilename = filename
         self.state = None
         self.config = SafeConfigParser()
@@ -36,7 +36,13 @@ class Buildozer(object):
         self.config.getdefault = self._get_config_default
         self.config.read(filename)
 
-        # resolve target
+        self.targetname = None
+        self.target = None
+        if target:
+            self.set_target(target)
+
+    def set_target(self, target):
+        self.targetname = target
         m = __import__('buildozer.targets.%s' % target, fromlist=['buildozer'])
         self.target = m.get_target(self)
 
@@ -56,7 +62,7 @@ class Buildozer(object):
 
     def error(self, msg):
         print 'E', msg
-        exit(-1)
+        exit(1)
 
     def checkbin(self, msg, fn):
         self.log('Search for {0}'.format(msg))
@@ -87,34 +93,15 @@ class Buildozer(object):
             print '--- end commend failed'
         return ret
 
-    def run(self):
-        self.log('Build started')
-
-        self.log('Check configuration tokens')
-        self.do_config_requirements()
-
-        self.log('Check requirements for %s' % self.targetname)
-        self.target.check_requirements()
-
-        self.log('Ensure build layout')
-        self.ensure_build_layout()
-
-        self.log('Install platform')
-        self.target.install_platform()
-
-        self.log('Compile platform')
-        self.target.compile_platform()
-
-        self.log('Prebuild the application')
-        self.prebuild_application()
-
-        self.log('Package the application')
-        self.target.build_package()
-
     def do_config_requirements(self):
         pass
 
     def ensure_build_layout(self):
+        if not exists(self.specfilename):
+            print 'No {0} found in the current directory. Abandon.'.format(
+                    self.specfilename)
+            exit(1)
+
         specdir = dirname(self.specfilename)
         self.mkdir(join(specdir, '.buildozer', self.targetname))
         self.mkdir(join(specdir, '.buildozer', self.targetname, 'platform'))
@@ -157,6 +144,11 @@ class Buildozer(object):
             return
 
         raise Exception('Unhandled extraction for type {0}'.format(archive))
+
+    def clean_platform(self):
+        if not exists(self.platform_dir):
+            return
+        rmtree(self.platform_dir)
 
     def download(self, url, filename, cwd=None):
         def report_hook(index, blksize, size):
@@ -212,7 +204,7 @@ class Buildozer(object):
 
         raise Exception('Missing version or version.regex + version.filename')
 
-    def prebuild_application(self):
+    def build_application(self):
         source_dir = realpath(self.config.getdefault('app', 'source.dir', '.'))
         include_exts = self.config.getlist('app', 'source.include_exts', '')
         exclude_exts = self.config.getlist('app', 'source.exclude_exts', '')
@@ -266,15 +258,142 @@ class Buildozer(object):
         return realpath(join(
             dirname(self.specfilename), 'bin'))
 
+    #
+    # command line invocation
+    #
+
+    def targets(self):
+        for fn in listdir(join(dirname(__file__), 'targets')):
+            if fn.startswith('.') or fn.startswith('__'):
+                continue
+            if not fn.endswith('.py'):
+                continue
+            target = fn[:-3]
+            try:
+                m = __import__('buildozer.targets.%s' % target, fromlist=['buildozer'])
+                yield target, m
+            except:
+                pass
+
+    def usage(self):
+        print 'Usage: buildozer [target] [command1] [command2]'
+        print
+        print 'Available targets:'
+        for target, m in self.targets():
+            print '  ' + target
+            doc = m.__doc__.strip().splitlines()[0]
+            print '    ' + doc
+
+        print
+        print 'Global commands (without target):'
+        cmds = [x for x in dir(self) if x.startswith('cmd_')]
+        for cmd in cmds:
+            name = cmd[4:]
+            meth = getattr(self, cmd)
+
+            print '  ' + name
+            doc = '\n'.join(['    ' + x for x in
+                meth.__doc__.strip().splitlines()])
+            print doc
+
+        print
+        print 'Target commands:'
+        print '  clean'
+        print '    Clean the target environment'
+        print '  update'
+        print '    Update the target dependencies'
+        print '  debug'
+        print '    Build the application in debug mode'
+        print '  release'
+        print '    Build the application in release mode'
+        print '  deploy'
+        print '    Deploy the application on the device'
+        print '  run'
+        print '    Run the application on the device'
+        print
+
+
+    def run_default(self):
+        self.ensure_build_layout()
+        if 'buildozer:defaultcommand' not in self.state:
+            print 'No default command set.'
+            print 'Use "buildozer setdefault <command args...>"'
+            exit(1)
+        cmd = self.state['buildozer:defaultcommand']
+        self.run_command(*cmd)
+
+    def run_command(self, args):
+        if '-h' in args or '--help' in args:
+            self.usage()
+            exit(0)
+
+        if not args:
+            self.run_default()
+            return
+
+        command, args = args[0], args[1:]
+        cmd = 'cmd_{0}'.format(command)
+
+        # internal commands ?
+        if hasattr(self, cmd):
+            getattr(self, cmd)(*args)
+            return
+
+        # maybe it's a target?
+        targets = [x[0] for x in self.targets()]
+        if command not in targets:
+            print 'Unknow command/target', command
+            exit(1)
+
+        self.set_target(command)
+        self.target.run_commands(args)
+
+    def prepare_for_build(self):
+        self.log('Preparing build')
+
+        self.log('Ensure build layout')
+        self.ensure_build_layout()
+
+        self.log('Check configuration tokens')
+        self.do_config_requirements()
+
+        self.log('Check requirements for %s' % self.targetname)
+        self.target.check_requirements()
+
+        self.log('Install platform')
+        self.target.install_platform()
+
+        self.log('Compile platform')
+        self.target.compile_platform()
+
+    def build(self):
+        self.log('Build the application')
+        self.build_application()
+
+        self.log('Package the application')
+        self.target.build_package()
+
+    def cmd_init(self, *args):
+        '''Create a initial buildozer.spec in the current directory
+        '''
+        copyfile((dirname(__file__), 'default.spec'), 'buildozer.spec')
+        print 'File buildozer.spec created, ready to customize!'
+
+    def cmd_clean(self, *args):
+        '''Clean the whole Buildozer environment.
+        '''
+        pass
+
+    def cmd_help(self, *args):
+        '''Show the Buildozer help.
+        '''
+        self.usage()
+
+    def cmd_setdefault(self, *args):
+        '''Set the default command to do when to arguments are given
+        '''
+        self.ensure_build_layout()
+        self.state['buildozer:defaultcommand'] = args
+
 def run():
-    from optparse import OptionParser
-
-    parser = OptionParser()
-    parser.add_option('-t', '--target', dest='target',
-        help='target to build (android, ios, windows, linux, osx)')
-
-    (options, args) = parser.parse_args()
-
-    if options.target is None:
-        raise Exception('Missing -t TARGET')
-    Buildozer('buildozer.spec', options.target).run()
+    Buildozer().run_command(sys.argv[1:])

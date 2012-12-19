@@ -1,3 +1,6 @@
+'''
+iOS target, based on kivy-ios project. (not working yet.)
+'''
 from buildozer.target import Target
 
 class TargetIos(Target):

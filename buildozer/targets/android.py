@@ -1,3 +1,6 @@
+'''
+Android target, based on python-for-android project
+'''
 #
 # Android target
 # Thanks for Renpy (again) for its install_sdk.py and plat.py in the PGS4A
@@ -172,12 +175,9 @@ class TargetAndroid(Target):
         if not self.buildozer.file_exists(pa_dir):
             cmd('git clone git://github.com/kivy/python-for-android',
                     cwd=self.buildozer.platform_dir)
-        '''
-        # don't update the latest clone, except if we asked for it.
-        else:
+        elif self.platform_update:
             cmd('git clean -dxf', cwd=pa_dir)
             cmd('git pull origin master', cwd=pa_dir)
-        '''
 
         self._install_apache_ant()
         self.sdk_dir = sdk_dir = self._install_android_sdk()
@@ -235,13 +235,18 @@ class TargetAndroid(Target):
         self.buildozer.state['android.requirements'] = android_requirements
         self.buildozer.state.sync()
 
-    def build_package(self):
-        dist_dir = join(self.pa_dir, 'dist', 'default')
+    def _get_package(self):
         config = self.buildozer.config
         package_domain = config.getdefault('app', 'package.domain', '')
         package = config.get('app', 'package.name')
         if package_domain:
             package = package_domain + '.' + package
+        return package
+
+    def build_package(self):
+        dist_dir = join(self.pa_dir, 'dist', 'default')
+        config = self.buildozer.config
+        package = self._get_package()
         version = self.buildozer.get_version()
 
         build_cmd = (
@@ -268,15 +273,20 @@ class TargetAndroid(Target):
             build_cmd += ' --permission {0}'.format(permission)
 
         # build only in debug right now.
-        build_cmd += ' debug'
+        if self.build_mode == 'debug':
+            build_cmd += ' debug'
+            mode = 'debug'
+        else:
+            build_cmd += ' release'
+            mode = 'release-unsigned'
         self.buildozer.cmd(build_cmd, cwd=dist_dir)
 
         # XXX found how the apk name is really built from the title
         bl = '\'" ,'
         apktitle = ''.join([x for x in config.get('app', 'title') if x not in
             bl])
-        apk = '{title}-{version}-debug.apk'.format(
-            title=apktitle, version=version)
+        apk = '{title}-{version}-{mode}.apk'.format(
+            title=apktitle, version=version, mode=mode)
 
         # copy to our place
         copyfile(join(dist_dir, 'bin', apk),
@@ -284,6 +294,49 @@ class TargetAndroid(Target):
 
         self.buildozer.log('Android packaging done!')
         self.buildozer.log('APK {0} available in the bin directory'.format(apk))
+        self.buildozer.state['android:latestapk'] = apk
+        self.buildozer.state['android:latestmode'] = self.build_mode
+
+    def cmd_deploy(self, *args):
+        super(TargetAndroid, self).cmd_deploy(*args)
+        state = self.buildozer.state
+        if 'android:latestapk' not in state:
+            self.buildozer.error(
+                'No APK built yet. Run "debug" first.')
+
+        if state.get('android:latestmode', '') != 'debug':
+            self.buildozer.error(
+                'Only debug APK are supported for deploy')
+
+        # search the APK in the bin dir
+        apk = state['android:latestapk']
+        full_apk = join(self.buildozer.bin_dir, apk)
+        if not self.buildozer.file_exists(full_apk):
+            self.buildozer.error(
+                'Unable to found the latest APK. Please run "debug" again.')
+
+        # push on the device
+        self.buildozer.cmd('{0} install -r {1}'.format(
+            self.adb_cmd, full_apk), cwd=self.buildozer.platform_dir)
+
+        self.buildozer.log('Application pushed on the device.')
+
+    def cmd_run(self, *args):
+        super(TargetAndroid, self).cmd_run(*args)
+
+        entrypoint = self.buildozer.config.getdefault(
+            'app', 'android.entrypoint', 'org.renpy.android.PythonActivity')
+        package = self._get_package()
+
+        self.buildozer.cmd(
+            '{adb} shell am start -n {package}/{entry} -a {entry}'.format(
+            adb=self.adb_cmd, package=package, entry=entrypoint),
+            cwd=self.buildozer.platform_dir)
+
+        self.buildozer.log('Application started on the device.')
+
+
+
 
 
 def get_target(buildozer):
