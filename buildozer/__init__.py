@@ -45,6 +45,7 @@ class Buildozer(object):
         self.targetname = target
         m = __import__('buildozer.targets.%s' % target, fromlist=['buildozer'])
         self.target = m.get_target(self)
+        self.ensure_build_layout()
 
     def _get_config_list(self, section, token, default=None):
         values = self.config.getdefault(section, token, default).split(',')
@@ -104,11 +105,13 @@ class Buildozer(object):
 
         specdir = dirname(self.specfilename)
         self.mkdir(join(specdir, '.buildozer'))
-        self.mkdir(join(specdir, '.buildozer', self.targetname))
-        self.mkdir(join(specdir, '.buildozer', self.targetname, 'platform'))
-        self.mkdir(join(specdir, '.buildozer', self.targetname, 'app'))
         self.mkdir(join(specdir, 'bin'))
-        self.state = shelve.open(join(self.platform_dir, 'state.db'))
+        self.state = shelve.open(join(self.buildozer_dir, 'state.db'))
+
+        if self.targetname:
+            self.mkdir(join(specdir, '.buildozer', self.targetname))
+            self.mkdir(join(specdir, '.buildozer', self.targetname, 'platform'))
+            self.mkdir(join(specdir, '.buildozer', self.targetname, 'app'))
 
     def mkdir(self, dn):
         if exists(dn):
@@ -253,6 +256,11 @@ class Buildozer(object):
         return realpath(join(
             dirname(self.specfilename), '.buildozer',
             self.targetname, 'app'))
+
+    @property
+    def buildozer_dir(self):
+        return realpath(join(
+            dirname(self.specfilename), '.buildozer'))
 
     @property
     def bin_dir(self):
