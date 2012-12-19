@@ -9,6 +9,7 @@ Android target, based on python-for-android project
 
 
 ANDROID_API = '14'
+ANDROID_MINAPI = '8'
 ANDROID_SDK_VERSION = '21'
 ANDROID_NDK_VERSION = '8c'
 APACHE_ANT_VERSION = '1.8.4'
@@ -24,27 +25,80 @@ from shutil import copyfile
 
 class TargetAndroid(Target):
 
+    @property
+    def android_sdk_version(self):
+        return self.buildozer.config.getdefault(
+                'app', 'android.sdk', ANDROID_SDK_VERSION)
+
+    @property
+    def android_ndk_version(self):
+        return self.buildozer.config.getdefault(
+                'app', 'android.ndk', ANDROID_NDK_VERSION)
+
+    @property
+    def android_api(self):
+        return self.buildozer.config.getdefault(
+                'app', 'android.api', ANDROID_API)
+
+    @property
+    def android_minapi(self):
+        return self.buildozer.config.getdefault(
+                'app', 'android.minapi', ANDROID_MINAPI)
+
+    @property
+    def android_sdk_dir(self):
+        directory = self.buildozer.config.getdefault(
+                'app', 'android.sdk_path', '')
+        if directory:
+            return realpath(directory)
+        version = self.buildozer.config.getdefault(
+                'app', 'android.sdk', self.android_sdk_version)
+        return join(self.buildozer.global_platform_dir,
+                'android-sdk-{0}'.format(version))
+
+    @property
+    def android_ndk_dir(self):
+        directory = self.buildozer.config.getdefault(
+                'app', 'android.ndk_path', '')
+        if directory:
+            return realpath(directory)
+        version = self.buildozer.config.getdefault(
+                'app', 'android.ndk', self.android_ndk_version)
+        return join(self.buildozer.global_platform_dir,
+                'android-sdk-{0}'.format(version))
+
+    @property
+    def apache_ant_dir(self):
+        directory = self.buildozer.config.getdefault(
+                'app', 'android.ant_path', '')
+        if directory:
+            return realpath(directory)
+        version = self.buildozer.config.getdefault(
+                'app', 'android.ant', APACHE_ANT_VERSION)
+        return join(self.buildozer.global_platform_dir,
+                'apache-ant-{0}'.format(version))
+
     def check_requirements(self):
         if platform in ('win32', 'cygwin'):
             try:
                 self._set_win32_java_home()
             except:
                 traceback.print_exc()
-            self.android_cmd = join('android-sdk', 'tools', 'android.bat')
-            self.ant_cmd = join('apache-ant', 'bin', 'ant.bat')
-            self.adb_cmd = join('android-sdk', 'platform-tools', 'adb.exe')
+            self.android_cmd = join(self.android_sdk_dir, 'tools', 'android.bat')
+            self.ant_cmd = join(self.apache_ant_dir, 'bin', 'ant.bat')
+            self.adb_cmd = join(self.android_sdk_dir, 'platform-tools', 'adb.exe')
             self.javac_cmd = self._locate_java('javac.exe')
             self.keytool_cmd = self._locate_java('keytool.exe')
         elif platform in ('darwin', ):
-            self.android_cmd = join('android-sdk', 'tools', 'android')
-            self.ant_cmd = join('apache-ant', 'bin', 'ant')
-            self.adb_cmd = join('android-sdk', 'platform-tools', 'adb')
+            self.android_cmd = join(self.android_sdk_dir, 'tools', 'android')
+            self.ant_cmd = join(self.apache_ant_dir, 'bin', 'ant')
+            self.adb_cmd = join(self.android_sdk_dir, 'platform-tools', 'adb')
             self.javac_cmd = self._locate_java('javac')
             self.keytool_cmd = self._locate_java('keytool')
         else:
-            self.android_cmd = join('android-sdk', 'tools', 'android')
-            self.ant_cmd = join('apache-ant', 'bin', 'ant')
-            self.adb_cmd = join('android-sdk', 'platform-tools', 'adb')
+            self.android_cmd = join(self.android_sdk_dir, 'tools', 'android')
+            self.ant_cmd = join(self.apache_ant_dir, 'bin', 'ant')
+            self.adb_cmd = join(self.android_sdk_dir, 'platform-tools', 'adb')
             self.javac_cmd = self._locate_java('javac')
             self.keytool_cmd = self._locate_java('keytool')
 
@@ -74,26 +128,23 @@ class TargetAndroid(Target):
             return s
 
     def _install_apache_ant(self):
-        ant_dir = join(self.buildozer.platform_dir, 'apache-ant')
+        ant_dir = self.apache_ant_dir
         if self.buildozer.file_exists(ant_dir):
             self.buildozer.log('Apache ANT found at {0}'.format(ant_dir))
             return ant_dir
 
         self.buildozer.log('Android ANT is missing, downloading')
         archive = 'apache-ant-{0}-bin.tar.gz'.format(APACHE_ANT_VERSION)
-        unpacked = 'apache-ant-{0}'.format(APACHE_ANT_VERSION)
         url = 'http://archive.apache.org/dist/ant/binaries/'
         self.buildozer.download(url, archive,
-                cwd=self.buildozer.platform_dir)
-
-        self.buildozer.file_extract(archive, cwd=self.buildozer.platform_dir)
-        self.buildozer.file_rename(unpacked, 'apache-ant',
-                cwd=self.buildozer.platform_dir)
+                cwd=self.buildozer.global_platform_dir)
+        self.buildozer.file_extract(archive,
+                cwd=self.buildozer.global_platform_dir)
         self.buildozer.log('Apache ANT installation done.')
         return ant_dir
 
     def _install_android_sdk(self):
-        sdk_dir = join(self.buildozer.platform_dir, 'android-sdk')
+        sdk_dir = self.android_sdk_dir
         if self.buildozer.file_exists(sdk_dir):
             self.buildozer.log('Android SDK found at {0}'.format(sdk_dir))
             return sdk_dir
@@ -111,20 +162,21 @@ class TargetAndroid(Target):
         else:
             raise SystemError('Unsupported platform: {0}'.format(platform))
 
-        archive = archive.format(ANDROID_SDK_VERSION)
+        archive = archive.format(self.android_sdk_version)
         url = 'http://dl.google.com/android/'
         self.buildozer.download(url, archive,
-                cwd=self.buildozer.platform_dir)
+                cwd=self.buildozer.global_platform_dir)
 
         self.buildozer.log('Unpacking Android SDK')
-        self.buildozer.file_extract(archive, cwd=self.buildozer.platform_dir)
-        self.buildozer.file_rename(unpacked, 'android-sdk',
-                cwd=self.buildozer.platform_dir)
+        self.buildozer.file_extract(archive,
+                cwd=self.buildozer.global_platform_dir)
+        self.buildozer.file_rename(unpacked, sdk_dir,
+                cwd=self.buildozer.global_platform_dir)
         self.buildozer.log('Android SDK installation done.')
         return sdk_dir
 
     def _install_android_ndk(self):
-        ndk_dir = join(self.buildozer.platform_dir, 'android-ndk')
+        ndk_dir = self.android_ndk_dir
         if self.buildozer.file_exists(ndk_dir):
             self.buildozer.log('Android NDK found at {0}'.format(ndk_dir))
             return ndk_dir
@@ -140,33 +192,34 @@ class TargetAndroid(Target):
             raise SystemError('Unsupported platform: {0}'.format(platform))
 
         unpacked = 'android-ndk-r{0}'
-        archive = archive.format(ANDROID_NDK_VERSION)
-        unpacked = unpacked.format(ANDROID_NDK_VERSION)
+        archive = archive.format(self.android_ndk_version)
+        unpacked = unpacked.format(self.android_ndk_version)
         url = 'http://dl.google.com/android/ndk/'
         self.buildozer.download(url, archive,
-                cwd=self.buildozer.platform_dir)
+                cwd=self.buildozer.global_platform_dir)
 
         self.buildozer.log('Unpacking Android NDK')
-        self.buildozer.file_extract(archive, cwd=self.buildozer.platform_dir)
-        self.buildozer.file_rename(unpacked, 'android-ndk',
-                cwd=self.buildozer.platform_dir)
+        self.buildozer.file_extract(archive,
+                cwd=self.buildozer.global_platform_dir)
+        self.buildozer.file_rename(unpacked, ndk_dir,
+                cwd=self.buildozer.global_platform_dir)
         self.buildozer.log('Android NDK installation done.')
         return ndk_dir
 
     def _install_android_packages(self):
         packages = []
-        android_platform = join(self.sdk_dir, 'platforms',
-                'android-{0}'.format(ANDROID_API))
+        android_platform = join(self.android_sdk_dir, 'platforms',
+                'android-{0}'.format(self.android_api))
         if not self.buildozer.file_exists(android_platform):
-            packages.append('android-{0}'.format(ANDROID_API))
-        if not self.buildozer.file_exists(self.sdk_dir, 'platform-tools'):
+            packages.append('android-{0}'.format(self.android_api))
+        if not self.buildozer.file_exists(self.android_sdk_dir, 'platform-tools'):
             packages.append('platform-tools')
         if not packages:
             self.buildozer.log('Android packages already installed.')
             return
         self.buildozer.cmd('{0} update sdk -u -a -t {1}'.format(
             self.android_cmd, ','.join(packages)),
-            cwd=self.buildozer.platform_dir)
+            cwd=self.buildozer.global_platform_dir)
         self.buildozer.log('Android packages installation done.')
 
     def install_platform(self):
@@ -180,14 +233,15 @@ class TargetAndroid(Target):
             cmd('git pull origin master', cwd=pa_dir)
 
         self._install_apache_ant()
-        self.sdk_dir = sdk_dir = self._install_android_sdk()
-        self.ndk_dir = ndk_dir = self._install_android_ndk()
+        self._install_android_sdk()
+        self._install_android_ndk()
         self._install_android_packages()
+
         self.buildozer.environ.update({
-            'ANDROIDSDK': realpath(sdk_dir),
-            'ANDROIDNDK': realpath(ndk_dir),
+            'ANDROIDSDK': self.android_sdk_dir,
+            'ANDROIDNDK': self.android_ndk_dir,
             'ANDROIDAPI': ANDROID_API,
-            'ANDROIDNDKVER': ANDROID_NDK_VERSION})
+            'ANDROIDNDKVER': self.android_ndk_version})
 
     def compile_platform(self):
         # for android, the compilation depends really on the app requirements.
@@ -317,7 +371,7 @@ class TargetAndroid(Target):
 
         # push on the device
         self.buildozer.cmd('{0} install -r {1}'.format(
-            self.adb_cmd, full_apk), cwd=self.buildozer.platform_dir)
+            self.adb_cmd, full_apk), cwd=self.buildozer.global_platform_dir)
 
         self.buildozer.log('Application pushed on the device.')
 
@@ -331,7 +385,7 @@ class TargetAndroid(Target):
         self.buildozer.cmd(
             '{adb} shell am start -n {package}/{entry} -a {entry}'.format(
             adb=self.adb_cmd, package=package, entry=entrypoint),
-            cwd=self.buildozer.platform_dir)
+            cwd=self.buildozer.global_platform_dir)
 
         self.buildozer.log('Application started on the device.')
 

@@ -17,9 +17,9 @@ from sys import stdout, exit
 from urllib import urlretrieve
 from re import search
 from ConfigParser import SafeConfigParser
-from os.path import join, exists, dirname, realpath, splitext
+from os.path import join, exists, dirname, realpath, splitext, expanduser
 from subprocess import Popen, PIPE
-from os import environ, mkdir, unlink, rename, walk, sep, listdir
+from os import environ, unlink, rename, walk, sep, listdir, makedirs
 from copy import copy
 from shutil import copyfile, rmtree
 
@@ -103,20 +103,25 @@ class Buildozer(object):
                     self.specfilename)
             exit(1)
 
+        # create global dir
+        self.mkdir(self.global_buildozer_dir)
+
+        # create local dir
         specdir = dirname(self.specfilename)
         self.mkdir(join(specdir, '.buildozer'))
         self.mkdir(join(specdir, 'bin'))
         self.state = shelve.open(join(self.buildozer_dir, 'state.db'))
 
         if self.targetname:
-            self.mkdir(join(specdir, '.buildozer', self.targetname))
-            self.mkdir(join(specdir, '.buildozer', self.targetname, 'platform'))
-            self.mkdir(join(specdir, '.buildozer', self.targetname, 'app'))
+            target = self.targetname
+            self.mkdir(join(self.global_platform_dir, target, 'platform'))
+            self.mkdir(join(specdir, '.buildozer', target, 'platform'))
+            self.mkdir(join(specdir, '.buildozer', target, 'app'))
 
     def mkdir(self, dn):
         if exists(dn):
             return
-        mkdir(dn)
+        makedirs(dn)
 
     def file_exists(self, *args):
         return exists(join(*args))
@@ -125,6 +130,7 @@ class Buildozer(object):
         if cwd:
             source = join(cwd, source)
             target = join(cwd, target)
+        self.log('Rename {0} to {1}'.format(source, target))
         rename(source, target)
 
     def file_extract(self, archive, cwd=None):
@@ -246,26 +252,32 @@ class Buildozer(object):
                 copyfile(sfn, rfn)
 
     @property
-    def platform_dir(self):
-        return realpath(
-            join(dirname(self.specfilename), '.buildozer',
-            self.targetname, 'platform'))
-
-    @property
-    def app_dir(self):
-        return realpath(join(
-            dirname(self.specfilename), '.buildozer',
-            self.targetname, 'app'))
-
-    @property
     def buildozer_dir(self):
         return realpath(join(
             dirname(self.specfilename), '.buildozer'))
 
     @property
+    def platform_dir(self):
+        return join(self.buildozer_dir, self.targetname, 'platform')
+
+    @property
+    def app_dir(self):
+        return join(self.buildozer_dir, self.targetname, 'app')
+
+    @property
     def bin_dir(self):
         return realpath(join(
             dirname(self.specfilename), 'bin'))
+
+    @property
+    def global_buildozer_dir(self):
+        return join(expanduser('~'), '.buildozer')
+
+    @property
+    def global_platform_dir(self):
+        return join(self.global_buildozer_dir, self.targetname, 'platform')
+
+
 
     #
     # command line invocation
@@ -419,5 +431,7 @@ class Buildozer(object):
         self.ensure_build_layout()
         self.state['buildozer:defaultcommand'] = args
 
+
 def run():
     Buildozer().run_command(sys.argv[1:])
+

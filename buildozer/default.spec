@@ -35,11 +35,23 @@ requirements = twisted,kivy
 # (list) Permissions
 #android.permissions = INTERNET
 
-# (int) Minimum SDK allowed for installation
-#android.minsdk = 8
+# (int) Android API to use
+#android.api = 14
 
-# (int) Android SDK to use
-#android.sdk = 16
+# (int) Minimum API required (8 = Android 2.2 devices)
+#android.minapi = 8
+
+# (int) Android SDK version to use
+#android.sdk = 21
+
+# (str) Android NDK version to use
+#android.ndk = 8c
+
+# (str) Android NDK directory (if empty, it will be automatically downloaded.)
+#android.ndk_path =
+
+# (str) Android SDK directory (if empty, it will be automatically downloaded.)
+#android.sdk_path = 
 
 # (str) Android entry point, default is ok for Kivy-based app
 #android.entrypoint = org.renpy.android.PythonActivity
