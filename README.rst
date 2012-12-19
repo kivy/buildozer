@@ -12,29 +12,41 @@ spec for create package for Android, iOS, Windows, OSX and Linux.
 Usage example
 -------------
 
-#. Add buildozer repo into your PYTHONPATH.
+#. Install buildozer::
+
+    # latest dev
+    git clone git://github.com/kivy/buildozer
+    cd buildozer
+    sudo python2.7 setup.py install
+
+    # via pip (latest stable)
+    sudo pip install buildozer
+
+    # via easy_install
+    sudo easy_install buildozer
+
 #. Go into your application directory and do::
 
-    buildozer.py init
+    buildozer init
     # edit the buildozer.spec, then
-    buildozer.py android build
+    buildozer android build
 
 Example of commands::
 
     # buildozer commands
-    buildozer.py clean
+    buildozer clean
 
     # buildozer target command
-    buildozer.py android update
-    buildozer.py android install
-    buildozer.py android debug
-    buildozer.py android release
+    buildozer android update
+    buildozer android install
+    buildozer android debug
+    buildozer android release
 
     # or all in one (compile in debug, install on device)
-    buildozer.py android debug install
+    buildozer android debug install
 
     # set the default command if nothing set
-    buildozer.py setdefault android debug install
+    buildozer setdefault android debug install
 
 
 Usage
