@@ -349,6 +349,9 @@ class Buildozer(object):
         self.target.run_commands(args)
 
     def prepare_for_build(self):
+        if hasattr(self.target, '_build_prepared'):
+            return
+
         self.log('Preparing build')
 
         self.log('Ensure build layout')
@@ -366,12 +369,21 @@ class Buildozer(object):
         self.log('Compile platform')
         self.target.compile_platform()
 
+        # flag to prevent multiple build
+        self.target._build_prepared = True
+
     def build(self):
+        if hasattr(self.target, '_build_done'):
+            return
+
         self.log('Build the application')
         self.build_application()
 
         self.log('Package the application')
         self.target.build_package()
+
+        # flag to prevent multiple build
+        self.target._build_done = True
 
     def cmd_init(self, *args):
         '''Create a initial buildozer.spec in the current directory
