@@ -25,44 +25,44 @@ buildozer.spec
 
     [app]
 
-    # Title of your application
+    # (str) Title of your application
     title = My Application
 
-    # Package name
+    # (str) Package name
     package.name = myapp
 
-    # Package domain (needed for android/ios packaging)
+    # (str) Package domain (needed for android/ios packaging)
     package.domain = org.test
 
-    # Source code where the main.py live
+    # (str) Source code where the main.py live
     source.dir = .
 
-    # Source files to include (let empty to include all the files)
+    # (list) Source files to include (let empty to include all the files)
     source.include_exts = py,png,jpg
 
-    # Source files to exclude (let empty to not excluding anything)
+    # (list) Source files to exclude (let empty to not excluding anything)
     #source.exclude_exts = spec
 
-    # Application versionning (method 1)
+    # (str) Application versionning (method 1)
     version.regex = __version__ = '(.*)'
     version.filename = %(source.dir)s/main.py
 
-    # Application versionning (method 2)
+    # (str) Application versionning (method 2)
     # version = 1.2.0
 
-    # Application requirements
+    # (list) Application requirements
     requirements = twisted,kivy
 
     #
     # Android specific
     #
 
-    # Permissions
-    android.permissions = INTERNET
+    # (list) Permissions
+    #android.permissions = INTERNET
 
-    # Minimum SDK allowed for installation
-    android.minsdk = 8
+    # (int) Minimum SDK allowed for installation
+    #android.minsdk = 8
 
-    # Android SDK to use
-    android.sdk = 16
+    # (int) Android SDK to use
+    #android.sdk = 16
 
