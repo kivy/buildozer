@@ -253,7 +253,7 @@ class TargetAndroid(Target):
         # we need to extract the requirements that python-for-android knows
         # about
         available_modules = self.buildozer.cmd(
-                './distribute.sh -l', cwd=self.pa_dir)[0]
+                './distribute.sh -l', cwd=self.pa_dir, get_stdout=True)[0]
         if not available_modules.startswith('Available modules:'):
             self.buildozer.error('Python-for-android invalid output for -l')
         available_modules = available_modules[19:].splitlines()[0].split()

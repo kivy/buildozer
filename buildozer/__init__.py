@@ -15,7 +15,10 @@ __version__ = '0.3-dev'
 import shelve
 import zipfile
 import sys
-from sys import stdout, exit
+import fcntl
+import os
+from select import select
+from sys import stdout, stderr, exit
 from urllib import urlretrieve
 from re import search
 from ConfigParser import SafeConfigParser
@@ -83,29 +86,65 @@ class Buildozer(object):
     def cmd(self, command, **kwargs):
         #print ' '.join(['{0}={1}'.format(*args) for args in
         #    self.environ.iteritems()])
+
+        get_stdout = kwargs.pop('get_stdout', False)
+        get_stderr = kwargs.pop('get_stderr', False)
+
+        # prepare the environ, based on the system + our own env
         env = copy(environ)
         env.update(self.environ)
-        kwargs.setdefault('env', env)
-        self.log('run %r' % command)
-        process = Popen(command, shell=True, stdout=PIPE, stderr=PIPE, **kwargs)
-        ret_stdout = ''
-        while True:
-            nextline = process.stdout.readline()
-            if nextline == '' and process.poll() != None:
-                break
-            ret_stdout += nextline
-            stdout.write(nextline)
-            stdout.flush()
 
-        ret = process.communicate()
+        # prepare the process
+        kwargs.setdefault('env', env)
+        kwargs.setdefault('stdout', PIPE)
+        kwargs.setdefault('stderr', PIPE)
+        kwargs.setdefault('close_fds', True)
+        kwargs.setdefault('shell', True)
+        self.log('Run %r' % command)
+
+        # open the process
+        process = Popen(command, **kwargs)
+
+        # prepare fds
+        fd_stdout = process.stdout.fileno()
+        fd_stderr = process.stderr.fileno()
+        fcntl.fcntl(
+            fd_stdout, fcntl.F_SETFL,
+            fcntl.fcntl(fd_stdout, fcntl.F_GETFL) | os.O_NONBLOCK)
+        fcntl.fcntl(
+            fd_stderr, fcntl.F_SETFL,
+            fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
+
+        ret_stdout = [] if get_stdout else None
+        ret_stderr = [] if get_stderr else None
+        while True:
+            readx = select([fd_stdout, fd_stderr], [], [])[0]
+            if fd_stdout in readx:
+                chunk = process.stdout.read()
+                if chunk == '':
+                    break
+                if get_stdout:
+                    ret_stdout.append(chunk)
+                stdout.write(chunk)
+            if fd_stderr in readx:
+                chunk = process.stderr.read()
+                if chunk == '':
+                    break
+                if get_stderr:
+                    ret_stderr.append(chunk)
+                stderr.write(chunk)
+
+        stdout.flush()
+        stderr.flush()
+
+        process.communicate()
         if process.returncode != 0:
-            print '--- command failed'
-            print '-- stdout output'
-            print ret_stdout
-            print '-- stderr output'
-            print ret[1]
-            print '--- end commend failed'
-        return (ret_stdout, ret[1])
+            self.error('Command failed: {0}'.format(command))
+        if ret_stdout:
+            ret_stdout = ''.join(ret_stdout)
+        if ret_stderr:
+            ret_stderr = ''.join(ret_stderr)
+        return (ret_stdout, ret_stderr)
 
     def do_config_requirements(self):
         pass
