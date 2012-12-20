@@ -29,7 +29,7 @@ Usage example
 
     buildozer init
     # edit the buildozer.spec, then
-    buildozer android debug install run
+    buildozer android debug deploy run
 
 Example of commands::
 
@@ -38,15 +38,15 @@ Example of commands::
 
     # buildozer target command
     buildozer android update
-    buildozer android install
+    buildozer android deploy
     buildozer android debug
     buildozer android release
 
-    # or all in one (compile in debug, install on device)
-    buildozer android debug install
+    # or all in one (compile in debug, deploy on device)
+    buildozer android debug deploy
 
     # set the default command if nothing set
-    buildozer setdefault android debug install run
+    buildozer setdefault android debug deploy run
 
 
 Usage
