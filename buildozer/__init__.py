@@ -10,6 +10,8 @@ Layout directory for buildozer:
 
 '''
 
+__version__ = '0.2'
+
 import shelve
 import zipfile
 import sys
@@ -301,9 +303,8 @@ class Buildozer(object):
         print
         print 'Available targets:'
         for target, m in self.targets():
-            print '  ' + target
-            doc = m.__doc__.strip().splitlines()[0]
-            print '    ' + doc
+            doc = m.__doc__.strip().splitlines()[0].strip()
+            print '  {0:<18} {1}'.format(target, doc)
 
         print
         print 'Global commands (without target):'
@@ -312,25 +313,18 @@ class Buildozer(object):
             name = cmd[4:]
             meth = getattr(self, cmd)
 
-            print '  ' + name
-            doc = '\n'.join(['    ' + x for x in
-                meth.__doc__.strip().splitlines()])
-            print doc
+            doc = [x for x in
+                    meth.__doc__.strip().splitlines()][0].strip()
+            print '  {0:<18} {1}'.format(name, doc)
 
         print
         print 'Target commands:'
-        print '  clean'
-        print '    Clean the target environment'
-        print '  update'
-        print '    Update the target dependencies'
-        print '  debug'
-        print '    Build the application in debug mode'
-        print '  release'
-        print '    Build the application in release mode'
-        print '  deploy'
-        print '    Deploy the application on the device'
-        print '  run'
-        print '    Run the application on the device'
+        print '  clean              Clean the target environment'
+        print '  update             Update the target dependencies'
+        print '  debug              Build the application in debug mode'
+        print '  release            Build the application in release mode'
+        print '  deploy             Deploy the application on the device'
+        print '  run                Run the application on the device'
         print
 
 
@@ -346,6 +340,10 @@ class Buildozer(object):
     def run_command(self, args):
         if '-h' in args or '--help' in args:
             self.usage()
+            exit(0)
+
+        if '--version' in args:
+            print 'Buildozer {0}'.format(__version__)
             exit(0)
 
         if not args:
@@ -430,6 +428,11 @@ class Buildozer(object):
         '''
         self.ensure_build_layout()
         self.state['buildozer:defaultcommand'] = args
+
+    def cmd_version(self, *args):
+        '''Show the Buildozer version
+        '''
+        print 'Buildozer {0}'.format(__version__)
 
 
 def run():

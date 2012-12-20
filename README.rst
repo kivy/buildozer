@@ -57,34 +57,23 @@ Usage
     Usage: buildozer [target] [command1] [command2]
 
     Available targets:
-      android
-        Android target, based on python-for-android project
-      ios
-        iOS target, based on kivy-ios project. (not working yet.)
+      android            Android target, based on python-for-android project
+      ios                iOS target, based on kivy-ios project. (not working yet.)
 
     Global commands (without target):
-      clean
-        Clean the whole Buildozer environment.
-      help
-        Show the Buildozer help.
-      init
-        Create a initial buildozer.spec in the current directory
-      setdefault
-        Set the default command to do when to arguments are given
+      clean              Clean the whole Buildozer environment.
+      help               Show the Buildozer help.
+      init               Create a initial buildozer.spec in the current directory
+      setdefault         Set the default command to do when to arguments are given
+      version            Show the Buildozer version
 
     Target commands:
-      clean
-        Clean the target environment
-      update
-        Update the target dependencies
-      debug
-        Build the application in debug mode
-      release
-        Build the application in release mode
-      deploy
-        Install the application on the device
-      run
-        Run the application on the device
+      clean              Clean the target environment
+      update             Update the target dependencies
+      debug              Build the application in debug mode
+      release            Build the application in release mode
+      deploy             Deploy the application on the device
+      run                Run the application on the device
 
 
 

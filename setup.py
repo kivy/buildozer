@@ -1,8 +1,10 @@
 from distutils.core import setup
 
+import buildozer
+
 setup(
     name='buildozer',
-    version='0.1',
+    version=buildozer.__version__,
     author='Mathieu Virbel',
     author_email='mat@kivy.org',
     url='http://github.com/kivy/buildozer',
