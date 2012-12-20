@@ -14,6 +14,16 @@ class Target(object):
     def compile_platform(self):
         pass
 
+    def get_custom_commands(self):
+        result = []
+        for x in dir(self):
+            if not x.startswith('cmd_'):
+                continue
+            if x[4:] in self.buildozer.standard_cmds:
+                continue
+            result.append((x[4:], getattr(self, x).__doc__))
+        return result
+
     def run_commands(self, args):
         if not args:
             print 'ERROR: missing target command'

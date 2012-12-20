@@ -28,6 +28,8 @@ from shutil import copyfile, rmtree
 
 class Buildozer(object):
 
+    standard_cmds = ('clean', 'update', 'debug', 'release', 'deploy', 'run')
+
     def __init__(self, filename='buildozer.spec', target=None):
         super(Buildozer, self).__init__()
         self.environ = {}
@@ -85,16 +87,25 @@ class Buildozer(object):
         env.update(self.environ)
         kwargs.setdefault('env', env)
         self.log('run %r' % command)
-        c = Popen(command, shell=True, stdout=PIPE, stderr=PIPE, **kwargs)
-        ret = c.communicate()
-        if c.returncode != 0:
+        process = Popen(command, shell=True, stdout=PIPE, stderr=PIPE, **kwargs)
+        ret_stdout = ''
+        while True:
+            nextline = process.stdout.readline()
+            if nextline == '' and process.poll() != None:
+                break
+            ret_stdout += nextline
+            stdout.write(nextline)
+            stdout.flush()
+
+        ret = process.communicate()
+        if process.returncode != 0:
             print '--- command failed'
             print '-- stdout output'
-            print ret[0]
+            print ret_stdout
             print '-- stderr output'
             print ret[1]
             print '--- end commend failed'
-        return ret
+        return (ret_stdout, ret[1])
 
     def do_config_requirements(self):
         pass
@@ -302,7 +313,8 @@ class Buildozer(object):
         print 'Usage: buildozer [target] [command1] [command2]'
         print
         print 'Available targets:'
-        for target, m in self.targets():
+        targets = list(self.targets())
+        for target, m in targets:
             doc = m.__doc__.strip().splitlines()[0].strip()
             print '  {0:<18} {1}'.format(target, doc)
 
@@ -325,6 +337,18 @@ class Buildozer(object):
         print '  release            Build the application in release mode'
         print '  deploy             Deploy the application on the device'
         print '  run                Run the application on the device'
+
+        for target, m in targets:
+            mt = m.get_target(self)
+            commands = mt.get_custom_commands()
+            if not commands:
+                continue
+            print
+            print 'Target "{0}" commands:'.format(target)
+            for command, doc in commands:
+                doc = doc.strip().splitlines()[0].strip()
+                print '  {0:<18} {1}'.format(command, doc)
+
         print
 
 

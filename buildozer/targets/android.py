@@ -389,7 +389,12 @@ class TargetAndroid(Target):
 
         self.buildozer.log('Application started on the device.')
 
-
+    def cmd_logcat(self, *args):
+        '''Show the log from the device
+        '''
+        self.check_requirements()
+        self.buildozer.cmd('{adb} logcat'.format(adb=self.adb_cmd),
+                cwd=self.buildozer.global_platform_dir)
 
 
 
