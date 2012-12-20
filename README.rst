@@ -3,7 +3,7 @@ Buildozer
 
 THIS IS A WORK IN PROGRESS, DO NOT USE.
 
-Buildozer is a tool for creating application packages easilly.
+Buildozer is a tool for creating application packages easily.
 
 The goal is to have one "buildozer.spec" file in your app directory: it
 describe your application requirements, titles, etc.  Buildozer will use that
