@@ -28,6 +28,14 @@ from os import environ, unlink, rename, walk, sep, listdir, makedirs
 from copy import copy
 from shutil import copyfile, rmtree
 
+RESET_SEQ = "\033[0m"
+COLOR_SEQ = "\033[1;{0}m"
+BOLD_SEQ = "\033[1m"
+BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
+USE_COLOR = 'NO_COLOR' not in environ
+# error, info, debug
+LOG_LEVELS_C = (RED, BLUE, BLACK)
+LOG_LEVELS_T = 'EID'
 
 class Buildozer(object):
 
@@ -43,43 +51,89 @@ class Buildozer(object):
         self.config.getdefault = self._get_config_default
         self.config.read(filename)
 
+        self.check_configuration_tokens()
+
         self.targetname = None
         self.target = None
         if target:
             self.set_target(target)
 
     def set_target(self, target):
+        '''Set the target to use (one of buildozer.targets, such as "android")
+        '''
         self.targetname = target
         m = __import__('buildozer.targets.%s' % target, fromlist=['buildozer'])
         self.target = m.get_target(self)
-        self.ensure_build_layout()
+        self.check_build_layout()
 
-    def _get_config_list(self, section, token, default=None):
-        values = self.config.getdefault(section, token, default).split(',')
-        return [x.strip() for x in values]
+    def prepare_for_build(self):
+        '''Prepare the build.
+        '''
+        assert(self.target is not None)
+        if hasattr(self.target, '_build_prepared'):
+            return
 
-    def _get_config_default(self, section, token, default=None):
-        if not self.config.has_section(section):
-            return default
-        if not self.config.has_option(section, token):
-            return default
-        return self.config.get(section, token)
+        self.info('Preparing build')
 
-    def log(self, msg):
-        print '-', msg
+        self.info('Check requirements for %s' % self.targetname)
+        self.target.check_requirements()
+
+        self.info('Install platform')
+        self.target.install_platform()
+
+        self.info('Compile platform')
+        self.target.compile_platform()
+
+        # flag to prevent multiple build
+        self.target._build_prepared = True
+
+    def build(self):
+        '''Do the build.
+
+        The target can set build_mode to 'release' or 'debug' before calling
+        this method.
+
+        (:meth:`prepare_for_build` must have been call before.)
+        '''
+        assert(self.target is not None)
+        assert(hasattr(self.target, '_build_prepared'))
+
+        if hasattr(self.target, '_build_done'):
+            return
+
+        self.info('Build the application')
+        self.build_application()
+
+        self.info('Package the application')
+        self.target.build_package()
+
+        # flag to prevent multiple build
+        self.target._build_done = True
+
+    def log(self, level, msg):
+        if USE_COLOR:
+            color = COLOR_SEQ.format(30 + LOG_LEVELS_C[level])
+            print ''.join((RESET_SEQ, color, '# ', msg, RESET_SEQ))
+        else:
+            print LOG_LEVELS_T[level], msg
+
+    def debug(self, msg):
+        self.log(2, msg)
+
+    def info(self, msg):
+        self.log(1, msg)
 
     def error(self, msg):
-        print 'E', msg
-        exit(1)
+        self.log(0, msg)
 
     def checkbin(self, msg, fn):
-        self.log('Search for {0}'.format(msg))
+        self.debug('Search for {0}'.format(msg))
         if exists(fn):
             return realpath(fn)
         for dn in environ['PATH'].split(':'):
             rfn = realpath(join(dn, fn))
             if exists(rfn):
-                self.log(' -> found at {0}'.format(rfn))
+                self.debug(' -> found at {0}'.format(rfn))
                 return rfn
         raise Exception(msg + 'not found')
 
@@ -100,7 +154,7 @@ class Buildozer(object):
         kwargs.setdefault('stderr', PIPE)
         kwargs.setdefault('close_fds', True)
         kwargs.setdefault('shell', True)
-        self.log('Run %r' % command)
+        self.debug('Run %r' % command)
 
         # open the process
         process = Popen(command, **kwargs)
@@ -146,10 +200,17 @@ class Buildozer(object):
             ret_stderr = ''.join(ret_stderr)
         return (ret_stdout, ret_stderr)
 
-    def do_config_requirements(self):
-        pass
+    def check_configuration_tokens(self):
+        '''Ensure the spec file is 'correct'.
+        '''
+        self.info('Check configuration tokens')
 
-    def ensure_build_layout(self):
+    def check_build_layout(self):
+        '''Ensure the build (local and global) directory layout and files are
+        ready.
+        '''
+        self.info('Ensure build layout')
+
         if not exists(self.specfilename):
             print 'No {0} found in the current directory. Abandon.'.format(
                     self.specfilename)
@@ -173,6 +234,7 @@ class Buildozer(object):
     def mkdir(self, dn):
         if exists(dn):
             return
+        self.debug('Create directory {0}', dn)
         makedirs(dn)
 
     def file_exists(self, *args):
@@ -182,7 +244,7 @@ class Buildozer(object):
         if cwd:
             source = join(cwd, source)
             target = join(cwd, target)
-        self.log('Rename {0} to {1}'.format(source, target))
+        self.debug('Rename {0} to {1}'.format(source, target))
         rename(source, target)
 
     def file_extract(self, archive, cwd=None):
@@ -208,6 +270,7 @@ class Buildozer(object):
         raise Exception('Unhandled extraction for type {0}'.format(archive))
 
     def clean_platform(self):
+        self.info('Clean the platform build directory')
         if not exists(self.platform_dir):
             return
         rmtree(self.platform_dir)
@@ -228,7 +291,7 @@ class Buildozer(object):
         if self.file_exists(filename):
             unlink(filename)
 
-        self.log('Downloading {0}'.format(url))
+        self.debug('Downloading {0}'.format(url))
         urlretrieve(url, filename, report_hook)
         return filename
 
@@ -261,7 +324,7 @@ class Buildozer(object):
                     raise Exception(
                         'Unable to found capture version in %r' % fn)
                 version = match.groups()[0]
-                self.log('Captured version: {0}'.format(version))
+                self.debug('Captured version: {0}'.format(version))
                 return version
 
         raise Exception('Missing version or version.regex + version.filename')
@@ -300,7 +363,7 @@ class Buildozer(object):
                 self.mkdir(dfn)
 
                 # copy!
-                self.log('Copy {0}'.format(sfn))
+                self.debug('Copy {0}'.format(sfn))
                 copyfile(sfn, rfn)
 
     @property
@@ -392,7 +455,7 @@ class Buildozer(object):
 
 
     def run_default(self):
-        self.ensure_build_layout()
+        self.check_build_layout()
         if 'buildozer:defaultcommand' not in self.state:
             print 'No default command set.'
             print 'Use "buildozer setdefault <command args...>"'
@@ -430,43 +493,6 @@ class Buildozer(object):
         self.set_target(command)
         self.target.run_commands(args)
 
-    def prepare_for_build(self):
-        if hasattr(self.target, '_build_prepared'):
-            return
-
-        self.log('Preparing build')
-
-        self.log('Ensure build layout')
-        self.ensure_build_layout()
-
-        self.log('Check configuration tokens')
-        self.do_config_requirements()
-
-        self.log('Check requirements for %s' % self.targetname)
-        self.target.check_requirements()
-
-        self.log('Install platform')
-        self.target.install_platform()
-
-        self.log('Compile platform')
-        self.target.compile_platform()
-
-        # flag to prevent multiple build
-        self.target._build_prepared = True
-
-    def build(self):
-        if hasattr(self.target, '_build_done'):
-            return
-
-        self.log('Build the application')
-        self.build_application()
-
-        self.log('Package the application')
-        self.target.build_package()
-
-        # flag to prevent multiple build
-        self.target._build_done = True
-
     def cmd_init(self, *args):
         '''Create a initial buildozer.spec in the current directory
         '''
@@ -489,13 +515,32 @@ class Buildozer(object):
     def cmd_setdefault(self, *args):
         '''Set the default command to do when to arguments are given
         '''
-        self.ensure_build_layout()
+        self.check_build_layout()
         self.state['buildozer:defaultcommand'] = args
 
     def cmd_version(self, *args):
         '''Show the Buildozer version
         '''
         print 'Buildozer {0}'.format(__version__)
+
+    #
+    # Private
+    #
+
+    def _get_config_list(self, section, token, default=None):
+        # monkey-patch method for ConfigParser
+        # get a key as a list of string, seperated from the comma
+        values = self.config.getdefault(section, token, default).split(',')
+        return [x.strip() for x in values]
+
+    def _get_config_default(self, section, token, default=None):
+        # monkey-patch method for ConfigParser
+        # get a key in a section, or the default
+        if not self.config.has_section(section):
+            return default
+        if not self.config.has_option(section, token):
+            return default
+        return self.config.get(section, token)
 
 
 def run():

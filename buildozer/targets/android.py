@@ -130,26 +130,26 @@ class TargetAndroid(Target):
     def _install_apache_ant(self):
         ant_dir = self.apache_ant_dir
         if self.buildozer.file_exists(ant_dir):
-            self.buildozer.log('Apache ANT found at {0}'.format(ant_dir))
+            self.buildozer.info('Apache ANT found at {0}'.format(ant_dir))
             return ant_dir
 
-        self.buildozer.log('Android ANT is missing, downloading')
+        self.buildozer.info('Android ANT is missing, downloading')
         archive = 'apache-ant-{0}-bin.tar.gz'.format(APACHE_ANT_VERSION)
         url = 'http://archive.apache.org/dist/ant/binaries/'
         self.buildozer.download(url, archive,
                 cwd=self.buildozer.global_platform_dir)
         self.buildozer.file_extract(archive,
                 cwd=self.buildozer.global_platform_dir)
-        self.buildozer.log('Apache ANT installation done.')
+        self.buildozer.info('Apache ANT installation done.')
         return ant_dir
 
     def _install_android_sdk(self):
         sdk_dir = self.android_sdk_dir
         if self.buildozer.file_exists(sdk_dir):
-            self.buildozer.log('Android SDK found at {0}'.format(sdk_dir))
+            self.buildozer.info('Android SDK found at {0}'.format(sdk_dir))
             return sdk_dir
 
-        self.buildozer.log('Android SDK is missing, downloading')
+        self.buildozer.info('Android SDK is missing, downloading')
         if platform in ('win32', 'cygwin'):
             archive = 'android-sdk_r{0}-windows.zip'
             unpacked = 'android-sdk-windows'
@@ -167,21 +167,21 @@ class TargetAndroid(Target):
         self.buildozer.download(url, archive,
                 cwd=self.buildozer.global_platform_dir)
 
-        self.buildozer.log('Unpacking Android SDK')
+        self.buildozer.info('Unpacking Android SDK')
         self.buildozer.file_extract(archive,
                 cwd=self.buildozer.global_platform_dir)
         self.buildozer.file_rename(unpacked, sdk_dir,
                 cwd=self.buildozer.global_platform_dir)
-        self.buildozer.log('Android SDK installation done.')
+        self.buildozer.info('Android SDK installation done.')
         return sdk_dir
 
     def _install_android_ndk(self):
         ndk_dir = self.android_ndk_dir
         if self.buildozer.file_exists(ndk_dir):
-            self.buildozer.log('Android NDK found at {0}'.format(ndk_dir))
+            self.buildozer.info('Android NDK found at {0}'.format(ndk_dir))
             return ndk_dir
 
-        self.buildozer.log('Android NDK is missing, downloading')
+        self.buildozer.info('Android NDK is missing, downloading')
         if platform in ('win32', 'cygwin'):
             archive = 'android-ndk-r{0}-windows.zip'
         elif platform in ('darwin', ):
@@ -198,12 +198,12 @@ class TargetAndroid(Target):
         self.buildozer.download(url, archive,
                 cwd=self.buildozer.global_platform_dir)
 
-        self.buildozer.log('Unpacking Android NDK')
+        self.buildozer.info('Unpacking Android NDK')
         self.buildozer.file_extract(archive,
                 cwd=self.buildozer.global_platform_dir)
         self.buildozer.file_rename(unpacked, ndk_dir,
                 cwd=self.buildozer.global_platform_dir)
-        self.buildozer.log('Android NDK installation done.')
+        self.buildozer.info('Android NDK installation done.')
         return ndk_dir
 
     def _install_android_packages(self):
@@ -215,12 +215,12 @@ class TargetAndroid(Target):
         if not self.buildozer.file_exists(self.android_sdk_dir, 'platform-tools'):
             packages.append('platform-tools')
         if not packages:
-            self.buildozer.log('Android packages already installed.')
+            self.buildozer.info('Android packages already installed.')
             return
         self.buildozer.cmd('{0} update sdk -u -a -t {1}'.format(
             self.android_cmd, ','.join(packages)),
             cwd=self.buildozer.global_platform_dir)
-        self.buildozer.log('Android packages installation done.')
+        self.buildozer.info('Android packages installation done.')
 
     def install_platform(self):
         cmd = self.buildozer.cmd
@@ -276,14 +276,14 @@ class TargetAndroid(Target):
             need_compile = 1
 
         if not need_compile:
-            self.buildozer.log('Distribution already compiled, pass.')
+            self.buildozer.info('Distribution already compiled, pass.')
             return
 
         modules_str = ' '.join(android_requirements)
         cmd = self.buildozer.cmd
         cmd('git clean -dxf', cwd=self.pa_dir)
         cmd('./distribute.sh -m "{0}"'.format(modules_str), cwd=self.pa_dir)
-        self.buildozer.log('Distribution compiled.')
+        self.buildozer.info('Distribution compiled.')
 
         # ensure we will not compile again
         self.buildozer.state['android.requirements'] = android_requirements
@@ -346,8 +346,8 @@ class TargetAndroid(Target):
         copyfile(join(dist_dir, 'bin', apk),
                 join(self.buildozer.bin_dir, apk))
 
-        self.buildozer.log('Android packaging done!')
-        self.buildozer.log('APK {0} available in the bin directory'.format(apk))
+        self.buildozer.info('Android packaging done!')
+        self.buildozer.info('APK {0} available in the bin directory'.format(apk))
         self.buildozer.state['android:latestapk'] = apk
         self.buildozer.state['android:latestmode'] = self.build_mode
 
@@ -373,7 +373,7 @@ class TargetAndroid(Target):
         self.buildozer.cmd('{0} install -r {1}'.format(
             self.adb_cmd, full_apk), cwd=self.buildozer.global_platform_dir)
 
-        self.buildozer.log('Application pushed on the device.')
+        self.buildozer.info('Application pushed on the device.')
 
     def cmd_run(self, *args):
         super(TargetAndroid, self).cmd_run(*args)
@@ -387,7 +387,7 @@ class TargetAndroid(Target):
             adb=self.adb_cmd, package=package, entry=entrypoint),
             cwd=self.buildozer.global_platform_dir)
 
-        self.buildozer.log('Application started on the device.')
+        self.buildozer.info('Application started on the device.')
 
     def cmd_logcat(self, *args):
         '''Show the log from the device
