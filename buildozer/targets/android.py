@@ -108,6 +108,51 @@ class TargetAndroid(Target):
         checkbin('Java compiler', self.javac_cmd)
         checkbin('Java keytool', self.keytool_cmd)
 
+    def check_configuration_tokens(self):
+        errors = []
+
+        # check the permission
+        available_permissions = self._get_available_permissions()
+        if available_permissions:
+            permissions = self.buildozer.config.getlist(
+                'app', 'android.permissions', [])
+            for permission in permissions:
+                if permission not in available_permissions:
+                    errors.append(
+                        '[app] "android.permission" contain an unknown'
+                        ' permission {0}'.format(permission))
+
+        super(TargetAndroid, self).check_configuration_tokens(errors)
+
+    def _get_available_permissions(self):
+        key = 'android:available_permissions'
+        key_sdk = 'android:available_permissions_sdk'
+
+        refresh_permissions = False
+        sdk = self.buildozer.state.get(key_sdk, None)
+        if not sdk or sdk != self.android_sdk_version:
+            refresh_permissions = True
+        if key not in self.buildozer.state:
+            refresh_permissions = True
+        if not refresh_permissions:
+            return self.buildozer.state[key]
+
+        try:
+            self.buildozer.debug('Read available permissions from api-versions.xml')
+            import xml.etree.ElementTree as ET
+            fn = join(self.android_sdk_dir, 'platform-tools',
+                    'api', 'api-versions.xml')
+            with open(fn) as fd:
+                doc = ET.fromstring(fd.read())
+            fields = doc.findall('.//class[@name="android/Manifest$permission"]/field[@name]')
+            available_permissions = [x.attrib['name'] for x in fields]
+
+            self.buildozer.state[key] = available_permissions
+            self.buildozer.state[key_sdk] = self.android_sdk_version
+            return available_permissions
+        except:
+            return None
+
     def _set_win32_java_home(self):
         if 'JAVA_HOME' in self.buildozer.environ:
             return
@@ -236,6 +281,10 @@ class TargetAndroid(Target):
         self._install_android_sdk()
         self._install_android_ndk()
         self._install_android_packages()
+
+        # ultimate configuration check.
+        # some of our configuration cannot be check without platform.
+        self.check_configuration_tokens()
 
         self.buildozer.environ.update({
             'ANDROIDSDK': self.android_sdk_dir,

@@ -72,6 +72,7 @@ class Buildozer(object):
         m = __import__('buildozer.targets.%s' % target, fromlist=['buildozer'])
         self.target = m.get_target(self)
         self.check_build_layout()
+        self.target.check_configuration_tokens()
 
     def prepare_for_build(self):
         '''Prepare the build.
@@ -248,7 +249,7 @@ class Buildozer(object):
                 ', required by "version.regex"')
 
         if errors:
-            self.error('{0} errors found in the buildozer.spec'.format(
+            self.error('{0} error(s) found in the buildozer.spec'.format(
                 len(errors)))
             for error in errors:
                 print error

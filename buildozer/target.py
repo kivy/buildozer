@@ -11,6 +11,16 @@ class Target(object):
     def check_requirements(self):
         pass
 
+    def check_configuration_tokens(self, errors=None):
+        if errors:
+            self.buildozer.info('Check target configuration tokens')
+            self.buildozer.error(
+                '{0} error(s) found in the buildozer.spec'.format(
+                len(errors)))
+            for error in errors:
+                print error
+            exit(1)
+
     def compile_platform(self):
         pass
 
@@ -26,7 +36,7 @@ class Target(object):
 
     def run_commands(self, args):
         if not args:
-            print 'ERROR: missing target command'
+            self.buildozer.error('Missing target command')
             self.buildozer.usage()
             exit(1)
 
@@ -40,7 +50,7 @@ class Target(object):
                 last_command.append(arg)
             else:
                 if not last_command:
-                    print 'ERROR: argument passed without a command'
+                    self.buildozer.error('Argument passed without a command')
                     self.buildozer.usage()
                     exit(1)
                 last_command.append(arg)
@@ -50,7 +60,7 @@ class Target(object):
         for item in result:
             command, args = item[0], item[1:]
             if not hasattr(self, 'cmd_{0}'.format(command)):
-                print 'Unknown command {0}'.format(command)
+                self.buildozer.error('Unknow command {0}'.format(command))
                 exit(1)
             getattr(self, 'cmd_{0}'.format(command))(args)
 
