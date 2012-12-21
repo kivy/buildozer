@@ -69,7 +69,8 @@ class Buildozer(object):
         '''Set the target to use (one of buildozer.targets, such as "android")
         '''
         self.targetname = target
-        m = __import__('buildozer.targets.%s' % target, fromlist=['buildozer'])
+        m = __import__('buildozer.targets.{0}'.format(target),
+                fromlist=['buildozer'])
         self.target = m.get_target(self)
         self.check_build_layout()
         self.target.check_configuration_tokens()
@@ -83,7 +84,7 @@ class Buildozer(object):
 
         self.info('Preparing build')
 
-        self.info('Check requirements for %s' % self.targetname)
+        self.info('Check requirements for {0}'.format(self.targetname))
         self.target.check_requirements()
 
         self.info('Install platform')
@@ -175,7 +176,7 @@ class Buildozer(object):
         get_stdout = kwargs.pop('get_stdout', False)
         get_stderr = kwargs.pop('get_stderr', False)
 
-        self.debug('Run %r' % command)
+        self.debug('Run {0!r}'.format(command))
 
         # open the process
         process = Popen(command, **kwargs)
@@ -285,7 +286,7 @@ class Buildozer(object):
     def mkdir(self, dn):
         if exists(dn):
             return
-        self.debug('Create directory {0}', dn)
+        self.debug('Create directory {0}'.format(dn))
         makedirs(dn)
 
     def file_exists(self, *args):
@@ -373,7 +374,7 @@ class Buildozer(object):
                 match = search(regex, data)
                 if not match:
                     raise Exception(
-                        'Unable to found capture version in %r' % fn)
+                        'Unable to found capture version in {0}'.format(fn))
                 version = match.groups()[0]
                 self.debug('Captured version: {0}'.format(version))
                 return version
@@ -457,7 +458,8 @@ class Buildozer(object):
                 continue
             target = fn[:-3]
             try:
-                m = __import__('buildozer.targets.%s' % target, fromlist=['buildozer'])
+                m = __import__('buildozer.targets.{0}'.format(target),
+                        fromlist=['buildozer'])
                 yield target, m
             except:
                 pass
