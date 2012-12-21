@@ -43,6 +43,7 @@ class Buildozer(object):
 
     def __init__(self, filename='buildozer.spec', target=None):
         super(Buildozer, self).__init__()
+        self.log_level = 1
         self.environ = {}
         self.specfilename = filename
         self.state = None
@@ -50,6 +51,12 @@ class Buildozer(object):
         self.config.getlist = self._get_config_list
         self.config.getdefault = self._get_config_default
         self.config.read(filename)
+
+        try:
+            self.log_level = int(self.config.getdefault(
+                'buildozer', 'log_level', '1'))
+        except:
+            pass
 
         self.check_configuration_tokens()
 
@@ -111,6 +118,8 @@ class Buildozer(object):
         self.target._build_done = True
 
     def log(self, level, msg):
+        if level > self.log_level:
+            return
         if USE_COLOR:
             color = COLOR_SEQ.format(30 + LOG_LEVELS_C[level])
             print ''.join((RESET_SEQ, color, '# ', msg, RESET_SEQ))
@@ -141,9 +150,6 @@ class Buildozer(object):
         #print ' '.join(['{0}={1}'.format(*args) for args in
         #    self.environ.iteritems()])
 
-        get_stdout = kwargs.pop('get_stdout', False)
-        get_stderr = kwargs.pop('get_stderr', False)
-
         # prepare the environ, based on the system + our own env
         env = copy(environ)
         env.update(self.environ)
@@ -154,6 +160,12 @@ class Buildozer(object):
         kwargs.setdefault('stderr', PIPE)
         kwargs.setdefault('close_fds', True)
         kwargs.setdefault('shell', True)
+        kwargs.setdefault('show_output', self.log_level > 1)
+
+        show_output = kwargs.pop('show_output')
+        get_stdout = kwargs.pop('get_stdout', False)
+        get_stderr = kwargs.pop('get_stderr', False)
+
         self.debug('Run %r' % command)
 
         # open the process
@@ -179,14 +191,16 @@ class Buildozer(object):
                     break
                 if get_stdout:
                     ret_stdout.append(chunk)
-                stdout.write(chunk)
+                if show_output:
+                    stdout.write(chunk)
             if fd_stderr in readx:
                 chunk = process.stderr.read()
                 if chunk == '':
                     break
                 if get_stderr:
                     ret_stderr.append(chunk)
-                stderr.write(chunk)
+                if show_output:
+                    stderr.write(chunk)
 
         stdout.flush()
         stderr.flush()
@@ -412,7 +426,7 @@ class Buildozer(object):
                 pass
 
     def usage(self):
-        print 'Usage: buildozer [target] [command1] [command2]'
+        print 'Usage: buildozer [--verbose] [target] [command1] [command2]'
         print
         print 'Available targets:'
         targets = list(self.targets())
@@ -464,13 +478,21 @@ class Buildozer(object):
         self.run_command(cmd)
 
     def run_command(self, args):
-        if '-h' in args or '--help' in args:
-            self.usage()
-            exit(0)
+        while args:
+            if not args[0].startswith('-'):
+                break
+            arg = args.pop(0)
 
-        if '--version' in args:
-            print 'Buildozer {0}'.format(__version__)
-            exit(0)
+            if arg in ('-v', '--verbose'):
+                self.log_level = 2
+
+            if arg in ('-h', '--help'):
+                self.usage()
+                exit(0)
+
+            if args == '--version':
+                print 'Buildozer {0}'.format(__version__)
+                exit(0)
 
         if not args:
             self.run_default()

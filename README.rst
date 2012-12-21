@@ -54,7 +54,7 @@ Usage
 
 ::
 
-    Usage: buildozer [target] [command1] [command2]
+    Usage: buildozer [--verbose] [target] [command1] [command2]
 
     Available targets:
       android            Android target, based on python-for-android project

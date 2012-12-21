@@ -394,7 +394,8 @@ class TargetAndroid(Target):
         '''
         self.check_requirements()
         self.buildozer.cmd('{adb} logcat'.format(adb=self.adb_cmd),
-                cwd=self.buildozer.global_platform_dir)
+                cwd=self.buildozer.global_platform_dir,
+                show_output=True)
 
 
 
