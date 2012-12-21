@@ -117,6 +117,10 @@ class Buildozer(object):
         # flag to prevent multiple build
         self.target._build_done = True
 
+    #
+    # Log functions
+    #
+
     def log(self, level, msg):
         if level > self.log_level:
             return
@@ -134,6 +138,10 @@ class Buildozer(object):
 
     def error(self, msg):
         self.log(0, msg)
+
+    #
+    # Internal check methods
+    #
 
     def checkbin(self, msg, fn):
         self.debug('Search for {0}'.format(msg))
@@ -218,6 +226,34 @@ class Buildozer(object):
         '''Ensure the spec file is 'correct'.
         '''
         self.info('Check configuration tokens')
+        get = self.config.getdefault
+        errors = []
+        adderror = errors.append
+        if not get('app', 'title', ''):
+            adderror('[app] "title" is missing')
+        if not get('app', 'package.name', ''):
+            adderror('[app] "package.name" is missing')
+        if not get('app', 'source.dir', ''):
+            adderror('[app] "source.dir" is missing')
+
+        version = get('app', 'version', '')
+        version_regex = get('app', 'version.regex', '')
+        if not version and not version_regex:
+            adderror('[app] One of "version" or "version.regex" must be set')
+        if version and version_regex:
+            adderror('[app] Conflict between "version" and "version.regex"'
+                    ', only one can be used.')
+        if version_regex and not get('app', 'version.filename', ''):
+            adderror('[app] "version.filename" is missing'
+                ', required by "version.regex"')
+
+        if errors:
+            self.error('{0} errors found in the buildozer.spec'.format(
+                len(errors)))
+            for error in errors:
+                print error
+            exit(1)
+
 
     def check_build_layout(self):
         '''Ensure the build (local and global) directory layout and files are
