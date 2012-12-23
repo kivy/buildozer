@@ -24,6 +24,9 @@ class Target(object):
     def compile_platform(self):
         pass
 
+    def install_platform(self):
+        pass
+
     def get_custom_commands(self):
         result = []
         for x in dir(self):
