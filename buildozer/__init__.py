@@ -17,6 +17,7 @@ import zipfile
 import sys
 import fcntl
 import os
+import re
 from select import select
 from sys import stdout, stderr, exit
 from urllib import urlretrieve
@@ -58,8 +59,6 @@ class Buildozer(object):
         except:
             pass
 
-        self.check_configuration_tokens()
-
         self.targetname = None
         self.target = None
         if target:
@@ -73,6 +72,7 @@ class Buildozer(object):
                 fromlist=['buildozer'])
         self.target = m.get_target(self)
         self.check_build_layout()
+        self.check_configuration_tokens()
         self.target.check_configuration_tokens()
 
     def prepare_for_build(self):
@@ -417,6 +417,12 @@ class Buildozer(object):
                 # copy!
                 self.debug('Copy {0}'.format(sfn))
                 copyfile(sfn, rfn)
+
+    def namify(self, name):
+        '''Return a "valid" name from a name with lot of invalid chars
+        (allowed characters: a-z, A-Z, 0-9, -, _)
+        '''
+        return re.sub('[^a-zA-Z0-9_\-]', '_', name)
 
     @property
     def buildozer_dir(self):
