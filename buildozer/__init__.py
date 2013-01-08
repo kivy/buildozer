@@ -37,6 +37,11 @@ USE_COLOR = 'NO_COLOR' not in environ
 LOG_LEVELS_C = (RED, BLUE, BLACK)
 LOG_LEVELS_T = 'EID'
 
+
+class BuildozerCommandException(Exception):
+    pass
+
+
 class Buildozer(object):
 
     standard_cmds = ('clean', 'update', 'debug', 'release', 'deploy', 'run')
@@ -177,6 +182,7 @@ class Buildozer(object):
         get_stderr = kwargs.pop('get_stderr', False)
 
         self.debug('Run {0!r}'.format(command))
+        self.debug('Cwd {}'.format(kwargs.get('cwd')))
 
         # open the process
         process = Popen(command, **kwargs)
@@ -218,6 +224,7 @@ class Buildozer(object):
         process.communicate()
         if process.returncode != 0:
             self.error('Command failed: {0}'.format(command))
+            raise BuildozerCommandException()
         if ret_stdout:
             ret_stdout = ''.join(ret_stdout)
         if ret_stderr:
@@ -605,5 +612,10 @@ class Buildozer(object):
 
 
 def run():
-    Buildozer().run_command(sys.argv[1:])
+    try:
+        Buildozer().run_command(sys.argv[1:])
+    except BuildozerCommandException:
+        # don't show the exception in the command line. The log already show the
+        # command failed.
+        pass
 
