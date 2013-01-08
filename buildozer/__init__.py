@@ -55,15 +55,17 @@ class Buildozer(object):
         self.config = SafeConfigParser()
         self.config.getlist = self._get_config_list
         self.config.getdefault = self._get_config_default
-        self.config.read(filename)
+
+        if exists(filename):
+            self.config.read(filename)
+            self.check_configuration_tokens()
+
 
         try:
             self.log_level = int(self.config.getdefault(
                 'buildozer', 'log_level', '1'))
         except:
             pass
-
-        self.check_configuration_tokens()
 
         self.targetname = None
         self.target = None
