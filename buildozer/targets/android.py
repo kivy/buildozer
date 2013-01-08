@@ -317,6 +317,7 @@ class TargetAndroid(Target):
                 'Cannot package the app cause of the missing'
                 ' requirements in python-for-android: {0}'.format(
                     missing_requirements))
+            exit(1)
 
         need_compile = 0
         if last_requirements != android_requirements:
