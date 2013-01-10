@@ -37,6 +37,9 @@ class Target(object):
             result.append((x[4:], getattr(self, x).__doc__))
         return result
 
+    def get_available_packages(self):
+        return ['kivy']
+
     def run_commands(self, args):
         if not args:
             self.buildozer.error('Missing target command')
