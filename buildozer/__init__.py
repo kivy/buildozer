@@ -310,9 +310,22 @@ class Buildozer(object):
         requirements = [x for x in requirements if x not in
                 target_available_packages]
 
+        # did we already installed the libs ?
+        if exists(self.applibs_dir) and \
+            self.state.get('cache.applibs', '') == requirements:
+                self.debug('Application requirements already installed, pass')
+                return
+
+        # recreate applibs
+        self.rmdir(self.applibs_dir)
+        self.mkdir(self.applibs_dir)
+
         # ok now check the availability of all requirements
         for requirement in requirements:
             self._install_application_requirement(requirement)
+
+        # everything goes as expected, save this state!
+        self.state['cache.applibs'] = requirements
 
     def _install_application_requirement(self, module):
         self._ensure_virtualenv()
@@ -354,6 +367,12 @@ class Buildozer(object):
             return
         self.debug('Create directory {0}'.format(dn))
         makedirs(dn)
+
+    def rmdir(self, dn):
+        if not exists(dn):
+            return
+        self.debug('Remove directory and subdirectory {}'.format(dn))
+        rmtree(dn)
 
     def file_exists(self, *args):
         return exists(join(*args))
