@@ -27,7 +27,7 @@ from os.path import join, exists, dirname, realpath, splitext, expanduser
 from subprocess import Popen, PIPE
 from os import environ, unlink, rename, walk, sep, listdir, makedirs
 from copy import copy
-from shutil import copyfile, rmtree
+from shutil import copyfile, rmtree, copytree
 
 RESET_SEQ = "\033[0m"
 COLOR_SEQ = "\033[1;{0}m"
@@ -37,6 +37,11 @@ USE_COLOR = 'NO_COLOR' not in environ
 # error, info, debug
 LOG_LEVELS_C = (RED, BLUE, BLACK)
 LOG_LEVELS_T = 'EID'
+
+
+class BuildozerCommandException(Exception):
+    pass
+
 
 class Buildozer(object):
 
@@ -51,7 +56,11 @@ class Buildozer(object):
         self.config = SafeConfigParser()
         self.config.getlist = self._get_config_list
         self.config.getdefault = self._get_config_default
-        self.config.read(filename)
+
+        if exists(filename):
+            self.config.read(filename)
+            self.check_configuration_tokens()
+
 
         try:
             self.log_level = int(self.config.getdefault(
@@ -89,6 +98,9 @@ class Buildozer(object):
 
         self.info('Install platform')
         self.target.install_platform()
+
+        self.info('Check application requirements')
+        self.check_application_requirements()
 
         self.info('Compile platform')
         self.target.compile_platform()
@@ -177,6 +189,7 @@ class Buildozer(object):
         get_stderr = kwargs.pop('get_stderr', False)
 
         self.debug('Run {0!r}'.format(command))
+        self.debug('Cwd {}'.format(kwargs.get('cwd')))
 
         # open the process
         process = Popen(command, **kwargs)
@@ -218,6 +231,7 @@ class Buildozer(object):
         process.communicate()
         if process.returncode != 0:
             self.error('Command failed: {0}'.format(command))
+            raise BuildozerCommandException()
         if ret_stdout:
             ret_stdout = ''.join(ret_stdout)
         if ret_stderr:
@@ -270,11 +284,13 @@ class Buildozer(object):
 
         # create global dir
         self.mkdir(self.global_buildozer_dir)
+        self.mkdir(self.global_cache_dir)
 
         # create local dir
         specdir = dirname(self.specfilename)
         self.mkdir(join(specdir, '.buildozer'))
         self.mkdir(join(specdir, 'bin'))
+        self.mkdir(self.applibs_dir)
         self.state = shelve.open(join(self.buildozer_dir, 'state.db'))
 
         if self.targetname:
@@ -283,11 +299,80 @@ class Buildozer(object):
             self.mkdir(join(specdir, '.buildozer', target, 'platform'))
             self.mkdir(join(specdir, '.buildozer', target, 'app'))
 
+    def check_application_requirements(self):
+        '''Ensure the application requirements are all available and ready to be
+        packaged as well.
+        '''
+        requirements = self.config.getlist('app', 'requirements', '')
+        target_available_packages = self.target.get_available_packages()
+
+        # remove all the requirements that the target can compile
+        requirements = [x for x in requirements if x not in
+                target_available_packages]
+
+        # did we already installed the libs ?
+        if exists(self.applibs_dir) and \
+            self.state.get('cache.applibs', '') == requirements:
+                self.debug('Application requirements already installed, pass')
+                return
+
+        # recreate applibs
+        self.rmdir(self.applibs_dir)
+        self.mkdir(self.applibs_dir)
+
+        # ok now check the availability of all requirements
+        for requirement in requirements:
+            self._install_application_requirement(requirement)
+
+        # everything goes as expected, save this state!
+        self.state['cache.applibs'] = requirements
+
+    def _install_application_requirement(self, module):
+        self._ensure_virtualenv()
+        self.debug('Install requirement {} in virtualenv'.format(module))
+        self.cmd('pip-2.7 install --download-cache={} --target={} {}'.format(
+                self.global_cache_dir, self.applibs_dir, module),
+                env=self.env_venv,
+                cwd=self.buildozer_dir)
+
+    def _ensure_virtualenv(self):
+        if hasattr(self, 'venv'):
+            return
+        self.venv = join(self.buildozer_dir, 'venv')
+        if not self.file_exists(self.venv):
+            self.cmd('virtualenv-2.7 --python=python2.7 ./venv',
+                    cwd=self.buildozer_dir)
+
+        # read virtualenv output and parse it
+        output = self.cmd('bash -c "source venv/bin/activate && env"',
+                get_stdout=True,
+                cwd=self.buildozer_dir)
+        self.env_venv = copy(self.environ)
+        for line in output[0].splitlines():
+            args = line.split('=', 1)
+            if len(args) != 2:
+                continue
+            key, value = args
+            if key in ('VIRTUAL_ENV', 'PATH'):
+                self.env_venv[key] = value
+        if 'PYTHONHOME' in self.env_venv:
+            del self.env_venv['PYTHONHOME']
+
+        # ensure any sort of compilation will fail
+        self.env_venv['CC'] = '/bin/false'
+        self.env_venv['CXX'] = '/bin/false'
+
     def mkdir(self, dn):
         if exists(dn):
             return
         self.debug('Create directory {0}'.format(dn))
         makedirs(dn)
+
+    def rmdir(self, dn):
+        if not exists(dn):
+            return
+        self.debug('Remove directory and subdirectory {}'.format(dn))
+        rmtree(dn)
 
     def file_exists(self, *args):
         return exists(join(*args))
@@ -387,6 +472,8 @@ class Buildozer(object):
         exclude_exts = self.config.getlist('app', 'source.exclude_exts', '')
         app_dir = self.app_dir
 
+        rmtree(self.app_dir)
+
         for root, dirs, files in walk(source_dir):
             # avoid hidden directory
             if True in [x.startswith('.') for x in root.split(sep)]:
@@ -408,7 +495,7 @@ class Buildozer(object):
                         continue
 
                 sfn = join(root, fn)
-                rfn = realpath(join(app_dir, root[len(source_dir):], fn))
+                rfn = realpath(join(app_dir, root[len(source_dir) + 1:], fn))
 
                 # ensure the directory exists
                 dfn = dirname(rfn)
@@ -417,6 +504,25 @@ class Buildozer(object):
                 # copy!
                 self.debug('Copy {0}'.format(sfn))
                 copyfile(sfn, rfn)
+
+        # copy also the libs
+        copytree(self.applibs_dir, join(app_dir, '_applibs'))
+
+        # patch the main.py
+        main_py = join(app_dir, 'main.py')
+        if not self.file_exists(main_py):
+            self.error('Unable to patch main_py to add applibs directory.')
+            return
+
+        header = ('import sys, os; '
+                  'sys.path = [os.path.join(os.path.dirname(__file__),'
+                  '"_applibs")] + sys.path\n')
+        with open(main_py, 'rb') as fd:
+            data = fd.read()
+        data = header + data
+        with open(main_py, 'wb') as fd:
+            fd.write(data)
+        self.info('Patched main.py to include applibs')
 
     def namify(self, name):
         '''Return a "valid" name from a name with lot of invalid chars
@@ -443,12 +549,20 @@ class Buildozer(object):
             dirname(self.specfilename), 'bin'))
 
     @property
+    def applibs_dir(self):
+        return join(self.buildozer_dir, 'applibs')
+
+    @property
     def global_buildozer_dir(self):
         return join(expanduser('~'), '.buildozer')
 
     @property
     def global_platform_dir(self):
         return join(self.global_buildozer_dir, self.targetname, 'platform')
+
+    @property
+    def global_cache_dir(self):
+        return join(self.global_buildozer_dir, 'cache')
 
 
 
@@ -518,6 +632,7 @@ class Buildozer(object):
         if 'buildozer:defaultcommand' not in self.state:
             print 'No default command set.'
             print 'Use "buildozer setdefault <command args...>"'
+            print 'Use "buildozer help" for a list of all commands"'
             exit(1)
         cmd = self.state['buildozer:defaultcommand']
         self.run_command(cmd)
@@ -611,5 +726,10 @@ class Buildozer(object):
 
 
 def run():
-    Buildozer().run_command(sys.argv[1:])
+    try:
+        Buildozer().run_command(sys.argv[1:])
+    except BuildozerCommandException:
+        # don't show the exception in the command line. The log already show the
+        # command failed.
+        pass
 

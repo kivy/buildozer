@@ -292,6 +292,13 @@ class TargetAndroid(Target):
             'ANDROIDAPI': ANDROID_API,
             'ANDROIDNDKVER': self.android_ndk_version})
 
+    def get_available_packages(self):
+        available_modules = self.buildozer.cmd(
+                './distribute.sh -l', cwd=self.pa_dir, get_stdout=True)[0]
+        if not available_modules.startswith('Available modules:'):
+            self.buildozer.error('Python-for-android invalid output for -l')
+        return available_modules[19:].splitlines()[0].split()
+
     def compile_platform(self):
         # for android, the compilation depends really on the app requirements.
         # compile the distribution only if the requirements changed.
@@ -301,23 +308,9 @@ class TargetAndroid(Target):
 
         # we need to extract the requirements that python-for-android knows
         # about
-        available_modules = self.buildozer.cmd(
-                './distribute.sh -l', cwd=self.pa_dir, get_stdout=True)[0]
-        if not available_modules.startswith('Available modules:'):
-            self.buildozer.error('Python-for-android invalid output for -l')
-        available_modules = available_modules[19:].splitlines()[0].split()
-
+        available_modules = self.get_available_packages()
         android_requirements = [x for x in app_requirements if x in
                 available_modules]
-        missing_requirements = [x for x in app_requirements if x not in
-                available_modules]
-
-        if missing_requirements:
-            self.buildozer.error(
-                'Cannot package the app cause of the missing'
-                ' requirements in python-for-android: {0}'.format(
-                    missing_requirements))
-            exit(1)
 
         need_compile = 0
         if last_requirements != android_requirements:
