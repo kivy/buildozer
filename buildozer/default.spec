@@ -28,6 +28,12 @@ version.filename = %(source.dir)s/main.py
 # (list) Application requirements
 requirements = twisted,kivy
 
+# (str) Presplash of the application
+#presplash.filename = %(source.dir)s/data/presplash.png
+
+# (str) Icon of the application
+#icon.filename = %(source.dir)s/data/icon.png
+
 #
 # Android specific
 #
