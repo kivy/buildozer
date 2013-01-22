@@ -582,6 +582,7 @@ class Buildozer(object):
                         fromlist=['buildozer'])
                 yield target, m
             except:
+                raise
                 pass
 
     def usage(self):
