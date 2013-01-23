@@ -53,6 +53,7 @@ class Buildozer(object):
         self.environ = {}
         self.specfilename = filename
         self.state = None
+        self.build_id = None
         self.config = SafeConfigParser()
         self.config.getlist = self._get_config_list
         self.config.getdefault = self._get_config_default
@@ -122,7 +123,15 @@ class Buildozer(object):
         if hasattr(self.target, '_build_done'):
             return
 
-        self.info('Build the application')
+        # increment the build number
+        self.build_id = int(self.state.get('cache.build_id', '0')) + 1
+        self.state['cache.build_id'] = str(self.build_id)
+        # FIXME WHY the hell we need to close/reopen the state to sync the build
+        # id ???
+        self.state.close()
+        self.state = shelve.open(join(self.buildozer_dir, 'state.db'))
+
+        self.info('Build the application #{}'.format(self.build_id))
         self.build_application()
 
         self.info('Package the application')
@@ -383,6 +392,13 @@ class Buildozer(object):
             target = join(cwd, target)
         self.debug('Rename {0} to {1}'.format(source, target))
         rename(source, target)
+
+    def file_copy(self, source, target, cwd=None):
+        if cwd:
+            source = join(cwd, source)
+            target = join(cwd, target)
+        self.debug('Copy {0} to {1}'.format(source, target))
+        copyfile(source, target)
 
     def file_extract(self, archive, cwd=None):
         if archive.endswith('.tgz') or archive.endswith('.tar.gz'):

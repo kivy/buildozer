@@ -338,7 +338,7 @@ class TargetAndroid(Target):
         package = config.get('app', 'package.name')
         if package_domain:
             package = package_domain + '.' + package
-        return package
+        return package.lower()
 
     def build_package(self):
         dist_dir = join(self.pa_dir, 'dist', 'default')

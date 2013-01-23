@@ -2,6 +2,7 @@
 iOS target, based on kivy-ios project. (not working yet.)
 '''
 
+import plistlib
 from buildozer.target import Target
 from os.path import join, basename
 
@@ -57,6 +58,14 @@ class TargetIos(Target):
         if not self.buildozer.file_exists(self.fruitstrap_dir, 'fruitstrap'):
             self.buildozer.cmd('make fruitstrap', cwd=self.fruitstrap_dir)
 
+    def _get_package(self):
+        config = self.buildozer.config
+        package_domain = config.getdefault('app', 'package.domain', '')
+        package = config.get('app', 'package.name')
+        if package_domain:
+            package = package_domain + '.' + package
+        return package.lower()
+
     def build_package(self):
         # create the project
         app_name = self.buildozer.namify(self.buildozer.config.get('app', 'title'))
@@ -71,6 +80,27 @@ class TargetIos(Target):
                 app_name, self.buildozer.app_dir),
                 cwd=self.ios_dir)
 
+        # fix the plist
+        plist_fn = '{}-Info.plist'.format(app_name.lower())
+        plist_rfn = join(self.app_project_dir, plist_fn)
+        version = self.buildozer.get_version()
+        self.buildozer.info('Update Plist {}'.format(plist_fn))
+        plist = plistlib.readPlist(plist_rfn)
+        plist['CFBundleIdentifier'] = self._get_package()
+        plist['CFBundleShortVersionString'] = version
+        plist['CFBundleVersion'] = '{}.{}'.format(version,
+                self.buildozer.build_id)
+
+        # add icon
+        icon = self._get_icon()
+        if icon:
+            plist['CFBundleIconFiles'] = [icon]
+            plist['CFBundleIcons'] = {'CFBundlePrimaryIcon': {
+                'UIPrerenderedIcon': False, 'CFBundleIconFiles': [icon]}}
+
+        # ok, write the modified plist.
+        plistlib.writePlist(plist, plist_rfn)
+
         mode = 'Debug' if self.build_mode == 'debug' else 'Release'
         self.buildozer.cmd('xcodebuild -configuration {}'.format(mode),
                 cwd=self.app_project_dir)
@@ -83,10 +113,10 @@ class TargetIos(Target):
         if not ioscodesign:
             self.buildozer.error('Cannot create the IPA package without'
                 ' signature. You must fill the "{}" token.'.format(key))
+            return
         elif ioscodesign[0] not in ('"', "'"):
             ioscodesign = '"{}"'.format(ioscodesign)
 
-        version = self.buildozer.get_version()
         ipa = join(self.buildozer.bin_dir, '{}-{}.ipa'.format(
             app_name, version))
         self.buildozer.cmd((
@@ -117,6 +147,7 @@ class TargetIos(Target):
         if 'ios:latestappdir' not in state:
             self.buildozer.error(
                 'App not built yet. Run "debug" or "release" first.')
+            return
         ios_app_dir = state.get('ios:latestappdir')
 
         if gdb:
@@ -130,6 +161,50 @@ class TargetIos(Target):
             fruitstrap=join(self.fruitstrap_dir, 'fruitstrap'),
             gdb=gdb_mode, app_dir=ios_app_dir),
             cwd=self.ios_dir, show_output=True)
+
+    def _get_icon(self):
+        # check the icon size, must be 72x72 or 144x144
+        icon = self.buildozer.config.getdefault('app', 'icon.filename', '')
+        if not icon:
+            return
+        icon_fn = join(self.buildozer.app_dir, icon)
+        if not self.buildozer.file_exists(icon_fn):
+            self.buildozer.error('Icon {} does not exists'.format(icon_fn))
+            return
+        output = self.buildozer.cmd('file {}'.format(icon),
+                cwd=self.buildozer.app_dir, get_stdout=True)[0]
+        if not output:
+            self.buildozer.error('Unable to read icon {}'.format(icon_fn))
+            return
+        # output is something like: 
+        # "data/cancel.png: PNG image data, 50 x 50, 8-bit/color RGBA,
+        # non-interlaced"
+        info = output.splitlines()[0].split(',')
+        fmt = info[0].split(':')[-1].strip()
+        if fmt != 'PNG image data':
+            self.buildozer.error('Only PNG icon are accepted, {} invalid'.format(icon_fn))
+            return
+        size = [int(x.strip()) for x in info[1].split('x')]
+        if size != [72, 72] and size != [144, 144]:
+            # icon cannot be used like that, it need a resize.
+            self.buildozer.error('Invalid PNG size, must be 72x72 or 144x144. Resampling.')
+            nearest_size = 144
+            if size[0] < 144:
+                nearest_size = 72
+
+            icon_basename = 'icon-{}.png'.format(nearest_size)
+            self.buildozer.file_copy(icon_fn, join(self.app_project_dir,
+                icon_basename))
+            self.buildozer.cmd('sips -z {0} {0} {1}'.format(nearest_size,
+                icon_basename), cwd=self.app_project_dir)
+        else:
+            # icon ok, use it as it.
+            icon_basename = 'icon-{}.png'.format(size[0])
+            self.buildozer.file_copy(icon_fn, join(self.app_project_dir,
+                icon_basename))
+
+        icon_fn = join(self.app_project_dir, icon_basename)
+        return icon_fn
 
     def check_configuration_tokens(self):
         errors = []
