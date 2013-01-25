@@ -3,8 +3,10 @@ iOS target, based on kivy-ios project. (not working yet.)
 '''
 
 import plistlib
+from buildozer import BuildozerCommandException
 from buildozer.target import Target
 from os.path import join, basename
+from getpass import getpass
 
 class TargetIos(Target):
 
@@ -67,6 +69,8 @@ class TargetIos(Target):
         return package.lower()
 
     def build_package(self):
+        self._unlock_keychain()
+
         # create the project
         app_name = self.buildozer.namify(self.buildozer.config.get('app', 'title'))
 
@@ -141,7 +145,7 @@ class TargetIos(Target):
     def cmd_run(self, *args):
         super(TargetIos, self).cmd_run(*args)
         self._run_fruitstrap(gdb=True)
-        
+
     def _run_fruitstrap(self, gdb=False):
         state = self.buildozer.state
         if 'ios:latestappdir' not in state:
@@ -208,10 +212,100 @@ class TargetIos(Target):
 
     def check_configuration_tokens(self):
         errors = []
-        if not self.buildozer.config.getdefault('app', 'ios.codesign.debug'):
-            errors.append('[app] "ios.codesign.debug" key missing, you must give a certificate name to use.')
+        config = self.buildozer.config
+        identity_debug = config.getdefault('app', 'ios.codesign.debug', '')
+        identity_release = config.getdefault('app', 'ios.codesign.release',
+                identity_debug)
+        available_identities = self._get_available_identities()
+
+        if not identity_debug:
+            errors.append('[app] "ios.codesign.debug" key missing, '
+                    'you must give a certificate name to use.')
+        elif identity_debug not in available_identities:
+            errors.append('[app] identity {} not found. '
+                    'Check with list_identities'.format(identity_debug))
+
+        if not identity_release:
+            errors.append('[app] "ios.codesign.release" key missing, '
+                    'you must give a certificate name to use.')
+        elif identity_release not in available_identities:
+            errors.append('[app] identity "{}" not found. '
+                    'Check with list_identities'.format(identity_release))
+
         super(TargetIos, self).check_configuration_tokens(errors)
 
+    def cmd_list_identities(self, *args):
+        '''List the available identities to use for signing.
+        '''
+        identities = self._get_available_identities()
+        print('Available identities:')
+        for x in identities:
+            print('  - {}'.format(x))
+
+    def _get_available_identities(self):
+        output = self.buildozer.cmd('security find-identity -v -p codesigning',
+                get_stdout=True)[0]
+
+        lines = output.splitlines()[:-1]
+        lines = ['"{}"'.format(x.split('"')[1]) for x in lines]
+        return lines
+
+    def _unlock_keychain(self):
+        password_file = join(self.buildozer.buildozer_dir, '.ioscodesign')
+        password = None
+        if self.buildozer.file_exists(password_file):
+            with open(password_file) as fd:
+                password = fd.read()
+
+        if not password:
+            # no password available, try to unlock anyway...
+            error = self.buildozer.cmd('security unlock-keychain -u',
+                    break_on_error=False)[2]
+            if not error:
+                return
+        else:
+            # password available, try to unlock
+            error = self.buildozer.cmd('security unlock-keychain -p {}'.format(
+                password), break_on_error=False, sensible=True)[2]
+            if not error:
+                return
+
+        # we need the password to unlock.
+        correct = False
+        attempt = 3
+        while attempt:
+            attempt -= 1
+            password = getpass('Password to unlock the default keychain:')
+            error = self.buildozer.cmd('security unlock-keychain -p "{}"'.format(
+                password), break_on_error=False, sensible=True)[2]
+            if not error:
+                correct = True
+                break
+            self.error('Invalid keychain password')
+
+        if not correct:
+            self.error('Unable to unlock the keychain, exiting.')
+            raise BuildozerCommandException()
+
+        # maybe user want to save it for further reuse?
+        print(
+            'The keychain password can be saved in the build directory\n'
+            'As soon as the build directory will be cleaned, '
+            'the password will be erased.')
+
+        save = None
+        while save is None:
+            q = raw_input('Do you want to save the password (Y/n): ')
+            if q in ('', 'Y'):
+                save = True
+            elif q == 'n':
+                save = False
+            else:
+                print('Invalid answer!')
+
+        if save:
+            with open(password_file, 'wb') as fd:
+                fd.write(password)
 
 def get_target(buildozer):
     return TargetIos(buildozer)
