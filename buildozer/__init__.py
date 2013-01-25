@@ -847,8 +847,6 @@ class BuildozerRemote(Buildozer):
         config = SafeConfigParser()
         config.read('buildozer.spec')
         config.set('app', 'source.dir', 'app')
-        config.set('app', 'source.include_exts', '')
-        config.set('app', 'source.exclude_ext', '')
 
         fn = join(self.remote_build_dir, 'buildozer.spec')
         fd = self._sftp_client.open(fn, 'wb')
