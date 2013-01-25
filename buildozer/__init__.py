@@ -12,14 +12,15 @@ Layout directory for buildozer:
 
 __version__ = '0.3-dev'
 
-import shelve
-import zipfile
-import sys
 import fcntl
 import os
 import re
+import shelve
+import socket
+import sys
+import zipfile
 from select import select
-from sys import stdout, stderr, exit
+from sys import stdout, stderr, stdin, exit
 from urllib import urlretrieve
 from re import search
 from ConfigParser import SafeConfigParser
@@ -28,6 +29,14 @@ from subprocess import Popen, PIPE
 from os import environ, unlink, rename, walk, sep, listdir, makedirs
 from copy import copy
 from shutil import copyfile, rmtree, copytree
+
+# windows does not have termios...
+try:
+    import termios
+    import tty
+    has_termios = True
+except ImportError:
+    has_termios = False
 
 RESET_SEQ = "\033[0m"
 COLOR_SEQ = "\033[1;{0}m"
@@ -196,8 +205,16 @@ class Buildozer(object):
         show_output = kwargs.pop('show_output')
         get_stdout = kwargs.pop('get_stdout', False)
         get_stderr = kwargs.pop('get_stderr', False)
+        break_on_error = kwargs.pop('break_on_error', True)
+        sensible = kwargs.pop('sensible', False)
 
-        self.debug('Run {0!r}'.format(command))
+        if not sensible:
+            self.debug('Run {0!r}'.format(command))
+        else:
+            if type(command) in (list, tuple):
+                self.debug('Run {0!r} ...'.format(command[0]))
+            else:
+                self.debug('Run {0!r} ...'.format(command.split()[0]))
         self.debug('Cwd {}'.format(kwargs.get('cwd')))
 
         # open the process
@@ -238,14 +255,14 @@ class Buildozer(object):
         stderr.flush()
 
         process.communicate()
-        if process.returncode != 0:
+        if process.returncode != 0 and break_on_error:
             self.error('Command failed: {0}'.format(command))
             raise BuildozerCommandException()
         if ret_stdout:
             ret_stdout = ''.join(ret_stdout)
         if ret_stderr:
             ret_stderr = ''.join(ret_stderr)
-        return (ret_stdout, ret_stderr)
+        return (ret_stdout, ret_stderr, process.returncode)
 
     def check_configuration_tokens(self):
         '''Ensure the spec file is 'correct'.
@@ -492,6 +509,8 @@ class Buildozer(object):
         include_exts = self.config.getlist('app', 'source.include_exts', '')
         exclude_exts = self.config.getlist('app', 'source.exclude_exts', '')
         app_dir = self.app_dir
+
+        self.debug('Copy application source from {}'.format(source_dir))
 
         rmtree(self.app_dir)
 
@@ -896,20 +915,83 @@ class BuildozerRemote(Buildozer):
 
     def _ssh_command(self, command):
         self.debug('Execute remote command {}'.format(command))
-        rstdin, rstdout, rstderr = self._ssh_client.exec_command(command)
-
-        # prepare fds
-        while True:
-            chunk = rstdout.read(1)
-            if chunk == '':
-                break
-            stdout.write(chunk)
-            stdout.flush()
-
+        #shell = self._ssh_client.invoke_shell()
+        #shell.sendall(command)
+        #shell.sendall('\nexit\n')
+        transport = self._ssh_client.get_transport()
+        channel = transport.open_session()
+        try:
+            channel.exec_command(command)
+            self._interactive_shell(channel)
+        finally:
+            channel.close()
 
     def usage(self):
         print 'Usage: buildozer-remote [--verbose] [remote-name] [buildozer args]'
 
+
+    def _interactive_shell(self, chan):
+        if has_termios:
+            self._posix_shell(chan)
+        else:
+            self._windows_shell(chan)
+
+    def _posix_shell(self, chan):
+        oldtty = termios.tcgetattr(stdin)
+        try:
+            #tty.setraw(stdin.fileno())
+            #tty.setcbreak(stdin.fileno())
+            chan.settimeout(0.0)
+
+            while True:
+                r, w, e = select([chan, stdin], [], [])
+                if chan in r:
+                    try:
+                        x = chan.recv(128)
+                        if len(x) == 0:
+                            print '\r\n*** EOF\r\n',
+                            break
+                        stdout.write(x)
+                        stdout.flush()
+                        #print len(x), repr(x)
+                    except socket.timeout:
+                        pass
+                if stdin in r:
+                    x = stdin.read(1)
+                    if len(x) == 0:
+                        break
+                    chan.sendall(x)
+        finally:
+            termios.tcsetattr(stdin, termios.TCSADRAIN, oldtty)
+
+    # thanks to Mike Looijmans for this code
+    def _windows_shell(self,chan):
+        import threading
+
+        stdout.write("Line-buffered terminal emulation. Press F6 or ^Z to send EOF.\r\n\r\n")
+
+        def writeall(sock):
+            while True:
+                data = sock.recv(256)
+                if not data:
+                    stdout.write('\r\n*** EOF ***\r\n\r\n')
+                    stdout.flush()
+                    break
+                stdout.write(data)
+                stdout.flush()
+
+        writer = threading.Thread(target=writeall, args=(chan,))
+        writer.start()
+
+        try:
+            while True:
+                d = stdin.read(1)
+                if not d:
+                    break
+                chan.send(d)
+        except EOFError:
+            # user hit ^Z or F6
+            pass
 
 def run():
     try:
