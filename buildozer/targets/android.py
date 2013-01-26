@@ -338,7 +338,7 @@ class TargetAndroid(Target):
         package = config.get('app', 'package.name')
         if package_domain:
             package = package_domain + '.' + package
-        return package
+        return package.lower()
 
     def build_package(self):
         dist_dir = join(self.pa_dir, 'dist', 'default')
@@ -368,6 +368,17 @@ class TargetAndroid(Target):
                 'android.permissions', [])
         for permission in permissions:
             build_cmd += ' --permission {0}'.format(permission)
+
+        # add presplash
+        presplash = config.getdefault('app', 'presplash.filename', '')
+        if presplash:
+            build_cmd += ' --presplash {}'.format(join(self.buildozer.app_dir,
+                presplash))
+
+        # add icon
+        icon = config.getdefault('app', 'icon.filename', '')
+        if icon:
+            build_cmd += ' --icon {}'.format(join(self.buildozer.app_dir, icon))
 
         # build only in debug right now.
         if self.build_mode == 'debug':

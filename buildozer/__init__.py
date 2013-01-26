@@ -12,14 +12,15 @@ Layout directory for buildozer:
 
 __version__ = '0.3-dev'
 
-import shelve
-import zipfile
-import sys
 import fcntl
 import os
 import re
+import shelve
+import socket
+import sys
+import zipfile
 from select import select
-from sys import stdout, stderr, exit
+from sys import stdout, stderr, stdin, exit
 from urllib import urlretrieve
 from re import search
 from ConfigParser import SafeConfigParser
@@ -28,6 +29,14 @@ from subprocess import Popen, PIPE
 from os import environ, unlink, rename, walk, sep, listdir, makedirs
 from copy import copy
 from shutil import copyfile, rmtree, copytree
+
+# windows does not have termios...
+try:
+    import termios
+    import tty
+    has_termios = True
+except ImportError:
+    has_termios = False
 
 RESET_SEQ = "\033[0m"
 COLOR_SEQ = "\033[1;{0}m"
@@ -53,6 +62,7 @@ class Buildozer(object):
         self.environ = {}
         self.specfilename = filename
         self.state = None
+        self.build_id = None
         self.config = SafeConfigParser()
         self.config.getlist = self._get_config_list
         self.config.getdefault = self._get_config_default
@@ -122,7 +132,15 @@ class Buildozer(object):
         if hasattr(self.target, '_build_done'):
             return
 
-        self.info('Build the application')
+        # increment the build number
+        self.build_id = int(self.state.get('cache.build_id', '0')) + 1
+        self.state['cache.build_id'] = str(self.build_id)
+        # FIXME WHY the hell we need to close/reopen the state to sync the build
+        # id ???
+        self.state.close()
+        self.state = shelve.open(join(self.buildozer_dir, 'state.db'))
+
+        self.info('Build the application #{}'.format(self.build_id))
         self.build_application()
 
         self.info('Package the application')
@@ -187,8 +205,16 @@ class Buildozer(object):
         show_output = kwargs.pop('show_output')
         get_stdout = kwargs.pop('get_stdout', False)
         get_stderr = kwargs.pop('get_stderr', False)
+        break_on_error = kwargs.pop('break_on_error', True)
+        sensible = kwargs.pop('sensible', False)
 
-        self.debug('Run {0!r}'.format(command))
+        if not sensible:
+            self.debug('Run {0!r}'.format(command))
+        else:
+            if type(command) in (list, tuple):
+                self.debug('Run {0!r} ...'.format(command[0]))
+            else:
+                self.debug('Run {0!r} ...'.format(command.split()[0]))
         self.debug('Cwd {}'.format(kwargs.get('cwd')))
 
         # open the process
@@ -229,14 +255,14 @@ class Buildozer(object):
         stderr.flush()
 
         process.communicate()
-        if process.returncode != 0:
+        if process.returncode != 0 and break_on_error:
             self.error('Command failed: {0}'.format(command))
             raise BuildozerCommandException()
         if ret_stdout:
             ret_stdout = ''.join(ret_stdout)
         if ret_stderr:
             ret_stderr = ''.join(ret_stderr)
-        return (ret_stdout, ret_stderr)
+        return (ret_stdout, ret_stderr, process.returncode)
 
     def check_configuration_tokens(self):
         '''Ensure the spec file is 'correct'.
@@ -384,6 +410,13 @@ class Buildozer(object):
         self.debug('Rename {0} to {1}'.format(source, target))
         rename(source, target)
 
+    def file_copy(self, source, target, cwd=None):
+        if cwd:
+            source = join(cwd, source)
+            target = join(cwd, target)
+        self.debug('Copy {0} to {1}'.format(source, target))
+        copyfile(source, target)
+
     def file_extract(self, archive, cwd=None):
         if archive.endswith('.tgz') or archive.endswith('.tar.gz'):
             # XXX tarfile doesn't work for NDK-r8c :(
@@ -467,10 +500,17 @@ class Buildozer(object):
         raise Exception('Missing version or version.regex + version.filename')
 
     def build_application(self):
+        self._copy_application_sources()
+        self._copy_application_libs()
+        self._patch_application_sources()
+
+    def _copy_application_sources(self):
         source_dir = realpath(self.config.getdefault('app', 'source.dir', '.'))
         include_exts = self.config.getlist('app', 'source.include_exts', '')
         exclude_exts = self.config.getlist('app', 'source.exclude_exts', '')
         app_dir = self.app_dir
+
+        self.debug('Copy application source from {}'.format(source_dir))
 
         rmtree(self.app_dir)
 
@@ -505,11 +545,13 @@ class Buildozer(object):
                 self.debug('Copy {0}'.format(sfn))
                 copyfile(sfn, rfn)
 
+    def _copy_application_libs(self):
         # copy also the libs
-        copytree(self.applibs_dir, join(app_dir, '_applibs'))
+        copytree(self.applibs_dir, join(self.app_dir, '_applibs'))
 
+    def _patch_application_sources(self):
         # patch the main.py
-        main_py = join(app_dir, 'main.py')
+        main_py = join(self.app_dir, 'main.py')
         if not self.file_exists(main_py):
             self.error('Unable to patch main_py to add applibs directory.')
             return
@@ -564,6 +606,13 @@ class Buildozer(object):
     def global_cache_dir(self):
         return join(self.global_buildozer_dir, 'cache')
 
+    @property
+    def package_full_name(self):
+        package_name = self.config.getdefault('app', 'package.name', '')
+        package_domain = self.config.getdefault('app', 'package.domain', '')
+        if package_domain == '':
+            return package_name
+        return '{}.{}'.format(package_domain, package_name)
 
 
     #
@@ -582,6 +631,7 @@ class Buildozer(object):
                         fromlist=['buildozer'])
                 yield target, m
             except:
+                raise
                 pass
 
     def usage(self):
@@ -650,7 +700,7 @@ class Buildozer(object):
                 self.usage()
                 exit(0)
 
-            if args == '--version':
+            if arg == '--version':
                 print 'Buildozer {0}'.format(__version__)
                 exit(0)
 
@@ -725,6 +775,224 @@ class Buildozer(object):
         return self.config.get(section, token)
 
 
+class BuildozerRemote(Buildozer):
+    def run_command(self, args):
+        while args:
+            if not args[0].startswith('-'):
+                break
+            arg = args.pop(0)
+
+            if arg in ('-v', '--verbose'):
+                self.log_level = 2
+
+            if arg in ('-h', '--help'):
+                self.usage()
+                exit(0)
+
+            if arg == '--version':
+                print 'Buildozer (remote) {0}'.format(__version__)
+                exit(0)
+
+        if len(args) < 2:
+            self.usage()
+            return
+
+        remote_name = args[0]
+        remote_section = 'remote:{}'.format(remote_name)
+        if not self.config.has_section(remote_section):
+            self.error('Unknow remote "{}", must be configured first.'.format(
+                remote_name))
+            return
+
+        self.remote_host = remote_host = self.config.get(
+                remote_section, 'host', '')
+        self.remote_user = remote_user = self.config.get(
+                remote_section, 'user', '')
+        self.remote_build_dir = remote_build_dir = self.config.get(
+                remote_section, 'build_directory', '')
+        if not remote_host:
+            self.error('Missing "host = " for {}'.format(remote_section))
+            return
+        if not remote_user:
+            self.error('Missing "user = " for {}'.format(remote_section))
+            return
+        if not remote_build_dir:
+            self.error('Missing "build_directory = " for {}'.format(remote_section))
+            return
+
+        # fake the target
+        self.targetname = 'remote'
+        self.check_build_layout()
+
+        # prepare our source code
+        self.info('Prepare source code to sync')
+        self._copy_application_sources()
+        self._ssh_connect()
+        try:
+            self._ensure_buildozer()
+            self._sync_application_sources()
+            self._do_remote_commands(args[1:])
+        finally:
+            self._ssh_close()
+
+    def _ssh_connect(self):
+        self.info('Connecting to {}'.format(self.remote_host))
+        import paramiko
+        self._ssh_client = client = paramiko.SSHClient()
+        client.load_system_host_keys()
+        client.connect(self.remote_host, username=self.remote_user)
+        self._sftp_client = client.open_sftp()
+
+    def _ssh_close(self):
+        self.debug('Closing remote connection')
+        self._sftp_client.close()
+        self._ssh_client.close()
+
+    def _ensure_buildozer(self):
+        s = self._sftp_client
+        root_dir = s.normalize('.')
+        self.remote_build_dir = join(root_dir, self.remote_build_dir,
+                self.package_full_name)
+        self.debug('Remote build directory: {}'.format(self.remote_build_dir))
+        self._ssh_mkdir(self.remote_build_dir)
+        self._ssh_sync(__path__[0])
+
+    def _sync_application_sources(self):
+        self.info('Synchronize application sources')
+        self._ssh_sync(self.app_dir)
+
+        # create custom buildozer.spec
+        self.info('Create custom buildozer.spec')
+        config = SafeConfigParser()
+        config.read('buildozer.spec')
+        config.set('app', 'source.dir', 'app')
+
+        fn = join(self.remote_build_dir, 'buildozer.spec')
+        fd = self._sftp_client.open(fn, 'wb')
+        config.write(fd)
+        fd.close()
+
+    def _do_remote_commands(self, args):
+        self.info('Execute remote buildozer')
+        cmd = (
+            'source ~/.profile;'
+            'cd {0};'
+            'env PYTHONPATH={0}:$PYTHONPATH '
+            'python -c "import buildozer, sys;'
+            'buildozer.Buildozer().run_command(sys.argv[1:])" {1} {2} 2>&1').format(
+            self.remote_build_dir,
+            '--verbose' if self.log_level == 2 else '',
+            ' '.join(args),
+            )
+        self._ssh_command(cmd)
+
+    def _ssh_mkdir(self, *args):
+        directory = join(*args)
+        self.debug('Create remote directory {}'.format(directory))
+        try:
+            self._sftp_client.mkdir(directory)
+        except IOError:
+            # already created?
+            try:
+                self._sftp_client.stat(directory)
+            except IOError:
+                self.error('Unable to create remote directory {}'.format(directory))
+                raise
+
+    def _ssh_sync(self, directory):
+        self.debug('Syncing {} directory'.format(directory))
+        directory = realpath(directory)
+        base_strip = directory.rfind('/')
+        for root, dirs, files in walk(directory):
+            self._ssh_mkdir(self.remote_build_dir, root[base_strip + 1:])
+            for fn in files:
+                if splitext(fn)[1] in ('.pyo', '.pyc', '.swp'):
+                    continue
+                local_file = join(root, fn)
+                remote_file = join(self.remote_build_dir, root[base_strip + 1:], fn)
+                self.debug('Sync {} -> {}'.format(local_file, remote_file))
+                self._sftp_client.put(local_file, remote_file)
+
+    def _ssh_command(self, command):
+        self.debug('Execute remote command {}'.format(command))
+        #shell = self._ssh_client.invoke_shell()
+        #shell.sendall(command)
+        #shell.sendall('\nexit\n')
+        transport = self._ssh_client.get_transport()
+        channel = transport.open_session()
+        try:
+            channel.exec_command(command)
+            self._interactive_shell(channel)
+        finally:
+            channel.close()
+
+    def usage(self):
+        print 'Usage: buildozer-remote [--verbose] [remote-name] [buildozer args]'
+
+
+    def _interactive_shell(self, chan):
+        if has_termios:
+            self._posix_shell(chan)
+        else:
+            self._windows_shell(chan)
+
+    def _posix_shell(self, chan):
+        oldtty = termios.tcgetattr(stdin)
+        try:
+            #tty.setraw(stdin.fileno())
+            #tty.setcbreak(stdin.fileno())
+            chan.settimeout(0.0)
+
+            while True:
+                r, w, e = select([chan, stdin], [], [])
+                if chan in r:
+                    try:
+                        x = chan.recv(128)
+                        if len(x) == 0:
+                            print '\r\n*** EOF\r\n',
+                            break
+                        stdout.write(x)
+                        stdout.flush()
+                        #print len(x), repr(x)
+                    except socket.timeout:
+                        pass
+                if stdin in r:
+                    x = stdin.read(1)
+                    if len(x) == 0:
+                        break
+                    chan.sendall(x)
+        finally:
+            termios.tcsetattr(stdin, termios.TCSADRAIN, oldtty)
+
+    # thanks to Mike Looijmans for this code
+    def _windows_shell(self,chan):
+        import threading
+
+        stdout.write("Line-buffered terminal emulation. Press F6 or ^Z to send EOF.\r\n\r\n")
+
+        def writeall(sock):
+            while True:
+                data = sock.recv(256)
+                if not data:
+                    stdout.write('\r\n*** EOF ***\r\n\r\n')
+                    stdout.flush()
+                    break
+                stdout.write(data)
+                stdout.flush()
+
+        writer = threading.Thread(target=writeall, args=(chan,))
+        writer.start()
+
+        try:
+            while True:
+                d = stdin.read(1)
+                if not d:
+                    break
+                chan.send(d)
+        except EOFError:
+            # user hit ^Z or F6
+            pass
+
 def run():
     try:
         Buildozer().run_command(sys.argv[1:])
@@ -733,3 +1001,8 @@ def run():
         # command failed.
         pass
 
+def run_remote():
+    try:
+        BuildozerRemote().run_command(sys.argv[1:])
+    except BuildozerCommandException:
+        pass

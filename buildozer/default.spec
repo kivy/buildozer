@@ -13,7 +13,7 @@ package.domain = org.test
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg
+source.include_exts = py,png,jpg,kv,atlas
 
 # (list) Source files to exclude (let empty to not excluding anything)
 #source.exclude_exts = spec
@@ -27,6 +27,12 @@ version.filename = %(source.dir)s/main.py
 
 # (list) Application requirements
 requirements = twisted,kivy
+
+# (str) Presplash of the application
+#presplash.filename = %(source.dir)s/data/presplash.png
+
+# (str) Icon of the application
+#icon.filename = %(source.dir)s/data/icon.png
 
 #
 # Android specific
@@ -55,6 +61,18 @@ requirements = twisted,kivy
 
 # (str) Android entry point, default is ok for Kivy-based app
 #android.entrypoint = org.renpy.android.PythonActivity
+
+
+#
+# iOS specific
+#
+
+# (str) Name of the certificate to use for signing the debug version
+#ios.codesign.debug = "iPhone Developer: <lastname> <firstname> (<hexstring>)"
+
+# (str) Name of the certificate to use for signing the release version
+#ios.codesign.release = %(ios.codesign.debug)s
+
 
 [buildozer]
 
