@@ -62,6 +62,8 @@ requirements = twisted,kivy
 # (str) Android entry point, default is ok for Kivy-based app
 #android.entrypoint = org.renpy.android.PythonActivity
 
+# (str) Android orientation (portrait, landscape)
+#android.orientation = 
 
 #
 # iOS specific
