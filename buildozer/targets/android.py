@@ -19,7 +19,7 @@ import traceback
 from pipes import quote
 from sys import platform, executable
 from buildozer.target import Target
-from os.path import join, realpath
+from os.path import join, realpath, expanduser
 from shutil import copyfile
 
 
@@ -47,8 +47,8 @@ class TargetAndroid(Target):
 
     @property
     def android_sdk_dir(self):
-        directory = self.buildozer.config.getdefault(
-                'app', 'android.sdk_path', '')
+        directory = expanduser(self.buildozer.config.getdefault(
+            'app', 'android.sdk_path', ''))
         if directory:
             return realpath(directory)
         version = self.buildozer.config.getdefault(
@@ -58,8 +58,8 @@ class TargetAndroid(Target):
 
     @property
     def android_ndk_dir(self):
-        directory = self.buildozer.config.getdefault(
-                'app', 'android.ndk_path', '')
+        directory = expanduser(self.buildozer.config.getdefault(
+            'app', 'android.ndk_path', ''))
         if directory:
             return realpath(directory)
         version = self.buildozer.config.getdefault(
@@ -69,8 +69,8 @@ class TargetAndroid(Target):
 
     @property
     def apache_ant_dir(self):
-        directory = self.buildozer.config.getdefault(
-                'app', 'android.ant_path', '')
+        directory = expanduser(self.buildozer.config.getdefault(
+            'app', 'android.ant_path', ''))
         if directory:
             return realpath(directory)
         version = self.buildozer.config.getdefault(
