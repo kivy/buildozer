@@ -762,7 +762,10 @@ class Buildozer(object):
     def _get_config_list(self, section, token, default=None):
         # monkey-patch method for ConfigParser
         # get a key as a list of string, seperated from the comma
-        values = self.config.getdefault(section, token, '').split(',')
+        strvalue = self.config.getdefault(section, token, '')
+        if not strvalue:
+            return []
+        values = strvalue.split(',')
         if not values:
             return default
         return [x.strip() for x in values]
