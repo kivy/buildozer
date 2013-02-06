@@ -117,9 +117,9 @@ class TargetAndroid(Target):
             permissions = self.buildozer.config.getlist(
                 'app', 'android.permissions', [])
             for permission in permissions:
-                if permission not in available_permissions:
+                if permission and permission not in available_permissions:
                     errors.append(
-                        '[app] "android.permission" contain an unknown'
+                        '[app] "android.permissions" contains an unknown'
                         ' permission {0}'.format(permission))
 
         super(TargetAndroid, self).check_configuration_tokens(errors)
@@ -372,7 +372,8 @@ class TargetAndroid(Target):
         permissions = config.getlist('app',
                 'android.permissions', [])
         for permission in permissions:
-            build_cmd += ' --permission {0}'.format(permission)
+            if permission:
+                build_cmd += ' --permission {0}'.format(permission)
 
         # add presplash
         presplash = config.getdefault('app', 'presplash.filename', '')
