@@ -377,13 +377,12 @@ class TargetAndroid(Target):
         # add presplash
         presplash = config.getdefault('app', 'presplash.filename', '')
         if presplash:
-            build_cmd += ' --presplash {}'.format(join(self.buildozer.app_dir,
-                presplash))
+            build_cmd += ' --presplash {}'.format(join(self.buildozer.app_dir, '..', '..', '..', presplash))
 
         # add icon
         icon = config.getdefault('app', 'icon.filename', '')
         if icon:
-            build_cmd += ' --icon {}'.format(join(self.buildozer.app_dir, icon))
+            build_cmd += ' --icon {}'.format(join(self.buildozer.app_dir, '..', '..', '..', icon))
 
         # build only in debug right now.
         if self.build_mode == 'debug':
