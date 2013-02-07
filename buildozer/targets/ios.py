@@ -17,6 +17,7 @@ class TargetIos(Target):
         checkbin('Xcode xcodebuild', 'xcodebuild')
         checkbin('Xcode xcode-select', 'xcode-select')
         checkbin('Git git', 'git')
+        checkbin('Cython', 'cython')
 
         self.buildozer.debug('Check availability of a iPhone SDK')
         sdk = cmd('xcodebuild -showsdks | fgrep "iphoneos" |'
