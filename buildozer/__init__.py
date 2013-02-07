@@ -573,9 +573,16 @@ class Buildozer(object):
         return re.sub('[^a-zA-Z0-9_\-]', '_', name)
 
     @property
+    def root_dir(self):
+        return realpath(join(dirname(self.specfilename)))
+
+    @property
     def buildozer_dir(self):
-        return realpath(join(
-            dirname(self.specfilename), '.buildozer'))
+        return join(self.root_dir, '.buildozer')
+
+    @property
+    def bin_dir(self):
+        return join(self.root_dir, 'bin')
 
     @property
     def platform_dir(self):
@@ -584,11 +591,6 @@ class Buildozer(object):
     @property
     def app_dir(self):
         return join(self.buildozer_dir, self.targetname, 'app')
-
-    @property
-    def bin_dir(self):
-        return realpath(join(
-            dirname(self.specfilename), 'bin'))
 
     @property
     def applibs_dir(self):
