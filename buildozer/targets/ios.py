@@ -8,6 +8,52 @@ from buildozer.target import Target
 from os.path import join, basename
 from getpass import getpass
 
+PHP_TEMPLATE = '''
+<?php
+// credits goes to http://jeffreysambells.com/2010/06/22/ios-wireless-app-distribution
+
+$ipas = glob('*.ipa');
+$provisioningProfiles = glob('*.mobileprovision');
+$plists = glob('*.plist');
+
+$sr = stristr( $_SERVER['SCRIPT_URI'], '.php' ) === false ? 
+    $_SERVER['SCRIPT_URI'] : dirname($_SERVER['SCRIPT_URI']) . '/';
+$provisioningProfile = $sr . $provisioningProfiles[0];
+$ipa = $sr . $ipas[0];
+$itmsUrl = urlencode( $sr . 'index.php?plist=' . str_replace( '.plist', '', $plists[0] ) );
+
+
+if ($_GET['plist']) {
+    $plist = file_get_contents( dirname(__FILE__) 
+        . DIRECTORY_SEPARATOR 
+        . preg_replace( '/![A-Za-z0-9-_]/i', '', $_GET['plist']) . '.plist' );
+    $plist = str_replace('_URL_', $ipa, $plist);
+    header('content-type: application/xml');
+    echo $plist;
+    die();
+}
+
+
+?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Install {appname}</title>
+<style type="text/css">
+li { padding: 1em; }
+</style>
+
+</head>
+<body>
+<ul>
+    <li><a href="<? echo $provisioningProfile; ?>">Install Team Provisioning File</a></li>
+    <li><a href="itms-services://?action=download-manifest&url=<? echo $itmsUrl; ?>">
+         Install Application</a></li>
+</ul>
+</body>
+</html>
+'''
+
 class TargetIos(Target):
 
     def check_requirements(self):
@@ -18,6 +64,12 @@ class TargetIos(Target):
         checkbin('Xcode xcode-select', 'xcode-select')
         checkbin('Git git', 'git')
         checkbin('Cython', 'cython')
+        checkbin('Mercurial', 'hg')
+        checkbin('Cython cython', 'cython')
+        checkbin('pkg-config', 'pkg-config')
+        checkbin('autoconf', 'autoconf')
+        checkbin('automake', 'automake')
+        checkbin('libtool', 'libtool')
 
         self.buildozer.debug('Check availability of a iPhone SDK')
         sdk = cmd('xcodebuild -showsdks | fgrep "iphoneos" |'
@@ -73,7 +125,8 @@ class TargetIos(Target):
         self._unlock_keychain()
 
         # create the project
-        app_name = self.buildozer.namify(self.buildozer.config.get('app', 'title'))
+        app_name = self.buildozer.namify(self.buildozer.config.get('app',
+            'package.name'))
 
         self.app_project_dir = join(self.ios_dir, 'app-{0}'.format(app_name.lower()))
         if not self.buildozer.file_exists(self.app_project_dir):
@@ -107,7 +160,7 @@ class TargetIos(Target):
         plistlib.writePlist(plist, plist_rfn)
 
         mode = 'Debug' if self.build_mode == 'debug' else 'Release'
-        self.buildozer.cmd('xcodebuild -configuration {}'.format(mode),
+        self.buildozer.cmd('xcodebuild -configuration {} clean build'.format(mode),
                 cwd=self.app_project_dir)
         ios_app_dir = 'app-{app_lower}/build/{mode}-iphoneos/{app_lower}.app'.format(
                 app_lower=app_name.lower(), mode=mode)
@@ -139,6 +192,8 @@ class TargetIos(Target):
         self.buildozer.state['ios:latestipa'] = ipa
         self.buildozer.state['ios:latestmode'] = self.build_mode
 
+        self._create_index()
+
     def cmd_deploy(self, *args):
         super(TargetIos, self).cmd_deploy(*args)
         self._run_fruitstrap(gdb=False)
@@ -146,6 +201,17 @@ class TargetIos(Target):
     def cmd_run(self, *args):
         super(TargetIos, self).cmd_run(*args)
         self._run_fruitstrap(gdb=True)
+
+    def cmd_xcode(self, *args):
+        '''Open the xcode project.
+        '''
+        app_name = self.buildozer.namify(self.buildozer.config.get('app',
+            'package.name'))
+        app_name = app_name.lower()
+
+        ios_dir = ios_dir = join(self.buildozer.platform_dir, 'kivy-ios')
+        self.buildozer.cmd('open {}.xcodeproj'.format(
+            app_name), cwd=join(ios_dir, 'app-{}'.format(app_name)))
 
     def _run_fruitstrap(self, gdb=False):
         state = self.buildozer.state
@@ -210,6 +276,10 @@ class TargetIos(Target):
 
         icon_fn = join(self.app_project_dir, icon_basename)
         return icon_fn
+
+    def _create_index(self):
+        # TODO
+        pass
 
     def check_configuration_tokens(self):
         errors = []
