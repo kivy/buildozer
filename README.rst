@@ -1,7 +1,7 @@
 Buildozer
 =========
 
-THIS IS A WORK IN PROGRESS, DO NOT USE.
+This tool is currently in alpha.
 
 Buildozer is a tool for creating application packages easily.
 
