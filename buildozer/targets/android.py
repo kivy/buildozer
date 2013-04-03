@@ -5,7 +5,7 @@ Android target, based on python-for-android project
 # Android target
 # Thanks for Renpy (again) for its install_sdk.py and plat.py in the PGS4A
 # project!
-# 
+#
 
 
 ANDROID_API = '14'
@@ -392,6 +392,13 @@ class TargetAndroid(Target):
         else:
             build_cmd += ' release'
             mode = 'release-unsigned'
+
+        # set orientation
+        orientation = config.getdefault('app', 'android.orientation', '')
+        if orientation:
+            build_cmd += ' --orientation {0}'.format(orientation)
+
+
         self.buildozer.cmd(build_cmd, cwd=dist_dir)
 
         # XXX found how the apk name is really built from the title
