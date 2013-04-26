@@ -277,7 +277,7 @@ class TargetAndroid(Target):
             cmd('git clean -dxf', cwd=pa_dir)
             cmd('git pull origin master', cwd=pa_dir)
 
-            source = self.buildozer.config.get('app', 'android.branch')
+            source = self.buildozer.config.getdefault('app', 'android.branch')
             if source:
                 cmd('git checkout --track -b %s origin/%s' % (source, source),
                     cwd=pa_dir)

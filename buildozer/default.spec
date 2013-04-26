@@ -62,6 +62,9 @@ requirements = twisted,kivy
 # (str) Android entry point, default is ok for Kivy-based app
 #android.entrypoint = org.renpy.android.PythonActivity
 
+# (str) python-for-android branch to use, if not master, useful to try
+# not yet merged features.
+#android.branch = master
 
 #
 # iOS specific
