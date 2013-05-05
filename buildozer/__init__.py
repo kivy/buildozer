@@ -66,6 +66,7 @@ class Buildozer(object):
         self.config = SafeConfigParser()
         self.config.getlist = self._get_config_list
         self.config.getdefault = self._get_config_default
+        self.config.getbooldefault = self._get_config_bool
 
         if exists(filename):
             self.config.read(filename)
@@ -288,6 +289,10 @@ class Buildozer(object):
         if version_regex and not get('app', 'version.filename', ''):
             adderror('[app] "version.filename" is missing'
                 ', required by "version.regex"')
+
+        orientation = get('app', 'orientation', 'landscape')
+        if orientation not in ('landscape', 'portrait', 'all'):
+            adderror('[app] "orientation" have an invalid value')
 
         if errors:
             self.error('{0} error(s) found in the buildozer.spec'.format(
@@ -781,6 +786,14 @@ class Buildozer(object):
             return default
         return self.config.get(section, token)
 
+    def _get_config_bool(self, section, token, default=False):
+        # monkey-patch method for ConfigParser
+        # get a key in a section, or the default
+        if not self.config.has_section(section):
+            return default
+        if not self.config.has_option(section, token):
+            return default
+        return self.config.getboolean(section, token)
 
 class BuildozerRemote(Buildozer):
     def run_command(self, args):

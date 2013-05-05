@@ -386,6 +386,17 @@ class TargetAndroid(Target):
         if icon:
             build_cmd += ' --icon {}'.format(join(self.buildozer.root_dir, icon))
 
+        # add orientation
+        orientation = config.getdefault('app', 'orientation', 'landscape')
+        if orientation == 'all':
+            orientation = 'sensor'
+        build_cmd += ' --orientation {}'.format(orientation)
+
+        # fullscreen ?
+        fullscreen = config.getbooldefault('app', 'fullscreen', True)
+        if not fullscreen:
+            build_cmd += ' --window'
+
         # build only in debug right now.
         if self.build_mode == 'debug':
             build_cmd += ' debug'
