@@ -26,13 +26,20 @@ version.filename = %(source.dir)s/main.py
 # version = 1.2.0
 
 # (list) Application requirements
-requirements = twisted,kivy
+requirements = kivy
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png
 
 # (str) Icon of the application
 #icon.filename = %(source.dir)s/data/icon.png
+
+# (str) Supported orientation (one of landscape, portrait or all)
+orientation = landscape
+
+# (bool) Indicate if the application should be fullscreen or not
+fullscreen = 1
+
 
 #
 # Android specific
@@ -62,6 +69,9 @@ requirements = twisted,kivy
 # (str) Android entry point, default is ok for Kivy-based app
 #android.entrypoint = org.renpy.android.PythonActivity
 
+# (str) python-for-android branch to use, if not master, useful to try
+# not yet merged features.
+#android.branch = master
 
 #
 # iOS specific

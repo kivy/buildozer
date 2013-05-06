@@ -66,6 +66,7 @@ class Buildozer(object):
         self.config = SafeConfigParser()
         self.config.getlist = self._get_config_list
         self.config.getdefault = self._get_config_default
+        self.config.getbooldefault = self._get_config_bool
 
         if exists(filename):
             self.config.read(filename)
@@ -288,6 +289,10 @@ class Buildozer(object):
         if version_regex and not get('app', 'version.filename', ''):
             adderror('[app] "version.filename" is missing'
                 ', required by "version.regex"')
+
+        orientation = get('app', 'orientation', 'landscape')
+        if orientation not in ('landscape', 'portrait', 'all'):
+            adderror('[app] "orientation" have an invalid value')
 
         if errors:
             self.error('{0} error(s) found in the buildozer.spec'.format(
@@ -573,9 +578,16 @@ class Buildozer(object):
         return re.sub('[^a-zA-Z0-9_\-]', '_', name)
 
     @property
+    def root_dir(self):
+        return realpath(join(dirname(self.specfilename)))
+
+    @property
     def buildozer_dir(self):
-        return realpath(join(
-            dirname(self.specfilename), '.buildozer'))
+        return join(self.root_dir, '.buildozer')
+
+    @property
+    def bin_dir(self):
+        return join(self.root_dir, 'bin')
 
     @property
     def platform_dir(self):
@@ -584,11 +596,6 @@ class Buildozer(object):
     @property
     def app_dir(self):
         return join(self.buildozer_dir, self.targetname, 'app')
-
-    @property
-    def bin_dir(self):
-        return realpath(join(
-            dirname(self.specfilename), 'bin'))
 
     @property
     def applibs_dir(self):
@@ -762,10 +769,10 @@ class Buildozer(object):
     def _get_config_list(self, section, token, default=None):
         # monkey-patch method for ConfigParser
         # get a key as a list of string, seperated from the comma
-        strvalue = self.config.getdefault(section, token, '')
-        if not strvalue:
-            return []
-        values = strvalue.split(',')
+        values = self.config.getdefault(section, token, '')
+        if not values:
+            return default
+        values = values.split(',')
         if not values:
             return default
         return [x.strip() for x in values]
@@ -779,6 +786,14 @@ class Buildozer(object):
             return default
         return self.config.get(section, token)
 
+    def _get_config_bool(self, section, token, default=False):
+        # monkey-patch method for ConfigParser
+        # get a key in a section, or the default
+        if not self.config.has_section(section):
+            return default
+        if not self.config.has_option(section, token):
+            return default
+        return self.config.getboolean(section, token)
 
 class BuildozerRemote(Buildozer):
     def run_command(self, args):

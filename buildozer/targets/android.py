@@ -19,6 +19,7 @@ import traceback
 from pipes import quote
 from sys import platform, executable
 from buildozer.target import Target
+from os import environ
 from os.path import join, realpath, expanduser
 from shutil import copyfile
 
@@ -277,7 +278,7 @@ class TargetAndroid(Target):
             cmd('git clean -dxf', cwd=pa_dir)
             cmd('git pull origin master', cwd=pa_dir)
 
-            source = self.buildozer.config.get('app', 'android.branch')
+            source = self.buildozer.config.getdefault('app', 'android.branch')
             if source:
                 cmd('git checkout --track -b %s origin/%s' % (source, source),
                     cwd=pa_dir)
@@ -377,12 +378,24 @@ class TargetAndroid(Target):
         # add presplash
         presplash = config.getdefault('app', 'presplash.filename', '')
         if presplash:
-            build_cmd += ' --presplash {}'.format(join(self.buildozer.app_dir, '..', '..', '..', presplash))
+            build_cmd += ' --presplash {}'.format(join(self.buildozer.root_dir,
+                presplash))
 
         # add icon
         icon = config.getdefault('app', 'icon.filename', '')
         if icon:
-            build_cmd += ' --icon {}'.format(join(self.buildozer.app_dir, '..', '..', '..', icon))
+            build_cmd += ' --icon {}'.format(join(self.buildozer.root_dir, icon))
+
+        # add orientation
+        orientation = config.getdefault('app', 'orientation', 'landscape')
+        if orientation == 'all':
+            orientation = 'sensor'
+        build_cmd += ' --orientation {}'.format(orientation)
+
+        # fullscreen ?
+        fullscreen = config.getbooldefault('app', 'fullscreen', True)
+        if not fullscreen:
+            build_cmd += ' --window'
 
         # build only in debug right now.
         if self.build_mode == 'debug':
@@ -409,6 +422,21 @@ class TargetAndroid(Target):
         self.buildozer.state['android:latestapk'] = apk
         self.buildozer.state['android:latestmode'] = self.build_mode
 
+    @property
+    def serials(self):
+        if hasattr(self, '_serials'):
+            return self._serials
+        serial = environ.get('ANDROID_SERIAL')
+        if serial:
+            return [serial]
+        l = self.buildozer.cmd('adb devices',
+                get_stdout=True)[0].splitlines()[1:-1]
+        serials = []
+        for serial in l:
+            serials.append(serial.split()[0])
+        self._serials = serials
+        return serials
+
     def cmd_deploy(self, *args):
         super(TargetAndroid, self).cmd_deploy(*args)
         state = self.buildozer.state
@@ -428,10 +456,14 @@ class TargetAndroid(Target):
                 'Unable to found the latest APK. Please run "debug" again.')
 
         # push on the device
-        self.buildozer.cmd('{0} install -r {1}'.format(
-            self.adb_cmd, full_apk), cwd=self.buildozer.global_platform_dir)
+        for serial in self.serials:
+            self.buildozer.environ['ANDROID_SERIAL'] = serial
+            self.buildozer.info('Deploy on {}'.format(serial))
+            self.buildozer.cmd('{0} install -r {1}'.format(
+                self.adb_cmd, full_apk), cwd=self.buildozer.global_platform_dir)
+        self.buildozer.environ.pop('ANDROID_SERIAL', None)
 
-        self.buildozer.info('Application pushed on the device.')
+        self.buildozer.info('Application pushed.')
 
     def cmd_run(self, *args):
         super(TargetAndroid, self).cmd_run(*args)
@@ -440,20 +472,30 @@ class TargetAndroid(Target):
             'app', 'android.entrypoint', 'org.renpy.android.PythonActivity')
         package = self._get_package()
 
-        self.buildozer.cmd(
-            '{adb} shell am start -n {package}/{entry} -a {entry}'.format(
-            adb=self.adb_cmd, package=package, entry=entrypoint),
-            cwd=self.buildozer.global_platform_dir)
+        # push on the device
+        for serial in self.serials:
+            self.buildozer.environ['ANDROID_SERIAL'] = serial
+            self.buildozer.info('Run on {}'.format(serial))
+            self.buildozer.cmd(
+                '{adb} shell am start -n {package}/{entry} -a {entry}'.format(
+                adb=self.adb_cmd, package=package, entry=entrypoint),
+                cwd=self.buildozer.global_platform_dir)
+        self.buildozer.environ.pop('ANDROID_SERIAL', None)
 
-        self.buildozer.info('Application started on the device.')
+        self.buildozer.info('Application started.')
 
     def cmd_logcat(self, *args):
         '''Show the log from the device
         '''
         self.check_requirements()
+        serial = self.serials[0:]
+        if not serial:
+            return
+        self.buildozer.environ['ANDROID_SERIAL'] = serial[0]
         self.buildozer.cmd('{adb} logcat'.format(adb=self.adb_cmd),
                 cwd=self.buildozer.global_platform_dir,
                 show_output=True)
+        self.buildozer.environ.pop('ANDROID_SERIAL', None)
 
 
 
