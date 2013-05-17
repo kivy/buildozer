@@ -22,6 +22,7 @@ from buildozer.target import Target
 from os import environ
 from os.path import join, realpath, expanduser
 from shutil import copyfile
+from glob import glob
 
 
 class TargetAndroid(Target):
@@ -374,6 +375,18 @@ class TargetAndroid(Target):
                 'android.permissions', [])
         for permission in permissions:
             build_cmd += ' --permission {0}'.format(permission)
+
+        # add extra Java jar files
+        add_jars = config.getdefault('app', 'android.add_jars', '')
+        if add_jars:
+            for pattern in add_jars.split(';'):
+                pattern = expanduser(pattern.strip())
+                matches = glob(pattern)
+                if matches:
+                    for jar in matches:
+                        build_cmd += ' --add-jar "{}"'.format(jar)
+                else:
+                    raise SystemError("Failed to find jar file: {}".format(pattern))
 
         # add presplash
         presplash = config.getdefault('app', 'presplash.filename', '')
