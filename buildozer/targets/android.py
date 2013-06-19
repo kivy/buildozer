@@ -11,7 +11,7 @@ Android target, based on python-for-android project
 ANDROID_API = '14'
 ANDROID_MINAPI = '8'
 ANDROID_SDK_VERSION = '21'
-ANDROID_NDK_VERSION = '8c'
+ANDROID_NDK_VERSION = '8e'
 APACHE_ANT_VERSION = '1.8.4'
 
 
@@ -67,7 +67,7 @@ class TargetAndroid(Target):
         version = self.buildozer.config.getdefault(
                 'app', 'android.ndk', self.android_ndk_version)
         return join(self.buildozer.global_platform_dir,
-                'android-sdk-{0}'.format(version))
+                'android-ndk-{0}'.format(version))
 
     @property
     def apache_ant_dir(self):
@@ -232,7 +232,7 @@ class TargetAndroid(Target):
         if platform in ('win32', 'cygwin'):
             archive = 'android-ndk-r{0}-windows.zip'
         elif platform in ('darwin', ):
-            archive = 'android-ndk-r{0}-darwin.tar.bz2'
+            archive = 'android-ndk-r{0}-darwin-x86.tar.bz2'
         elif platform in ('linux2', 'linux3'):
             archive = 'android-ndk-r{0}-linux-x86.tar.bz2'
         else:
@@ -264,6 +264,7 @@ class TargetAndroid(Target):
         if not packages:
             self.buildozer.info('Android packages already installed.')
             return
+        self.buildozer.cmd('chmod +x {}/tools/*'.format(self.android_sdk_dir))
         self.buildozer.cmd('{0} update sdk -u -a -t {1}'.format(
             self.android_cmd, ','.join(packages)),
             cwd=self.buildozer.global_platform_dir)

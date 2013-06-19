@@ -437,6 +437,7 @@ class Buildozer(object):
             return
 
         if archive.endswith('.zip'):
+            archive = join(cwd, archive)
             zf = zipfile.ZipFile(archive)
             zf.extractall(path=cwd)
             zf.close()
