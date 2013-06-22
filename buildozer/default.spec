@@ -86,6 +86,10 @@ fullscreen = 1
 # (str) Filename of OUYA Console icon. It must be a 732x412 png image.
 #android.ouya.icon.filename = %(source.dir)s/data/ouya_icon.png
 
+# (str) XML file to include as an intent filters in <activity> tag
+#android.manifest.intent_filters = 
+
+
 #
 # iOS specific
 #

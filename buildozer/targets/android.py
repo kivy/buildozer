@@ -421,6 +421,13 @@ class TargetAndroid(Target):
         if not fullscreen:
             build_cmd += ' --window'
 
+        # intent filters
+        intent_filters = config.getdefault('app',
+            'android.manifest.intent_filters', '')
+        if intent_filters:
+            build_cmd += ' --intent-filters {}'.format(
+                    join(self.buildozer.root_dir, intent_filters))
+
         # build only in debug right now.
         if self.build_mode == 'debug':
             build_cmd += ' debug'
