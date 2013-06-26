@@ -459,7 +459,7 @@ class TargetAndroid(Target):
             return self._serials
         serial = environ.get('ANDROID_SERIAL')
         if serial:
-            return [serial]
+            return serial.split(',')
         l = self.buildozer.cmd('adb devices',
                 get_stdout=True)[0].splitlines()[1:-1]
         serials = []
