@@ -583,6 +583,21 @@ class Buildozer(object):
             fd.write(data)
         self.info('Patched main.py to include applibs')
 
+        main_py = join(self.app_dir, 'service', 'main.py')
+        if not self.file_exists(main_py):
+            #self.error('Unable to patch main_py to add applibs directory.')
+            return
+
+        header = ('import sys, os; '
+                  'sys.path = [os.path.join(os.getcwd(),'
+                  '"..", "_applibs")] + sys.path\n')
+        with open(main_py, 'rb') as fd:
+            data = fd.read()
+        data = header + data
+        with open(main_py, 'wb') as fd:
+            fd.write(data)
+        self.info('Patched service/main.py to include applibs')
+
     def namify(self, name):
         '''Return a "valid" name from a name with lot of invalid chars
         (allowed characters: a-z, A-Z, 0-9, -, _)
