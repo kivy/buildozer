@@ -853,6 +853,7 @@ class BuildozerRemote(Buildozer):
             self._ensure_buildozer()
             self._sync_application_sources()
             self._do_remote_commands(args[1:])
+            self._ssh_sync(os.getcwd(), mode='get')
         finally:
             self._ssh_close()
 
@@ -860,6 +861,7 @@ class BuildozerRemote(Buildozer):
         self.info('Connecting to {}'.format(self.remote_host))
         import paramiko
         self._ssh_client = client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.load_system_host_keys()
         client.connect(self.remote_host, username=self.remote_user)
         self._sftp_client = client.open_sftp()
@@ -920,10 +922,19 @@ class BuildozerRemote(Buildozer):
                 self.error('Unable to create remote directory {}'.format(directory))
                 raise
 
-    def _ssh_sync(self, directory):
+    def _ssh_sync(self, directory, mode='put'):
         self.debug('Syncing {} directory'.format(directory))
         directory = realpath(directory)
         base_strip = directory.rfind('/')
+        if mode == 'get':
+            local_dir = join(directory,'bin')
+            remote_dir = join(self.remote_build_dir, 'bin')
+            if not os.path.exists(local_dir):
+                os.path.makedirs(local_dir)
+            for _file in self._sftp_client.listdir(path=remote_dir):
+                self._sftp_client.get(join(remote_dir, _file),
+                                      join(local_dir, _file))
+            return
         for root, dirs, files in walk(directory):
             self._ssh_mkdir(self.remote_build_dir, root[base_strip + 1:])
             for fn in files:
