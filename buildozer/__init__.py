@@ -48,7 +48,19 @@ LOG_LEVELS_C = (RED, BLUE, BLACK)
 LOG_LEVELS_T = 'EID'
 
 
-class BuildozerCommandException(Exception):
+class BuildozerException(Exception):
+    '''
+    Exception raised for general situations buildozer cannot process.
+    '''
+    pass
+
+
+class BuildozerCommandException(BuildozerException):
+    '''
+    Exception raised when an external command failed.
+    
+    See: `Buildozer.cmd()`.
+    '''
     pass
 
 
@@ -1033,9 +1045,13 @@ def run():
         # don't show the exception in the command line. The log already show the
         # command failed.
         pass
+    except BuildozerException as error:
+        Buildozer().error('%s' % error)
 
 def run_remote():
     try:
         BuildozerRemote().run_command(sys.argv[1:])
     except BuildozerCommandException:
         pass
+    except BuildozerException as error:
+        Buildozer().error('%s' % error)

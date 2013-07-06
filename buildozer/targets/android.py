@@ -19,6 +19,7 @@ import traceback
 import os
 from pipes import quote
 from sys import platform, executable
+from buildozer import BuildozerException
 from buildozer.target import Target
 from os import environ
 from os.path import join, realpath, expanduser
@@ -101,6 +102,15 @@ class TargetAndroid(Target):
             self.adb_cmd = join(self.android_sdk_dir, 'platform-tools', 'adb')
             self.javac_cmd = self._locate_java('javac')
             self.keytool_cmd = self._locate_java('keytool')
+
+        # Check for C header <zlib.h>.
+        _, _, returncode_dpkg = self.buildozer.cmd(
+                'dpkg --version', break_on_error= False)
+        is_debian_like = (returncode_dpkg == 0)
+        if is_debian_like:
+            if not self.buildozer.file_exists('/usr/include/zlib.h'):
+                message = 'zlib headers must be installed, run: sudo apt-get install zlib1g-dev'
+                raise BuildozerException(message) 
 
         # Need to add internally installed ant to path for external tools
         # like adb to use
@@ -334,7 +344,7 @@ class TargetAndroid(Target):
         need_compile = 0
         if last_requirements != android_requirements:
             need_compile = 1
-        if not self.buildozer.file_exists(self.pa_dir, 'dist', 'default'):
+        if not self.buildozer.file_exists(self.pa_dir, 'dist', 'default', 'build.py'):
             need_compile = 1
 
         if not need_compile:
