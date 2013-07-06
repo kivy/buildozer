@@ -472,10 +472,10 @@ class TargetAndroid(Target):
         if serial:
             return serial.split(',')
         l = self.buildozer.cmd('{} devices'.format(self.adb_cmd),
-                get_stdout=True)[0].splitlines()[1:-1]
+                get_stdout=True)[0].splitlines()
         serials = []
         for serial in l:
-            if serial.startswith('*'):
+            if serial.startswith('*') or serial.startswith('List '):
                 continue
             serials.append(serial.split()[0])
         self._serials = serials
