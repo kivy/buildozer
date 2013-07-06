@@ -475,6 +475,8 @@ class TargetAndroid(Target):
                 get_stdout=True)[0].splitlines()[1:-1]
         serials = []
         for serial in l:
+            if serial.startswith('*'):
+                continue
             serials.append(serial.split()[0])
         self._serials = serials
         return serials
