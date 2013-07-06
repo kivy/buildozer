@@ -236,17 +236,18 @@ class TargetAndroid(Target):
 
         self.buildozer.info('Android NDK is missing, downloading')
         if platform in ('win32', 'cygwin'):
-            architecture = None
-            archive = 'android-ndk-r{0}-windows.zip'
+            is_64 = False       # TODO: figure out bittiness
+            archive = 'android-ndk-r{0}-windows-{1}.tar.gz'
         elif platform in ('darwin', ):
-            architecture = os.uname()[4]
+            is_64 = (os.uname()[4] == 'x86_64')
             archive = 'android-ndk-r{0}-darwin-{1}.tar.bz2'
         elif platform in ('linux2', 'linux3'):
-            architecture = os.uname()[4]
+            is_64 = (os.uname()[4] == 'x86_64')
             archive = 'android-ndk-r{0}-linux-{1}.tar.bz2'
         else:
             raise SystemError('Unsupported platform: {0}'.format(platform))
 
+        architecture = 'x86_64' if is_64 else 'x86'
         unpacked = 'android-ndk-r{0}'
         archive = archive.format(self.android_ndk_version, architecture)
         unpacked = unpacked.format(self.android_ndk_version)
