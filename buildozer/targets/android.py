@@ -88,23 +88,28 @@ class TargetAndroid(Target):
             except:
                 traceback.print_exc()
             self.android_cmd = join(self.android_sdk_dir, 'tools', 'android.bat')
-            self.ant_cmd = join(self.apache_ant_dir, 'bin', 'ant.bat')
             self.adb_cmd = join(self.android_sdk_dir, 'platform-tools', 'adb.exe')
             self.javac_cmd = self._locate_java('javac.exe')
             self.keytool_cmd = self._locate_java('keytool.exe')
         elif platform in ('darwin', ):
             self.android_cmd = join(self.android_sdk_dir, 'tools', 'android')
-            self.ant_cmd = join(self.apache_ant_dir, 'bin', 'ant')
             self.adb_cmd = join(self.android_sdk_dir, 'platform-tools', 'adb')
             self.javac_cmd = self._locate_java('javac')
             self.keytool_cmd = self._locate_java('keytool')
         else:
             self.android_cmd = join(self.android_sdk_dir, 'tools', 'android')
-            self.ant_cmd = join(self.apache_ant_dir, 'bin', 'ant')
             self.adb_cmd = join(self.android_sdk_dir, 'platform-tools', 'adb')
             self.javac_cmd = self._locate_java('javac')
             self.keytool_cmd = self._locate_java('keytool')
 
+        # Need to add internally installed ant to path for external tools
+        # like adb to use
+        path = [join(self.apache_ant_dir, 'bin')]
+        if 'PATH' in self.buildozer.environ:
+            path.append(self.buildozer.environ['PATH'])
+        else:
+            path.append(os.environ['PATH'])
+        self.buildozer.environ['PATH'] = ':'.join(path)
         checkbin = self.buildozer.checkbin
         checkbin('Git git', 'git')
         checkbin('Cython cython', 'cython')
