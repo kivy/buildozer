@@ -498,7 +498,8 @@ class Buildozer(object):
                 match = search(regex, data)
                 if not match:
                     raise Exception(
-                        'Unable to found capture version in {0}'.format(fn))
+                        'Unable to find capture version in {0}\n'
+                        ' (looking for `{1}`)'.format(fn, regex))
                 version = match.groups()[0]
                 self.debug('Captured version: {0}'.format(version))
                 return version
