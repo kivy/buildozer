@@ -475,6 +475,8 @@ class TargetAndroid(Target):
                 get_stdout=True)[0].splitlines()
         serials = []
         for serial in l:
+            if not serial:
+                continue
             if serial.startswith('*') or serial.startswith('List '):
                 continue
             serials.append(serial.split()[0])
