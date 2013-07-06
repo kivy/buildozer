@@ -16,6 +16,7 @@ APACHE_ANT_VERSION = '1.8.4'
 
 
 import traceback
+import os
 from pipes import quote
 from sys import platform, executable
 from buildozer.target import Target
@@ -230,16 +231,19 @@ class TargetAndroid(Target):
 
         self.buildozer.info('Android NDK is missing, downloading')
         if platform in ('win32', 'cygwin'):
+            architecture = None
             archive = 'android-ndk-r{0}-windows.zip'
         elif platform in ('darwin', ):
-            archive = 'android-ndk-r{0}-darwin-x86.tar.bz2'
+            architecture = os.uname()[4]
+            archive = 'android-ndk-r{0}-darwin-{1}.tar.bz2'
         elif platform in ('linux2', 'linux3'):
-            archive = 'android-ndk-r{0}-linux-x86.tar.bz2'
+            architecture = os.uname()[4]
+            archive = 'android-ndk-r{0}-linux-{1}.tar.bz2'
         else:
             raise SystemError('Unsupported platform: {0}'.format(platform))
 
         unpacked = 'android-ndk-r{0}'
-        archive = archive.format(self.android_ndk_version)
+        archive = archive.format(self.android_ndk_version, architecture)
         unpacked = unpacked.format(self.android_ndk_version)
         url = 'http://dl.google.com/android/ndk/'
         self.buildozer.download(url, archive,
