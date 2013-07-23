@@ -1,5 +1,9 @@
 from sys import exit
 
+def no_config(f):
+    f.__no_config = True
+    return f
+
 class Target(object):
 
     def __init__(self, buildozer):
@@ -63,12 +67,22 @@ class Target(object):
         if last_command:
             result.append(last_command)
 
+        config_check = False
+
         for item in result:
             command, args = item[0], item[1:]
             if not hasattr(self, 'cmd_{0}'.format(command)):
                 self.buildozer.error('Unknow command {0}'.format(command))
                 exit(1)
-            getattr(self, 'cmd_{0}'.format(command))(args)
+
+            func = getattr(self, 'cmd_{0}'.format(command))
+
+            need_config_check = not hasattr(func, '__no_config')
+            if need_config_check and not config_check:
+                config_check = True
+                self.check_configuration_tokens()
+
+            func(args)
 
     def cmd_clean(self, *args):
         self.buildozer.clean_platform()

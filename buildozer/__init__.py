@@ -47,7 +47,6 @@ USE_COLOR = 'NO_COLOR' not in environ
 LOG_LEVELS_C = (RED, BLUE, BLACK)
 LOG_LEVELS_T = 'EID'
 
-
 class BuildozerException(Exception):
     '''
     Exception raised for general situations buildozer cannot process.
@@ -105,7 +104,6 @@ class Buildozer(object):
         self.target = m.get_target(self)
         self.check_build_layout()
         self.check_configuration_tokens()
-        self.target.check_configuration_tokens()
 
     def prepare_for_build(self):
         '''Prepare the build.

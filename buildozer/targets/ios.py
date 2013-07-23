@@ -4,7 +4,7 @@ iOS target, based on kivy-ios project. (not working yet.)
 
 import plistlib
 from buildozer import BuildozerCommandException
-from buildozer.target import Target
+from buildozer.target import Target, no_config
 from os.path import join, basename
 from getpass import getpass
 
@@ -305,6 +305,7 @@ class TargetIos(Target):
 
         super(TargetIos, self).check_configuration_tokens(errors)
 
+    @no_config
     def cmd_list_identities(self, *args):
         '''List the available identities to use for signing.
         '''
