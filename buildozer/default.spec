@@ -95,6 +95,7 @@ fullscreen = 1
 #
 
 # (str) Name of the certificate to use for signing the debug version
+# Get a list of available identities: buildozer ios list_identities
 #ios.codesign.debug = "iPhone Developer: <lastname> <firstname> (<hexstring>)"
 
 # (str) Name of the certificate to use for signing the release version
