@@ -838,10 +838,14 @@ class BuildozerRemote(Buildozer):
 
         self.remote_host = remote_host = self.config.get(
                 remote_section, 'host', '')
+        self.remote_port = self.config.get(
+                remote_section, 'port', '22')
         self.remote_user = remote_user = self.config.get(
                 remote_section, 'user', '')
         self.remote_build_dir = remote_build_dir = self.config.get(
                 remote_section, 'build_directory', '')
+        self.remote_identity = self.config.get(
+                remote_section, 'identity', '')
         if not remote_host:
             self.error('Missing "host = " for {}'.format(remote_section))
             return
@@ -874,7 +878,11 @@ class BuildozerRemote(Buildozer):
         self._ssh_client = client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.load_system_host_keys()
-        client.connect(self.remote_host, username=self.remote_user)
+        kwargs = {}
+        if self.remote_identity:
+            kwargs['key_filename'] = expanduser(self.remote_identity)
+        client.connect(self.remote_host, username=self.remote_user,
+                port=int(self.remote_port), **kwargs)
         self._sftp_client = client.open_sftp()
 
     def _ssh_close(self):
