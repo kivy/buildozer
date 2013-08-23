@@ -112,3 +112,21 @@ fullscreen = 1
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
 log_level = 1
+
+
+# -----------------------------------------------------------------------------
+# Alternatively, you can define all the "list" as [section:key].
+# Each line will be considered as a option to the list.
+# Let's take [app] / source.exclude_patterns.
+# Instead of doing:
+#
+# [app]
+# source.exclude_patterns = license,data/audio/*.wav,data/images/original/*
+#
+# This can be translated into:
+#
+# [app:source.exclude_patterns]
+# license
+# data/audio/*.wav
+# data/images/original/*
+#

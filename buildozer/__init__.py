@@ -832,6 +832,13 @@ class Buildozer(object):
     def _get_config_list(self, section, token, default=None):
         # monkey-patch method for ConfigParser
         # get a key as a list of string, seperated from the comma
+
+        # if a section:token is defined, let's use the content as a list.
+        l_section = '{}:{}'.format(section, token)
+        if self.config.has_section(l_section):
+            values = self.config.options(l_section)
+            return [x.strip() for x in values]
+
         values = self.config.getdefault(section, token, '')
         if not values:
             return default
