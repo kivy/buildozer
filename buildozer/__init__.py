@@ -29,6 +29,7 @@ from subprocess import Popen, PIPE
 from os import environ, unlink, rename, walk, sep, listdir, makedirs
 from copy import copy
 from shutil import copyfile, rmtree, copytree
+from fnmatch import fnmatch
 
 # windows does not have termios...
 try:
@@ -83,7 +84,7 @@ class Buildozer(object):
         self.specfilename = filename
         self.state = None
         self.build_id = None
-        self.config = SafeConfigParser()
+        self.config = SafeConfigParser(allow_no_value=True)
         self.config.getlist = self._get_config_list
         self.config.getdefault = self._get_config_default
         self.config.getbooldefault = self._get_config_bool
@@ -531,9 +532,12 @@ class Buildozer(object):
         self._patch_application_sources()
 
     def _copy_application_sources(self):
+        # XXX clean the inclusion/exclusion algo.
         source_dir = realpath(self.config.getdefault('app', 'source.dir', '.'))
         include_exts = self.config.getlist('app', 'source.include_exts', '')
         exclude_exts = self.config.getlist('app', 'source.exclude_exts', '')
+        exclude_dirs = self.config.getlist('app', 'source.exclude_dirs', '')
+        exclude_patterns = self.config.getlist('app', 'source.exclude_patterns', '')
         app_dir = self.app_dir
 
         self.debug('Copy application source from {}'.format(source_dir))
@@ -545,9 +549,47 @@ class Buildozer(object):
             if True in [x.startswith('.') for x in root.split(sep)]:
                 continue
 
+            # need to have sort-of normalization. Let's say you want to exclude
+            # image directory but not images, the filtered_root must have a / at
+            # the end, same for the exclude_dir. And then we can safely compare
+            filtered_root = root[len(source_dir) + 1:].lower()
+            if filtered_root:
+                filtered_root += '/'
+
+                # manual exclude_dirs approach
+                is_excluded = False
+                for exclude_dir in exclude_dirs:
+                    if exclude_dir[-1] != '/':
+                        exclude_dir += '/'
+                    if filtered_root.startswith(exclude_dir):
+                        is_excluded = True
+                        break
+                if is_excluded:
+                    continue
+
+                # pattern matching
+                for pattern in exclude_patterns:
+                    if fnmatch(filtered_root, pattern):
+                        is_excluded = True
+                        break
+                if is_excluded:
+                    continue
+
             for fn in files:
                 # avoid hidden files
                 if fn.startswith('.'):
+                    continue
+
+                # exclusion by pattern matching
+                is_excluded = False
+                dfn = fn.lower()
+                if filtered_root:
+                    dfn = join(filtered_root, fn)
+                for pattern in exclude_patterns:
+                    if fnmatch(dfn, pattern):
+                        is_excluded = True
+                        break
+                if is_excluded:
                     continue
 
                 # filter based on the extension
