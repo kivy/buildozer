@@ -21,7 +21,7 @@ import sys
 import zipfile
 from select import select
 from sys import stdout, stderr, stdin, exit
-from urllib import urlretrieve
+from urllib import FancyURLopener
 from re import search
 from ConfigParser import SafeConfigParser
 from os.path import join, exists, dirname, realpath, splitext, expanduser
@@ -46,6 +46,15 @@ USE_COLOR = 'NO_COLOR' not in environ
 # error, info, debug
 LOG_LEVELS_C = (RED, BLUE, BLACK)
 LOG_LEVELS_T = 'EID'
+
+
+class ChromeDownloader(FancyURLopener):
+    version = (
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
+        '(KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36')
+
+urlretrieve = ChromeDownloader().retrieve
+
 
 class BuildozerException(Exception):
     '''
