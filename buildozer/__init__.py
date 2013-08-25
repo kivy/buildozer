@@ -10,7 +10,7 @@ Layout directory for buildozer:
 
 '''
 
-__version__ = '0.4'
+__version__ = '0.5'
 
 import fcntl
 import os
