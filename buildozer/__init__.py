@@ -10,7 +10,7 @@ Layout directory for buildozer:
 
 '''
 
-__version__ = '0.5'
+__version__ = '0.6'
 
 import fcntl
 import os
@@ -84,6 +84,7 @@ class Buildozer(object):
         self.specfilename = filename
         self.state = None
         self.build_id = None
+        self.config_profile = ''
         self.config = SafeConfigParser(allow_no_value=True)
         self.config.getlist = self._get_config_list
         self.config.getdefault = self._get_config_default
@@ -92,7 +93,6 @@ class Buildozer(object):
         if exists(filename):
             self.config.read(filename)
             self.check_configuration_tokens()
-
 
         try:
             self.log_level = int(self.config.getdefault(
@@ -705,7 +705,9 @@ class Buildozer(object):
                 pass
 
     def usage(self):
-        print 'Usage: buildozer [--verbose] [target] [command1] [command2]'
+        print 'Usage:'
+        print '    buildozer [--profile <name>] [--verbose] [target] <command>...'
+        print '    buildozer --version'
         print
         print 'Available targets:'
         targets = list(self.targets())
@@ -766,13 +768,18 @@ class Buildozer(object):
             if arg in ('-v', '--verbose'):
                 self.log_level = 2
 
-            if arg in ('-h', '--help'):
+            elif arg in ('-h', '--help'):
                 self.usage()
                 exit(0)
 
-            if arg == '--version':
+            elif arg in ('-p', '--profile'):
+                self.config_profile = args.pop(0)
+
+            elif arg == '--version':
                 print 'Buildozer {0}'.format(__version__)
                 exit(0)
+
+        self._merge_config_profile()
 
         if not args:
             self.run_default()
@@ -829,6 +836,37 @@ class Buildozer(object):
     # Private
     #
 
+    def _merge_config_profile(self):
+        profile = self.config_profile
+        if not profile:
+            return
+        for section in self.config.sections():
+
+            # extract the profile part from the section name
+            # example: [app@default,hd]
+            parts = section.split('@', 1)
+            if len(parts) < 2:
+                continue
+
+            # create a list that contain all the profiles of the current section
+            # ['default', 'hd']
+            section_base, section_profiles = parts
+            section_profiles = section_profiles.split(',')
+            if profile not in section_profiles:
+                continue
+
+            # the current profile is one available in the section
+            # merge with the general section, or make it one.
+            if not self.config.has_section(section_base):
+                self.config.add_section(section_base)
+            for name, value in self.config.items(section):
+                print 'merged ({}, {}) into {} (profile is {})'.format(name,
+                        value, section_base, profile)
+                self.config.set(section_base, name, value)
+
+
+
+
     def _get_config_list(self, section, token, default=None):
         # monkey-patch method for ConfigParser
         # get a key as a list of string, seperated from the comma
@@ -865,6 +903,7 @@ class Buildozer(object):
             return default
         return self.config.getboolean(section, token)
 
+
 class BuildozerRemote(Buildozer):
     def run_command(self, args):
         while args:
@@ -875,13 +914,18 @@ class BuildozerRemote(Buildozer):
             if arg in ('-v', '--verbose'):
                 self.log_level = 2
 
-            if arg in ('-h', '--help'):
+            elif arg in ('-p', '--profile'):
+                self.config_profile = args.pop(0)
+
+            elif arg in ('-h', '--help'):
                 self.usage()
                 exit(0)
 
-            if arg == '--version':
+            elif arg == '--version':
                 print 'Buildozer (remote) {0}'.format(__version__)
                 exit(0)
+
+        self._merge_config_profile()
 
         if len(args) < 2:
             self.usage()
@@ -1034,10 +1078,6 @@ class BuildozerRemote(Buildozer):
             self._interactive_shell(channel)
         finally:
             channel.close()
-
-    def usage(self):
-        print 'Usage: buildozer-remote [--verbose] [remote-name] [buildozer args]'
-
 
     def _interactive_shell(self, chan):
         if has_termios:
