@@ -379,24 +379,29 @@ class TargetAndroid(Target):
             '{python} build.py --name {name}'
             ' --version {version}'
             ' --package {package}'
-            ' --private {appdir}'
             ' --sdk {androidsdk}'
             ' --minsdk {androidminsdk}').format(
             python=executable,
             name=quote(config.get('app', 'title')),
             version=version,
             package=package,
-            appdir=self.buildozer.app_dir,
             androidminsdk=config.getdefault(
                 'app', 'android.minsdk', 8),
             androidsdk=config.getdefault(
                 'app', 'android.sdk', ANDROID_API))
+        
+        # Use sdcard app file storage or private.
+        private_storage = config.getbooldefault('app', 'android.private_storage', True)
+        if private_storage:
+            build_cmd += ' --private {0}'.format(self.buildozer.app_dir,)
+        else:
+            build_cmd += ' --dir {0}'.format(self.buildozer.app_dir,)
 
         # add permissions
-        permissions = config.getlist('app',
-                'android.permissions', [])
-        for permission in permissions:
-            build_cmd += ' --permission {0}'.format(permission)
+        permissions = config.getdefault('app', 'android.permissions', )
+        if permissions is not None:
+            for permission in permissions:
+                build_cmd += ' --permission {0}'.format(permission)
 
         # add extra Java jar files
         add_jars = config.getdefault('app', 'android.add_jars', '')

@@ -75,6 +75,10 @@ fullscreen = 1
 # (str) Android entry point, default is ok for Kivy-based app
 #android.entrypoint = org.renpy.android.PythonActivity
 
+# (bool) Indicate whther to use private app file storage (True, default)
+# or SD card storage (False)
+android.private_storage = True
+
 # (str) Semicolon separated list of Java .jar files to add to the libs so
 # that pyjnius can access their classes. Don't add jars that you do not need,
 # since extra jars can slow down the build process. Allows wildcards matching,
