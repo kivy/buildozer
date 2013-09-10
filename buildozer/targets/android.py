@@ -22,7 +22,7 @@ from sys import platform, executable
 from buildozer import BuildozerException
 from buildozer.target import Target
 from os import environ
-from os.path import join, realpath, expanduser
+from os.path import join, realpath, expanduser, abspath
 from shutil import copyfile
 from glob import glob
 
@@ -406,7 +406,7 @@ class TargetAndroid(Target):
                 matches = glob(pattern)
                 if matches:
                     for jar in matches:
-                        build_cmd += ' --add-jar "{}"'.format(jar)
+                        build_cmd += ' --add-jar "{}"'.format(abspath(jar))
                 else:
                     raise SystemError("Failed to find jar file: {}".format(pattern))
 
