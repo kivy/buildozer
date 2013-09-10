@@ -538,6 +538,12 @@ class Buildozer(object):
         exclude_exts = self.config.getlist('app', 'source.exclude_exts', '')
         exclude_dirs = self.config.getlist('app', 'source.exclude_dirs', '')
         exclude_patterns = self.config.getlist('app', 'source.exclude_patterns', '')
+
+        raw_include_files = self.config.getlist('app', 'source.include_files', '')
+        include_files = [abspath(fn) for fn in raw_include_files]
+        raw_exclude_files = self.config.getlist('app', 'source.exclude_files', '')
+        exclude_files = [abspath(fn) for fn in raw_exclude_files]
+
         app_dir = self.app_dir
 
         self.debug('Copy application source from {}'.format(source_dir))
@@ -603,15 +609,28 @@ class Buildozer(object):
                         continue
 
                 sfn = join(root, fn)
+
+                # skip include_files to add explicitly later
+                if sfn in exclude_files or sfn in include_files:
+                    continue
+
                 rfn = realpath(join(app_dir, root[len(source_dir) + 1:], fn))
 
-                # ensure the directory exists
-                dfn = dirname(rfn)
-                self.mkdir(dfn)
+                self._copyfile(sfn, rfn)
 
-                # copy!
-                self.debug('Copy {0}'.format(sfn))
-                copyfile(sfn, rfn)
+        for fn in raw_include_files:
+            sfn = join(source_dir, fn)
+            rfn = realpath(join(app_dir, fn))
+            self._copyfile(sfn, rfn)
+
+    def _copyfile(self, sfn, rfn):
+        # ensure the directory exists
+        dfn = dirname(rfn)
+        self.mkdir(dfn)
+
+        # copy!
+        self.debug('Copy {0}'.format(sfn))
+        copyfile(sfn, rfn)
 
     def _copy_application_libs(self):
         # copy also the libs
