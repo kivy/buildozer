@@ -24,7 +24,7 @@ from sys import stdout, stderr, stdin, exit
 from urllib import FancyURLopener
 from re import search
 from ConfigParser import SafeConfigParser
-from os.path import join, exists, dirname, realpath, splitext, expanduser
+from os.path import join, exists, dirname, realpath, splitext, expanduser, abspath
 from subprocess import Popen, PIPE
 from os import environ, unlink, rename, walk, sep, listdir, makedirs
 from copy import copy
