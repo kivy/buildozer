@@ -22,7 +22,7 @@ from sys import platform, executable
 from buildozer import BuildozerException
 from buildozer.target import Target
 from os import environ
-from os.path import join, realpath, expanduser
+from os.path import join, realpath, expanduser, basename
 from shutil import copyfile
 from glob import glob
 
@@ -374,6 +374,21 @@ class TargetAndroid(Target):
         config = self.buildozer.config
         package = self._get_package()
         version = self.buildozer.get_version()
+
+        # add extra libs/armeabi files in dist/default/libs/armeabi
+        # XXX to the same for x86 and v7a
+        add_libs_armeabi = config.getlist('app', 'android.add_libs_armeabi', [])
+        for pattern in add_libs_armeabi:
+            matches = glob(expanduser(pattern.strip()))
+            if matches:
+                for fn in matches:
+                    self.buildozer.file_copy(
+                        join(self.buildozer.root_dir, fn),
+                        join(dist_dir, 'libs', 'armeabi', basename(fn)))
+            else:
+                raise SystemError(
+                        'Failed to find libs_armeabi files: {}'.format(
+                            pattern))
 
         build_cmd = (
             '{python} build.py --name {name}'

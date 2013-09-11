@@ -95,6 +95,8 @@ fullscreen = 1
 # (str) XML file to include as an intent filters in <activity> tag
 #android.manifest.intent_filters = 
 
+# (list) Android additionnal libraries to copy into libs/armeabi
+#android.add_libs_armeabi = libs/android/*.so
 
 #
 # iOS specific
