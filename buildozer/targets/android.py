@@ -414,16 +414,16 @@ class TargetAndroid(Target):
             build_cmd += ' --permission {0}'.format(permission)
 
         # add extra Java jar files
-        add_jars = config.getdefault('app', 'android.add_jars', '')
-        if add_jars:
-            for pattern in add_jars.split(';'):
-                pattern = expanduser(pattern.strip())
-                matches = glob(pattern)
-                if matches:
-                    for jar in matches:
-                        build_cmd += ' --add-jar "{}"'.format(jar)
-                else:
-                    raise SystemError("Failed to find jar file: {}".format(pattern))
+        add_jars = config.getlist('app', 'android.add_jars', [])
+        for pattern in add_jars:
+            pattern = join(self.buildozer.root_dir, pattern)
+            matches = glob(expanduser(pattern.strip()))
+            if matches:
+                for jar in matches:
+                    build_cmd += ' --add-jar "{}"'.format(jar)
+            else:
+                raise SystemError(
+                    'Failed to find jar file: {}'.format(pattern))
 
         # add presplash
         presplash = config.getdefault('app', 'presplash.filename', '')
