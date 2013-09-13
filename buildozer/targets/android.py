@@ -448,6 +448,11 @@ class TargetAndroid(Target):
         if not fullscreen:
             build_cmd += ' --window'
 
+        # wakelock ?
+        wakelock = config.getbooldefault('app', 'wakelock', False)
+        if wakelock:
+            build_cmd += ' --wakelock'
+
         # intent filters
         intent_filters = config.getdefault('app',
             'android.manifest.intent_filters', '')
