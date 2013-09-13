@@ -379,7 +379,7 @@ class TargetAndroid(Target):
             '{python} build.py --name {name}'
             ' --version {version}'
             ' --package {package}'
-            ' --sdk {androidsdk}'
+#            ' --sdk {androidsdk}'
             ' --minsdk {androidminsdk}').format(
             python=executable,
             name=quote(config.get('app', 'title')),
@@ -387,9 +387,10 @@ class TargetAndroid(Target):
             package=package,
             androidminsdk=config.getdefault(
                 'app', 'android.minsdk', 8),
-            androidsdk=config.getdefault(
-                'app', 'android.sdk', ANDROID_API))
-        
+#            androidsdk=config.getdefault(
+#                'app', 'android.sdk', ANDROID_API)
+            )
+
         # Use sdcard app file storage or private.
         private_storage = config.getbooldefault('app', 'android.private_storage', True)
         if private_storage:
