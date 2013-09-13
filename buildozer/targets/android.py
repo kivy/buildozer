@@ -401,6 +401,8 @@ class TargetAndroid(Target):
         # add permissions
         permissions = config.getdefault('app', 'android.permissions', )
         if permissions is not None:
+            if not isinstance(permissions, (list, tuple)):
+                permissions = [permissions, ]
             for permission in permissions:
                 build_cmd += ' --permission {0}'.format(permission)
 
