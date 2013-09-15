@@ -629,7 +629,14 @@ class Buildozer(object):
                   '"_applibs")] + sys.path\n')
         with open(main_py, 'rb') as fd:
             data = fd.read()
-        data = header + data
+
+        data_lines = data.splitlines()
+        for index, line in enumerate(data_lines):
+            if '__future__' not in line:
+                break
+        data_lines.insert(index, header)
+        data = '\n'.join(data_lines)
+
         with open(main_py, 'wb') as fd:
             fd.write(data)
         self.info('Patched main.py to include applibs')
