@@ -529,7 +529,7 @@ class Buildozer(object):
     def build_application(self):
         self._copy_application_sources()
         self._copy_application_libs()
-        self._patch_application_sources()
+        self._add_sitecustomize()
 
     def _copy_application_sources(self):
         # XXX clean the inclusion/exclusion algo.
@@ -617,22 +617,9 @@ class Buildozer(object):
         # copy also the libs
         copytree(self.applibs_dir, join(self.app_dir, '_applibs'))
 
-    def _patch_application_sources(self):
-        # patch the main.py
-        main_py = join(self.app_dir, 'main.py')
-        if not self.file_exists(main_py):
-            self.error('Unable to patch main_py to add applibs directory.')
-            return
-
-        header = ('import sys, os; '
-                  'sys.path = [os.path.join(os.path.dirname(__file__),'
-                  '"_applibs")] + sys.path\n')
-        with open(main_py, 'rb') as fd:
-            data = fd.read()
-        data = header + data
-        with open(main_py, 'wb') as fd:
-            fd.write(data)
-        self.info('Patched main.py to include applibs')
+    def _add_sitecustomize(self):
+        copyfile(join(dirname(__file__), 'sitecustomize.py'),
+                join(self.app_dir, 'sitecustomize.py'))
 
     def namify(self, name):
         '''Return a "valid" name from a name with lot of invalid chars
