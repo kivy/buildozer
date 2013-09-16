@@ -81,7 +81,7 @@ class BuildozerCommandException(BuildozerException):
 class Buildozer(object):
 
     standard_cmds = ('clean', 'update', 'debug', 'release',
-                     'deploy', 'run', 'serve_http')
+                     'deploy', 'run', 'serve')
 
     def __init__(self, filename='buildozer.spec', target=None):
         super(Buildozer, self).__init__()
@@ -734,13 +734,13 @@ class Buildozer(object):
 
         print
         print 'Target commands:'
-        print '  clean         Clean the target environment'
-        print '  update        Update the target dependencies'
-        print '  debug         Build the application in debug mode'
-        print '  release       Build the application in release mode'
-        print '  deploy        Deploy the application on the device'
-        print '  run           Run the application on the device'
-        print '  serve_http    Serve the bin directory via SimpleHTTPServer'
+        print '  clean      Clean the target environment'
+        print '  update     Update the target dependencies'
+        print '  debug      Build the application in debug mode'
+        print '  release    Build the application in release mode'
+        print '  deploy     Deploy the application on the device'
+        print '  run        Run the application on the device'
+        print '  serve      Serve the bin directory via SimpleHTTPServer'
 
         for target, m in targets:
             mt = m.get_target(self)
@@ -838,7 +838,7 @@ class Buildozer(object):
         '''
         print 'Buildozer {0}'.format(__version__)
 
-    def serve_http(self, *args):
+    def cmd_serve(self, *args):
         '''Serve the bin directory via SimpleHTTPServer
         '''
         os.chdir(self.bin_dir)
@@ -1174,3 +1174,4 @@ def run_remote():
         pass
     except BuildozerException as error:
         Buildozer().error('%s' % error)
+
