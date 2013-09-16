@@ -108,5 +108,5 @@ class Target(object):
         self.buildozer.prepare_for_build()
 
     def cmd_serve(self, *args):
-        self.buildozer.serve()
+        self.buildozer.cmd_serve()
 
