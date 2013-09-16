@@ -755,7 +755,6 @@ class Buildozer(object):
 
         print
 
-
     def run_default(self):
         self.check_build_layout()
         if 'buildozer:defaultcommand' not in self.state:
@@ -839,9 +838,10 @@ class Buildozer(object):
         '''
         print 'Buildozer {0}'.format(__version__)
 
-    def cmd_serve(self, *args):
+    def serve_http(self, *args):
         '''Serve the bin directory via SimpleHTTPServer
         '''
+        os.chdir(self.bin_dir)
         handler = SimpleHTTPServer.SimpleHTTPRequestHandler
         httpd = SocketServer.TCPServer(("", SIMPLE_HTTP_SERVER_PORT), handler)
         print("Serving via HTTP at port {}".format(SIMPLE_HTTP_SERVER_PORT))
