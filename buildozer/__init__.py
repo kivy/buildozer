@@ -133,6 +133,9 @@ class Buildozer(object):
         self.info('Check application requirements')
         self.check_application_requirements()
 
+        self.info('Check garden requirements')
+        self.check_garden_requirements()
+
         self.info('Compile platform')
         self.target.compile_platform()
 
@@ -385,6 +388,27 @@ class Buildozer(object):
                 self.global_cache_dir, self.applibs_dir, module),
                 env=self.env_venv,
                 cwd=self.buildozer_dir)
+
+    def check_garden_requirements(self):
+        '''Ensure required garden packages are available to be included.
+        '''
+        garden_requirements = self.config.getlist('app',
+                'garden_requirements', '')
+
+        if self.state.get('cache.gardenlibs', '') == garden_requirements:
+            self.debug('Garden requirements already installed, pass')
+            return
+
+        for requirement in garden_requirements:
+            self._install_garden_package(requirement)
+
+        self.state['cache.gardenlibs'] = garden_requirements
+
+    def _install_garden_package(self, package):
+        self._ensure_virtualenv()
+        self.debug('Install garden package {} in virtualenv'.format(package))
+        self.cmd('garden install {}'.format(package),
+                env=self.env_venv)
 
     def _ensure_virtualenv(self):
         if hasattr(self, 'venv'):
