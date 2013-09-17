@@ -407,8 +407,9 @@ class Buildozer(object):
     def _install_garden_package(self, package):
         self._ensure_virtualenv()
         self.debug('Install garden package {} in virtualenv'.format(package))
-        self.cmd('garden install {}'.format(package),
-                env=self.env_venv)
+        self.cmd('garden install --app {}'.format(package),
+                env=self.env_venv,
+                cwd=self.app_dir)
 
     def _ensure_virtualenv(self):
         if hasattr(self, 'venv'):
