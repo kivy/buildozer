@@ -380,6 +380,10 @@ class Buildozer(object):
 
     def _install_application_requirement(self, module):
         self._ensure_virtualenv()
+        # resetup distribute, just in case
+        self.debug('Install distribute')
+        self.cmd('curl http://python-distribute.org/distribute_setup.py | venv/bin/python', get_stdout=True, cwd=self.buildozer_dir)
+
         self.debug('Install requirement {} in virtualenv'.format(module))
         self.cmd('pip-2.7 install --download-cache={} --target={} {}'.format(
                 self.global_cache_dir, self.applibs_dir, module),
