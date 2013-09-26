@@ -395,7 +395,9 @@ class Buildozer(object):
         garden_requirements = self.config.getlist('app',
                 'garden_requirements', '')
 
-        if self.state.get('cache.gardenlibs', '') == garden_requirements:
+        # have we installed the garden packages?
+        if exists(self.gardenlibs_dir) and \
+                self.state.get('cache.gardenlibs', '') == garden_requirements:
             self.debug('Garden requirements already installed, pass')
             return
 
@@ -404,17 +406,22 @@ class Buildozer(object):
                 env=self.env_venv,
                 )
 
+        # recreate gardenlibs
+        self.rmdir(self.gardenlibs_dir)
+        self.mkdir(self.gardenlibs_dir)
+
         for requirement in garden_requirements:
             self._install_garden_package(requirement)
 
+        # save gardenlibs state
         self.state['cache.gardenlibs'] = garden_requirements
 
     def _install_garden_package(self, package):
         self._ensure_virtualenv()
-        self.debug('Install garden package {} in virtualenv'.format(package))
+        self.debug('Install garden package {} in buildozer_dir'.format(package))
         self.cmd('garden install --app {}'.format(package),
                 env=self.env_venv,
-                cwd=self.app_dir)
+                cwd=self.buildozer_dir)
 
     def _ensure_virtualenv(self):
         if hasattr(self, 'venv'):
@@ -559,6 +566,7 @@ class Buildozer(object):
     def build_application(self):
         self._copy_application_sources()
         self._copy_application_libs()
+        self._copy_garden_libs()
         self._add_sitecustomize()
 
     def _copy_application_sources(self):
@@ -647,6 +655,9 @@ class Buildozer(object):
         # copy also the libs
         copytree(self.applibs_dir, join(self.app_dir, '_applibs'))
 
+    def _copy_garden_libs(self):
+        copytree(self.gardenlibs_dir, join(self.app_dir, 'libs'))
+
     def _add_sitecustomize(self):
         copyfile(join(dirname(__file__), 'sitecustomize.py'),
                 join(self.app_dir, 'sitecustomize.py'))
@@ -680,6 +691,10 @@ class Buildozer(object):
     @property
     def applibs_dir(self):
         return join(self.buildozer_dir, 'applibs')
+
+    @property
+    def gardenlibs_dir(self):
+        return join(self.buildozer_dir, 'libs')
 
     @property
     def global_buildozer_dir(self):
