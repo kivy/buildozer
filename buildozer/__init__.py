@@ -399,6 +399,11 @@ class Buildozer(object):
             self.debug('Garden requirements already installed, pass')
             return
 
+        self._ensure_virtualenv()
+        self.cmd('pip-2.7 install -e git+git@github.com:Ian-Foote/kivy_garden.git#egg=garden',
+                env=self.env_venv,
+                )
+
         for requirement in garden_requirements:
             self._install_garden_package(requirement)
 
