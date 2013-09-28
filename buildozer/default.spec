@@ -35,7 +35,7 @@ version.filename = %(source.dir)s/main.py
 requirements = kivy
 
 # (list) Garden requirements
-#garden_requirements
+#garden_requirements =
 
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png

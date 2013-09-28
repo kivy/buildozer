@@ -402,7 +402,7 @@ class Buildozer(object):
             return
 
         self._ensure_virtualenv()
-        self.cmd('pip-2.7 install -e git+git@github.com:Ian-Foote/kivy_garden.git#egg=garden',
+        self.cmd('pip-2.7 install -e git+https://github.com/kivy-garden/garden.git#egg=garden',
                 env=self.env_venv,
                 )
 
