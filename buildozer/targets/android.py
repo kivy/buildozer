@@ -301,10 +301,10 @@ class TargetAndroid(Target):
             cmd('git clean -dxf', cwd=pa_dir)
             cmd('git pull origin master', cwd=pa_dir)
 
-            source = self.buildozer.config.getdefault('app', 'android.branch')
-            if source:
-                cmd('git checkout --track -b %s origin/%s' % (source, source),
-                    cwd=pa_dir)
+        source = self.buildozer.config.getdefault('app', 'android.branch')
+        if source:
+            cmd('git checkout  %s' % (source),
+                cwd=pa_dir)
 
         self._install_apache_ant()
         self._install_android_sdk()
