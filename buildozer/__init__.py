@@ -802,7 +802,7 @@ class Buildozer(object):
         # maybe it's a target?
         targets = [x[0] for x in self.targets()]
         if command not in targets:
-            print 'Unknow command/target', command
+            print 'Unknown command/target', command
             exit(1)
 
         self.set_target(command)
@@ -940,7 +940,7 @@ class BuildozerRemote(Buildozer):
         remote_name = args[0]
         remote_section = 'remote:{}'.format(remote_name)
         if not self.config.has_section(remote_section):
-            self.error('Unknow remote "{}", must be configured first.'.format(
+            self.error('Unknown remote "{}", must be configured first.'.format(
                 remote_name))
             return
 
