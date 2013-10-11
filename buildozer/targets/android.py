@@ -395,7 +395,10 @@ class TargetAndroid(Target):
             ' --version {version}'
             ' --package {package}'
             ' --private {appdir}'
-            ' --sdk {androidsdk}'
+# Disabled so python-for-android will fall back to SDK 8 so rotation will work.
+# Re-enable 401, 410, 411 when root cause of failure has been fixed in py4a.
+# See https://github.com/kivy/python-for-android/issues/148
+#            ' --sdk {androidsdk}'
             ' --minsdk {androidminsdk}').format(
             python=executable,
             name=quote(config.get('app', 'title')),
@@ -404,8 +407,9 @@ class TargetAndroid(Target):
             appdir=self.buildozer.app_dir,
             androidminsdk=config.getdefault(
                 'app', 'android.minsdk', 8),
-            androidsdk=config.getdefault(
-                'app', 'android.sdk', ANDROID_API))
+#            androidsdk=config.getdefault(
+#                'app', 'android.sdk', ANDROID_API)
+        )
 
         # add permissions
         permissions = config.getlist('app',
