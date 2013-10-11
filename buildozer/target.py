@@ -72,7 +72,7 @@ class Target(object):
         for item in result:
             command, args = item[0], item[1:]
             if not hasattr(self, 'cmd_{0}'.format(command)):
-                self.buildozer.error('Unknow command {0}'.format(command))
+                self.buildozer.error('Unknown command {0}'.format(command))
                 exit(1)
 
             func = getattr(self, 'cmd_{0}'.format(command))
