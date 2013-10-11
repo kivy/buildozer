@@ -319,7 +319,7 @@ class TargetAndroid(Target):
             'ANDROIDSDK': self.android_sdk_dir,
             'ANDROIDNDK': self.android_ndk_dir,
             'ANDROIDAPI': self.android_api,
-            'ANDROIDNDKVER': self.android_ndk_version})
+            'ANDROIDNDKVER': 'r{}'.format(self.android_ndk_version)})
 
     def get_available_packages(self):
         available_modules = self.buildozer.cmd(
