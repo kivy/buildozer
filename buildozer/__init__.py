@@ -16,7 +16,9 @@ import fcntl
 import os
 import re
 import shelve
+import SimpleHTTPServer
 import socket
+import SocketServer
 import sys
 import zipfile
 from select import select
@@ -47,6 +49,7 @@ USE_COLOR = 'NO_COLOR' not in environ
 # error, info, debug
 LOG_LEVELS_C = (RED, BLUE, BLACK)
 LOG_LEVELS_T = 'EID'
+SIMPLE_HTTP_SERVER_PORT = 8000
 
 
 class ChromeDownloader(FancyURLopener):
@@ -75,7 +78,8 @@ class BuildozerCommandException(BuildozerException):
 
 class Buildozer(object):
 
-    standard_cmds = ('clean', 'update', 'debug', 'release', 'deploy', 'run')
+    standard_cmds = ('clean', 'update', 'debug', 'release', 
+                     'deploy', 'run', 'serve')
 
     def __init__(self, filename='buildozer.spec', target=None):
         super(Buildozer, self).__init__()
@@ -734,12 +738,13 @@ class Buildozer(object):
 
         print
         print 'Target commands:'
-        print '  clean              Clean the target environment'
-        print '  update             Update the target dependencies'
-        print '  debug              Build the application in debug mode'
-        print '  release            Build the application in release mode'
-        print '  deploy             Deploy the application on the device'
-        print '  run                Run the application on the device'
+        print '  clean      Clean the target environment'
+        print '  update     Update the target dependencies'
+        print '  debug      Build the application in debug mode'
+        print '  release    Build the application in release mode'
+        print '  deploy     Deploy the application on the device'
+        print '  run        Run the application on the device'
+        print '  serve      Serve the bin directory via SimpleHTTPServer'
 
         for target, m in targets:
             mt = m.get_target(self)
@@ -837,6 +842,16 @@ class Buildozer(object):
         '''Show the Buildozer version
         '''
         print 'Buildozer {0}'.format(__version__)
+
+    def cmd_serve(self, *args):
+        '''Serve the bin directory via SimpleHTTPServer
+        '''
+        os.chdir(self.bin_dir)
+        handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+        httpd = SocketServer.TCPServer(("", SIMPLE_HTTP_SERVER_PORT), handler)
+        print("Serving via HTTP at port {}".format(SIMPLE_HTTP_SERVER_PORT))
+        print("Press Ctrl+c to quit serving.")
+        httpd.serve_forever()
 
     #
     # Private
