@@ -406,9 +406,10 @@ class TargetAndroid(Target):
                 'app', 'android.sdk', ANDROID_API))
 
         # Choose public or private storage
-        storage = ' --private {appdir}'
-        priv = config.getbooldefault('app', 'android.privatestorage', True)
-        if not priv:
+        priv = config.getbooldefault('app', 'android.private_storage', True)
+        if priv:
+            storage = ' --private {appdir}'
+        else:
             storage = ' --dir {appdir}'
         build_cmd += storage.format(appdir=self.buildozer.app_dir)
 

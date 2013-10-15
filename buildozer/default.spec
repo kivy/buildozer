@@ -73,7 +73,7 @@ fullscreen = True
 #android.sdk_path = 
 
 # (bool) Use private data storage or SDCARD
-#android.privatestorage = True
+#android.private_storage = True
 
 # (str) Android entry point, default is ok for Kivy-based app
 #android.entrypoint = org.renpy.android.PythonActivity
