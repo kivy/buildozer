@@ -394,18 +394,24 @@ class TargetAndroid(Target):
             '{python} build.py --name {name}'
             ' --version {version}'
             ' --package {package}'
-            ' --private {appdir}'
             ' --sdk {androidsdk}'
             ' --minsdk {androidminsdk}').format(
             python=executable,
             name=quote(config.get('app', 'title')),
             version=version,
             package=package,
-            appdir=self.buildozer.app_dir,
             androidminsdk=config.getdefault(
                 'app', 'android.minsdk', 8),
             androidsdk=config.getdefault(
                 'app', 'android.sdk', ANDROID_API))
+
+        # Choose public or private storage
+        priv = config.getbooldefault('app', 'android.private_storage', True)
+        if priv:
+            storage = ' --private {appdir}'
+        else:
+            storage = ' --dir {appdir}'
+        build_cmd += storage.format(appdir=self.buildozer.app_dir)
 
         # add permissions
         permissions = config.getlist('app',
