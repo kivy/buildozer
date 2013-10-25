@@ -135,6 +135,7 @@ class TargetAndroid(Target):
             permissions = self.buildozer.config.getlist(
                 'app', 'android.permissions', [])
             for permission in permissions:
+                permission = permission.upper()
                 if permission not in available_permissions:
                     errors.append(
                         '[app] "android.permission" contain an unknown'
