@@ -44,7 +44,7 @@ requirements = kivy
 orientation = landscape
 
 # (bool) Indicate if the application should be fullscreen or not
-fullscreen = 1
+fullscreen = True
 
 
 #
@@ -71,6 +71,12 @@ fullscreen = 1
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
 #android.sdk_path = 
+
+# (bool) Choose between private, dir, or launcher
+# private uses private storage for your app files
+# dir uses SDCARD for storage of your app files
+# launcher makes it a multi-app launcher instead of a single app
+#android.storagetype = private
 
 # (str) Android entry point, default is ok for Kivy-based app
 #android.entrypoint = org.renpy.android.PythonActivity

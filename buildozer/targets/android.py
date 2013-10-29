@@ -403,13 +403,15 @@ class TargetAndroid(Target):
             '{python} build.py --name {name}'
             ' --version {version}'
             ' --package {package}'
-            ' --private {appdir}'
+            ' --{storage_type} {appdir}'
             ' --sdk {androidsdk}'
             ' --minsdk {androidminsdk}').format(
             python=executable,
             name=quote(config.get('app', 'title')),
             version=version,
             package=package,
+            storage_type=config.getdefault(
+                'app', 'android.storagetype', 'private'),
             appdir=self.buildozer.app_dir,
             androidminsdk=config.getdefault(
                 'app', 'android.minsdk', 8),
