@@ -135,6 +135,10 @@ class TargetAndroid(Target):
             permissions = self.buildozer.config.getlist(
                 'app', 'android.permissions', [])
             for permission in permissions:
+                # no check on full named permission
+                # like com.google.android.providers.gsf.permission.READ_GSERVICES
+                if '.' in permission:
+                    continue
                 permission = permission.upper()
                 if permission not in available_permissions:
                     errors.append(
@@ -412,7 +416,12 @@ class TargetAndroid(Target):
         permissions = config.getlist('app',
                 'android.permissions', [])
         for permission in permissions:
-            build_cmd += ' --permission {0}'.format(permission)
+            # force the latest component to be uppercase
+            print 'initial permission is', permission
+            permission = permission.split('.')
+            permission[-1] = permission[-1].upper()
+            permission = '.'.join(permission)
+            build_cmd += ' --permission {}'.format(permission)
 
         # add extra Java jar files
         add_jars = config.getlist('app', 'android.add_jars', [])
