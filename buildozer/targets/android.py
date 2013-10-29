@@ -411,7 +411,7 @@ class TargetAndroid(Target):
             version=version,
             package=package,
             storage_type='private' if config.getbooldefault(
-                'app', 'android.privatestorage', True) else 'dir',
+                'app', 'android.private_storage', True) else 'dir',
             appdir=self.buildozer.app_dir,
             androidminsdk=config.getdefault(
                 'app', 'android.minsdk', 8),

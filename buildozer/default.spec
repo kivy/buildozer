@@ -67,7 +67,7 @@ fullscreen = 1
 #android.ndk = 9
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
-#android.privatestorage = True
+#android.private_storage = True
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
 #android.ndk_path =
