@@ -358,8 +358,12 @@ class TargetAndroid(Target):
 
         modules_str = ' '.join(android_requirements)
         cmd = self.buildozer.cmd
+        self.buildozer.debug('Clean and build python-for-android')
         cmd('git clean -dxf', cwd=self.pa_dir)
         cmd('./distribute.sh -m "{0}"'.format(modules_str), cwd=self.pa_dir)
+        self.buildozer.debug('Remove temporary build files')
+        self.buildozer.rmdir(join(self.pa_dir, 'build'))
+        self.buildozer.rmdir(join(self.pa_dir, '.packages'))
         self.buildozer.info('Distribution compiled.')
 
         # ensure we will not compile again
