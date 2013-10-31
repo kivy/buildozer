@@ -365,6 +365,7 @@ class TargetAndroid(Target):
         self.buildozer.debug('Remove temporary build files')
         self.buildozer.rmdir(join(self.pa_dir, 'build'))
         self.buildozer.rmdir(join(self.pa_dir, '.packages'))
+        self.buildozer.rmdir(join(self.pa_dir, 'src', 'jni', 'obj', 'local'))
         self.buildozer.info('Distribution compiled.')
 
         # ensure we will not compile again
