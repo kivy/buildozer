@@ -671,10 +671,6 @@ class Buildozer(object):
         return join(self.buildozer_dir, self.targetname, 'app')
 
     @property
-    def packages_dir(self):
-        return join(self.buildozer_dir, self.targetname, 'packages')
-
-    @property
     def applibs_dir(self):
         return join(self.buildozer_dir, 'applibs')
 
@@ -685,6 +681,10 @@ class Buildozer(object):
     @property
     def global_platform_dir(self):
         return join(self.global_buildozer_dir, self.targetname, 'platform')
+
+    @property
+    def global_packages_dir(self):
+        return join(self.global_buildozer_dir, self.targetname, 'packages')
 
     @property
     def global_cache_dir(self):
