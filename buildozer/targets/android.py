@@ -321,6 +321,7 @@ class TargetAndroid(Target):
         self.check_configuration_tokens()
 
         self.buildozer.environ.update({
+            'PACKAGES_PATH': self.buildozer.packages_dir,
             'ANDROIDSDK': self.android_sdk_dir,
             'ANDROIDNDK': self.android_ndk_dir,
             'ANDROIDAPI': self.android_api,

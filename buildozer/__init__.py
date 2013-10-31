@@ -10,7 +10,7 @@ Layout directory for buildozer:
 
 '''
 
-__version__ = '0.8'
+__version__ = '0.9'
 
 import fcntl
 import os
@@ -669,6 +669,10 @@ class Buildozer(object):
     @property
     def app_dir(self):
         return join(self.buildozer_dir, self.targetname, 'app')
+
+    @property
+    def packages_dir(self):
+        return join(self.buildozer_dir, self.targetname, 'packages')
 
     @property
     def applibs_dir(self):
