@@ -90,7 +90,9 @@ class Buildozer(object):
         self.build_id = None
         self.config_profile = ''
         self.config = SafeConfigParser(allow_no_value=True)
+        self.config.optionxform = lambda value: value
         self.config.getlist = self._get_config_list
+        self.config.getlistvalues = self._get_config_list_values
         self.config.getdefault = self._get_config_default
         self.config.getbooldefault = self._get_config_bool
 
@@ -472,6 +474,19 @@ class Buildozer(object):
             return
 
         raise Exception('Unhandled extraction for type {0}'.format(archive))
+
+    def file_copytree(self, src, dest):
+        print 'copy {} to {}'.format(src, dest)
+        if os.path.isdir(src):
+            if not os.path.isdir(dest):
+                os.makedirs(dest)
+            files = os.listdir(src)
+            for f in files:
+                self.file_copytree(
+                    os.path.join(src, f),
+                    os.path.join(dest, f))
+        else:
+            copyfile(src, dest)
 
     def clean_platform(self):
         self.info('Clean the platform build directory')
@@ -891,8 +906,11 @@ class Buildozer(object):
 
 
 
+    def _get_config_list_values(self, *args, **kwargs):
+        kwargs['with_values'] = True
+        return self._get_config_list(*args, **kwargs)
 
-    def _get_config_list(self, section, token, default=None):
+    def _get_config_list(self, section, token, default=None, with_values=False):
         # monkey-patch method for ConfigParser
         # get a key as a list of string, seperated from the comma
 
@@ -900,7 +918,11 @@ class Buildozer(object):
         l_section = '{}:{}'.format(section, token)
         if self.config.has_section(l_section):
             values = self.config.options(l_section)
-            return [x.strip() for x in values]
+            if with_values:
+                return ['{}={}'.format(key, self.config.get(l_section, key)) for
+                        key in values]
+            else:
+                return [x.strip() for x in values]
 
         values = self.config.getdefault(section, token, '')
         if not values:

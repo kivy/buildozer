@@ -22,7 +22,7 @@ from sys import platform, executable
 from buildozer import BuildozerException
 from buildozer.target import Target
 from os import environ
-from os.path import join, realpath, expanduser, basename
+from os.path import join, realpath, expanduser, basename, relpath
 from shutil import copyfile
 from glob import glob
 
@@ -401,6 +401,13 @@ class TargetAndroid(Target):
                         'Failed to find libs_armeabi files: {}'.format(
                             pattern))
 
+        # update the project.properties libraries references
+        self._update_libraries_references(dist_dir)
+
+        # add src files
+        self._add_java_src(dist_dir)
+
+        # build the app
         build_cmd = (
             '{python} build.py --name {name}'
             ' --version {version}'
@@ -425,11 +432,17 @@ class TargetAndroid(Target):
                 'android.permissions', [])
         for permission in permissions:
             # force the latest component to be uppercase
-            print 'initial permission is', permission
             permission = permission.split('.')
             permission[-1] = permission[-1].upper()
             permission = '.'.join(permission)
             build_cmd += ' --permission {}'.format(permission)
+
+        # meta-data
+        meta_datas = config.getlistvalues('app', 'android.meta_data', [])
+        for meta in meta_datas:
+            key, value = meta.split('=', 1)
+            meta = '{}={}'.format(key.strip(), value.strip())
+            build_cmd += ' --meta-data "{}"'.format(meta)
 
         # add extra Java jar files
         add_jars = config.getlist('app', 'android.add_jars', [])
@@ -511,6 +524,58 @@ class TargetAndroid(Target):
         self.buildozer.info('APK {0} available in the bin directory'.format(apk))
         self.buildozer.state['android:latestapk'] = apk
         self.buildozer.state['android:latestmode'] = self.build_mode
+
+    def _update_libraries_references(self, dist_dir):
+        # ensure the project.properties exist
+        project_fn = join(dist_dir, 'project.properties')
+
+        if not self.buildozer.file_exists(project_fn):
+            content = ['target=android-{}\n'.format(self.android_api)]
+        else:
+            with open(project_fn) as fd:
+                content = fd.readlines()
+
+        # extract library reference
+        references = []
+        for line in content[:]:
+            if not line.startswith('android.library.reference.'):
+                continue
+            content.remove(line)
+
+        # convert our references to relative path
+        app_references = self.buildozer.config.getlist(
+                'app', 'android.library_references', [])
+        source_dir = realpath(self.buildozer.config.getdefault('app', 'source.dir', '.'))
+        for cref in app_references:
+            # get the full path of the current reference
+            ref = realpath(join(source_dir, cref))
+            if not self.buildozer.file_exists(ref):
+                self.buildozer.error('Invalid library reference (path not found): {}'.format(cref))
+                exit(1)
+            # get a relative path from the project file
+            ref = relpath(ref, dist_dir)
+            # ensure the reference exists
+            references.append(ref)
+
+        # recreate the project.properties
+        with open(project_fn, 'wb') as fd:
+            for line in content:
+                fd.write(line)
+            for index, ref in enumerate(references):
+                fd.write('android.library.reference.{}={}\n'.format(
+                    index + 1, ref))
+
+        self.buildozer.debug('project.properties updated')
+
+    def _add_java_src(self, dist_dir):
+        print '_add_java_src()'
+        java_src = self.buildozer.config.getlist('app', 'android.add_src', [])
+        src_dir = join(dist_dir, 'src')
+        for pattern in java_src:
+            for fn in glob(expanduser(pattern.strip())):
+                print 'match file', fn
+                last_component = basename(fn)
+                self.buildozer.file_copytree(fn, join(src_dir, last_component))
 
     @property
     def serials(self):

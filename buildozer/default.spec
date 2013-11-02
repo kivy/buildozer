@@ -84,6 +84,10 @@ fullscreen = 1
 # OUYA-ODK/libs/*.jar
 #android.add_jars = foo.jar,bar.jar,path/to/more/*.jar
 
+# (list) List of Java files to add to the android project (can be java or a
+# directory containing the files)
+#android.add_src =
+
 # (str) python-for-android branch to use, if not master, useful to try
 # not yet merged features.
 #android.branch = master
@@ -104,6 +108,13 @@ fullscreen = 1
 # (bool) Indicate whether the screen should stay on
 # Don't forget to add the WAKE_LOCK permission if you set this to True
 #android.wakelock = False
+
+# (list) Android application meta-data to set (key=value format)
+#android.meta_data =
+
+# (list) Android library project to add (will be added in the
+# project.properties automatically.)
+#android.library_references =
 
 #
 # iOS specific
