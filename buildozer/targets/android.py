@@ -306,7 +306,7 @@ class TargetAndroid(Target):
                     cwd = self.buildozer.platform_dir)
             else:
                 cmd('git clone git://github.com/kivy/python-for-android',
-                        cwd=self.buildozer.platform_dir)
+                    cwd=self.buildozer.platform_dir)
         elif self.platform_update:
             cmd('git clean -dxf', cwd=pa_dir)
             cmd('git pull origin master', cwd=pa_dir)
@@ -367,7 +367,6 @@ class TargetAndroid(Target):
         modules_str = ' '.join(android_requirements)
         cmd = self.buildozer.cmd
         self.buildozer.debug('Clean and build python-for-android')
-        # cmd('git clean -dxf', cwd=self.pa_dir)
         cmd('./distribute.sh -m "{0}" -d "{1}"'.format(modules_str, dist_name),
             cwd=self.pa_dir)
         self.buildozer.debug('Remove temporary build files')
