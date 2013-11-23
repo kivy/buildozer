@@ -918,9 +918,10 @@ class Buildozer(object):
         # monkey-patch method for ConfigParser
         # get a key as a list of string, seperated from the comma
 
-        # if a section:token is defined, let's use the content as a list.
+        # check if an env var exists that should replace the file config
         set_config_token_from_env(section, token, self.config)
 
+        # if a section:token is defined, let's use the content as a list.
         l_section = '{}:{}'.format(section, token)
         if self.config.has_section(l_section):
             values = self.config.options(l_section)
@@ -942,7 +943,10 @@ class Buildozer(object):
         # monkey-patch method for ConfigParser
         # get an appropriate env var if it exists, else
         # get a key in a section, or the default
+
+        # check if an env var exists that should replace the file config
         set_config_token_from_env(section, token, self.config)
+
         if not self.config.has_section(section):
             return default
         if not self.config.has_option(section, token):
@@ -952,7 +956,10 @@ class Buildozer(object):
     def _get_config_bool(self, section, token, default=False):
         # monkey-patch method for ConfigParser
         # get a key in a section, or the default
+
+        # check if an env var exists that should replace the file config
         set_config_token_from_env(section, token, self.config)
+
         if not self.config.has_section(section):
             return default
         if not self.config.has_option(section, token):
