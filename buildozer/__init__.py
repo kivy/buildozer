@@ -915,6 +915,8 @@ class Buildozer(object):
         # get a key as a list of string, seperated from the comma
 
         # if a section:token is defined, let's use the content as a list.
+        set_config_from_env(section, token, self.config)
+
         l_section = '{}:{}'.format(section, token)
         if self.config.has_section(l_section):
             values = self.config.options(l_section)
@@ -936,9 +938,7 @@ class Buildozer(object):
         # monkey-patch method for ConfigParser
         # get an appropriate env var if it exists, else
         # get a key in a section, or the default
-        env_var = query_env(section, token)
-        if env_var is not None:
-            return env_var
+        set_config_from_env(section, token, self.config)
         if not self.config.has_section(section):
             return default
         if not self.config.has_option(section, token):
@@ -948,9 +948,7 @@ class Buildozer(object):
     def _get_config_bool(self, section, token, default=False):
         # monkey-patch method for ConfigParser
         # get a key in a section, or the default
-        env_var = query_env_bool(section, token)
-        if env_var is not None:
-            return env_var
+        set_config_from_env(section, token, self.config)
         if not self.config.has_section(section):
             return default
         if not self.config.has_option(section, token):
@@ -1214,31 +1212,22 @@ def run_remote():
     except BuildozerException as error:
         Buildozer().error('%s' % error)
 
+def set_config_from_env(section, token, config):
+    '''Given a config section and token, checks for an appropriate
+    environment variable. If the variable exists, sets the config entry to
+    its value.
 
-def query_env(section, token):
-    '''Given config section and token names, returns the environment
-    variable SECTION_TOKEN, or None if the variable does not exist.'''
+    The environment variable checked is of the form SECTION_TOKEN, all
+    upper case, with any dots replaced by underscores.
+
+    Returns True if the environment variable exists and was used, or
+    False otherwise.
+
+    '''
     env_var_name = ''.join([section.upper(), '_',
                             token.upper().replace('.', '_')])
     env_var = os.environ.get(env_var_name)
-    return env_var
-
-def query_env_bool(section, token):
-    '''Given config section and token names, uses query_env to query an
-    appropriate environment variable. If the variable exists, coerces to a
-    bool before returning.'''
-    env_var = query_env(section, token)
     if env_var is None:
-        return env_var
-    elif env_var.tolower() in ['1', 'yes', 'true', 'on']:
-        return True
-    elif env_var.tolower() in ['0', 'no', 'false', 'off']:
         return False
-    else:
-        env_var_name = ''.join([section.upper(), '_',
-                                token.upper().replace('.', '_')])
-        raise ValueError('Failed to parse {} as a config boolean. Should be one'
-                         'of {}'.format(env_var_name
-                                        ['1', 'yes', 'true', 'on',
-                                         '0', 'no', 'false', 'off']))
-
+    config.set(section, token, env_var)
+    return True
