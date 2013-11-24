@@ -304,6 +304,10 @@ class Buildozer(object):
             adderror('[app] "package.name" is missing')
         if not get('app', 'source.dir', ''):
             adderror('[app] "source.dir" is missing')
+            
+        package_name = get('app', 'package.name', '')
+        if package_name[0] in map(str, range(10)):
+            adderror('[app] "package.name" may not start with a number.')
 
         version = get('app', 'version', '')
         version_regex = get('app', 'version.regex', '')
