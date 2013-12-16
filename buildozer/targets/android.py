@@ -251,9 +251,10 @@ class TargetAndroid(Target):
 
         self.buildozer.info('Android NDK is missing, downloading')
         if platform in ('win32', 'cygwin'):
-            #FIXME find a way of checking 32/64 bits os (not sys.maxint)
+            # Checking of 32/64 bits at Windows from: http://stackoverflow.com/a/1405971/798575
+            import struct
             archive = 'android-ndk-r{0}-windows-{1}.zip'
-            is_64 = False
+            is_64 = (8*struct.calcsize("P") == 64)
         elif platform in ('darwin', ):
             archive = 'android-ndk-r{0}-darwin-{1}.tar.bz2'
             is_64 = (os.uname()[4] == 'x86_64')
