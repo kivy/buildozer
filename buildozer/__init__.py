@@ -364,7 +364,8 @@ class Buildozer(object):
         target_available_packages = self.target.get_available_packages()
 
         # remove all the requirements that the target can compile
-        requirements = [x for x in requirements if x not in
+        onlyname = lambda x: x.split('==')[0]
+        requirements = [x for x in requirements if onlyname(x) not in
                 target_available_packages]
 
         # did we already installed the libs ?

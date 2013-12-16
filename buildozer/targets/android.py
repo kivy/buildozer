@@ -344,7 +344,8 @@ class TargetAndroid(Target):
         # we need to extract the requirements that python-for-android knows
         # about
         available_modules = self.get_available_packages()
-        android_requirements = [x for x in app_requirements if x in
+        onlyname = lambda x: x.split('==')[0]
+        android_requirements = [x for x in app_requirements if onlyname(x) in
                 available_modules]
 
         need_compile = 0
