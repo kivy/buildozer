@@ -64,7 +64,7 @@ Usage
       clean              Clean the whole Buildozer environment.
       help               Show the Buildozer help.
       init               Create a initial buildozer.spec in the current directory
-      setdefault         Set the default command to do when to arguments are given
+      setdefault         Set the default command to do when no arguments are given
       version            Show the Buildozer version
 
     Target commands:

@@ -10,13 +10,15 @@ Layout directory for buildozer:
 
 '''
 
-__version__ = '0.7'
+__version__ = '0.9'
 
 import fcntl
 import os
 import re
 import shelve
+import SimpleHTTPServer
 import socket
+import SocketServer
 import sys
 import zipfile
 from select import select
@@ -47,6 +49,7 @@ USE_COLOR = 'NO_COLOR' not in environ
 # error, info, debug
 LOG_LEVELS_C = (RED, BLUE, BLACK)
 LOG_LEVELS_T = 'EID'
+SIMPLE_HTTP_SERVER_PORT = 8000
 
 
 class ChromeDownloader(FancyURLopener):
@@ -75,7 +78,8 @@ class BuildozerCommandException(BuildozerException):
 
 class Buildozer(object):
 
-    standard_cmds = ('clean', 'update', 'debug', 'release', 'deploy', 'run')
+    standard_cmds = ('clean', 'update', 'debug', 'release', 
+                     'deploy', 'run', 'serve')
 
     def __init__(self, filename='buildozer.spec', target=None):
         super(Buildozer, self).__init__()
@@ -86,7 +90,9 @@ class Buildozer(object):
         self.build_id = None
         self.config_profile = ''
         self.config = SafeConfigParser(allow_no_value=True)
+        self.config.optionxform = lambda value: value
         self.config.getlist = self._get_config_list
+        self.config.getlistvalues = self._get_config_list_values
         self.config.getdefault = self._get_config_default
         self.config.getbooldefault = self._get_config_bool
 
@@ -361,7 +367,8 @@ class Buildozer(object):
         target_available_packages = self.target.get_available_packages()
 
         # remove all the requirements that the target can compile
-        requirements = [x for x in requirements if x not in
+        onlyname = lambda x: x.split('==')[0]
+        requirements = [x for x in requirements if onlyname(x) not in
                 target_available_packages]
 
         # did we already installed the libs ?
@@ -383,6 +390,10 @@ class Buildozer(object):
 
     def _install_application_requirement(self, module):
         self._ensure_virtualenv()
+        # resetup distribute, just in case
+        self.debug('Install distribute')
+        self.cmd('curl http://python-distribute.org/distribute_setup.py | venv/bin/python', get_stdout=True, cwd=self.buildozer_dir)
+
         self.debug('Install requirement {} in virtualenv'.format(module))
         self.cmd('pip-2.7 install --download-cache={} --target={} {}'.format(
                 self.global_cache_dir, self.applibs_dir, module),
@@ -501,6 +512,19 @@ class Buildozer(object):
             return
 
         raise Exception('Unhandled extraction for type {0}'.format(archive))
+
+    def file_copytree(self, src, dest):
+        print 'copy {} to {}'.format(src, dest)
+        if os.path.isdir(src):
+            if not os.path.isdir(dest):
+                os.makedirs(dest)
+            files = os.listdir(src)
+            for f in files:
+                self.file_copytree(
+                    os.path.join(src, f),
+                    os.path.join(dest, f))
+        else:
+            copyfile(src, dest)
 
     def clean_platform(self):
         self.info('Clean the platform build directory')
@@ -662,6 +686,21 @@ class Buildozer(object):
         copyfile(join(dirname(__file__), 'sitecustomize.py'),
                 join(self.app_dir, 'sitecustomize.py'))
 
+        main_py = join(self.app_dir, 'service', 'main.py')
+        if not self.file_exists(main_py):
+            #self.error('Unable to patch main_py to add applibs directory.')
+            return
+
+        header = ('import sys, os; '
+                  'sys.path = [os.path.join(os.getcwd(),'
+                  '"..", "_applibs")] + sys.path\n')
+        with open(main_py, 'rb') as fd:
+            data = fd.read()
+        data = header + data
+        with open(main_py, 'wb') as fd:
+            fd.write(data)
+        self.info('Patched service/main.py to include applibs')
+
     def namify(self, name):
         '''Return a "valid" name from a name with lot of invalid chars
         (allowed characters: a-z, A-Z, 0-9, -, _)
@@ -703,6 +742,10 @@ class Buildozer(object):
     @property
     def global_platform_dir(self):
         return join(self.global_buildozer_dir, self.targetname, 'platform')
+
+    @property
+    def global_packages_dir(self):
+        return join(self.global_buildozer_dir, self.targetname, 'packages')
 
     @property
     def global_cache_dir(self):
@@ -760,12 +803,13 @@ class Buildozer(object):
 
         print
         print 'Target commands:'
-        print '  clean              Clean the target environment'
-        print '  update             Update the target dependencies'
-        print '  debug              Build the application in debug mode'
-        print '  release            Build the application in release mode'
-        print '  deploy             Deploy the application on the device'
-        print '  run                Run the application on the device'
+        print '  clean      Clean the target environment'
+        print '  update     Update the target dependencies'
+        print '  debug      Build the application in debug mode'
+        print '  release    Build the application in release mode'
+        print '  deploy     Deploy the application on the device'
+        print '  run        Run the application on the device'
+        print '  serve      Serve the bin directory via SimpleHTTPServer'
 
         for target, m in targets:
             mt = m.get_target(self)
@@ -828,7 +872,7 @@ class Buildozer(object):
         # maybe it's a target?
         targets = [x[0] for x in self.targets()]
         if command not in targets:
-            print 'Unknow command/target', command
+            print 'Unknown command/target', command
             exit(1)
 
         self.set_target(command)
@@ -864,6 +908,16 @@ class Buildozer(object):
         '''
         print 'Buildozer {0}'.format(__version__)
 
+    def cmd_serve(self, *args):
+        '''Serve the bin directory via SimpleHTTPServer
+        '''
+        os.chdir(self.bin_dir)
+        handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+        httpd = SocketServer.TCPServer(("", SIMPLE_HTTP_SERVER_PORT), handler)
+        print("Serving via HTTP at port {}".format(SIMPLE_HTTP_SERVER_PORT))
+        print("Press Ctrl+c to quit serving.")
+        httpd.serve_forever()
+
     #
     # Private
     #
@@ -898,8 +952,11 @@ class Buildozer(object):
 
 
 
+    def _get_config_list_values(self, *args, **kwargs):
+        kwargs['with_values'] = True
+        return self._get_config_list(*args, **kwargs)
 
-    def _get_config_list(self, section, token, default=None):
+    def _get_config_list(self, section, token, default=None, with_values=False):
         # monkey-patch method for ConfigParser
         # get a key as a list of string, seperated from the comma
 
@@ -907,7 +964,11 @@ class Buildozer(object):
         l_section = '{}:{}'.format(section, token)
         if self.config.has_section(l_section):
             values = self.config.options(l_section)
-            return [x.strip() for x in values]
+            if with_values:
+                return ['{}={}'.format(key, self.config.get(l_section, key)) for
+                        key in values]
+            else:
+                return [x.strip() for x in values]
 
         values = self.config.getdefault(section, token, '')
         if not values:
@@ -966,7 +1027,7 @@ class BuildozerRemote(Buildozer):
         remote_name = args[0]
         remote_section = 'remote:{}'.format(remote_name)
         if not self.config.has_section(remote_section):
-            self.error('Unknow remote "{}", must be configured first.'.format(
+            self.error('Unknown remote "{}", must be configured first.'.format(
                 remote_name))
             return
 

@@ -11,7 +11,7 @@ Android target, based on python-for-android project
 ANDROID_API = '14'
 ANDROID_MINAPI = '8'
 ANDROID_SDK_VERSION = '21'
-ANDROID_NDK_VERSION = '8e'
+ANDROID_NDK_VERSION = '9'
 APACHE_ANT_VERSION = '1.8.4'
 
 
@@ -22,7 +22,7 @@ from sys import platform, executable
 from buildozer import BuildozerException
 from buildozer.target import Target
 from os import environ
-from os.path import join, realpath, expanduser, basename
+from os.path import join, realpath, expanduser, basename, relpath
 from shutil import copyfile
 from glob import glob
 
@@ -69,7 +69,7 @@ class TargetAndroid(Target):
         version = self.buildozer.config.getdefault(
                 'app', 'android.ndk', self.android_ndk_version)
         return join(self.buildozer.global_platform_dir,
-                'android-ndk-{0}'.format(version))
+                'android-ndk-r{0}'.format(version))
 
     @property
     def apache_ant_dir(self):
@@ -135,6 +135,11 @@ class TargetAndroid(Target):
             permissions = self.buildozer.config.getlist(
                 'app', 'android.permissions', [])
             for permission in permissions:
+                # no check on full named permission
+                # like com.google.android.providers.gsf.permission.READ_GSERVICES
+                if '.' in permission:
+                    continue
+                permission = permission.upper()
                 if permission not in available_permissions:
                     errors.append(
                         '[app] "android.permission" contain an unknown'
@@ -246,9 +251,10 @@ class TargetAndroid(Target):
 
         self.buildozer.info('Android NDK is missing, downloading')
         if platform in ('win32', 'cygwin'):
-            #FIXME find a way of checking 32/64 bits os (not sys.maxint)
+            # Checking of 32/64 bits at Windows from: http://stackoverflow.com/a/1405971/798575
+            import struct
             archive = 'android-ndk-r{0}-windows-{1}.zip'
-            is_64 = False
+            is_64 = (8*struct.calcsize("P") == 64)
         elif platform in ('darwin', ):
             archive = 'android-ndk-r{0}-darwin-{1}.tar.bz2'
             is_64 = (os.uname()[4] == 'x86_64')
@@ -301,10 +307,10 @@ class TargetAndroid(Target):
             cmd('git clean -dxf', cwd=pa_dir)
             cmd('git pull origin master', cwd=pa_dir)
 
-            source = self.buildozer.config.getdefault('app', 'android.branch')
-            if source:
-                cmd('git checkout --track -b %s origin/%s' % (source, source),
-                    cwd=pa_dir)
+        source = self.buildozer.config.getdefault('app', 'android.branch')
+        if source:
+            cmd('git checkout  %s' % (source),
+                cwd=pa_dir)
 
         self._install_apache_ant()
         self._install_android_sdk()
@@ -316,10 +322,11 @@ class TargetAndroid(Target):
         self.check_configuration_tokens()
 
         self.buildozer.environ.update({
+            'PACKAGES_PATH': self.buildozer.global_packages_dir,
             'ANDROIDSDK': self.android_sdk_dir,
             'ANDROIDNDK': self.android_ndk_dir,
             'ANDROIDAPI': self.android_api,
-            'ANDROIDNDKVER': self.android_ndk_version})
+            'ANDROIDNDKVER': 'r{}'.format(self.android_ndk_version)})
 
     def get_available_packages(self):
         available_modules = self.buildozer.cmd(
@@ -338,7 +345,8 @@ class TargetAndroid(Target):
         # we need to extract the requirements that python-for-android knows
         # about
         available_modules = self.get_available_packages()
-        android_requirements = [x for x in app_requirements if x in
+        onlyname = lambda x: x.split('==')[0]
+        android_requirements = [x for x in app_requirements if onlyname(x) in
                 available_modules]
 
         need_compile = 0
@@ -353,8 +361,13 @@ class TargetAndroid(Target):
 
         modules_str = ' '.join(android_requirements)
         cmd = self.buildozer.cmd
+        self.buildozer.debug('Clean and build python-for-android')
         cmd('git clean -dxf', cwd=self.pa_dir)
         cmd('./distribute.sh -m "{0}"'.format(modules_str), cwd=self.pa_dir)
+        self.buildozer.debug('Remove temporary build files')
+        self.buildozer.rmdir(join(self.pa_dir, 'build'))
+        self.buildozer.rmdir(join(self.pa_dir, '.packages'))
+        self.buildozer.rmdir(join(self.pa_dir, 'src', 'jni', 'obj', 'local'))
         self.buildozer.info('Distribution compiled.')
 
         # ensure we will not compile again
@@ -390,17 +403,26 @@ class TargetAndroid(Target):
                         'Failed to find libs_armeabi files: {}'.format(
                             pattern))
 
+        # update the project.properties libraries references
+        self._update_libraries_references(dist_dir)
+
+        # add src files
+        self._add_java_src(dist_dir)
+
+        # build the app
         build_cmd = (
             '{python} build.py --name {name}'
             ' --version {version}'
             ' --package {package}'
-            ' --private {appdir}'
+            ' --{storage_type} {appdir}'
             ' --sdk {androidsdk}'
             ' --minsdk {androidminsdk}').format(
             python=executable,
             name=quote(config.get('app', 'title')),
             version=version,
             package=package,
+            storage_type='private' if config.getbooldefault(
+                'app', 'android.private_storage', True) else 'dir',
             appdir=self.buildozer.app_dir,
             androidminsdk=config.getdefault(
                 'app', 'android.minsdk', 8),
@@ -411,7 +433,18 @@ class TargetAndroid(Target):
         permissions = config.getlist('app',
                 'android.permissions', [])
         for permission in permissions:
-            build_cmd += ' --permission {0}'.format(permission)
+            # force the latest component to be uppercase
+            permission = permission.split('.')
+            permission[-1] = permission[-1].upper()
+            permission = '.'.join(permission)
+            build_cmd += ' --permission {}'.format(permission)
+
+        # meta-data
+        meta_datas = config.getlistvalues('app', 'android.meta_data', [])
+        for meta in meta_datas:
+            key, value = meta.split('=', 1)
+            meta = '{}={}'.format(key.strip(), value.strip())
+            build_cmd += ' --meta-data "{}"'.format(meta)
 
         # add extra Java jar files
         add_jars = config.getlist('app', 'android.add_jars', [])
@@ -457,6 +490,11 @@ class TargetAndroid(Target):
         if not fullscreen:
             build_cmd += ' --window'
 
+        # wakelock ?
+        wakelock = config.getbooldefault('app', 'android.wakelock', False)
+        if wakelock:
+            build_cmd += ' --wakelock'
+
         # intent filters
         intent_filters = config.getdefault('app',
             'android.manifest.intent_filters', '')
@@ -488,6 +526,58 @@ class TargetAndroid(Target):
         self.buildozer.info('APK {0} available in the bin directory'.format(apk))
         self.buildozer.state['android:latestapk'] = apk
         self.buildozer.state['android:latestmode'] = self.build_mode
+
+    def _update_libraries_references(self, dist_dir):
+        # ensure the project.properties exist
+        project_fn = join(dist_dir, 'project.properties')
+
+        if not self.buildozer.file_exists(project_fn):
+            content = ['target=android-{}\n'.format(self.android_api)]
+        else:
+            with open(project_fn) as fd:
+                content = fd.readlines()
+
+        # extract library reference
+        references = []
+        for line in content[:]:
+            if not line.startswith('android.library.reference.'):
+                continue
+            content.remove(line)
+
+        # convert our references to relative path
+        app_references = self.buildozer.config.getlist(
+                'app', 'android.library_references', [])
+        source_dir = realpath(self.buildozer.config.getdefault('app', 'source.dir', '.'))
+        for cref in app_references:
+            # get the full path of the current reference
+            ref = realpath(join(source_dir, cref))
+            if not self.buildozer.file_exists(ref):
+                self.buildozer.error('Invalid library reference (path not found): {}'.format(cref))
+                exit(1)
+            # get a relative path from the project file
+            ref = relpath(ref, dist_dir)
+            # ensure the reference exists
+            references.append(ref)
+
+        # recreate the project.properties
+        with open(project_fn, 'wb') as fd:
+            for line in content:
+                fd.write(line)
+            for index, ref in enumerate(references):
+                fd.write('android.library.reference.{}={}\n'.format(
+                    index + 1, ref))
+
+        self.buildozer.debug('project.properties updated')
+
+    def _add_java_src(self, dist_dir):
+        print '_add_java_src()'
+        java_src = self.buildozer.config.getlist('app', 'android.add_src', [])
+        src_dir = join(dist_dir, 'src')
+        for pattern in java_src:
+            for fn in glob(expanduser(pattern.strip())):
+                print 'match file', fn
+                last_component = basename(fn)
+                self.buildozer.file_copytree(fn, join(src_dir, last_component))
 
     @property
     def serials(self):

@@ -67,7 +67,10 @@ fullscreen = 1
 #android.sdk = 21
 
 # (str) Android NDK version to use
-#android.ndk = 8c
+#android.ndk = 9
+
+# (bool) Use --private data storage (True) or --dir public storage (False)
+#android.private_storage = True
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
 #android.ndk_path =
@@ -83,6 +86,10 @@ fullscreen = 1
 # down the build process. Allows wildcards matching, for example:
 # OUYA-ODK/libs/*.jar
 #android.add_jars = foo.jar,bar.jar,path/to/more/*.jar
+
+# (list) List of Java files to add to the android project (can be java or a
+# directory containing the files)
+#android.add_src =
 
 # (str) python-for-android branch to use, if not master, useful to try
 # not yet merged features.
@@ -100,6 +107,17 @@ fullscreen = 1
 
 # (list) Android additionnal libraries to copy into libs/armeabi
 #android.add_libs_armeabi = libs/android/*.so
+
+# (bool) Indicate whether the screen should stay on
+# Don't forget to add the WAKE_LOCK permission if you set this to True
+#android.wakelock = False
+
+# (list) Android application meta-data to set (key=value format)
+#android.meta_data =
+
+# (list) Android library project to add (will be added in the
+# project.properties automatically.)
+#android.library_references =
 
 #
 # iOS specific
