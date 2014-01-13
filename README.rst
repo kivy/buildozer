@@ -6,8 +6,8 @@ This tool is currently in alpha.
 Buildozer is a tool for creating application packages easily.
 
 The goal is to have one "buildozer.spec" file in your app directory that
-describes your application requirements, titles, etc.  Buildozer will use that
-spec to create a package, currently Android and iOS are supported.
+describes your application requirements, titles, etc. Buildozer will use that
+spec to create a package, currently Android and iOS packaging is supported.
 
 Usage example
 -------------
