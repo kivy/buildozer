@@ -849,7 +849,14 @@ class Buildozer(object):
     def cmd_clean(self, *args):
         '''Clean the whole Buildozer environment.
         '''
-        pass
+        import sys
+        print("Warning: Your ndk, sdk and all other cached packages will be"+\
+            " removed. Continue? (y/n)")
+        if sys.stdin.readline().lower()[0] == 'y':
+            self.info('Clean the global build directory')
+            if not exists(self.global_buildozer_dir):
+                return
+            rmtree(self.global_buildozer_dir)
 
     def cmd_help(self, *args):
         '''Show the Buildozer help.
