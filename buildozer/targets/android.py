@@ -301,7 +301,12 @@ class TargetAndroid(Target):
         cmd = self.buildozer.cmd
         self.pa_dir = pa_dir = join(self.buildozer.platform_dir, 'python-for-android')
         if not self.buildozer.file_exists(pa_dir):
-            cmd('git clone git://github.com/kivy/python-for-android',
+            system_p4a_dir = self.buildozer.config.getdefault('app', 'p4a_dir')
+            if system_p4a_dir:
+                cmd('ln -s {} ./python-for-android'.format(system_p4a_dir),
+                    cwd = self.buildozer.platform_dir)
+            else:
+                cmd('git clone git://github.com/kivy/python-for-android',
                     cwd=self.buildozer.platform_dir)
         elif self.platform_update:
             cmd('git clean -dxf', cwd=pa_dir)
@@ -352,7 +357,9 @@ class TargetAndroid(Target):
         need_compile = 0
         if last_requirements != android_requirements:
             need_compile = 1
-        if not self.buildozer.file_exists(self.pa_dir, 'dist', 'default', 'build.py'):
+
+        dist_name = self.buildozer.config.get('app', 'package.name')
+        if not self.buildozer.file_exists(self.pa_dir, 'dist', dist_name, 'build.py'):
             need_compile = 1
 
         if not need_compile:
@@ -362,8 +369,8 @@ class TargetAndroid(Target):
         modules_str = ' '.join(android_requirements)
         cmd = self.buildozer.cmd
         self.buildozer.debug('Clean and build python-for-android')
-        cmd('git clean -dxf', cwd=self.pa_dir)
-        cmd('./distribute.sh -m "{0}"'.format(modules_str), cwd=self.pa_dir)
+        cmd('./distribute.sh -m "{0}" -d "{1}"'.format(modules_str, dist_name),
+            cwd=self.pa_dir)
         self.buildozer.debug('Remove temporary build files')
         self.buildozer.rmdir(join(self.pa_dir, 'build'))
         self.buildozer.rmdir(join(self.pa_dir, '.packages'))
@@ -383,7 +390,8 @@ class TargetAndroid(Target):
         return package.lower()
 
     def build_package(self):
-        dist_dir = join(self.pa_dir, 'dist', 'default')
+        dist_name = self.buildozer.config.get('app', 'package.name')
+        dist_dir = join(self.pa_dir, 'dist', dist_name)
         config = self.buildozer.config
         package = self._get_package()
         version = self.buildozer.get_version()

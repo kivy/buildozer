@@ -100,6 +100,10 @@ class Buildozer(object):
             self.config.read(filename)
             self.check_configuration_tokens()
 
+        # Check all section/tokens for env vars, and replace the
+        # config value if a suitable env var exists.
+        set_config_from_envs(self.config)
+
         try:
             self.log_level = int(self.config.getdefault(
                 'buildozer', 'log_level', '1'))
@@ -919,6 +923,9 @@ class Buildozer(object):
         # monkey-patch method for ConfigParser
         # get a key as a list of string, seperated from the comma
 
+        # check if an env var exists that should replace the file config
+        set_config_token_from_env(section, token, self.config)
+
         # if a section:token is defined, let's use the content as a list.
         l_section = '{}:{}'.format(section, token)
         if self.config.has_section(l_section):
@@ -939,7 +946,12 @@ class Buildozer(object):
 
     def _get_config_default(self, section, token, default=None):
         # monkey-patch method for ConfigParser
+        # get an appropriate env var if it exists, else
         # get a key in a section, or the default
+
+        # check if an env var exists that should replace the file config
+        set_config_token_from_env(section, token, self.config)
+
         if not self.config.has_section(section):
             return default
         if not self.config.has_option(section, token):
@@ -949,6 +961,10 @@ class Buildozer(object):
     def _get_config_bool(self, section, token, default=False):
         # monkey-patch method for ConfigParser
         # get a key in a section, or the default
+
+        # check if an env var exists that should replace the file config
+        set_config_token_from_env(section, token, self.config)
+
         if not self.config.has_section(section):
             return default
         if not self.config.has_option(section, token):
@@ -1211,3 +1227,33 @@ def run_remote():
         pass
     except BuildozerException as error:
         Buildozer().error('%s' % error)
+
+def set_config_from_envs(config):
+    '''Takes a ConfigParser, and checks every section/token for an
+    environment variable of the form SECTION_TOKEN, with any dots
+    replaced by underscores. If the variable exists, sets the config
+    variable to the env value.
+    '''
+    for section in config.sections():
+        for token in config.options(section):
+            set_config_token_from_env(section, token, config)
+
+def set_config_token_from_env(section, token, config):
+    '''Given a config section and token, checks for an appropriate
+    environment variable. If the variable exists, sets the config entry to
+    its value.
+
+    The environment variable checked is of the form SECTION_TOKEN, all
+    upper case, with any dots replaced by underscores.
+
+    Returns True if the environment variable exists and was used, or
+    False otherwise.
+
+    '''
+    env_var_name = ''.join([section.upper(), '_',
+                            token.upper().replace('.', '_')])
+    env_var = os.environ.get(env_var_name)
+    if env_var is None:
+        return False
+    config.set(section, token, env_var)
+    return True
