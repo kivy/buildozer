@@ -22,7 +22,7 @@ from sys import platform, executable
 from buildozer import BuildozerException
 from buildozer.target import Target
 from os import environ
-from os.path import join, realpath, expanduser, basename, relpath
+from os.path import exists, join, realpath, expanduser, basename, relpath
 from shutil import copyfile
 from glob import glob
 
@@ -359,7 +359,8 @@ class TargetAndroid(Target):
             need_compile = 1
 
         dist_name = self.buildozer.config.get('app', 'package.name')
-        if not self.buildozer.file_exists(self.pa_dir, 'dist', dist_name, 'build.py'):
+        dist_dir = join(self.pa_dir, 'dist', dist_name)
+        if not exists(dist_dir):
             need_compile = 1
 
         if not need_compile:
@@ -369,6 +370,8 @@ class TargetAndroid(Target):
         modules_str = ' '.join(android_requirements)
         cmd = self.buildozer.cmd
         self.buildozer.debug('Clean and build python-for-android')
+        self.buildozer.rmdir(dist_dir)  # Delete existing distribution to stop
+                                        # p4a complaining
         cmd('./distribute.sh -m "{0}" -d "{1}"'.format(modules_str, dist_name),
             cwd=self.pa_dir)
         self.buildozer.debug('Remove temporary build files')
