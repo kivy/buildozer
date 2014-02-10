@@ -78,7 +78,7 @@ class BuildozerCommandException(BuildozerException):
 
 class Buildozer(object):
 
-    standard_cmds = ('clean', 'update', 'debug', 'release', 
+    standard_cmds = ('distclean', 'update', 'debug', 'release', 
                      'deploy', 'run', 'serve')
 
     def __init__(self, filename='buildozer.spec', target=None):
@@ -306,7 +306,7 @@ class Buildozer(object):
             adderror('[app] "title" is missing')
         if not get('app', 'source.dir', ''):
             adderror('[app] "source.dir" is missing')
-            
+
         package_name = get('app', 'package.name', '')
         if not package_name:
             adderror('[app] "package.name" is missing')
@@ -850,7 +850,7 @@ class Buildozer(object):
         copyfile(join(dirname(__file__), 'default.spec'), 'buildozer.spec')
         print 'File buildozer.spec created, ready to customize!'
 
-    def cmd_clean(self, *args):
+    def cmd_distclean(self, *args):
         '''Clean the whole Buildozer environment.
         '''
         import sys
