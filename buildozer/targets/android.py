@@ -11,7 +11,7 @@ Android target, based on python-for-android project
 ANDROID_API = '14'
 ANDROID_MINAPI = '8'
 ANDROID_SDK_VERSION = '21'
-ANDROID_NDK_VERSION = '9'
+ANDROID_NDK_VERSION = '9c'
 APACHE_ANT_VERSION = '1.8.4'
 
 
