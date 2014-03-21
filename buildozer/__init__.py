@@ -12,7 +12,7 @@ Layout directory for buildozer:
 
 __version__ = '0.10-dev'
 
-import fcntl
+
 import os
 import re
 import shelve
@@ -35,11 +35,14 @@ from fnmatch import fnmatch
 
 # windows does not have termios...
 try:
+    import fcntl
     import termios
     import tty
     has_termios = True
+    has_fcntl = True
 except ImportError:
     has_termios = False
+    has_fcntl = False
 
 RESET_SEQ = "\033[0m"
 COLOR_SEQ = "\033[1;{0}m"
@@ -254,10 +257,12 @@ class Buildozer(object):
         # prepare fds
         fd_stdout = process.stdout.fileno()
         fd_stderr = process.stderr.fileno()
-        fcntl.fcntl(
+	
+	if has_fcntl== True:
+         fcntl.fcntl(
             fd_stdout, fcntl.F_SETFL,
             fcntl.fcntl(fd_stdout, fcntl.F_GETFL) | os.O_NONBLOCK)
-        fcntl.fcntl(
+         fcntl.fcntl(
             fd_stderr, fcntl.F_SETFL,
             fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
 
