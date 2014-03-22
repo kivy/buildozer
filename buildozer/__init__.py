@@ -1215,7 +1215,7 @@ from copy import copy
 from shutil import copyfile, rmtree, copytree
 from fnmatch import fnmatch
 
-# windows does not have termios...
+# windows does not have termios... nor fcntl
 try:
     import fcntl
     import termios
@@ -1440,6 +1440,8 @@ class Buildozer(object):
         fd_stdout = process.stdout.fileno()
         fd_stderr = process.stderr.fileno()
 	
+
+
         if has_fcntl==True:
             fcntl.fcntl( fd_stdout, fcntl.F_SETFL,fcntl.fcntl(fd_stdout, fcntl.F_GETFL) | os.O_NONBLOCK)
             fcntl.fcntl(fd_stderr, fcntl.F_SETFL, fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
