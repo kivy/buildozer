@@ -261,8 +261,12 @@ class Buildozer(object):
 
 
         if has_fcntl==True:
-            fcntl.fcntl( fd_stdout, fcntl.F_SETFL,fcntl.fcntl(fd_stdout, fcntl.F_GETFL) | os.O_NONBLOCK)
-            fcntl.fcntl(fd_stderr, fcntl.F_SETFL, fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
+            fcntl.fcntl( fd_stdout,
+			 fcntl.F_SETFL,
+			fcntl.fcntl(fd_stdout, fcntl.F_GETFL) | os.O_NONBLOCK)
+            fcntl.fcntl(fd_stderr, 
+			fcntl.F_SETFL, 
+			fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
 
         ret_stdout = [] if get_stdout else None
         ret_stderr = [] if get_stderr else None
