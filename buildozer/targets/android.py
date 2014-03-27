@@ -303,6 +303,7 @@ class TargetAndroid(Target):
         if not self.buildozer.file_exists(pa_dir):
             system_p4a_dir = self.buildozer.config.getdefault('app', 'android.p4a_dir')
             if system_p4a_dir:
+                system_p4a_dir = realpath(system_p4a_dir)
                 cmd('ln -s {} ./python-for-android'.format(system_p4a_dir),
                     cwd = self.buildozer.platform_dir)
             else:
