@@ -5,7 +5,7 @@ Android target, based on python-for-android project
 # Android target
 # Thanks for Renpy (again) for its install_sdk.py and plat.py in the PGS4A
 # project!
-# 
+#
 
 
 ANDROID_API = '14'
@@ -110,7 +110,7 @@ class TargetAndroid(Target):
         if is_debian_like:
             if not self.buildozer.file_exists('/usr/include/zlib.h'):
                 message = 'zlib headers must be installed, run: sudo apt-get install zlib1g-dev'
-                raise BuildozerException(message) 
+                raise BuildozerException(message)
 
         # Need to add internally installed ant to path for external tools
         # like adb to use
@@ -303,7 +303,7 @@ class TargetAndroid(Target):
         if not self.buildozer.file_exists(pa_dir):
             system_p4a_dir = self.buildozer.config.getdefault('app', 'android.p4a_dir')
             if system_p4a_dir:
-                cmd('ln -s {} ./python-for-android'.format(system_p4a_dir),
+                cmd('ln -sf {} ./python-for-android'.format(system_p4a_dir),
                     cwd = self.buildozer.platform_dir)
             else:
                 cmd('git clone git://github.com/kivy/python-for-android',
