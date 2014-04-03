@@ -403,7 +403,7 @@ class Buildozer(object):
         self.cmd('curl http://python-distribute.org/distribute_setup.py | venv/bin/python', get_stdout=True, cwd=self.buildozer_dir)
 
         self.debug('Install requirement {} in virtualenv'.format(module))
-        self.cmd('pip-2.7 install --download-cache={} --target={} {}'.format(
+        self.cmd('pip install --download-cache={} --target={} {}'.format(
                 self.global_cache_dir, self.applibs_dir, module),
                 env=self.env_venv,
                 cwd=self.buildozer_dir)
@@ -421,7 +421,7 @@ class Buildozer(object):
             return
 
         self._ensure_virtualenv()
-        self.cmd('pip-2.7 install Kivy-Garden==0.1.1', env=self.env_venv)
+        self.cmd('pip install Kivy-Garden==0.1.1', env=self.env_venv)
 
         # recreate gardenlibs
         self.rmdir(self.gardenlibs_dir)
@@ -445,7 +445,7 @@ class Buildozer(object):
             return
         self.venv = join(self.buildozer_dir, 'venv')
         if not self.file_exists(self.venv):
-            self.cmd('virtualenv-2.7 --python=python2.7 ./venv',
+            self.cmd('virtualenv --python=python2.7 ./venv',
                     cwd=self.buildozer_dir)
 
         # read virtualenv output and parse it
