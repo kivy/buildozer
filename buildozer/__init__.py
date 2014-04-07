@@ -420,11 +420,19 @@ class Buildozer(object):
             self.debug('Garden requirements already installed, pass')
             return
 
+        # we're going to reinstall all the garden libs.
+        self.rmdir(self.gardenlibs_dir)
+
+        # but if we don't have requirements, or if the user removed everything,
+        # don't do anything.
+        if not garden_requirements:
+            self.state['cache.gardenlibs'] = garden_requirements
+            return
+
         self._ensure_virtualenv()
         self.cmd('pip install Kivy-Garden==0.1.1', env=self.env_venv)
 
         # recreate gardenlibs
-        self.rmdir(self.gardenlibs_dir)
         self.mkdir(self.gardenlibs_dir)
 
         for requirement in garden_requirements:
