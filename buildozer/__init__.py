@@ -694,7 +694,8 @@ class Buildozer(object):
         copytree(self.applibs_dir, join(self.app_dir, '_applibs'))
 
     def _copy_garden_libs(self):
-        copytree(self.gardenlibs_dir, join(self.app_dir, 'libs'))
+        if exists(self.gardenlibs_dir):
+            copytree(self.gardenlibs_dir, join(self.app_dir, 'libs'))
 
     def _add_sitecustomize(self):
         copyfile(join(dirname(__file__), 'sitecustomize.py'),
