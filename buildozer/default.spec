@@ -24,6 +24,12 @@ source.include_exts = py,png,jpg,kv,atlas
 # (list) List of exclusions using pattern matching
 #source.exclude_patterns = license,images/*/*.jpg
 
+# (list) List of specific files to include. Overrides general excludes.
+#source.include_files
+
+# (list) List of specific files to exclude. Overrides general includes.
+#source.exclude_files
+
 # (str) Application versioning (method 1)
 version.regex = __version__ = '(.*)'
 version.filename = %(source.dir)s/main.py
