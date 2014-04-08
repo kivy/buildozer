@@ -280,21 +280,58 @@ class TargetAndroid(Target):
         self.buildozer.info('Android NDK installation done.')
         return ndk_dir
 
+    def _android_list_sdk(self):
+        available_packages = self.buildozer.cmd(
+                '{} list sdk -u -e'.format(self.android_cmd),
+                cwd=self.buildozer.global_platform_dir,
+                get_stdout=True)[0]
+
+        # get only the line like -> id: 5 or "build-tools-19.0.1"
+        # and extract the name part.
+        return [x.split('"')[1] for x in
+                available_packages.splitlines() if x.startswith('id: ')]
+
+    def _android_update_sdk(self, packages):
+        from buildozer.libs.pexpect import EOF
+        child = self.buildozer.cmd_expect('{} update sdk -u -a -t {}'.format(
+            self.android_cmd, packages,
+            cwd=self.buildozer.global_platform_dir))
+        while True:
+            index = child.expect([EOF, '[y/n]: '])
+            if index == 0:
+                break
+            child.sendline('y')
+
     def _install_android_packages(self):
-        packages = []
+        # 3 pass installation.
+        need_refresh = False
+
+        # 1. update the tool and platform-tools if needed
+        packages = self._android_list_sdk()
+        if 'tools' in packages or 'platform-tools' in packages:
+            self._android_update_sdk('tools,platform-tools')
+            need_refresh = True
+
+        # 2. install the latest build tool
+        if need_refresh:
+            packages = self._android_list_sdk()
+        build_tools = [x for x in packages if x.startswith('build-tools-')]
+        if build_tools:
+            build_tools.sort()
+            self._android_update_sdk(build_tools[-1])
+            need_refresh = True
+
+        # 3. finally, install the android for the current api
         android_platform = join(self.android_sdk_dir, 'platforms',
                 'android-{0}'.format(self.android_api))
         if not self.buildozer.file_exists(android_platform):
-            packages.append('android-{0}'.format(self.android_api))
-        if not self.buildozer.file_exists(self.android_sdk_dir, 'platform-tools'):
-            packages.append('platform-tools')
-        if not packages:
-            self.buildozer.info('Android packages already installed.')
-            return
+            if need_refresh:
+                packages = self._android_list_sdk()
+            android_package = 'android-{}'.format(self.android_api)
+            if android_package in packages:
+                self._android_update_sdk(android_package)
+
         self.buildozer.cmd('chmod +x {}/tools/*'.format(self.android_sdk_dir))
-        self.buildozer.cmd('{0} update sdk -u -a -t {1}'.format(
-            self.android_cmd, ','.join(packages)),
-            cwd=self.buildozer.global_platform_dir)
         self.buildozer.info('Android packages installation done.')
 
     def install_platform(self):

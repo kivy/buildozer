@@ -298,6 +298,30 @@ class Buildozer(object):
             ret_stderr = ''.join(ret_stderr)
         return (ret_stdout, ret_stderr, process.returncode)
 
+    def cmd_expect(self, command, **kwargs):
+        from buildozer.libs.pexpect import spawn
+
+        # prepare the environ, based on the system + our own env
+        env = copy(environ)
+        env.update(self.environ)
+
+        # prepare the process
+        kwargs.setdefault('env', env)
+        kwargs.setdefault('show_output', self.log_level > 1)
+        sensible = kwargs.pop('sensible', False)
+        show_output = kwargs.pop('show_output')
+
+        if show_output:
+            kwargs['logfile'] = stdout
+
+        if not sensible:
+            self.debug('Run (expect) {0!r}'.format(command))
+        else:
+            self.debug('Run (expect) {0!r} ...'.format(command.split()[0]))
+
+        self.debug('Cwd {}'.format(kwargs.get('cwd')))
+        return spawn(command, **kwargs)
+
     def check_configuration_tokens(self):
         '''Ensure the spec file is 'correct'.
         '''
