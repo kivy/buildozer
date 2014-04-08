@@ -9,6 +9,8 @@ setup(
     author_email='mat@kivy.org',
     url='http://github.com/kivy/buildozer',
     license='MIT',
+    install_requires=[
+        'pexpect'],
     packages=[
         'buildozer',
         'buildozer.targets'],
