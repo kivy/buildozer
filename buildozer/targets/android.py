@@ -292,7 +292,7 @@ class TargetAndroid(Target):
                 available_packages.splitlines() if x.startswith('id: ')]
 
     def _android_update_sdk(self, packages):
-        from buildozer.libs.pexpect import EOF
+        from pexpect import EOF
         child = self.buildozer.cmd_expect('{} update sdk -u -a -t {}'.format(
             self.android_cmd, packages,
             cwd=self.buildozer.global_platform_dir))

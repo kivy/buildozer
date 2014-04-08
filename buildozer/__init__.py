@@ -299,7 +299,7 @@ class Buildozer(object):
         return (ret_stdout, ret_stderr, process.returncode)
 
     def cmd_expect(self, command, **kwargs):
-        from buildozer.libs.pexpect import spawn
+        from pexpect import spawn
 
         # prepare the environ, based on the system + our own env
         env = copy(environ)
