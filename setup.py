@@ -11,7 +11,8 @@ setup(
     license='MIT',
     packages=[
         'buildozer',
-        'buildozer.targets'],
+        'buildozer.targets',
+        'buildozer.libs'],
     package_data={'buildozer': ['default.spec']},
     scripts=['tools/buildozer', 'tools/buildozer-remote'],
     description='Generic Python packager for Android / iOS and Desktop'
