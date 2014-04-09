@@ -297,7 +297,7 @@ class TargetAndroid(Target):
             self.android_cmd, packages,
             cwd=self.buildozer.global_platform_dir))
         while True:
-            index = child.expect([EOF, '[y/n]: '])
+            index = child.expect([EOF, '\[y/n\]:'], timeout=600)
             if index == 0:
                 break
             child.sendline('y')
