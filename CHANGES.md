@@ -1,3 +1,11 @@
+### 0.13
+(April 21st, 2014)
+
+- Fixes for Python 2 (Python 3 support was a little bit too invasive.)
+
+- Fixes Windows console color
+
+
 ### 0.12
 (April 21st, 2014)
 
