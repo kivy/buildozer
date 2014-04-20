@@ -44,6 +44,6 @@ class JsonStore(object):
         return self.data.keys()
 
     def sync(self):
-        with open(self.filename, 'w', encoding='utf-8') as fd:
+        with io.open(self.filename, 'w', encoding='utf-8') as fd:
             dump(self.data, fd)
 
