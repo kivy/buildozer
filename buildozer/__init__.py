@@ -38,10 +38,10 @@ try:
     import colorama
     colorama.init()
 
-    RESET_SEQ = colorama.Fore.RESET
+    RESET_SEQ = colorama.Fore.RESET + colorama.Style.RESET_ALL
     COLOR_SEQ = lambda x: x
     BOLD_SEQ = ''
-    BLACK = colorama.Fore.BLACK
+    BLACK = colorama.Fore.BLACK + colorama.Style.DIM
     RED = colorama.Fore.RED
     BLUE = colorama.Fore.CYAN
     USE_COLOR = 'NO_COLOR' not in environ
