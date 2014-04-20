@@ -616,9 +616,9 @@ class TargetAndroid(Target):
         # recreate the project.properties
         with io.open(project_fn, 'w', encoding='utf-8') as fd:
             for line in content:
-                fd.write(line)
+                fd.write(line.decode('utf-8'))
             for index, ref in enumerate(references):
-                fd.write('android.library.reference.{}={}\n'.format(
+                fd.write(u'android.library.reference.{}={}\n'.format(
                     index + 1, ref))
 
         self.buildozer.debug('project.properties updated')

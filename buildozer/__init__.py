@@ -206,7 +206,7 @@ class Buildozer(object):
             color = COLOR_SEQ(LOG_LEVELS_C[level])
             print(''.join((RESET_SEQ, color, '# ', msg, RESET_SEQ)))
         else:
-            print(LOG_LEVELS_T[level], msg)
+            print('{} {}'.format(LOG_LEVELS_T[level], msg))
 
     def debug(self, msg):
         self.log(2, msg)
