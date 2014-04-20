@@ -6,7 +6,7 @@ Generic Python packager for Android / iOS. Desktop later.
 
 '''
 
-__version__ = '0.13'
+__version__ = '0.14'
 
 import os
 import re
@@ -66,7 +66,7 @@ except ImportError:
 LOG_LEVELS_C = (RED, BLUE, BLACK)
 LOG_LEVELS_T = 'EID'
 SIMPLE_HTTP_SERVER_PORT = 8000
-
+IS_PY3 = sys.version_info[0] >= 3
 
 class ChromeDownloader(FancyURLopener):
     version = (
@@ -290,7 +290,10 @@ class Buildozer(object):
                 if get_stdout:
                     ret_stdout.append(chunk)
                 if show_output:
-                    stdout.write(chunk.decode('utf-8'))
+                    if IS_PY3:
+                        stdout.write(chunk.decode('utf-8'))
+                    else:
+                        stdout.write(chunk)
             if fd_stderr in readx:
                 chunk = process.stderr.read()
                 if not chunk:
@@ -298,7 +301,10 @@ class Buildozer(object):
                 if get_stderr:
                     ret_stderr.append(chunk)
                 if show_output:
-                    stderr.write(chunk.decode('utf-8'))
+                    if IS_PY3:
+                        stderr.write(chunk.decode('utf-8'))
+                    else:
+                        stderr.write(chunk)
 
         stdout.flush()
         stderr.flush()

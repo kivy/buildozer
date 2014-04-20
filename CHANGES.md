@@ -1,3 +1,9 @@
+### 0.14
+(April 21st, 2014)
+
+- More fixes for linux console on Python 2
+
+
 ### 0.13
 (April 21st, 2014)
 
