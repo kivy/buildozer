@@ -1,5 +1,5 @@
 ### 0.11
-(not released yet)
+(April 20th, 2014)
 
 - Buildozer is now compatible with Python 3.3
 
