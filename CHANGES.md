@@ -6,4 +6,5 @@
 - Scripts have been moved to buildozer/scripts, and created by console-scripts
   in setup.py.
 
-- Setup.py use now setuptools
+- Windows is supported, but no target are available for it. Though, it is
+  sufficient to create a project.
