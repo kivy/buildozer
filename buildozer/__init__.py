@@ -15,23 +15,26 @@ __version__ = '0.11-dev'
 import fcntl
 import os
 import re
-import shelve
-import SimpleHTTPServer
 import socket
-import SocketServer
 import sys
 import zipfile
+import io
 from select import select
+from buildozer.jsonstore import JsonStore
 from sys import stdout, stderr, stdin, exit
-from urllib import FancyURLopener
 from re import search
-from ConfigParser import SafeConfigParser
 from os.path import join, exists, dirname, realpath, splitext, expanduser
 from subprocess import Popen, PIPE
 from os import environ, unlink, rename, walk, sep, listdir, makedirs
 from copy import copy
 from shutil import copyfile, rmtree, copytree
 from fnmatch import fnmatch
+try:
+    from urllib.request import FancyURLopener
+    from configparser import SafeConfigParser
+except ImportError:
+    from urllib import FancyURLopener
+    from ConfigParser import SafeConfigParser
 
 # windows does not have termios...
 try:
@@ -169,10 +172,6 @@ class Buildozer(object):
         # increment the build number
         self.build_id = int(self.state.get('cache.build_id', '0')) + 1
         self.state['cache.build_id'] = str(self.build_id)
-        # FIXME WHY the hell we need to close/reopen the state to sync the build
-        # id ???
-        self.state.close()
-        self.state = shelve.open(join(self.buildozer_dir, 'state.db'))
 
         self.info('Build the application #{}'.format(self.build_id))
         self.build_application()
@@ -192,9 +191,9 @@ class Buildozer(object):
             return
         if USE_COLOR:
             color = COLOR_SEQ.format(30 + LOG_LEVELS_C[level])
-            print ''.join((RESET_SEQ, color, '# ', msg, RESET_SEQ))
+            print(''.join((RESET_SEQ, color, '# ', msg, RESET_SEQ)))
         else:
-            print LOG_LEVELS_T[level], msg
+            print(LOG_LEVELS_T[level], msg)
 
     def debug(self, msg):
         self.log(2, msg)
@@ -221,9 +220,6 @@ class Buildozer(object):
         raise Exception(msg + 'not found')
 
     def cmd(self, command, **kwargs):
-        #print ' '.join(['{0}={1}'.format(*args) for args in
-        #    self.environ.iteritems()])
-
         # prepare the environ, based on the system + our own env
         env = copy(environ)
         env.update(self.environ)
@@ -270,20 +266,20 @@ class Buildozer(object):
             readx = select([fd_stdout, fd_stderr], [], [])[0]
             if fd_stdout in readx:
                 chunk = process.stdout.read()
-                if chunk == '':
+                if not chunk:
                     break
                 if get_stdout:
                     ret_stdout.append(chunk)
                 if show_output:
-                    stdout.write(chunk)
+                    stdout.write(chunk.decode('utf-8'))
             if fd_stderr in readx:
                 chunk = process.stderr.read()
-                if chunk == '':
+                if not chunk:
                     break
                 if get_stderr:
                     ret_stderr.append(chunk)
                 if show_output:
-                    stderr.write(chunk)
+                    stderr.write(chunk.decode('utf-8'))
 
         stdout.flush()
         stderr.flush()
@@ -293,10 +289,12 @@ class Buildozer(object):
             self.error('Command failed: {0}'.format(command))
             raise BuildozerCommandException()
         if ret_stdout:
-            ret_stdout = ''.join(ret_stdout)
+            ret_stdout = b''.join(ret_stdout)
         if ret_stderr:
-            ret_stderr = ''.join(ret_stderr)
-        return (ret_stdout, ret_stderr, process.returncode)
+            ret_stderr = b''.join(ret_stderr)
+        return (ret_stdout.decode('utf-8') if ret_stdout else None,
+                ret_stderr.decode('utf-8') if ret_stderr else None,
+                process.returncode)
 
     def cmd_expect(self, command, **kwargs):
         from buildozer.libs.pexpect import spawn
@@ -359,7 +357,7 @@ class Buildozer(object):
             self.error('{0} error(s) found in the buildozer.spec'.format(
                 len(errors)))
             for error in errors:
-                print error
+                print(error)
             exit(1)
 
 
@@ -370,8 +368,8 @@ class Buildozer(object):
         self.info('Ensure build layout')
 
         if not exists(self.specfilename):
-            print 'No {0} found in the current directory. Abandon.'.format(
-                    self.specfilename)
+            print('No {0} found in the current directory. Abandon.'.format(
+                    self.specfilename))
             exit(1)
 
         # create global dir
@@ -383,7 +381,7 @@ class Buildozer(object):
         self.mkdir(join(specdir, '.buildozer'))
         self.mkdir(join(specdir, 'bin'))
         self.mkdir(self.applibs_dir)
-        self.state = shelve.open(join(self.buildozer_dir, 'state.db'))
+        self.state = JsonStore(join(self.buildozer_dir, 'state.db'))
 
         if self.targetname:
             target = self.targetname
@@ -552,7 +550,7 @@ class Buildozer(object):
         raise Exception('Unhandled extraction for type {0}'.format(archive))
 
     def file_copytree(self, src, dest):
-        print 'copy {} to {}'.format(src, dest)
+        print('copy {} to {}'.format(src, dest))
         if os.path.isdir(src):
             if not os.path.isdir(dest):
                 os.makedirs(dest)
@@ -577,7 +575,7 @@ class Buildozer(object):
             else:
                 progression = '{0:.2f}%'.format(
                         index * blksize * 100. / float(size))
-            print '- Download', progression, '\r',
+            stdout.write('- Download {}\r'.format(progression))
             stdout.flush()
 
         url = url + filename
@@ -819,57 +817,60 @@ class Buildozer(object):
                 pass
 
     def usage(self):
-        print 'Usage:'
-        print '    buildozer [--profile <name>] [--verbose] [target] <command>...'
-        print '    buildozer --version'
-        print
-        print 'Available targets:'
+        print('Usage:')
+        print('    buildozer [--profile <name>] [--verbose] [target] <command>...')
+        print('    buildozer --version')
+        print('')
+        print('Available targets:')
         targets = list(self.targets())
         for target, m in targets:
             doc = m.__doc__.strip().splitlines()[0].strip()
-            print '  {0:<18} {1}'.format(target, doc)
+            print('  {0:<18} {1}'.format(target, doc))
 
-        print
-        print 'Global commands (without target):'
+        print('')
+        print('Global commands (without target):')
         cmds = [x for x in dir(self) if x.startswith('cmd_')]
         for cmd in cmds:
             name = cmd[4:]
             meth = getattr(self, cmd)
 
+            if not meth.__doc__:
+                continue
             doc = [x for x in
                     meth.__doc__.strip().splitlines()][0].strip()
-            print '  {0:<18} {1}'.format(name, doc)
+            print('  {0:<18} {1}'.format(name, doc))
 
-        print
-        print 'Target commands:'
-        print '  clean      Clean the target environment'
-        print '  update     Update the target dependencies'
-        print '  debug      Build the application in debug mode'
-        print '  release    Build the application in release mode'
-        print '  deploy     Deploy the application on the device'
-        print '  run        Run the application on the device'
-        print '  serve      Serve the bin directory via SimpleHTTPServer'
+        print('')
+        print('Target commands:')
+        print('  clean      Clean the target environment')
+        print('  update     Update the target dependencies')
+        print('  debug      Build the application in debug mode')
+        print('  release    Build the application in release mode')
+        print('  deploy     Deploy the application on the device')
+        print('  run        Run the application on the device')
+        print('  serve      Serve the bin directory via SimpleHTTPServer')
 
         for target, m in targets:
             mt = m.get_target(self)
             commands = mt.get_custom_commands()
             if not commands:
                 continue
-            print
-            print 'Target "{0}" commands:'.format(target)
+            print('')
+            print('Target "{0}" commands:'.format(target))
             for command, doc in commands:
+                if not doc:
+                    continue
                 doc = doc.strip().splitlines()[0].strip()
-                print '  {0:<18} {1}'.format(command, doc)
+                print('  {0:<18} {1}'.format(command, doc))
 
-        print
-
+        print('')
 
     def run_default(self):
         self.check_build_layout()
         if 'buildozer:defaultcommand' not in self.state:
-            print 'No default command set.'
-            print 'Use "buildozer setdefault <command args...>"'
-            print 'Use "buildozer help" for a list of all commands"'
+            print('No default command set.')
+            print('Use "buildozer setdefault <command args...>"')
+            print('Use "buildozer help" for a list of all commands"')
             exit(1)
         cmd = self.state['buildozer:defaultcommand']
         self.run_command(cmd)
@@ -891,7 +892,7 @@ class Buildozer(object):
                 self.config_profile = args.pop(0)
 
             elif arg == '--version':
-                print 'Buildozer {0}'.format(__version__)
+                print('Buildozer {0}'.format(__version__))
                 exit(0)
 
         self._merge_config_profile()
@@ -911,7 +912,7 @@ class Buildozer(object):
         # maybe it's a target?
         targets = [x[0] for x in self.targets()]
         if command not in targets:
-            print 'Unknown command/target', command
+            print('Unknown command/target', command)
             exit(1)
 
         self.set_target(command)
@@ -921,10 +922,10 @@ class Buildozer(object):
         '''Create a initial buildozer.spec in the current directory
         '''
         if exists('buildozer.spec'):
-            print 'ERROR: You already have a buildozer.spec file.'
+            print('ERROR: You already have a buildozer.spec file.')
             exit(1)
         copyfile(join(dirname(__file__), 'default.spec'), 'buildozer.spec')
-        print 'File buildozer.spec created, ready to customize!'
+        print('File buildozer.spec created, ready to customize!')
 
     def cmd_distclean(self, *args):
         '''Clean the whole Buildozer environment.
@@ -952,14 +953,21 @@ class Buildozer(object):
     def cmd_version(self, *args):
         '''Show the Buildozer version
         '''
-        print 'Buildozer {0}'.format(__version__)
+        print('Buildozer {0}'.format(__version__))
 
     def cmd_serve(self, *args):
         '''Serve the bin directory via SimpleHTTPServer
         '''
+        try:
+            from http.server import SimpleHTTPRequestHandler
+            from socketserver import TCPServer
+        except ImportError:
+            from SimpleHTTPServer import SimpleHTTPRequestHandler
+            from SocketServer import TCPServer
+
         os.chdir(self.bin_dir)
-        handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-        httpd = SocketServer.TCPServer(("", SIMPLE_HTTP_SERVER_PORT), handler)
+        handler = SimpleHTTPRequestHandler
+        httpd = TCPServer(("", SIMPLE_HTTP_SERVER_PORT), handler)
         print("Serving via HTTP at port {}".format(SIMPLE_HTTP_SERVER_PORT))
         print("Press Ctrl+c to quit serving.")
         httpd.serve_forever()
@@ -992,8 +1000,8 @@ class Buildozer(object):
             if not self.config.has_section(section_base):
                 self.config.add_section(section_base)
             for name, value in self.config.items(section):
-                print 'merged ({}, {}) into {} (profile is {})'.format(name,
-                        value, section_base, profile)
+                print('merged ({}, {}) into {} (profile is {})'.format(name,
+                        value, section_base, profile))
                 self.config.set(section_base, name, value)
 
 
@@ -1073,7 +1081,7 @@ class BuildozerRemote(Buildozer):
                 exit(0)
 
             elif arg == '--version':
-                print 'Buildozer (remote) {0}'.format(__version__)
+                print('Buildozer (remote) {0}'.format(__version__))
                 exit(0)
 
         self._merge_config_profile()
@@ -1249,7 +1257,7 @@ class BuildozerRemote(Buildozer):
                     try:
                         x = chan.recv(128)
                         if len(x) == 0:
-                            print '\r\n*** EOF\r\n',
+                            print('\r\n*** EOF\r\n',)
                             break
                         stdout.write(x)
                         stdout.flush()

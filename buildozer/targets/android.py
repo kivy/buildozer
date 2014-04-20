@@ -17,6 +17,7 @@ APACHE_ANT_VERSION = '1.8.4'
 
 import traceback
 import os
+import io
 from pipes import quote
 from sys import platform, executable
 from buildozer import BuildozerException
@@ -165,7 +166,7 @@ class TargetAndroid(Target):
             import xml.etree.ElementTree as ET
             fn = join(self.android_sdk_dir, 'platform-tools',
                     'api', 'api-versions.xml')
-            with open(fn) as fd:
+            with io.open(fn, encoding='utf-8') as fd:
                 doc = ET.fromstring(fd.read())
             fields = doc.findall('.//class[@name="android/Manifest$permission"]/field[@name]')
             available_permissions = [x.attrib['name'] for x in fields]
@@ -288,6 +289,7 @@ class TargetAndroid(Target):
 
         # get only the line like -> id: 5 or "build-tools-19.0.1"
         # and extract the name part.
+        print(available_packages)
         return [x.split('"')[1] for x in
                 available_packages.splitlines() if x.startswith('id: ')]
 
@@ -583,7 +585,7 @@ class TargetAndroid(Target):
         if not self.buildozer.file_exists(project_fn):
             content = ['target=android-{}\n'.format(self.android_api)]
         else:
-            with open(project_fn) as fd:
+            with io.open(project_fn, encoding='utf-8') as fd:
                 content = fd.readlines()
 
         # extract library reference
@@ -609,7 +611,7 @@ class TargetAndroid(Target):
             references.append(ref)
 
         # recreate the project.properties
-        with open(project_fn, 'wb') as fd:
+        with io.open(project_fn, 'w', encoding='utf-8') as fd:
             for line in content:
                 fd.write(line)
             for index, ref in enumerate(references):
@@ -619,12 +621,10 @@ class TargetAndroid(Target):
         self.buildozer.debug('project.properties updated')
 
     def _add_java_src(self, dist_dir):
-        print '_add_java_src()'
         java_src = self.buildozer.config.getlist('app', 'android.add_src', [])
         src_dir = join(dist_dir, 'src')
         for pattern in java_src:
             for fn in glob(expanduser(pattern.strip())):
-                print 'match file', fn
                 last_component = basename(fn)
                 self.buildozer.file_copytree(fn, join(src_dir, last_component))
 
