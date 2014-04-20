@@ -2,6 +2,10 @@
 iOS target, based on kivy-ios project. (not working yet.)
 '''
 
+import sys
+if sys.platform != 'darwin':
+    raise NotImplementedError('Windows platform not yet working for Android')
+
 import plistlib
 from buildozer import BuildozerCommandException
 from buildozer.target import Target, no_config

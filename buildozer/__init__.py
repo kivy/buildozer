@@ -8,12 +8,11 @@ Generic Python packager for Android / iOS. Desktop later.
 
 __version__ = '0.11-dev'
 
-import fcntl
 import os
 import re
 import sys
 import zipfile
-from select import select
+import select
 from buildozer.jsonstore import JsonStore
 from sys import stdout, stderr, exit
 from re import search
@@ -29,12 +28,40 @@ try:
 except ImportError:
     from urllib import FancyURLopener
     from ConfigParser import SafeConfigParser
+try:
+    import fcntl
+except ImportError:
+    # on windows, no fcntl
+    fcntl = None
+try:
+    # if installed, it can give color to windows as well
+    import colorama
+    colorama.init()
 
-RESET_SEQ = "\033[0m"
-COLOR_SEQ = "\033[1;{0}m"
-BOLD_SEQ = "\033[1m"
-BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
-USE_COLOR = 'NO_COLOR' not in environ
+    RESET_SEQ = colorama.Fore.RESET
+    COLOR_SEQ = lambda x: x
+    BOLD_SEQ = ''
+    BLACK = colorama.Fore.BLACK
+    RED = colorama.Fore.RED
+    BLUE = colorama.Fore.CYAN
+    USE_COLOR = 'NO_COLOR' not in environ
+
+except ImportError:
+    if sys.platform != 'win32':
+        RESET_SEQ = "\033[0m"
+        COLOR_SEQ = lambda x: "\033[1;{}m".format(30 + x)
+        BOLD_SEQ = "\033[1m"
+        BLACK = 0
+        RED = 1
+        BLUE = 4
+        USE_COLOR = 'NO_COLOR' not in environ
+    else:
+        RESET_SEQ = ''
+        COLOR_SEQ = ''
+        BOLD_SEQ = ''
+        RED = BLUE = BLACK = 0
+        USE_COLOR = False
+
 # error, info, debug
 LOG_LEVELS_C = (RED, BLUE, BLACK)
 LOG_LEVELS_T = 'EID'
@@ -176,7 +203,7 @@ class Buildozer(object):
         if level > self.log_level:
             return
         if USE_COLOR:
-            color = COLOR_SEQ.format(30 + LOG_LEVELS_C[level])
+            color = COLOR_SEQ(LOG_LEVELS_C[level])
             print(''.join((RESET_SEQ, color, '# ', msg, RESET_SEQ)))
         else:
             print(LOG_LEVELS_T[level], msg)
@@ -234,22 +261,28 @@ class Buildozer(object):
         self.debug('Cwd {}'.format(kwargs.get('cwd')))
 
         # open the process
+        if sys.platform == 'win32':
+            kwargs.pop('close_fds', None)
         process = Popen(command, **kwargs)
 
         # prepare fds
         fd_stdout = process.stdout.fileno()
         fd_stderr = process.stderr.fileno()
-        fcntl.fcntl(
-            fd_stdout, fcntl.F_SETFL,
-            fcntl.fcntl(fd_stdout, fcntl.F_GETFL) | os.O_NONBLOCK)
-        fcntl.fcntl(
-            fd_stderr, fcntl.F_SETFL,
-            fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
+        if fcntl:
+            fcntl.fcntl(
+                fd_stdout, fcntl.F_SETFL,
+                fcntl.fcntl(fd_stdout, fcntl.F_GETFL) | os.O_NONBLOCK)
+            fcntl.fcntl(
+                fd_stderr, fcntl.F_SETFL,
+                fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
 
         ret_stdout = [] if get_stdout else None
         ret_stderr = [] if get_stderr else None
         while True:
-            readx = select([fd_stdout, fd_stderr], [], [])[0]
+            try:
+                readx = select.select([fd_stdout, fd_stderr], [], [])[0]
+            except select.error:
+                break
             if fd_stdout in readx:
                 chunk = process.stdout.read()
                 if not chunk:
@@ -798,6 +831,8 @@ class Buildozer(object):
                 m = __import__('buildozer.targets.{0}'.format(target),
                         fromlist=['buildozer'])
                 yield target, m
+            except NotImplementedError:
+                pass
             except:
                 raise
                 pass
@@ -898,7 +933,7 @@ class Buildozer(object):
         # maybe it's a target?
         targets = [x[0] for x in self.targets()]
         if command not in targets:
-            print('Unknown command/target', command)
+            print('Unknown command/target {}'.format(command))
             exit(1)
 
         self.set_target(command)
@@ -916,7 +951,6 @@ class Buildozer(object):
     def cmd_distclean(self, *args):
         '''Clean the whole Buildozer environment.
         '''
-        import sys
         print("Warning: Your ndk, sdk and all other cached packages will be"+\
             " removed. Continue? (y/n)")
         if sys.stdin.readline().lower()[0] == 'y':

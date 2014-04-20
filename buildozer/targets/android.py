@@ -7,13 +7,15 @@ Android target, based on python-for-android project
 # project!
 #
 
+import sys
+if sys.platform == 'win32':
+    raise NotImplementedError('Windows platform not yet working for Android')
 
 ANDROID_API = '14'
 ANDROID_MINAPI = '8'
 ANDROID_SDK_VERSION = '21'
 ANDROID_NDK_VERSION = '9c'
 APACHE_ANT_VERSION = '1.8.4'
-
 
 import traceback
 import os
@@ -26,6 +28,7 @@ from os import environ
 from os.path import exists, join, realpath, expanduser, basename, relpath
 from shutil import copyfile
 from glob import glob
+
 
 
 class TargetAndroid(Target):
