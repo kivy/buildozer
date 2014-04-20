@@ -1,5 +1,7 @@
 ### 0.12
-(not released yet)
+(April 21st, 2014)
+
+- Fixes a open() and encoding for Python 2 on JsonStore
 
 
 ### 0.11
