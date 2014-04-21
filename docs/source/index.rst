@@ -36,6 +36,7 @@ mailing list <https://groups.google.com/forum/#!forum/kivy-users>`_.
    installation
    quickstart
    specifications
+   contribute
 
 Indices and tables
 ==================

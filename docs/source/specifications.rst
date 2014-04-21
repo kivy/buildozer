@@ -95,7 +95,7 @@ Section [app]
   that require compilation), and that it doesn't have a recipe associated to
   Python-for-android, it will not work. We explicitely disable the compilation
   here. If you want to make it work, contribute to the Python-for-android
-  project by creating a recipe.
+  project by creating a recipe. See :doc:`contribute`
 
 - `garden_requirements`: List, Garden packages to include.
 
