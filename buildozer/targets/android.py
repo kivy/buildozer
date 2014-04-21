@@ -479,9 +479,9 @@ class TargetAndroid(Target):
                 'app', 'android.private_storage', True) else 'dir',
             appdir=self.buildozer.app_dir,
             androidminsdk=config.getdefault(
-                'app', 'android.minsdk', 8),
+                'app', 'android.minsdk', self.android_minapi),
             androidsdk=config.getdefault(
-                'app', 'android.sdk', ANDROID_API))
+                'app', 'android.sdk', self.android_api))
 
         # add permissions
         permissions = config.getlist('app',
