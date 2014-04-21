@@ -15,4 +15,4 @@ SDK. Some binaries of the Android SDK are still in 32 bits, so you need few
 32bits libraries available::
 
     pip install --upgrade cython
-    apt-get install ccache lib32stdc++6 openjdk-7-jdk
+    apt-get install ccache build-essential lib32stdc++6 libz1g-dev openjdk-7-jdk
