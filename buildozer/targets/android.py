@@ -450,19 +450,22 @@ class TargetAndroid(Target):
         version = self.buildozer.get_version()
 
         # add extra libs/armeabi files in dist/default/libs/armeabi
-        # XXX to the same for x86 and v7a
-        add_libs_armeabi = config.getlist('app', 'android.add_libs_armeabi', [])
-        for pattern in add_libs_armeabi:
-            matches = glob(expanduser(pattern.strip()))
-            if matches:
-                for fn in matches:
-                    self.buildozer.file_copy(
-                        join(self.buildozer.root_dir, fn),
-                        join(dist_dir, 'libs', 'armeabi', basename(fn)))
-            else:
-                raise SystemError(
-                        'Failed to find libs_armeabi files: {}'.format(
-                            pattern))
+        # (same for armeabi-v7a, x86, mips)
+        for config_key, lib_dir in (
+            ('android.add_libs_armeabi', 'armeabi'),
+            ('android.add_libs_armeabi_v7a', 'armeabi-v7a'),
+            ('android.add_libs_x86', 'x86'),
+            ('android.add_libs_mips', 'mips')):
+
+            patterns = config.getlist('app', config_key, [])
+            if not patterns:
+                continue
+
+            self.debug('Search and copy libs for {}'.format(lib_dir))
+            for fn in self.buildozer.file_matches(patterns):
+                self.buildozer.file_copy(
+                    join(self.buildozer.root_dir, fn),
+                    join(dist_dir, 'libs', lib_dir, basename(fn)))
 
         # update the project.properties libraries references
         self._update_libraries_references(dist_dir)

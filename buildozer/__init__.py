@@ -535,6 +535,16 @@ class Buildozer(object):
         self.debug('Remove directory and subdirectory {}'.format(dn))
         rmtree(dn)
 
+    def file_matches(self, patterns):
+        from glob import glob
+        result = []
+        for pattern in patterns:
+            matches = glob(expanduser(pattern.strip()))
+            if not matches:
+                return
+            result.extend(matches)
+        return result
+
     def file_exists(self, *args):
         return exists(join(*args))
 
