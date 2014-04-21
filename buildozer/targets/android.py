@@ -395,7 +395,7 @@ class TargetAndroid(Target):
         available_modules = self.get_available_packages()
         onlyname = lambda x: x.split('==')[0]
         android_requirements = [x for x in app_requirements if onlyname(x) in
-                available_modules]
+                            available_modules]
 
         need_compile = 0
         if last_requirements != android_requirements:
@@ -405,6 +405,13 @@ class TargetAndroid(Target):
         dist_dir = join(self.pa_dir, 'dist', dist_name)
         if not exists(dist_dir):
             need_compile = 1
+
+        # whitelist p4a
+        p4a_whitelist = self.buildozer.config.getlist('app', 'android.p4a_whitelist')
+        if p4a_whitelist:
+            with open(join(self.pa_dir, 'src', 'whitelist.txt'), 'w') as fd:
+                for wl in p4a_whitelist:
+                    fd.write(wl + '\n')
 
         if not need_compile:
             self.buildozer.info('Distribution already compiled, pass.')
