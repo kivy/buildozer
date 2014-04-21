@@ -230,7 +230,8 @@ class Buildozer(object):
             if exists(rfn):
                 self.debug(' -> found at {0}'.format(rfn))
                 return rfn
-        raise Exception(msg + 'not found')
+        self.error('{} not found, please install it.'.format(msg))
+        exit(1)
 
     def cmd(self, command, **kwargs):
         # prepare the environ, based on the system + our own env

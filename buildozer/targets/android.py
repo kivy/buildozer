@@ -125,10 +125,10 @@ class TargetAndroid(Target):
             path.append(os.environ['PATH'])
         self.buildozer.environ['PATH'] = ':'.join(path)
         checkbin = self.buildozer.checkbin
-        checkbin('Git git', 'git')
-        checkbin('Cython cython', 'cython')
-        checkbin('Java compiler', self.javac_cmd)
-        checkbin('Java keytool', self.keytool_cmd)
+        checkbin('Git (git)', 'git')
+        checkbin('Cython (cython)', 'cython')
+        checkbin('Java compiler (javac)', self.javac_cmd)
+        checkbin('Java keytool (keytool)', self.keytool_cmd)
 
     def check_configuration_tokens(self):
         errors = []
