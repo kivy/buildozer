@@ -8,10 +8,7 @@ Generic Python packager for Android / iOS. Desktop later.
 
 __version__ = '0.15-dev'
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
 import os
 import re
 import sys
