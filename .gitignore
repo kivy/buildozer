@@ -2,6 +2,7 @@
 
 # Packages
 .*.swp
+.*.swo
 *.egg
 *.egg-info
 dist

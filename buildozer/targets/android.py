@@ -5,8 +5,11 @@ Android target, based on python-for-android project
 # Android target
 # Thanks for Renpy (again) for its install_sdk.py and plat.py in the PGS4A
 # project!
-# 
+#
 
+import sys
+if sys.platform == 'win32':
+    raise NotImplementedError('Windows platform not yet working for Android')
 
 ANDROID_API = '14'
 ANDROID_MINAPI = '8'
@@ -14,17 +17,18 @@ ANDROID_SDK_VERSION = '21'
 ANDROID_NDK_VERSION = '9c'
 APACHE_ANT_VERSION = '1.8.4'
 
-
 import traceback
 import os
+import io
 from pipes import quote
 from sys import platform, executable
 from buildozer import BuildozerException
 from buildozer.target import Target
 from os import environ
-from os.path import join, realpath, expanduser, basename, relpath
+from os.path import exists, join, realpath, expanduser, basename, relpath
 from shutil import copyfile
 from glob import glob
+
 
 
 class TargetAndroid(Target):
@@ -110,7 +114,7 @@ class TargetAndroid(Target):
         if is_debian_like:
             if not self.buildozer.file_exists('/usr/include/zlib.h'):
                 message = 'zlib headers must be installed, run: sudo apt-get install zlib1g-dev'
-                raise BuildozerException(message) 
+                raise BuildozerException(message)
 
         # Need to add internally installed ant to path for external tools
         # like adb to use
@@ -121,10 +125,10 @@ class TargetAndroid(Target):
             path.append(os.environ['PATH'])
         self.buildozer.environ['PATH'] = ':'.join(path)
         checkbin = self.buildozer.checkbin
-        checkbin('Git git', 'git')
-        checkbin('Cython cython', 'cython')
-        checkbin('Java compiler', self.javac_cmd)
-        checkbin('Java keytool', self.keytool_cmd)
+        checkbin('Git (git)', 'git')
+        checkbin('Cython (cython)', 'cython')
+        checkbin('Java compiler (javac)', self.javac_cmd)
+        checkbin('Java keytool (keytool)', self.keytool_cmd)
 
     def check_configuration_tokens(self):
         errors = []
@@ -165,7 +169,7 @@ class TargetAndroid(Target):
             import xml.etree.ElementTree as ET
             fn = join(self.android_sdk_dir, 'platform-tools',
                     'api', 'api-versions.xml')
-            with open(fn) as fd:
+            with io.open(fn, encoding='utf-8') as fd:
                 doc = ET.fromstring(fd.read())
             fields = doc.findall('.//class[@name="android/Manifest$permission"]/field[@name]')
             available_permissions = [x.attrib['name'] for x in fields]
@@ -280,30 +284,69 @@ class TargetAndroid(Target):
         self.buildozer.info('Android NDK installation done.')
         return ndk_dir
 
+    def _android_list_sdk(self):
+        available_packages = self.buildozer.cmd(
+                '{} list sdk -u -e'.format(self.android_cmd),
+                cwd=self.buildozer.global_platform_dir,
+                get_stdout=True)[0]
+
+        # get only the line like -> id: 5 or "build-tools-19.0.1"
+        # and extract the name part.
+        print(available_packages)
+        return [x.split('"')[1] for x in
+                available_packages.splitlines() if x.startswith('id: ')]
+
+    def _android_update_sdk(self, packages):
+        from buildozer.libs.pexpect import EOF
+        child = self.buildozer.cmd_expect('{} update sdk -u -a -t {}'.format(
+            self.android_cmd, packages,
+            cwd=self.buildozer.global_platform_dir),
+            timeout=None)
+        while True:
+            index = child.expect([EOF, '[y/n]: '])
+            if index == 0:
+                break
+            child.sendline('y')
+
     def _install_android_packages(self):
-        packages = []
+        # 3 pass installation.
+        need_refresh = False
+
+        # 1. update the tool and platform-tools if needed
+        packages = self._android_list_sdk()
+        if 'tools' in packages or 'platform-tools' in packages:
+            self._android_update_sdk('tools,platform-tools')
+            need_refresh = True
+
+        # 2. install the latest build tool
+        if need_refresh:
+            packages = self._android_list_sdk()
+        build_tools = [x for x in packages if x.startswith('build-tools-')]
+        if build_tools:
+            build_tools.sort()
+            self._android_update_sdk(build_tools[-1])
+            need_refresh = True
+
+        # 3. finally, install the android for the current api
         android_platform = join(self.android_sdk_dir, 'platforms',
                 'android-{0}'.format(self.android_api))
         if not self.buildozer.file_exists(android_platform):
-            packages.append('android-{0}'.format(self.android_api))
-        if not self.buildozer.file_exists(self.android_sdk_dir, 'platform-tools'):
-            packages.append('platform-tools')
-        if not packages:
-            self.buildozer.info('Android packages already installed.')
-            return
+            if need_refresh:
+                packages = self._android_list_sdk()
+            android_package = 'android-{}'.format(self.android_api)
+            if android_package in packages:
+                self._android_update_sdk(android_package)
+
         self.buildozer.cmd('chmod +x {}/tools/*'.format(self.android_sdk_dir))
-        self.buildozer.cmd('{0} update sdk -u -a -t {1}'.format(
-            self.android_cmd, ','.join(packages)),
-            cwd=self.buildozer.global_platform_dir)
         self.buildozer.info('Android packages installation done.')
 
     def install_platform(self):
         cmd = self.buildozer.cmd
         self.pa_dir = pa_dir = join(self.buildozer.platform_dir, 'python-for-android')
         if not self.buildozer.file_exists(pa_dir):
-            system_p4a_dir = self.buildozer.config.getdefault('app', 'p4a_dir')
+            system_p4a_dir = self.buildozer.config.getdefault('app', 'android.p4a_dir')
             if system_p4a_dir:
-                cmd('ln -s {} ./python-for-android'.format(system_p4a_dir),
+                cmd('ln -sf {} ./python-for-android'.format(system_p4a_dir),
                     cwd = self.buildozer.platform_dir)
             else:
                 cmd('git clone git://github.com/kivy/python-for-android',
@@ -352,15 +395,23 @@ class TargetAndroid(Target):
         available_modules = self.get_available_packages()
         onlyname = lambda x: x.split('==')[0]
         android_requirements = [x for x in app_requirements if onlyname(x) in
-                available_modules]
+                            available_modules]
 
         need_compile = 0
         if last_requirements != android_requirements:
             need_compile = 1
 
         dist_name = self.buildozer.config.get('app', 'package.name')
-        if not self.buildozer.file_exists(self.pa_dir, 'dist', dist_name, 'build.py'):
+        dist_dir = join(self.pa_dir, 'dist', dist_name)
+        if not exists(dist_dir):
             need_compile = 1
+
+        # whitelist p4a
+        p4a_whitelist = self.buildozer.config.getlist('app', 'android.p4a_whitelist')
+        if p4a_whitelist:
+            with open(join(self.pa_dir, 'src', 'whitelist.txt'), 'w') as fd:
+                for wl in p4a_whitelist:
+                    fd.write(wl + '\n')
 
         if not need_compile:
             self.buildozer.info('Distribution already compiled, pass.')
@@ -369,6 +420,8 @@ class TargetAndroid(Target):
         modules_str = ' '.join(android_requirements)
         cmd = self.buildozer.cmd
         self.buildozer.debug('Clean and build python-for-android')
+        self.buildozer.rmdir(dist_dir)  # Delete existing distribution to stop
+                                        # p4a complaining
         cmd('./distribute.sh -m "{0}" -d "{1}"'.format(modules_str, dist_name),
             cwd=self.pa_dir)
         self.buildozer.debug('Remove temporary build files')
@@ -397,19 +450,22 @@ class TargetAndroid(Target):
         version = self.buildozer.get_version()
 
         # add extra libs/armeabi files in dist/default/libs/armeabi
-        # XXX to the same for x86 and v7a
-        add_libs_armeabi = config.getlist('app', 'android.add_libs_armeabi', [])
-        for pattern in add_libs_armeabi:
-            matches = glob(expanduser(pattern.strip()))
-            if matches:
-                for fn in matches:
-                    self.buildozer.file_copy(
-                        join(self.buildozer.root_dir, fn),
-                        join(dist_dir, 'libs', 'armeabi', basename(fn)))
-            else:
-                raise SystemError(
-                        'Failed to find libs_armeabi files: {}'.format(
-                            pattern))
+        # (same for armeabi-v7a, x86, mips)
+        for config_key, lib_dir in (
+            ('android.add_libs_armeabi', 'armeabi'),
+            ('android.add_libs_armeabi_v7a', 'armeabi-v7a'),
+            ('android.add_libs_x86', 'x86'),
+            ('android.add_libs_mips', 'mips')):
+
+            patterns = config.getlist('app', config_key, [])
+            if not patterns:
+                continue
+
+            self.debug('Search and copy libs for {}'.format(lib_dir))
+            for fn in self.buildozer.file_matches(patterns):
+                self.buildozer.file_copy(
+                    join(self.buildozer.root_dir, fn),
+                    join(dist_dir, 'libs', lib_dir, basename(fn)))
 
         # update the project.properties libraries references
         self._update_libraries_references(dist_dir)
@@ -433,9 +489,9 @@ class TargetAndroid(Target):
                 'app', 'android.private_storage', True) else 'dir',
             appdir=self.buildozer.app_dir,
             androidminsdk=config.getdefault(
-                'app', 'android.minsdk', 8),
+                'app', 'android.minsdk', self.android_minapi),
             androidsdk=config.getdefault(
-                'app', 'android.sdk', ANDROID_API))
+                'app', 'android.sdk', self.android_api))
 
         # add permissions
         permissions = config.getlist('app',
@@ -542,7 +598,7 @@ class TargetAndroid(Target):
         if not self.buildozer.file_exists(project_fn):
             content = ['target=android-{}\n'.format(self.android_api)]
         else:
-            with open(project_fn) as fd:
+            with io.open(project_fn, encoding='utf-8') as fd:
                 content = fd.readlines()
 
         # extract library reference
@@ -568,22 +624,20 @@ class TargetAndroid(Target):
             references.append(ref)
 
         # recreate the project.properties
-        with open(project_fn, 'wb') as fd:
+        with io.open(project_fn, 'w', encoding='utf-8') as fd:
             for line in content:
-                fd.write(line)
+                fd.write(line.decode('utf-8'))
             for index, ref in enumerate(references):
-                fd.write('android.library.reference.{}={}\n'.format(
+                fd.write(u'android.library.reference.{}={}\n'.format(
                     index + 1, ref))
 
         self.buildozer.debug('project.properties updated')
 
     def _add_java_src(self, dist_dir):
-        print '_add_java_src()'
         java_src = self.buildozer.config.getlist('app', 'android.add_src', [])
         src_dir = join(dist_dir, 'src')
         for pattern in java_src:
             for fn in glob(expanduser(pattern.strip())):
-                print 'match file', fn
                 last_component = basename(fn)
                 self.buildozer.file_copytree(fn, join(src_dir, last_component))
 

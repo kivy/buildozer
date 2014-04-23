@@ -87,3 +87,20 @@ buildozer.spec
 
 See `buildozer/default.spec <https://raw.github.com/kivy/buildozer/master/buildozer/default.spec>`_ for an up-to-date spec file.
 
+
+Default config
+--------------
+
+You can override the value of *any* buildozer.spec config token by
+setting an appropriate environment variable. These are all of the
+form ``$SECTION_TOKEN``, where SECTION is the config file section and
+TOKEN is the config token to override. Dots are replaced by
+underscores.
+
+For example, here are some config tokens from the [app] section of the
+config, along with the environment variables that would override them.
+
+- ``title`` -> ``$APP_TITLE``
+- ``package.name`` -> ``$APP_PACKAGE_NAME``
+- ``android.p4a_dir`` -> ``$APP_ANDROID_P4A_DIR``
+

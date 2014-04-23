@@ -22,7 +22,7 @@ class Target(object):
                 '{0} error(s) found in the buildozer.spec'.format(
                 len(errors)))
             for error in errors:
-                print error
+                print(error)
             exit(1)
 
     def compile_platform(self):
