@@ -26,19 +26,7 @@ from os import environ, unlink, rename, walk, sep, listdir, makedirs
 from copy import copy
 from shutil import copyfile, rmtree, copytree
 from fnmatch import fnmatch
-<<<<<<< HEAD
 
-# windows does not have termios... nor fcntl
-try:
-    import fcntl
-    import termios
-    import tty
-    has_termios = True
-    has_fcntl = True
-except ImportError:
-    has_termios = False
-    has_fcntl = False
-=======
 try:
     from urllib.request import FancyURLopener
     from configparser import SafeConfigParser
@@ -78,7 +66,7 @@ except ImportError:
         BOLD_SEQ = ''
         RED = BLUE = BLACK = 0
         USE_COLOR = False
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
+
 
 # error, info, debug
 LOG_LEVELS_C = (RED, BLUE, BLACK)
@@ -114,11 +102,7 @@ class BuildozerCommandException(BuildozerException):
 
 class Buildozer(object):
 
-<<<<<<< HEAD
-    standard_cmds = ('clean', 'update', 'debug', 'release',
-=======
     standard_cmds = ('distclean', 'update', 'debug', 'release', 
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
                      'deploy', 'run', 'serve')
 
     def __init__(self, filename='buildozer.spec', target=None):
@@ -227,17 +211,11 @@ class Buildozer(object):
         if level > self.log_level:
             return
         if USE_COLOR:
-<<<<<<< HEAD
-            color = COLOR_SEQ.format(30 + LOG_LEVELS_C[level])
-            print(''.join((RESET_SEQ, color, '# ', msg, RESET_SEQ)))
-        else:
-            print(LOG_LEVELS_T[level], msg)
-=======
             color = COLOR_SEQ(LOG_LEVELS_C[level])
             print(''.join((RESET_SEQ, color, '# ', msg, RESET_SEQ)))
         else:
             print('{} {}'.format(LOG_LEVELS_T[level], msg))
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
+
 
     def debug(self, msg):
         self.log(2, msg)
@@ -265,12 +243,6 @@ class Buildozer(object):
         exit(1)
 
     def cmd(self, command, **kwargs):
-<<<<<<< HEAD
-        # print ' '.join(['{0}={1}'.format(*args) for args in
-        #    self.environ.iteritems()])
-
-=======
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
         # prepare the environ, based on the system + our own env
         env = copy(environ)
         env.update(self.environ)
@@ -306,16 +278,6 @@ class Buildozer(object):
         # prepare fds
         fd_stdout = process.stdout.fileno()
         fd_stderr = process.stderr.fileno()
-<<<<<<< HEAD
-
-        if has_fcntl:
-            fcntl.fcntl(fd_stdout,
-                        fcntl.F_SETFL,
-                        fcntl.fcntl(fd_stdout, fcntl.F_GETFL) | os.O_NONBLOCK)
-            fcntl.fcntl(fd_stderr,
-                        fcntl.F_SETFL,
-                        fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
-=======
         if fcntl:
             fcntl.fcntl(
                 fd_stdout, fcntl.F_SETFL,
@@ -323,7 +285,6 @@ class Buildozer(object):
             fcntl.fcntl(
                 fd_stderr, fcntl.F_SETFL,
                 fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
 
         ret_stdout = [] if get_stdout else None
         ret_stderr = [] if get_stderr else None
@@ -442,11 +403,7 @@ class Buildozer(object):
 
         if not exists(self.specfilename):
             print('No {0} found in the current directory. Abandon.'.format(
-<<<<<<< HEAD
-                self.specfilename))
-=======
                     self.specfilename))
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
             exit(1)
 
         # create global dir
@@ -503,17 +460,10 @@ class Buildozer(object):
                  get_stdout=True, cwd=self.buildozer_dir)
 
         self.debug('Install requirement {} in virtualenv'.format(module))
-<<<<<<< HEAD
-        self.cmd('pip-2.7 install --download-cache={} --target={} {}'.format(
-            self.global_cache_dir, self.applibs_dir, module),
-            env=self.env_venv,
-            cwd=self.buildozer_dir)
-=======
         self.cmd('pip install --download-cache={} --target={} {}'.format(
                 self.global_cache_dir, self.applibs_dir, module),
                 env=self.env_venv,
                 cwd=self.buildozer_dir)
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
 
     def check_garden_requirements(self):
         '''Ensure required garden packages are available to be included.
@@ -560,13 +510,8 @@ class Buildozer(object):
             return
         self.venv = join(self.buildozer_dir, 'venv')
         if not self.file_exists(self.venv):
-<<<<<<< HEAD
-            self.cmd('virtualenv-2.7 --python=python2.7 ./venv',
-                     cwd=self.buildozer_dir)
-=======
             self.cmd('virtualenv --python=python2.7 ./venv',
                     cwd=self.buildozer_dir)
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
 
         # read virtualenv output and parse it
         output = self.cmd('bash -c "source venv/bin/activate && env"',
@@ -674,15 +619,9 @@ class Buildozer(object):
                 progression = '{0} bytes'.format(index * blksize)
             else:
                 progression = '{0:.2f}%'.format(
-<<<<<<< HEAD
-                    index * blksize * 100. / float(size))
-            print('- Download', progression, '\r',
-                  stdout.flush())
-=======
                         index * blksize * 100. / float(size))
             stdout.write('- Download {}\r'.format(progression))
             stdout.flush()
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
 
         url = url + filename
         if cwd:
@@ -925,27 +864,16 @@ class Buildozer(object):
 
     def usage(self):
         print('Usage:')
-<<<<<<< HEAD
-        print(
-            '    buildozer [--profile <name>] [--verbose] [target] <command>...')
-        print('    buildozer --version')
-        print
-=======
         print('    buildozer [--profile <name>] [--verbose] [target] <command>...')
         print('    buildozer --version')
         print('')
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
         print('Available targets:')
         targets = list(self.targets())
         for target, m in targets:
             doc = m.__doc__.strip().splitlines()[0].strip()
             print('  {0:<18} {1}'.format(target, doc))
 
-<<<<<<< HEAD
-        print
-=======
         print('')
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
         print('Global commands (without target):')
         cmds = [x for x in dir(self) if x.startswith('cmd_')]
         for cmd in cmds:
@@ -955,17 +883,10 @@ class Buildozer(object):
             if not meth.__doc__:
                 continue
             doc = [x for x in
-<<<<<<< HEAD
-                   meth.__doc__.strip().splitlines()][0].strip()
-            print('  {0:<18} {1}'.format(name, doc))
-
-        print
-=======
                     meth.__doc__.strip().splitlines()][0].strip()
             print('  {0:<18} {1}'.format(name, doc))
 
         print('')
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
         print('Target commands:')
         print('  clean      Clean the target environment')
         print('  update     Update the target dependencies')
@@ -980,26 +901,16 @@ class Buildozer(object):
             commands = mt.get_custom_commands()
             if not commands:
                 continue
-<<<<<<< HEAD
-            print
-=======
             print('')
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
             print('Target "{0}" commands:'.format(target))
             for command, doc in commands:
                 if not doc:
                     continue
                 doc = doc.strip().splitlines()[0].strip()
                 print('  {0:<18} {1}'.format(command, doc))
-<<<<<<< HEAD
-
-        print
-
-=======
 
         print('')
 
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
     def run_default(self):
         self.check_build_layout()
         if 'buildozer:defaultcommand' not in self.state:
@@ -1047,11 +958,7 @@ class Buildozer(object):
         # maybe it's a target?
         targets = [x[0] for x in self.targets()]
         if command not in targets:
-<<<<<<< HEAD
-            print('Unknown command/target', command)
-=======
             print('Unknown command/target {}'.format(command))
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
             exit(1)
 
         self.set_target(command)
@@ -1139,11 +1046,7 @@ class Buildozer(object):
                 self.config.add_section(section_base)
             for name, value in self.config.items(section):
                 print('merged ({}, {}) into {} (profile is {})'.format(name,
-<<<<<<< HEAD
-                                                                       value, section_base, profile))
-=======
                         value, section_base, profile))
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
                 self.config.set(section_base, name, value)
 
     def _get_config_list_values(self, *args, **kwargs):
@@ -1202,274 +1105,6 @@ class Buildozer(object):
             return default
         return self.config.getboolean(section, token)
 
-<<<<<<< HEAD
-
-class BuildozerRemote(Buildozer):
-
-    def run_command(self, args):
-        while args:
-            if not args[0].startswith('-'):
-                break
-            arg = args.pop(0)
-
-            if arg in ('-v', '--verbose'):
-                self.log_level = 2
-
-            elif arg in ('-p', '--profile'):
-                self.config_profile = args.pop(0)
-
-            elif arg in ('-h', '--help'):
-                self.usage()
-                exit(0)
-
-            elif arg == '--version':
-                print('Buildozer (remote) {0}'.format(__version__))
-                exit(0)
-
-        self._merge_config_profile()
-
-        if len(args) < 2:
-            self.usage()
-            return
-
-        remote_name = args[0]
-        remote_section = 'remote:{}'.format(remote_name)
-        if not self.config.has_section(remote_section):
-            self.error('Unknown remote "{}", must be configured first.'.format(
-                remote_name))
-            return
-
-        self.remote_host = remote_host = self.config.get(
-            remote_section, 'host', '')
-        self.remote_port = self.config.get(
-            remote_section, 'port', '22')
-        self.remote_user = remote_user = self.config.get(
-            remote_section, 'user', '')
-        self.remote_build_dir = remote_build_dir = self.config.get(
-            remote_section, 'build_directory', '')
-        self.remote_identity = self.config.get(
-            remote_section, 'identity', '')
-        if not remote_host:
-            self.error('Missing "host = " for {}'.format(remote_section))
-            return
-        if not remote_user:
-            self.error('Missing "user = " for {}'.format(remote_section))
-            return
-        if not remote_build_dir:
-            self.error(
-                'Missing "build_directory = " for {}'.format(remote_section))
-            return
-
-        # fake the target
-        self.targetname = 'remote'
-        self.check_build_layout()
-
-        # prepare our source code
-        self.info('Prepare source code to sync')
-        self._copy_application_sources()
-        self._ssh_connect()
-        try:
-            self._ensure_buildozer()
-            self._sync_application_sources()
-            self._do_remote_commands(args[1:])
-            self._ssh_sync(os.getcwd(), mode='get')
-        finally:
-            self._ssh_close()
-
-    def _ssh_connect(self):
-        self.info('Connecting to {}'.format(self.remote_host))
-        import paramiko
-        self._ssh_client = client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.load_system_host_keys()
-        kwargs = {}
-        if self.remote_identity:
-            kwargs['key_filename'] = expanduser(self.remote_identity)
-        client.connect(self.remote_host, username=self.remote_user,
-                       port=int(self.remote_port), **kwargs)
-        self._sftp_client = client.open_sftp()
-
-    def _ssh_close(self):
-        self.debug('Closing remote connection')
-        self._sftp_client.close()
-        self._ssh_client.close()
-
-    def _ensure_buildozer(self):
-        s = self._sftp_client
-        root_dir = s.normalize('.')
-        self.remote_build_dir = join(root_dir, self.remote_build_dir,
-                                     self.package_full_name)
-        self.debug('Remote build directory: {}'.format(self.remote_build_dir))
-        self._ssh_mkdir(self.remote_build_dir)
-        self._ssh_sync(__path__[0])
-
-    def _sync_application_sources(self):
-        self.info('Synchronize application sources')
-        self._ssh_sync(self.app_dir)
-
-        # create custom buildozer.spec
-        self.info('Create custom buildozer.spec')
-        config = SafeConfigParser()
-        config.read('buildozer.spec')
-        config.set('app', 'source.dir', 'app')
-
-        fn = join(self.remote_build_dir, 'buildozer.spec')
-        fd = self._sftp_client.open(fn, 'wb')
-        config.write(fd)
-        fd.close()
-
-    def _do_remote_commands(self, args):
-        self.info('Execute remote buildozer')
-        cmd = (
-            'source ~/.profile;'
-            'cd {0};'
-            'env PYTHONPATH={0}:$PYTHONPATH '
-            'python -c "import buildozer, sys;'
-            'buildozer.Buildozer().run_command(sys.argv[1:])" {1} {2} 2>&1').format(
-            self.remote_build_dir,
-            '--verbose' if self.log_level == 2 else '',
-            ' '.join(args),
-        )
-        self._ssh_command(cmd)
-
-    def _ssh_mkdir(self, *args):
-        directory = join(*args)
-        self.debug('Create remote directory {}'.format(directory))
-        try:
-            self._sftp_client.mkdir(directory)
-        except IOError:
-            # already created?
-            try:
-                self._sftp_client.stat(directory)
-            except IOError:
-                self.error(
-                    'Unable to create remote directory {}'.format(directory))
-                raise
-
-    def _ssh_sync(self, directory, mode='put'):
-        self.debug('Syncing {} directory'.format(directory))
-        directory = realpath(directory)
-        base_strip = directory.rfind('/')
-        if mode == 'get':
-            local_dir = join(directory, 'bin')
-            remote_dir = join(self.remote_build_dir, 'bin')
-            if not os.path.exists(local_dir):
-                os.path.makedirs(local_dir)
-            for _file in self._sftp_client.listdir(path=remote_dir):
-                self._sftp_client.get(join(remote_dir, _file),
-                                      join(local_dir, _file))
-            return
-        for root, dirs, files in walk(directory):
-            self._ssh_mkdir(self.remote_build_dir, root[base_strip + 1:])
-            for fn in files:
-                if splitext(fn)[1] in ('.pyo', '.pyc', '.swp'):
-                    continue
-                local_file = join(root, fn)
-                remote_file = join(
-                    self.remote_build_dir, root[base_strip + 1:], fn)
-                self.debug('Sync {} -> {}'.format(local_file, remote_file))
-                self._sftp_client.put(local_file, remote_file)
-
-    def _ssh_command(self, command):
-        self.debug('Execute remote command {}'.format(command))
-        #shell = self._ssh_client.invoke_shell()
-        # shell.sendall(command)
-        # shell.sendall('\nexit\n')
-        transport = self._ssh_client.get_transport()
-        channel = transport.open_session()
-        try:
-            channel.exec_command(command)
-            self._interactive_shell(channel)
-        finally:
-            channel.close()
-
-    def _interactive_shell(self, chan):
-        if has_termios:
-            self._posix_shell(chan)
-        else:
-            self._windows_shell(chan)
-
-    def _posix_shell(self, chan):
-        oldtty = termios.tcgetattr(stdin)
-        try:
-            # tty.setraw(stdin.fileno())
-            # tty.setcbreak(stdin.fileno())
-            chan.settimeout(0.0)
-
-            while True:
-                r, w, e = select([chan, stdin], [], [])
-                if chan in r:
-                    try:
-                        x = chan.recv(128)
-                        if len(x) == 0:
-                            print('\r\n*** EOF\r\n',)
-                            break
-                        stdout.write(x)
-                        stdout.flush()
-                        # print len(x), repr(x)
-                    except socket.timeout:
-                        pass
-                if stdin in r:
-                    x = stdin.read(1)
-                    if len(x) == 0:
-                        break
-                    chan.sendall(x)
-        finally:
-            termios.tcsetattr(stdin, termios.TCSADRAIN, oldtty)
-
-    # thanks to Mike Looijmans for this code
-    def _windows_shell(self, chan):
-        import threading
-
-        stdout.write(
-            "Line-buffered terminal emulation. Press F6 or ^Z to send EOF.\r\n\r\n")
-
-        def writeall(sock):
-            while True:
-                data = sock.recv(256)
-                if not data:
-                    stdout.write('\r\n*** EOF ***\r\n\r\n')
-                    stdout.flush()
-                    break
-                stdout.write(data)
-                stdout.flush()
-
-        writer = threading.Thread(target=writeall, args=(chan,))
-        writer.start()
-
-        try:
-            while True:
-                d = stdin.read(1)
-                if not d:
-                    break
-                chan.send(d)
-        except EOFError:
-            # user hit ^Z or F6
-            pass
-
-
-def run():
-    try:
-        Buildozer().run_command(sys.argv[1:])
-    except BuildozerCommandException:
-        # don't show the exception in the command line. The log already show the
-        # command failed.
-        pass
-    except BuildozerException as error:
-        Buildozer().error('%s' % error)
-
-
-def run_remote():
-    try:
-        BuildozerRemote().run_command(sys.argv[1:])
-    except BuildozerCommandException:
-        pass
-    except BuildozerException as error:
-        Buildozer().error('%s' % error)
-
-
-=======
->>>>>>> 32f77a248c77734b4fbf15db082c3df42d27313a
 def set_config_from_envs(config):
     '''Takes a ConfigParser, and checks every section/token for an
     environment variable of the form SECTION_TOKEN, with any dots
