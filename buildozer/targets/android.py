@@ -461,7 +461,7 @@ class TargetAndroid(Target):
             if not patterns:
                 continue
 
-            self.debug('Search and copy libs for {}'.format(lib_dir))
+            self.buildozer.debug('Search and copy libs for {}'.format(lib_dir))
             for fn in self.buildozer.file_matches(patterns):
                 self.buildozer.file_copy(
                     join(self.buildozer.root_dir, fn),
