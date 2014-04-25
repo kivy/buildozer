@@ -312,6 +312,8 @@ class TargetAndroid(Target):
         # 3 pass installation.
         need_refresh = False
 
+        self.buildozer.cmd('chmod ug+x {}'.format(self.android_cmd))
+
         # 1. update the tool and platform-tools if needed
         packages = self._android_list_sdk()
         if 'tools' in packages or 'platform-tools' in packages:
@@ -337,7 +339,6 @@ class TargetAndroid(Target):
             if android_package in packages:
                 self._android_update_sdk(android_package)
 
-        self.buildozer.cmd('chmod +x {}/tools/*'.format(self.android_sdk_dir))
         self.buildozer.info('Android packages installation done.')
 
     def install_platform(self):
