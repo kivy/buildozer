@@ -318,7 +318,7 @@ class Buildozer(object):
             ret_stdout = b''.join(ret_stdout)
         if ret_stderr:
             ret_stderr = b''.join(ret_stderr)
-        return (ret_stdout.decode('utf-8') if ret_stdout else None,
+        return (ret_stdout.decode('utf-8', 'ignore') if ret_stdout else None,
                 ret_stderr.decode('utf-8') if ret_stderr else None,
                 process.returncode)
 
