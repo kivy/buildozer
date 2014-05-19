@@ -10,7 +10,8 @@ your application requirements and settings such as title, icon, included modules
 etc. Buildozer will use that spec to create a package for Android, iOS, Windows,
 OSX and/or Linux. 
 
-Buildozer currently supports packaging for Android via the python-for-android
+Buildozer currently supports packaging for Android via the `python-for-android 
+<http://github.com/kivy/python-for-android/>`_
 project, and for iOS via the kivy-ios project. Support for other operating systems
 is intended in the future.
 
