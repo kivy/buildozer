@@ -312,7 +312,8 @@ class TargetAndroid(Target):
         # 3 pass installation.
         need_refresh = False
 
-        self.buildozer.cmd('chmod ug+x {}'.format(self.android_cmd))
+        if not os.access(self.android_cmd, os.X_OK):
+            self.buildozer.cmd('chmod ug+x {}'.format(self.android_cmd))
 
         # 1. update the tool and platform-tools if needed
         packages = self._android_list_sdk()
