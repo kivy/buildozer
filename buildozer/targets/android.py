@@ -228,7 +228,7 @@ class TargetAndroid(Target):
         elif platform in ('darwin', ):
             archive = 'android-sdk_r{0}-macosx.zip'
             unpacked = 'android-sdk-macosx'
-        elif platform in ('linux2', 'linux3'):
+        elif platform.startswith('linux'):
             archive = 'android-sdk_r{0}-linux.tgz'
             unpacked = 'android-sdk-linux'
         else:
