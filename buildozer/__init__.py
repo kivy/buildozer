@@ -935,6 +935,8 @@ class Buildozer(object):
 
         self._merge_config_profile()
 
+        self.check_root()
+
         if not args:
             self.run_default()
             return
@@ -955,6 +957,28 @@ class Buildozer(object):
 
         self.set_target(command)
         self.target.run_commands(args)
+
+    def check_root(self):
+        '''If effective user id is 0, display a warning and require
+        user input to continue (or to cancel)'''
+
+        try:  # ensure same result in python2 and python3
+            input = raw_input
+        except NameError:
+            pass
+
+        warn_on_root = self.config.getdefault('buildozer', 'warn_on_root', 1)
+        euid = os.geteuid()
+        if warn_on_root and euid == 0:
+            print('\033[91m\033[1mBuildozer is running as root!\033[0m')
+            print('\033[91mThis is \033[1mnot\033[0m \033[91mrecommended, and may lead to problems later.\033[0m')
+            cont = None
+            while cont not in ('y', 'n'):
+                cont = input('Are you sure you want to continue [y/n]? ')
+
+            if cont == 'n':
+                sys.exit()
+            
 
     def cmd_init(self, *args):
         '''Create a initial buildozer.spec in the current directory

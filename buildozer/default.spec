@@ -145,6 +145,9 @@ fullscreen = 1
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
 log_level = 1
 
+# (int) Display warning if buildozer is run as root (0 = False, 1 = True)
+warn_on_root = 1
+
 
 # -----------------------------------------------------------------------------
 # List as sections
