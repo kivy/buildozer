@@ -967,7 +967,7 @@ class Buildozer(object):
         except NameError:
             pass
 
-        warn_on_root = self.config.getdefault('buildozer', 'warn_on_root', 'yay')
+        warn_on_root = self.config.getdefault('buildozer', 'warn_on_root', '1')
         euid = os.geteuid()
         if warn_on_root == '1' and euid == 0:
             print('\033[91m\033[1mBuildozer is running as root!\033[0m')
