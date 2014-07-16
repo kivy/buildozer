@@ -3,10 +3,10 @@
 # (str) Title of your application
 title = My Application
 
-# (str) Package name
+# (str) Package name (required for .deb packaging)
 package.name = myapp
 
-# (str) Package domain (needed for android/ios packaging)
+# (str) Package domain (needed for android/ios/.deb packaging)
 package.domain = org.test
 
 # (str) Source code where the main.py live
@@ -25,11 +25,11 @@ source.include_exts = py,png,jpg,kv,atlas
 #source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
-version.regex = __version__ = ['"](.*)['"]
-version.filename = %(source.dir)s/main.py
+#version.regex = __version__ = ['"](.*)['"]
+#version.filename = %(source.dir)s/main.py
 
-# (str) Application versioning (method 2)
-# version = 1.2.0
+# (str) Application versioning (method 2) (required for .deb packaging)
+ version = 1.2.0
 
 # (list) Application requirements
 requirements = kivy
@@ -183,3 +183,36 @@ log_level = 1
 # Then, invoke the command line with the "demo" profile:
 #
 #     buildozer --profile demo android debug
+#--------------------------------------------------------------------------------
+# Debian specific
+[debian]
+
+#(str)
+description = 
+
+#(str) 
+long_description = 
+
+#(str) Name of the author
+author =
+
+#(str) License
+license = 
+
+#(str) Email of the user
+author_email = 
+
+#(str) Python dependencies // Just specify the name of the library such as kivy, pygame
+# Do not add a 'python-' prefix
+P_dependencies = kivy,pygame
+
+#(str) Non Python dependencies 
+dependencies = 
+
+
+#(list) A list of static data files and directories inside you source directory
+#ex: images/*.png, sounds/*.wav, *.jpg, *.png
+package_data = *.jpg,*.png
+
+#(str) Entry point for your application ex: main.MainClass
+entry_point = main.MainClass
