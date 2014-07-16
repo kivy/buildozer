@@ -12,12 +12,16 @@ __version__ = '0.16-dev'
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> cabd968... put a fcntl condition
 =======
 
 >>>>>>> f8b2dd6... upstream update
+=======
+
+>>>>>>> cdcaa9047d22eaa2936dd57b15937a3985c97c46
 import os
 import re
 import sys
@@ -64,9 +68,13 @@ from shutil import copyfile, rmtree, copytree
 from fnmatch import fnmatch
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> 37d451c... upstream update
+=======
+
+>>>>>>> cdcaa9047d22eaa2936dd57b15937a3985c97c46
 try:
 <<<<<<< HEAD
     from urllib.request import FancyURLopener
@@ -111,6 +119,7 @@ except ImportError:
 =======
 =======
 
+<<<<<<< HEAD
 # windows does not have termios... nor fcntl
 try:
 >>>>>>> 3efc838... Normalized line endings
@@ -136,6 +145,9 @@ BOLD_SEQ = "\033[1m"
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 USE_COLOR = 'NO_COLOR' not in environ
 >>>>>>> 3efc838... Normalized line endings
+=======
+
+>>>>>>> cdcaa9047d22eaa2936dd57b15937a3985c97c46
 # error, info, debug
 LOG_LEVELS_C = (RED, BLUE, BLACK)
 LOG_LEVELS_T = 'EID'
@@ -323,7 +335,10 @@ class Buildozer(object):
         else:
             print('{} {}'.format(LOG_LEVELS_T[level], msg))
 
+<<<<<<< HEAD
 >>>>>>> 37d451c... upstream update
+=======
+>>>>>>> cdcaa9047d22eaa2936dd57b15937a3985c97c46
 
     def debug(self, msg):
         self.log(2, msg)
