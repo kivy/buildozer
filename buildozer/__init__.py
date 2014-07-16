@@ -11,9 +11,13 @@ Generic Python packager for Android / iOS. Desktop later.
 __version__ = '0.16-dev'
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> cabd968... put a fcntl condition
+=======
+
+>>>>>>> f8b2dd6... upstream update
 import os
 import re
 import sys
