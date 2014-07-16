@@ -8,6 +8,7 @@ Generic Python packager for Android / iOS. Desktop later.
 
 __version__ = '0.16-dev'
 
+
 import os
 import re
 import sys
@@ -22,6 +23,7 @@ from os import environ, unlink, rename, walk, sep, listdir, makedirs
 from copy import copy
 from shutil import copyfile, rmtree, copytree
 from fnmatch import fnmatch
+
 try:
     from urllib.request import FancyURLopener
     from configparser import SafeConfigParser
@@ -62,6 +64,7 @@ except ImportError:
         RED = BLUE = BLACK = 0
         USE_COLOR = False
 
+
 # error, info, debug
 LOG_LEVELS_C = (RED, BLUE, BLACK)
 LOG_LEVELS_T = 'EID'
@@ -77,6 +80,7 @@ urlretrieve = ChromeDownloader().retrieve
 
 
 class BuildozerException(Exception):
+
     '''
     Exception raised for general situations buildozer cannot process.
     '''
@@ -84,9 +88,10 @@ class BuildozerException(Exception):
 
 
 class BuildozerCommandException(BuildozerException):
+
     '''
     Exception raised when an external command failed.
-    
+
     See: `Buildozer.cmd()`.
     '''
     pass
@@ -136,7 +141,7 @@ class Buildozer(object):
         '''
         self.targetname = target
         m = __import__('buildozer.targets.{0}'.format(target),
-                fromlist=['buildozer'])
+                       fromlist=['buildozer'])
         self.target = m.get_target(self)
         self.check_build_layout()
         self.check_configuration_tokens()
@@ -207,6 +212,7 @@ class Buildozer(object):
             print(''.join((RESET_SEQ, color, '# ', msg, RESET_SEQ)))
         else:
             print('{} {}'.format(LOG_LEVELS_T[level], msg))
+
 
     def debug(self, msg):
         self.log(2, msg)
@@ -370,10 +376,10 @@ class Buildozer(object):
             adderror('[app] One of "version" or "version.regex" must be set')
         if version and version_regex:
             adderror('[app] Conflict between "version" and "version.regex"'
-                    ', only one can be used.')
+                     ', only one can be used.')
         if version_regex and not get('app', 'version.filename', ''):
             adderror('[app] "version.filename" is missing'
-                ', required by "version.regex"')
+                     ', required by "version.regex"')
 
         orientation = get('app', 'orientation', 'landscape')
         if orientation not in ('landscape', 'portrait', 'all'):
@@ -385,7 +391,6 @@ class Buildozer(object):
             for error in errors:
                 print(error)
             exit(1)
-
 
     def check_build_layout(self):
         '''Ensure the build (local and global) directory layout and files are
@@ -425,13 +430,13 @@ class Buildozer(object):
         # remove all the requirements that the target can compile
         onlyname = lambda x: x.split('==')[0]
         requirements = [x for x in requirements if onlyname(x) not in
-                target_available_packages]
+                        target_available_packages]
 
         # did we already installed the libs ?
         if exists(self.applibs_dir) and \
-            self.state.get('cache.applibs', '') == requirements:
-                self.debug('Application requirements already installed, pass')
-                return
+                self.state.get('cache.applibs', '') == requirements:
+            self.debug('Application requirements already installed, pass')
+            return
 
         # recreate applibs
         self.rmdir(self.applibs_dir)
@@ -448,7 +453,8 @@ class Buildozer(object):
         self._ensure_virtualenv()
         # resetup distribute, just in case
         self.debug('Install distribute')
-        self.cmd('curl http://python-distribute.org/distribute_setup.py | venv/bin/python', get_stdout=True, cwd=self.buildozer_dir)
+        self.cmd('curl http://python-distribute.org/distribute_setup.py | venv/bin/python',
+                 get_stdout=True, cwd=self.buildozer_dir)
 
         self.debug('Install requirement {} in virtualenv'.format(module))
         self.cmd('pip install --download-cache={} --target={} {}'.format(
@@ -506,8 +512,8 @@ class Buildozer(object):
 
         # read virtualenv output and parse it
         output = self.cmd('bash -c "source venv/bin/activate && env"',
-                get_stdout=True,
-                cwd=self.buildozer_dir)
+                          get_stdout=True,
+                          cwd=self.buildozer_dir)
         self.env_venv = copy(self.environ)
         for line in output[0].splitlines():
             args = line.split('=', 1)
@@ -566,8 +572,8 @@ class Buildozer(object):
         if archive.endswith('.tgz') or archive.endswith('.tar.gz'):
             # XXX tarfile doesn't work for NDK-r8c :(
             #tf = tarfile.open(archive, 'r:*')
-            #tf.extractall(path=cwd)
-            #tf.close()
+            # tf.extractall(path=cwd)
+            # tf.close()
             self.cmd('tar xzf {0}'.format(archive), cwd=cwd)
             return
 
@@ -671,7 +677,8 @@ class Buildozer(object):
         include_exts = self.config.getlist('app', 'source.include_exts', '')
         exclude_exts = self.config.getlist('app', 'source.exclude_exts', '')
         exclude_dirs = self.config.getlist('app', 'source.exclude_dirs', '')
-        exclude_patterns = self.config.getlist('app', 'source.exclude_patterns', '')
+        exclude_patterns = self.config.getlist(
+            'app', 'source.exclude_patterns', '')
         app_dir = self.app_dir
 
         self.debug('Copy application source from {}'.format(source_dir))
@@ -757,7 +764,7 @@ class Buildozer(object):
 
     def _add_sitecustomize(self):
         copyfile(join(dirname(__file__), 'sitecustomize.py'),
-                join(self.app_dir, 'sitecustomize.py'))
+                 join(self.app_dir, 'sitecustomize.py'))
 
         main_py = join(self.app_dir, 'service', 'main.py')
         if not self.file_exists(main_py):
@@ -832,11 +839,9 @@ class Buildozer(object):
             return package_name
         return '{}.{}'.format(package_domain, package_name)
 
-
     #
     # command line invocation
     #
-
     def targets(self):
         for fn in listdir(join(dirname(__file__), 'targets')):
             if fn.startswith('.') or fn.startswith('__'):
@@ -846,7 +851,7 @@ class Buildozer(object):
             target = fn[:-3]
             try:
                 m = __import__('buildozer.targets.{0}'.format(target),
-                        fromlist=['buildozer'])
+                               fromlist=['buildozer'])
                 yield target, m
             except NotImplementedError:
                 pass
@@ -1065,8 +1070,6 @@ class Buildozer(object):
                         value, section_base, profile))
                 self.config.set(section_base, name, value)
 
-
-
     def _get_config_list_values(self, *args, **kwargs):
         kwargs['with_values'] = True
         return self._get_config_list(*args, **kwargs)
@@ -1132,6 +1135,7 @@ def set_config_from_envs(config):
     for section in config.sections():
         for token in config.options(section):
             set_config_token_from_env(section, token, config)
+
 
 def set_config_token_from_env(section, token, config):
     '''Given a config section and token, checks for an appropriate
