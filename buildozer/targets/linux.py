@@ -35,7 +35,7 @@ class TargetLinux(Target):
 
 	def assemble_specs(self):
 		self.version = self.buildozer.get_version()
-		self.name = self.buildozer.config.get('app','package.name')
+		self.name = self.buildozer.config.get('app','package.name').lower()
 		self.url = self.buildozer.config.get('app','package.domain')
 		self.P_dependencies = self.buildozer.config.get('debian','P_dependencies')
 		self.dependencies = self.buildozer.config.get('debian','dependencies')

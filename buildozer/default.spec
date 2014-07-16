@@ -29,7 +29,7 @@ source.include_exts = py,png,jpg,kv,atlas
 #version.filename = %(source.dir)s/main.py
 
 # (str) Application versioning (method 2) (required for .deb packaging)
- version = 1.2.0
+version = 1.2.0
 
 # (list) Application requirements
 requirements = kivy

@@ -16,6 +16,24 @@ class Target(object):
         pass
 
     def check_configuration_tokens(self, errors=None):
+    	
+    	if self.buildozer.targetname == 'linux':
+    		if not self.buildozer.config.getdefault('debian','author'):
+    			self.buildozer.error('[debian] "author" field is empty')
+    			exit(1)
+    		if not self.buildozer.config.getdefault('debian','package_data'):
+    			self.buildozer.error('[debian] "package_data" field is empty')
+    			exit(1)
+    		if not self.buildozer.config.getdefault('debian','P_dependencies'):
+    			self.buildozer.error('[debian] "P_dependencies" field is empty')
+    			exit(1)	
+    		if not self.buildozer.config.getdefault('debian','entry_point'):
+    			self.buildozer.error('[debian] "entry_point" field is empty')
+    			exit(1)	
+    		if not self.buildozer.config.getdefault('debian','author_email'):
+    			self.buildozer.error('[debian] "author_email" field is empty')
+    			exit(1)
+    
         if errors:
             self.buildozer.info('Check target configuration tokens')
             self.buildozer.error(
