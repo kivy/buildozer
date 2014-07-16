@@ -284,9 +284,12 @@ class TargetAndroid(Target):
         self.buildozer.info('Android NDK installation done.')
         return ndk_dir
 
-    def _android_list_sdk(self):
+    def _android_list_sdk(self, include_all=False):
+        cmd = '{} list sdk -u -e'.format(self.android_cmd)
+        if include_all:
+            cmd += ' -a'
         available_packages = self.buildozer.cmd(
-                '{} list sdk -u -e'.format(self.android_cmd),
+                cmd,
                 cwd=self.buildozer.global_platform_dir,
                 get_stdout=True)[0]
 
@@ -308,10 +311,25 @@ class TargetAndroid(Target):
                 break
             child.sendline('y')
 
+    def _read_version_subdir(self, *args):
+        try:
+            versions = os.listdir(join(*args))
+            versions.sort()
+            return versions[-1]
+        except:
+            self.buildozer.error(
+                'Unable to find the latest version for {}'.format(join(*args)))
+            return '0'
+
+    def _find_latest_package(self, packages, key):
+        l = [x for x in packages if x.startswith(key)]
+        if not l:
+            return
+        l.sort()
+        return l[-1]
+
     def _install_android_packages(self):
         # 3 pass installation.
-        need_refresh = False
-
         if not os.access(self.android_cmd, os.X_OK):
             self.buildozer.cmd('chmod ug+x {}'.format(self.android_cmd))
 
@@ -319,23 +337,20 @@ class TargetAndroid(Target):
         packages = self._android_list_sdk()
         if 'tools' in packages or 'platform-tools' in packages:
             self._android_update_sdk('tools,platform-tools')
-            need_refresh = True
 
         # 2. install the latest build tool
-        if need_refresh:
-            packages = self._android_list_sdk()
-        build_tools = [x for x in packages if x.startswith('build-tools-')]
-        if build_tools:
-            build_tools.sort()
-            self._android_update_sdk(build_tools[-1])
-            need_refresh = True
+        v_build_tools = self._read_version_subdir(
+                self.android_sdk_dir, 'build-tools')
+        packages = self._android_list_sdk(include_all=True)
+        ver = self._find_latest_package(packages, 'build-tools-')
+        if ver and ver > v_build_tools:
+            self._android_update_sdk(ver)
 
         # 3. finally, install the android for the current api
         android_platform = join(self.android_sdk_dir, 'platforms',
                 'android-{0}'.format(self.android_api))
         if not self.buildozer.file_exists(android_platform):
-            if need_refresh:
-                packages = self._android_list_sdk()
+            packages = self._android_list_sdk()
             android_package = 'android-{}'.format(self.android_api)
             if android_package in packages:
                 self._android_update_sdk(android_package)
