@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 '''
 Buildozer
 =========
@@ -21,12 +22,43 @@ import select
 from buildozer.jsonstore import JsonStore
 from sys import stdout, stderr, exit
 from re import search
+=======
+'''
+
+Layout directory for buildozer:
+
+    build/
+        <targetname>/
+            platform/ - all the platform files necessary
+            app/ - compiled application
+
+
+'''
+
+__version__ = '0.10-dev'
+
+
+import os
+import re
+import shelve
+import SimpleHTTPServer
+import socket
+import SocketServer
+import sys
+import zipfile
+from select import select
+from sys import stdout, stderr, stdin, exit
+from urllib import FancyURLopener
+from re import search
+from ConfigParser import SafeConfigParser
+>>>>>>> 3efc838... Normalized line endings
 from os.path import join, exists, dirname, realpath, splitext, expanduser
 from subprocess import Popen, PIPE
 from os import environ, unlink, rename, walk, sep, listdir, makedirs
 from copy import copy
 from shutil import copyfile, rmtree, copytree
 from fnmatch import fnmatch
+<<<<<<< HEAD
 try:
 <<<<<<< HEAD
     from urllib.request import FancyURLopener
@@ -68,6 +100,11 @@ except ImportError:
         RED = BLUE = BLACK = 0
         USE_COLOR = False
 =======
+=======
+
+# windows does not have termios... nor fcntl
+try:
+>>>>>>> 3efc838... Normalized line endings
     import fcntl
     import termios
     import tty
@@ -76,13 +113,26 @@ except ImportError:
 except ImportError:
     has_termios = False
     has_fcntl = False
+<<<<<<< HEAD
 >>>>>>> cabd968... put a fcntl condition
 
+=======
+
+RESET_SEQ = "\033[0m"
+COLOR_SEQ = "\033[1;{0}m"
+BOLD_SEQ = "\033[1m"
+BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
+USE_COLOR = 'NO_COLOR' not in environ
+>>>>>>> 3efc838... Normalized line endings
 # error, info, debug
 LOG_LEVELS_C = (RED, BLUE, BLACK)
 LOG_LEVELS_T = 'EID'
 SIMPLE_HTTP_SERVER_PORT = 8000
+<<<<<<< HEAD
 IS_PY3 = sys.version_info[0] >= 3
+=======
+
+>>>>>>> 3efc838... Normalized line endings
 
 class ChromeDownloader(FancyURLopener):
     version = (
@@ -110,7 +160,11 @@ class BuildozerCommandException(BuildozerException):
 
 class Buildozer(object):
 
+<<<<<<< HEAD
     standard_cmds = ('distclean', 'update', 'debug', 'release', 
+=======
+    standard_cmds = ('clean', 'update', 'debug', 'release', 
+>>>>>>> 3efc838... Normalized line endings
                      'deploy', 'run', 'serve')
 
     def __init__(self, filename='buildozer.spec', target=None):
@@ -175,9 +229,12 @@ class Buildozer(object):
         self.info('Check application requirements')
         self.check_application_requirements()
 
+<<<<<<< HEAD
         self.info('Check garden requirements')
         self.check_garden_requirements()
 
+=======
+>>>>>>> 3efc838... Normalized line endings
         self.info('Compile platform')
         self.target.compile_platform()
 
@@ -201,6 +258,13 @@ class Buildozer(object):
         # increment the build number
         self.build_id = int(self.state.get('cache.build_id', '0')) + 1
         self.state['cache.build_id'] = str(self.build_id)
+<<<<<<< HEAD
+=======
+        # FIXME WHY the hell we need to close/reopen the state to sync the build
+        # id ???
+        self.state.close()
+        self.state = shelve.open(join(self.buildozer_dir, 'state.db'))
+>>>>>>> 3efc838... Normalized line endings
 
         self.info('Build the application #{}'.format(self.build_id))
         self.build_application()
@@ -219,10 +283,17 @@ class Buildozer(object):
         if level > self.log_level:
             return
         if USE_COLOR:
+<<<<<<< HEAD
             color = COLOR_SEQ(LOG_LEVELS_C[level])
             print(''.join((RESET_SEQ, color, '# ', msg, RESET_SEQ)))
         else:
             print('{} {}'.format(LOG_LEVELS_T[level], msg))
+=======
+            color = COLOR_SEQ.format(30 + LOG_LEVELS_C[level])
+            print(''.join((RESET_SEQ, color, '# ', msg, RESET_SEQ)))
+        else:
+            print(LOG_LEVELS_T[level], msg)
+>>>>>>> 3efc838... Normalized line endings
 
     def debug(self, msg):
         self.log(2, msg)
@@ -246,10 +317,19 @@ class Buildozer(object):
             if exists(rfn):
                 self.debug(' -> found at {0}'.format(rfn))
                 return rfn
+<<<<<<< HEAD
         self.error('{} not found, please install it.'.format(msg))
         exit(1)
 
     def cmd(self, command, **kwargs):
+=======
+        raise Exception(msg + 'not found')
+
+    def cmd(self, command, **kwargs):
+        #print ' '.join(['{0}={1}'.format(*args) for args in
+        #    self.environ.iteritems()])
+
+>>>>>>> 3efc838... Normalized line endings
         # prepare the environ, based on the system + our own env
         env = copy(environ)
         env.update(self.environ)
@@ -278,13 +358,17 @@ class Buildozer(object):
         self.debug('Cwd {}'.format(kwargs.get('cwd')))
 
         # open the process
+<<<<<<< HEAD
         if sys.platform == 'win32':
             kwargs.pop('close_fds', None)
+=======
+>>>>>>> 3efc838... Normalized line endings
         process = Popen(command, **kwargs)
 
         # prepare fds
         fd_stdout = process.stdout.fileno()
         fd_stderr = process.stderr.fileno()
+<<<<<<< HEAD
 <<<<<<< HEAD
         if fcntl:
             fcntl.fcntl(
@@ -303,10 +387,19 @@ class Buildozer(object):
             fd_stderr, fcntl.F_SETFL,
             fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
 >>>>>>> cabd968... put a fcntl condition
+=======
+	
+
+
+        if has_fcntl==True:
+            fcntl.fcntl( fd_stdout, fcntl.F_SETFL,fcntl.fcntl(fd_stdout, fcntl.F_GETFL) | os.O_NONBLOCK)
+            fcntl.fcntl(fd_stderr, fcntl.F_SETFL, fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
+>>>>>>> 3efc838... Normalized line endings
 
         ret_stdout = [] if get_stdout else None
         ret_stderr = [] if get_stderr else None
         while True:
+<<<<<<< HEAD
             try:
                 readx = select.select([fd_stdout, fd_stderr], [], [])[0]
             except select.error:
@@ -314,10 +407,17 @@ class Buildozer(object):
             if fd_stdout in readx:
                 chunk = process.stdout.read()
                 if not chunk:
+=======
+            readx = select([fd_stdout, fd_stderr], [], [])[0]
+            if fd_stdout in readx:
+                chunk = process.stdout.read()
+                if chunk == '':
+>>>>>>> 3efc838... Normalized line endings
                     break
                 if get_stdout:
                     ret_stdout.append(chunk)
                 if show_output:
+<<<<<<< HEAD
                     if IS_PY3:
                         stdout.write(chunk.decode('utf-8'))
                     else:
@@ -325,14 +425,24 @@ class Buildozer(object):
             if fd_stderr in readx:
                 chunk = process.stderr.read()
                 if not chunk:
+=======
+                    stdout.write(chunk)
+            if fd_stderr in readx:
+                chunk = process.stderr.read()
+                if chunk == '':
+>>>>>>> 3efc838... Normalized line endings
                     break
                 if get_stderr:
                     ret_stderr.append(chunk)
                 if show_output:
+<<<<<<< HEAD
                     if IS_PY3:
                         stderr.write(chunk.decode('utf-8'))
                     else:
                         stderr.write(chunk)
+=======
+                    stderr.write(chunk)
+>>>>>>> 3efc838... Normalized line endings
 
         stdout.flush()
         stderr.flush()
@@ -342,6 +452,7 @@ class Buildozer(object):
             self.error('Command failed: {0}'.format(command))
             raise BuildozerCommandException()
         if ret_stdout:
+<<<<<<< HEAD
             ret_stdout = b''.join(ret_stdout)
         if ret_stderr:
             ret_stderr = b''.join(ret_stderr)
@@ -372,6 +483,12 @@ class Buildozer(object):
 
         self.debug('Cwd {}'.format(kwargs.get('cwd')))
         return spawn(command, **kwargs)
+=======
+            ret_stdout = ''.join(ret_stdout)
+        if ret_stderr:
+            ret_stderr = ''.join(ret_stderr)
+        return (ret_stdout, ret_stderr, process.returncode)
+>>>>>>> 3efc838... Normalized line endings
 
     def check_configuration_tokens(self):
         '''Ensure the spec file is 'correct'.
@@ -384,7 +501,11 @@ class Buildozer(object):
             adderror('[app] "title" is missing')
         if not get('app', 'source.dir', ''):
             adderror('[app] "source.dir" is missing')
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 3efc838... Normalized line endings
         package_name = get('app', 'package.name', '')
         if not package_name:
             adderror('[app] "package.name" is missing')
@@ -434,7 +555,11 @@ class Buildozer(object):
         self.mkdir(join(specdir, '.buildozer'))
         self.mkdir(join(specdir, 'bin'))
         self.mkdir(self.applibs_dir)
+<<<<<<< HEAD
         self.state = JsonStore(join(self.buildozer_dir, 'state.db'))
+=======
+        self.state = shelve.open(join(self.buildozer_dir, 'state.db'))
+>>>>>>> 3efc838... Normalized line endings
 
         if self.targetname:
             target = self.targetname
@@ -478,11 +603,16 @@ class Buildozer(object):
         self.cmd('curl http://python-distribute.org/distribute_setup.py | venv/bin/python', get_stdout=True, cwd=self.buildozer_dir)
 
         self.debug('Install requirement {} in virtualenv'.format(module))
+<<<<<<< HEAD
         self.cmd('pip install --download-cache={} --target={} {}'.format(
+=======
+        self.cmd('pip-2.7 install --download-cache={} --target={} {}'.format(
+>>>>>>> 3efc838... Normalized line endings
                 self.global_cache_dir, self.applibs_dir, module),
                 env=self.env_venv,
                 cwd=self.buildozer_dir)
 
+<<<<<<< HEAD
     def check_garden_requirements(self):
         '''Ensure required garden packages are available to be included.
         '''
@@ -523,12 +653,18 @@ class Buildozer(object):
                 env=self.env_venv,
                 cwd=self.buildozer_dir)
 
+=======
+>>>>>>> 3efc838... Normalized line endings
     def _ensure_virtualenv(self):
         if hasattr(self, 'venv'):
             return
         self.venv = join(self.buildozer_dir, 'venv')
         if not self.file_exists(self.venv):
+<<<<<<< HEAD
             self.cmd('virtualenv --python=python2.7 ./venv',
+=======
+            self.cmd('virtualenv-2.7 --python=python2.7 ./venv',
+>>>>>>> 3efc838... Normalized line endings
                     cwd=self.buildozer_dir)
 
         # read virtualenv output and parse it
@@ -562,6 +698,7 @@ class Buildozer(object):
         self.debug('Remove directory and subdirectory {}'.format(dn))
         rmtree(dn)
 
+<<<<<<< HEAD
     def file_matches(self, patterns):
         from glob import glob
         result = []
@@ -572,6 +709,8 @@ class Buildozer(object):
             result.extend(matches)
         return result
 
+=======
+>>>>>>> 3efc838... Normalized line endings
     def file_exists(self, *args):
         return exists(join(*args))
 
@@ -638,8 +777,13 @@ class Buildozer(object):
             else:
                 progression = '{0:.2f}%'.format(
                         index * blksize * 100. / float(size))
+<<<<<<< HEAD
             stdout.write('- Download {}\r'.format(progression))
             stdout.flush()
+=======
+            print('- Download', progression, '\r',
+            stdout.flush())
+>>>>>>> 3efc838... Normalized line endings
 
         url = url + filename
         if cwd:
@@ -689,7 +833,10 @@ class Buildozer(object):
     def build_application(self):
         self._copy_application_sources()
         self._copy_application_libs()
+<<<<<<< HEAD
         self._copy_garden_libs()
+=======
+>>>>>>> 3efc838... Normalized line endings
         self._add_sitecustomize()
 
     def _copy_application_sources(self):
@@ -778,10 +925,13 @@ class Buildozer(object):
         # copy also the libs
         copytree(self.applibs_dir, join(self.app_dir, '_applibs'))
 
+<<<<<<< HEAD
     def _copy_garden_libs(self):
         if exists(self.gardenlibs_dir):
             copytree(self.gardenlibs_dir, join(self.app_dir, 'libs'))
 
+=======
+>>>>>>> 3efc838... Normalized line endings
     def _add_sitecustomize(self):
         copyfile(join(dirname(__file__), 'sitecustomize.py'),
                 join(self.app_dir, 'sitecustomize.py'))
@@ -832,10 +982,13 @@ class Buildozer(object):
         return join(self.buildozer_dir, 'applibs')
 
     @property
+<<<<<<< HEAD
     def gardenlibs_dir(self):
         return join(self.buildozer_dir, 'libs')
 
     @property
+=======
+>>>>>>> 3efc838... Normalized line endings
     def global_buildozer_dir(self):
         return join(expanduser('~'), '.buildozer')
 
@@ -875,8 +1028,11 @@ class Buildozer(object):
                 m = __import__('buildozer.targets.{0}'.format(target),
                         fromlist=['buildozer'])
                 yield target, m
+<<<<<<< HEAD
             except NotImplementedError:
                 pass
+=======
+>>>>>>> 3efc838... Normalized line endings
             except:
                 raise
                 pass
@@ -885,27 +1041,42 @@ class Buildozer(object):
         print('Usage:')
         print('    buildozer [--profile <name>] [--verbose] [target] <command>...')
         print('    buildozer --version')
+<<<<<<< HEAD
         print('')
+=======
+        print
+>>>>>>> 3efc838... Normalized line endings
         print('Available targets:')
         targets = list(self.targets())
         for target, m in targets:
             doc = m.__doc__.strip().splitlines()[0].strip()
             print('  {0:<18} {1}'.format(target, doc))
 
+<<<<<<< HEAD
         print('')
+=======
+        print
+>>>>>>> 3efc838... Normalized line endings
         print('Global commands (without target):')
         cmds = [x for x in dir(self) if x.startswith('cmd_')]
         for cmd in cmds:
             name = cmd[4:]
             meth = getattr(self, cmd)
 
+<<<<<<< HEAD
             if not meth.__doc__:
                 continue
+=======
+>>>>>>> 3efc838... Normalized line endings
             doc = [x for x in
                     meth.__doc__.strip().splitlines()][0].strip()
             print('  {0:<18} {1}'.format(name, doc))
 
+<<<<<<< HEAD
         print('')
+=======
+        print
+>>>>>>> 3efc838... Normalized line endings
         print('Target commands:')
         print('  clean      Clean the target environment')
         print('  update     Update the target dependencies')
@@ -920,6 +1091,7 @@ class Buildozer(object):
             commands = mt.get_custom_commands()
             if not commands:
                 continue
+<<<<<<< HEAD
             print('')
             print('Target "{0}" commands:'.format(target))
             for command, doc in commands:
@@ -929,6 +1101,16 @@ class Buildozer(object):
                 print('  {0:<18} {1}'.format(command, doc))
 
         print('')
+=======
+            print
+            print('Target "{0}" commands:'.format(target))
+            for command, doc in commands:
+                doc = doc.strip().splitlines()[0].strip()
+                print('  {0:<18} {1}'.format(command, doc))
+
+        print
+
+>>>>>>> 3efc838... Normalized line endings
 
     def run_default(self):
         self.check_build_layout()
@@ -962,8 +1144,11 @@ class Buildozer(object):
 
         self._merge_config_profile()
 
+<<<<<<< HEAD
         self.check_root()
 
+=======
+>>>>>>> 3efc838... Normalized line endings
         if not args:
             self.run_default()
             return
@@ -979,12 +1164,17 @@ class Buildozer(object):
         # maybe it's a target?
         targets = [x[0] for x in self.targets()]
         if command not in targets:
+<<<<<<< HEAD
             print('Unknown command/target {}'.format(command))
+=======
+            print('Unknown command/target', command)
+>>>>>>> 3efc838... Normalized line endings
             exit(1)
 
         self.set_target(command)
         self.target.run_commands(args)
 
+<<<<<<< HEAD
     def check_root(self):
         '''If effective user id is 0, display a warning and require
         user input to continue (or to cancel)'''
@@ -1007,6 +1197,8 @@ class Buildozer(object):
                 sys.exit()
             
 
+=======
+>>>>>>> 3efc838... Normalized line endings
     def cmd_init(self, *args):
         '''Create a initial buildozer.spec in the current directory
         '''
@@ -1016,6 +1208,7 @@ class Buildozer(object):
         copyfile(join(dirname(__file__), 'default.spec'), 'buildozer.spec')
         print('File buildozer.spec created, ready to customize!')
 
+<<<<<<< HEAD
     def cmd_distclean(self, *args):
         '''Clean the whole Buildozer environment.
         '''
@@ -1026,6 +1219,12 @@ class Buildozer(object):
             if not exists(self.global_buildozer_dir):
                 return
             rmtree(self.global_buildozer_dir)
+=======
+    def cmd_clean(self, *args):
+        '''Clean the whole Buildozer environment.
+        '''
+        pass
+>>>>>>> 3efc838... Normalized line endings
 
     def cmd_help(self, *args):
         '''Show the Buildozer help.
@@ -1046,6 +1245,7 @@ class Buildozer(object):
     def cmd_serve(self, *args):
         '''Serve the bin directory via SimpleHTTPServer
         '''
+<<<<<<< HEAD
         try:
             from http.server import SimpleHTTPRequestHandler
             from socketserver import TCPServer
@@ -1056,6 +1256,11 @@ class Buildozer(object):
         os.chdir(self.bin_dir)
         handler = SimpleHTTPRequestHandler
         httpd = TCPServer(("", SIMPLE_HTTP_SERVER_PORT), handler)
+=======
+        os.chdir(self.bin_dir)
+        handler = SimpleHTTPServer.SimpleHTTPRequestHandler
+        httpd = SocketServer.TCPServer(("", SIMPLE_HTTP_SERVER_PORT), handler)
+>>>>>>> 3efc838... Normalized line endings
         print("Serving via HTTP at port {}".format(SIMPLE_HTTP_SERVER_PORT))
         print("Press Ctrl+c to quit serving.")
         httpd.serve_forever()
@@ -1150,6 +1355,266 @@ class Buildozer(object):
             return default
         return self.config.getboolean(section, token)
 
+<<<<<<< HEAD
+=======
+
+class BuildozerRemote(Buildozer):
+    def run_command(self, args):
+        while args:
+            if not args[0].startswith('-'):
+                break
+            arg = args.pop(0)
+
+            if arg in ('-v', '--verbose'):
+                self.log_level = 2
+
+            elif arg in ('-p', '--profile'):
+                self.config_profile = args.pop(0)
+
+            elif arg in ('-h', '--help'):
+                self.usage()
+                exit(0)
+
+            elif arg == '--version':
+                print('Buildozer (remote) {0}'.format(__version__))
+                exit(0)
+
+        self._merge_config_profile()
+
+        if len(args) < 2:
+            self.usage()
+            return
+
+        remote_name = args[0]
+        remote_section = 'remote:{}'.format(remote_name)
+        if not self.config.has_section(remote_section):
+            self.error('Unknown remote "{}", must be configured first.'.format(
+                remote_name))
+            return
+
+        self.remote_host = remote_host = self.config.get(
+                remote_section, 'host', '')
+        self.remote_port = self.config.get(
+                remote_section, 'port', '22')
+        self.remote_user = remote_user = self.config.get(
+                remote_section, 'user', '')
+        self.remote_build_dir = remote_build_dir = self.config.get(
+                remote_section, 'build_directory', '')
+        self.remote_identity = self.config.get(
+                remote_section, 'identity', '')
+        if not remote_host:
+            self.error('Missing "host = " for {}'.format(remote_section))
+            return
+        if not remote_user:
+            self.error('Missing "user = " for {}'.format(remote_section))
+            return
+        if not remote_build_dir:
+            self.error('Missing "build_directory = " for {}'.format(remote_section))
+            return
+
+        # fake the target
+        self.targetname = 'remote'
+        self.check_build_layout()
+
+        # prepare our source code
+        self.info('Prepare source code to sync')
+        self._copy_application_sources()
+        self._ssh_connect()
+        try:
+            self._ensure_buildozer()
+            self._sync_application_sources()
+            self._do_remote_commands(args[1:])
+            self._ssh_sync(os.getcwd(), mode='get')
+        finally:
+            self._ssh_close()
+
+    def _ssh_connect(self):
+        self.info('Connecting to {}'.format(self.remote_host))
+        import paramiko
+        self._ssh_client = client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.load_system_host_keys()
+        kwargs = {}
+        if self.remote_identity:
+            kwargs['key_filename'] = expanduser(self.remote_identity)
+        client.connect(self.remote_host, username=self.remote_user,
+                port=int(self.remote_port), **kwargs)
+        self._sftp_client = client.open_sftp()
+
+    def _ssh_close(self):
+        self.debug('Closing remote connection')
+        self._sftp_client.close()
+        self._ssh_client.close()
+
+    def _ensure_buildozer(self):
+        s = self._sftp_client
+        root_dir = s.normalize('.')
+        self.remote_build_dir = join(root_dir, self.remote_build_dir,
+                self.package_full_name)
+        self.debug('Remote build directory: {}'.format(self.remote_build_dir))
+        self._ssh_mkdir(self.remote_build_dir)
+        self._ssh_sync(__path__[0])
+
+    def _sync_application_sources(self):
+        self.info('Synchronize application sources')
+        self._ssh_sync(self.app_dir)
+
+        # create custom buildozer.spec
+        self.info('Create custom buildozer.spec')
+        config = SafeConfigParser()
+        config.read('buildozer.spec')
+        config.set('app', 'source.dir', 'app')
+
+        fn = join(self.remote_build_dir, 'buildozer.spec')
+        fd = self._sftp_client.open(fn, 'wb')
+        config.write(fd)
+        fd.close()
+
+    def _do_remote_commands(self, args):
+        self.info('Execute remote buildozer')
+        cmd = (
+            'source ~/.profile;'
+            'cd {0};'
+            'env PYTHONPATH={0}:$PYTHONPATH '
+            'python -c "import buildozer, sys;'
+            'buildozer.Buildozer().run_command(sys.argv[1:])" {1} {2} 2>&1').format(
+            self.remote_build_dir,
+            '--verbose' if self.log_level == 2 else '',
+            ' '.join(args),
+            )
+        self._ssh_command(cmd)
+
+    def _ssh_mkdir(self, *args):
+        directory = join(*args)
+        self.debug('Create remote directory {}'.format(directory))
+        try:
+            self._sftp_client.mkdir(directory)
+        except IOError:
+            # already created?
+            try:
+                self._sftp_client.stat(directory)
+            except IOError:
+                self.error('Unable to create remote directory {}'.format(directory))
+                raise
+
+    def _ssh_sync(self, directory, mode='put'):
+        self.debug('Syncing {} directory'.format(directory))
+        directory = realpath(directory)
+        base_strip = directory.rfind('/')
+        if mode == 'get':
+            local_dir = join(directory,'bin')
+            remote_dir = join(self.remote_build_dir, 'bin')
+            if not os.path.exists(local_dir):
+                os.path.makedirs(local_dir)
+            for _file in self._sftp_client.listdir(path=remote_dir):
+                self._sftp_client.get(join(remote_dir, _file),
+                                      join(local_dir, _file))
+            return
+        for root, dirs, files in walk(directory):
+            self._ssh_mkdir(self.remote_build_dir, root[base_strip + 1:])
+            for fn in files:
+                if splitext(fn)[1] in ('.pyo', '.pyc', '.swp'):
+                    continue
+                local_file = join(root, fn)
+                remote_file = join(self.remote_build_dir, root[base_strip + 1:], fn)
+                self.debug('Sync {} -> {}'.format(local_file, remote_file))
+                self._sftp_client.put(local_file, remote_file)
+
+    def _ssh_command(self, command):
+        self.debug('Execute remote command {}'.format(command))
+        #shell = self._ssh_client.invoke_shell()
+        #shell.sendall(command)
+        #shell.sendall('\nexit\n')
+        transport = self._ssh_client.get_transport()
+        channel = transport.open_session()
+        try:
+            channel.exec_command(command)
+            self._interactive_shell(channel)
+        finally:
+            channel.close()
+
+    def _interactive_shell(self, chan):
+        if has_termios:
+            self._posix_shell(chan)
+        else:
+            self._windows_shell(chan)
+
+    def _posix_shell(self, chan):
+        oldtty = termios.tcgetattr(stdin)
+        try:
+            #tty.setraw(stdin.fileno())
+            #tty.setcbreak(stdin.fileno())
+            chan.settimeout(0.0)
+
+            while True:
+                r, w, e = select([chan, stdin], [], [])
+                if chan in r:
+                    try:
+                        x = chan.recv(128)
+                        if len(x) == 0:
+                            print('\r\n*** EOF\r\n',)
+                            break
+                        stdout.write(x)
+                        stdout.flush()
+                        #print len(x), repr(x)
+                    except socket.timeout:
+                        pass
+                if stdin in r:
+                    x = stdin.read(1)
+                    if len(x) == 0:
+                        break
+                    chan.sendall(x)
+        finally:
+            termios.tcsetattr(stdin, termios.TCSADRAIN, oldtty)
+
+    # thanks to Mike Looijmans for this code
+    def _windows_shell(self,chan):
+        import threading
+
+        stdout.write("Line-buffered terminal emulation. Press F6 or ^Z to send EOF.\r\n\r\n")
+
+        def writeall(sock):
+            while True:
+                data = sock.recv(256)
+                if not data:
+                    stdout.write('\r\n*** EOF ***\r\n\r\n')
+                    stdout.flush()
+                    break
+                stdout.write(data)
+                stdout.flush()
+
+        writer = threading.Thread(target=writeall, args=(chan,))
+        writer.start()
+
+        try:
+            while True:
+                d = stdin.read(1)
+                if not d:
+                    break
+                chan.send(d)
+        except EOFError:
+            # user hit ^Z or F6
+            pass
+
+def run():
+    try:
+        Buildozer().run_command(sys.argv[1:])
+    except BuildozerCommandException:
+        # don't show the exception in the command line. The log already show the
+        # command failed.
+        pass
+    except BuildozerException as error:
+        Buildozer().error('%s' % error)
+
+def run_remote():
+    try:
+        BuildozerRemote().run_command(sys.argv[1:])
+    except BuildozerCommandException:
+        pass
+    except BuildozerException as error:
+        Buildozer().error('%s' % error)
+
+>>>>>>> 3efc838... Normalized line endings
 def set_config_from_envs(config):
     '''Takes a ConfigParser, and checks every section/token for an
     environment variable of the form SECTION_TOKEN, with any dots
@@ -1179,6 +1644,7 @@ def set_config_token_from_env(section, token, config):
         return False
     config.set(section, token, env_var)
     return True
+<<<<<<< HEAD
 =======
 '''
 
@@ -2444,3 +2910,6 @@ def set_config_token_from_env(section, token, config):
     return True
 
 >>>>>>> bf32878... Solved fcntl import and changed print statements
+=======
+
+>>>>>>> 3efc838... Normalized line endings
