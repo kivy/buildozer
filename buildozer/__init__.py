@@ -59,6 +59,10 @@ from copy import copy
 from shutil import copyfile, rmtree, copytree
 from fnmatch import fnmatch
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+
+>>>>>>> 37d451c... upstream update
 try:
 <<<<<<< HEAD
     from urllib.request import FancyURLopener
@@ -99,6 +103,7 @@ except ImportError:
         BOLD_SEQ = ''
         RED = BLUE = BLACK = 0
         USE_COLOR = False
+<<<<<<< HEAD
 =======
 =======
 
@@ -117,6 +122,9 @@ except ImportError:
 >>>>>>> cabd968... put a fcntl condition
 
 =======
+=======
+
+>>>>>>> 37d451c... upstream update
 
 RESET_SEQ = "\033[0m"
 COLOR_SEQ = "\033[1;{0}m"
@@ -164,6 +172,7 @@ class Buildozer(object):
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     standard_cmds = ('distclean', 'update', 'debug', 'release', 
 =======
     standard_cmds = ('clean', 'update', 'debug', 'release', 
@@ -171,6 +180,9 @@ class Buildozer(object):
 =======
     standard_cmds = ('clean', 'update', 'debug', 'release',
 >>>>>>> c3fb1f4... standardized using autopep8
+=======
+    standard_cmds = ('distclean', 'update', 'debug', 'release', 
+>>>>>>> 37d451c... upstream update
                      'deploy', 'run', 'serve')
 
     def __init__(self, filename='buildozer.spec', target=None):
@@ -290,6 +302,7 @@ class Buildozer(object):
             return
         if USE_COLOR:
 <<<<<<< HEAD
+<<<<<<< HEAD
             color = COLOR_SEQ(LOG_LEVELS_C[level])
             print(''.join((RESET_SEQ, color, '# ', msg, RESET_SEQ)))
         else:
@@ -300,6 +313,13 @@ class Buildozer(object):
         else:
             print(LOG_LEVELS_T[level], msg)
 >>>>>>> 3efc838... Normalized line endings
+=======
+            color = COLOR_SEQ(LOG_LEVELS_C[level])
+            print(''.join((RESET_SEQ, color, '# ', msg, RESET_SEQ)))
+        else:
+            print('{} {}'.format(LOG_LEVELS_T[level], msg))
+
+>>>>>>> 37d451c... upstream update
 
     def debug(self, msg):
         self.log(2, msg)
@@ -328,6 +348,7 @@ class Buildozer(object):
         exit(1)
 
     def cmd(self, command, **kwargs):
+<<<<<<< HEAD
 =======
         raise Exception(msg + 'not found')
 
@@ -336,6 +357,8 @@ class Buildozer(object):
         #    self.environ.iteritems()])
 
 >>>>>>> 3efc838... Normalized line endings
+=======
+>>>>>>> 37d451c... upstream update
         # prepare the environ, based on the system + our own env
         env = copy(environ)
         env.update(self.environ)
@@ -377,6 +400,9 @@ class Buildozer(object):
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 37d451c... upstream update
         if fcntl:
             fcntl.fcntl(
                 fd_stdout, fcntl.F_SETFL,
@@ -384,6 +410,7 @@ class Buildozer(object):
             fcntl.fcntl(
                 fd_stderr, fcntl.F_SETFL,
                 fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
+<<<<<<< HEAD
 =======
 	
 	if has_fcntl== True:
@@ -421,6 +448,8 @@ class Buildozer(object):
                         fcntl.F_SETFL,
                         fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
 >>>>>>> c3fb1f4... standardized using autopep8
+=======
+>>>>>>> 37d451c... upstream update
 
         ret_stdout = [] if get_stdout else None
         ret_stderr = [] if get_stderr else None
@@ -572,7 +601,11 @@ class Buildozer(object):
 
         if not exists(self.specfilename):
             print('No {0} found in the current directory. Abandon.'.format(
+<<<<<<< HEAD
                 self.specfilename))
+=======
+                    self.specfilename))
+>>>>>>> 37d451c... upstream update
             exit(1)
 
         # create global dir
@@ -634,6 +667,9 @@ class Buildozer(object):
 
         self.debug('Install requirement {} in virtualenv'.format(module))
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 37d451c... upstream update
         self.cmd('pip install --download-cache={} --target={} {}'.format(
 =======
         self.cmd('pip-2.7 install --download-cache={} --target={} {}'.format(
@@ -642,11 +678,14 @@ class Buildozer(object):
                 self.global_cache_dir, self.applibs_dir, module),
                 env=self.env_venv,
                 cwd=self.buildozer_dir)
+<<<<<<< HEAD
 =======
             self.global_cache_dir, self.applibs_dir, module),
             env=self.env_venv,
             cwd=self.buildozer_dir)
 >>>>>>> c3fb1f4... standardized using autopep8
+=======
+>>>>>>> 37d451c... upstream update
 
 <<<<<<< HEAD
     def check_garden_requirements(self):
@@ -697,15 +736,21 @@ class Buildozer(object):
         self.venv = join(self.buildozer_dir, 'venv')
         if not self.file_exists(self.venv):
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 37d451c... upstream update
             self.cmd('virtualenv --python=python2.7 ./venv',
 =======
             self.cmd('virtualenv-2.7 --python=python2.7 ./venv',
 <<<<<<< HEAD
 >>>>>>> 3efc838... Normalized line endings
                     cwd=self.buildozer_dir)
+<<<<<<< HEAD
 =======
                      cwd=self.buildozer_dir)
 >>>>>>> c3fb1f4... standardized using autopep8
+=======
+>>>>>>> 37d451c... upstream update
 
         # read virtualenv output and parse it
         output = self.cmd('bash -c "source venv/bin/activate && env"',
@@ -817,10 +862,14 @@ class Buildozer(object):
             else:
                 progression = '{0:.2f}%'.format(
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 37d451c... upstream update
                         index * blksize * 100. / float(size))
 <<<<<<< HEAD
             stdout.write('- Download {}\r'.format(progression))
             stdout.flush()
+<<<<<<< HEAD
 =======
             print('- Download', progression, '\r',
             stdout.flush())
@@ -830,6 +879,8 @@ class Buildozer(object):
             print('- Download', progression, '\r',
                   stdout.flush())
 >>>>>>> c3fb1f4... standardized using autopep8
+=======
+>>>>>>> 37d451c... upstream update
 
         url = url + filename
         if cwd:
@@ -1084,6 +1135,7 @@ class Buildozer(object):
 
     def usage(self):
         print('Usage:')
+<<<<<<< HEAD
         print(
             '    buildozer [--profile <name>] [--verbose] [target] <command>...')
         print('    buildozer --version')
@@ -1092,6 +1144,11 @@ class Buildozer(object):
 =======
         print
 >>>>>>> 3efc838... Normalized line endings
+=======
+        print('    buildozer [--profile <name>] [--verbose] [target] <command>...')
+        print('    buildozer --version')
+        print('')
+>>>>>>> 37d451c... upstream update
         print('Available targets:')
         targets = list(self.targets())
         for target, m in targets:
@@ -1099,10 +1156,14 @@ class Buildozer(object):
             print('  {0:<18} {1}'.format(target, doc))
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         print('')
 =======
         print
 >>>>>>> 3efc838... Normalized line endings
+=======
+        print('')
+>>>>>>> 37d451c... upstream update
         print('Global commands (without target):')
         cmds = [x for x in dir(self) if x.startswith('cmd_')]
         for cmd in cmds:
@@ -1115,6 +1176,7 @@ class Buildozer(object):
 =======
 >>>>>>> 3efc838... Normalized line endings
             doc = [x for x in
+<<<<<<< HEAD
                    meth.__doc__.strip().splitlines()][0].strip()
             print('  {0:<18} {1}'.format(name, doc))
 
@@ -1123,6 +1185,12 @@ class Buildozer(object):
 =======
         print
 >>>>>>> 3efc838... Normalized line endings
+=======
+                    meth.__doc__.strip().splitlines()][0].strip()
+            print('  {0:<18} {1}'.format(name, doc))
+
+        print('')
+>>>>>>> 37d451c... upstream update
         print('Target commands:')
         print('  clean      Clean the target environment')
         print('  update     Update the target dependencies')
@@ -1138,6 +1206,9 @@ class Buildozer(object):
             if not commands:
                 continue
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 37d451c... upstream update
             print('')
             print('Target "{0}" commands:'.format(target))
             for command, doc in commands:
@@ -1145,6 +1216,7 @@ class Buildozer(object):
                     continue
                 doc = doc.strip().splitlines()[0].strip()
                 print('  {0:<18} {1}'.format(command, doc))
+<<<<<<< HEAD
 
         print('')
 =======
@@ -1153,14 +1225,19 @@ class Buildozer(object):
             for command, doc in commands:
                 doc = doc.strip().splitlines()[0].strip()
                 print('  {0:<18} {1}'.format(command, doc))
+=======
+>>>>>>> 37d451c... upstream update
 
         print
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 >>>>>>> 3efc838... Normalized line endings
 
 =======
 >>>>>>> c3fb1f4... standardized using autopep8
+=======
+>>>>>>> 37d451c... upstream update
     def run_default(self):
         self.check_build_layout()
         if 'buildozer:defaultcommand' not in self.state:
@@ -1214,10 +1291,14 @@ class Buildozer(object):
         targets = [x[0] for x in self.targets()]
         if command not in targets:
 <<<<<<< HEAD
+<<<<<<< HEAD
             print('Unknown command/target {}'.format(command))
 =======
             print('Unknown command/target', command)
 >>>>>>> 3efc838... Normalized line endings
+=======
+            print('Unknown command/target {}'.format(command))
+>>>>>>> 37d451c... upstream update
             exit(1)
 
         self.set_target(command)
@@ -1343,7 +1424,11 @@ class Buildozer(object):
                 self.config.add_section(section_base)
             for name, value in self.config.items(section):
                 print('merged ({}, {}) into {} (profile is {})'.format(name,
+<<<<<<< HEAD
                                                                        value, section_base, profile))
+=======
+                        value, section_base, profile))
+>>>>>>> 37d451c... upstream update
                 self.config.set(section_base, name, value)
 
     def _get_config_list_values(self, *args, **kwargs):
@@ -1402,6 +1487,7 @@ class Buildozer(object):
             return default
         return self.config.getboolean(section, token)
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 
@@ -1673,6 +1759,8 @@ def run_remote():
 =======
 
 >>>>>>> c3fb1f4... standardized using autopep8
+=======
+>>>>>>> 37d451c... upstream update
 def set_config_from_envs(config):
     '''Takes a ConfigParser, and checks every section/token for an
     environment variable of the form SECTION_TOKEN, with any dots
