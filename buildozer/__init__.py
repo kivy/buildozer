@@ -8,6 +8,10 @@ Generic Python packager for Android / iOS. Desktop later.
 
 __version__ = '0.16-dev'
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> cabd968... put a fcntl condition
 import os
 import re
 import sys
@@ -23,6 +27,7 @@ from copy import copy
 from shutil import copyfile, rmtree, copytree
 from fnmatch import fnmatch
 try:
+<<<<<<< HEAD
     from urllib.request import FancyURLopener
     from configparser import SafeConfigParser
 except ImportError:
@@ -61,6 +66,16 @@ except ImportError:
         BOLD_SEQ = ''
         RED = BLUE = BLACK = 0
         USE_COLOR = False
+=======
+    import fcntl
+    import termios
+    import tty
+    has_termios = True
+    has_fcntl = True
+except ImportError:
+    has_termios = False
+    has_fcntl = False
+>>>>>>> cabd968... put a fcntl condition
 
 # error, info, debug
 LOG_LEVELS_C = (RED, BLUE, BLACK)
@@ -269,6 +284,7 @@ class Buildozer(object):
         # prepare fds
         fd_stdout = process.stdout.fileno()
         fd_stderr = process.stderr.fileno()
+<<<<<<< HEAD
         if fcntl:
             fcntl.fcntl(
                 fd_stdout, fcntl.F_SETFL,
@@ -276,6 +292,16 @@ class Buildozer(object):
             fcntl.fcntl(
                 fd_stderr, fcntl.F_SETFL,
                 fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
+=======
+	
+	if has_fcntl== True:
+         fcntl.fcntl(
+            fd_stdout, fcntl.F_SETFL,
+            fcntl.fcntl(fd_stdout, fcntl.F_GETFL) | os.O_NONBLOCK)
+         fcntl.fcntl(
+            fd_stderr, fcntl.F_SETFL,
+            fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
+>>>>>>> cabd968... put a fcntl condition
 
         ret_stdout = [] if get_stdout else None
         ret_stderr = [] if get_stderr else None
