@@ -78,7 +78,7 @@ try:
     import errno
     import traceback
     import signal
-except ImportError, e:
+except ImportError e:
     raise ImportError (str(e) + """
 
 A critical module was not found. Probably this operating system does not
