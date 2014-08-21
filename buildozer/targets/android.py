@@ -318,7 +318,7 @@ class TargetAndroid(Target):
 
     def _read_version_subdir(self, *args):
         try:
-            versions = [ _process_version_string(v) for v in os.listdir(join(*args))]
+            versions = [ self._process_version_string(v) for v in os.listdir(join(*args))]
             versions.sort()
             return versions[-1]
         except:
@@ -332,7 +332,7 @@ class TargetAndroid(Target):
         for p in packages:
             if p.startswith(key):
                 version_string = p.split(key)[-1]
-                version = _process_version_string(version_string)                
+                version = self._process_version_string(version_string)                
                 package_versions.append(version)
         if not package_versions:
             return
