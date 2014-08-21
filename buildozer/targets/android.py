@@ -324,7 +324,7 @@ class TargetAndroid(Target):
         except:
             self.buildozer.error(
                 'Unable to find the latest version for {}'.format(join(*args)))
-            return '0'
+            return [0, 0, 0]  # to match version format
 
     def _find_latest_package(self, packages, key):
         # create list of versions only (no leading package name)
