@@ -311,22 +311,33 @@ class TargetAndroid(Target):
                 break
             child.sendline('y')
 
+    def _process_version_string(self, version_string):
+        """Convert version string, "X.X.X", to list of ints (X, X, X)"""
+        version = [int(i) for i in version_string.split(".")]
+        return version        
+
     def _read_version_subdir(self, *args):
         try:
-            versions = os.listdir(join(*args))
+            versions = [ self._process_version_string(v) for v in os.listdir(join(*args))]
             versions.sort()
             return versions[-1]
         except:
             self.buildozer.error(
                 'Unable to find the latest version for {}'.format(join(*args)))
-            return '0'
+            return [0, 0, 0]  # to match version format
 
     def _find_latest_package(self, packages, key):
-        l = [x for x in packages if x.startswith(key)]
-        if not l:
+        # create list of versions only (no leading package name)
+        package_versions = []
+        for p in packages:
+            if p.startswith(key):
+                version_string = p.split(key)[-1]
+                version = self._process_version_string(version_string)                
+                package_versions.append(version)
+        if not package_versions:
             return
-        l.sort()
-        return l[-1]
+        package_versions.sort()        
+        return package_versions[-1]
 
     def _install_android_packages(self):
         # 3 pass installation.
