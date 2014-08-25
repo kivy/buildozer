@@ -636,7 +636,7 @@ class TargetAndroid(Target):
                 self.buildozer.error('Invalid library reference (path not found): {}'.format(cref))
                 exit(1)
             # get a relative path from the project file
-            ref = relpath(ref, dist_dir)
+            ref = relpath(ref, realpath(dist_dir))
             # ensure the reference exists
             references.append(ref)
 
