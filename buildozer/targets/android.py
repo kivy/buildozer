@@ -86,6 +86,18 @@ class TargetAndroid(Target):
         return join(self.buildozer.global_platform_dir,
                 'apache-ant-{0}'.format(version))
 
+    @property
+    def proxy_host(self):
+        return self.buildozer.config.getdefault(
+                'app', 'android.proxy_host', 'localhost')
+
+    @property
+    def proxy_port(self):
+        v = self.buildozer.config.get(
+                'app', 'android.proxy_port')
+        if v:
+            return int(v)
+
     def check_requirements(self):
         if platform in ('win32', 'cygwin'):
             try:
@@ -288,6 +300,8 @@ class TargetAndroid(Target):
         cmd = '{} list sdk -u -e'.format(self.android_cmd)
         if include_all:
             cmd += ' -a'
+        if self.proxy_port:
+            cmd += ' --proxy-host %s --proxy-port %s' % (self.proxy_host, self.proxy_port)
         available_packages = self.buildozer.cmd(
                 cmd,
                 cwd=self.buildozer.global_platform_dir,
