@@ -553,6 +553,8 @@ class Buildozer(object):
             source = join(cwd, source)
             target = join(cwd, target)
         self.debug('Rename {0} to {1}'.format(source, target))
+        if not os.path.isdir(os.path.dirname(target)):
+            self.error('Rename {0} to {1} fails becaues {2} is not a directory'.format(source, target, os.path.directory(target)))
         rename(source, target)
 
     def file_copy(self, source, target, cwd=None):
