@@ -311,9 +311,14 @@ class TargetAndroid(Target):
                 break
             child.sendline('y')
 
+    def _process_version_string(self, version_string):
+        version = [int(i) for i in version_string.split(".")]
+        return version
+
     def _read_version_subdir(self, *args):
         try:
-            versions = os.listdir(join(*args))
+            versions = [self._process_version_string(v) for v in
+                        os.listdir(join(*args))]
             versions.sort()
             return versions[-1]
         except:
@@ -322,11 +327,17 @@ class TargetAndroid(Target):
             return '0'
 
     def _find_latest_package(self, packages, key):
-        l = [x for x in packages if x.startswith(key)]
-        if not l:
+        package_versions = []
+        for p in packages:
+            if not p.startswith(key):
+                continue
+            version_string = p.split(key)[-1]
+            version = self._process_version_string(version_string)
+            package_versions.append(version)
+        if not package_versions:
             return
-        l.sort()
-        return l[-1]
+        package_versions.sort()
+        return package_versions[-1]
 
     def _install_android_packages(self):
         # 3 pass installation.
