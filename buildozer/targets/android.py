@@ -490,6 +490,9 @@ class TargetAndroid(Target):
         # add src files
         self._add_java_src(dist_dir)
 
+        # metadata
+        metadatas = config.getlist('app', 'android.metadata', [])
+
         # build the app
         build_cmd = (
             '{python} build.py --name {name}'
@@ -497,7 +500,8 @@ class TargetAndroid(Target):
             ' --package {package}'
             ' --{storage_type} {appdir}'
             ' --sdk {androidsdk}'
-            ' --minsdk {androidminsdk}').format(
+            ' --minsdk {androidminsdk}'
+            ' --meta-data {metadatas}').format(
             python=executable,
             name=quote(config.get('app', 'title')),
             version=version,
@@ -508,7 +512,8 @@ class TargetAndroid(Target):
             androidminsdk=config.getdefault(
                 'app', 'android.minsdk', self.android_minapi),
             androidsdk=config.getdefault(
-                'app', 'android.sdk', self.android_api))
+                'app', 'android.sdk', self.android_api),
+            metadatas=' --meta-data '.join(metadatas))
 
         # add permissions
         permissions = config.getlist('app',
