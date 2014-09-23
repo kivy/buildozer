@@ -86,6 +86,18 @@ class TargetAndroid(Target):
         return join(self.buildozer.global_platform_dir,
                 'apache-ant-{0}'.format(version))
 
+    @property
+    def proxy_host(self):
+        return self.buildozer.config.getdefault(
+                'app', 'android.proxy_host', 'localhost')
+
+    @property
+    def proxy_port(self):
+        v = self.buildozer.config.get(
+                'app', 'android.proxy_port')
+        if v:
+            return int(v)
+
     def check_requirements(self):
         if platform in ('win32', 'cygwin'):
             try:
@@ -288,6 +300,8 @@ class TargetAndroid(Target):
         cmd = '{} list sdk -u -e'.format(self.android_cmd)
         if include_all:
             cmd += ' -a'
+        if self.proxy_port:
+            cmd += ' --proxy-host %s --proxy-port %s' % (self.proxy_host, self.proxy_port)
         available_packages = self.buildozer.cmd(
                 cmd,
                 cwd=self.buildozer.global_platform_dir,
@@ -501,6 +515,9 @@ class TargetAndroid(Target):
         # add src files
         self._add_java_src(dist_dir)
 
+        # metadata
+        metadatas = config.getlist('app', 'android.metadata', [])
+
         # build the app
         build_cmd = (
             '{python} build.py --name {name}'
@@ -508,7 +525,8 @@ class TargetAndroid(Target):
             ' --package {package}'
             ' --{storage_type} {appdir}'
             ' --sdk {androidsdk}'
-            ' --minsdk {androidminsdk}').format(
+            ' --minsdk {androidminsdk}'
+            ' --meta-data {metadatas}').format(
             python=executable,
             name=quote(config.get('app', 'title')),
             version=version,
@@ -519,7 +537,8 @@ class TargetAndroid(Target):
             androidminsdk=config.getdefault(
                 'app', 'android.minsdk', self.android_minapi),
             androidsdk=config.getdefault(
-                'app', 'android.sdk', self.android_api))
+                'app', 'android.sdk', self.android_api),
+            metadatas=' --meta-data '.join(metadatas))
 
         # add permissions
         permissions = config.getlist('app',
