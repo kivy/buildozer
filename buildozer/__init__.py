@@ -1154,3 +1154,4 @@ def set_config_token_from_env(section, token, config):
         return False
     config.set(section, token, env_var)
     return True
+
