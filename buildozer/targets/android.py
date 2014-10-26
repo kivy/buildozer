@@ -301,10 +301,12 @@ class TargetAndroid(Target):
 
     def _android_update_sdk(self, packages):
         from buildozer.libs.pexpect import EOF
+        java_tool_options = environ.get('JAVA_TOOL_OPTIONS', '')
         child = self.buildozer.cmd_expect('{} update sdk -u -a -t {}'.format(
             self.android_cmd, packages,
             cwd=self.buildozer.global_platform_dir),
-            timeout=None)
+            timeout=None,
+            env={'JAVA_TOOL_OPTIONS': java_tool_options + ' -Dfile.encoding=UTF-8'})
         while True:
             index = child.expect([EOF, '[y/n]: '])
             if index == 0:
