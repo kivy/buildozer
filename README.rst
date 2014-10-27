@@ -15,6 +15,9 @@ Buildozer currently supports packaging for Android via the `python-for-android
 project, and for iOS via the kivy-ios project. Support for other operating systems
 is intended in the future.
 
+Note that this tool has nothing to do with the eponymous online build service 
+`buildozer.io <http://buildozer.io />`_.
+
 Usage example
 -------------
 
