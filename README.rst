@@ -16,7 +16,7 @@ project, and for iOS via the kivy-ios project. Support for other operating syste
 is intended in the future.
 
 Note that this tool has nothing to do with the eponymous online build service 
-`buildozer.io <http://buildozer.io>`.
+`buildozer.io <http://buildozer.io />`_.
 
 Usage example
 -------------
