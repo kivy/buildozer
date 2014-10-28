@@ -320,15 +320,19 @@ class TargetAndroid(Target):
         return '{}-{}'.format(package_name, version_string)
 
     def _read_version_subdir(self, *args):
-        try:
-            versions = [self._process_version_string(v) for v in
-                        os.listdir(join(*args))]
-            versions.sort()
-            return versions[-1]
-        except:
+        versions = []
+        for v in os.listdir(join(*args)):
+            try:
+                print(os.listdir(join(*args)))
+                versions.append(self._process_version_string(v))
+            except:
+                pass
+        if not versions:
             self.buildozer.error(
                 'Unable to find the latest version for {}'.format(join(*args)))
             return [0]
+        versions.sort()
+        return versions[-1]
 
     def _find_latest_package(self, packages, key):
         package_versions = []
