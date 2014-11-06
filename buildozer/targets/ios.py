@@ -67,7 +67,6 @@ class TargetIos(Target):
         checkbin('Xcode xcodebuild', 'xcodebuild')
         checkbin('Xcode xcode-select', 'xcode-select')
         checkbin('Git git', 'git')
-        checkbin('Cython', 'cython')
         checkbin('Mercurial', 'hg')
         checkbin('Cython cython', 'cython')
         checkbin('pkg-config', 'pkg-config')
