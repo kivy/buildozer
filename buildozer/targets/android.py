@@ -317,16 +317,23 @@ class TargetAndroid(Target):
         version = [int(i) for i in version_string.split(".")]
         return version
 
+    def _build_package_string(self, package_name, version_list):
+        version_string = '.'.join([str(ver) for ver in version_list])
+        return '{}-{}'.format(package_name, version_string)
+
     def _read_version_subdir(self, *args):
-        try:
-            versions = [self._process_version_string(v) for v in
-                        os.listdir(join(*args))]
-            versions.sort()
-            return versions[-1]
-        except:
+        versions = []
+        for v in os.listdir(join(*args)):
+            try:
+                versions.append(self._process_version_string(v))
+            except:
+                pass
+        if not versions:
             self.buildozer.error(
                 'Unable to find the latest version for {}'.format(join(*args)))
-            return '0'
+            return [0]
+        versions.sort()
+        return versions[-1]
 
     def _find_latest_package(self, packages, key):
         package_versions = []
@@ -357,7 +364,7 @@ class TargetAndroid(Target):
         packages = self._android_list_sdk(include_all=True)
         ver = self._find_latest_package(packages, 'build-tools-')
         if ver and ver > v_build_tools:
-            self._android_update_sdk(ver)
+            self._android_update_sdk(self._build_package_string('build-tools', ver))
 
         # 3. finally, install the android for the current api
         android_platform = join(self.android_sdk_dir, 'platforms',
