@@ -125,6 +125,7 @@ class Buildozer(object):
                 'buildozer', 'log_level', '1'))
         except:
             pass
+        self.builddir = self.config.getdefault('buildozer', 'builddir', None)
 
         self.targetname = None
         self.target = None
@@ -404,6 +405,9 @@ class Buildozer(object):
 
         # create local dir
         specdir = dirname(self.specfilename)
+        if self.builddir:
+            specdir = self.builddir
+
         self.mkdir(join(specdir, '.buildozer'))
         self.mkdir(join(specdir, 'bin'))
         self.mkdir(self.applibs_dir)
@@ -788,6 +792,8 @@ class Buildozer(object):
 
     @property
     def buildozer_dir(self):
+        if self.builddir:
+            return join(self.builddir, '.buildozer')
         return join(self.root_dir, '.buildozer')
 
     @property

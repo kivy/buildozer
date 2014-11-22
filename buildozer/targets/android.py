@@ -323,6 +323,10 @@ class TargetAndroid(Target):
 
     def _read_version_subdir(self, *args):
         versions = []
+        if not os.path.exists(join(*args)):
+            self.buildozer.debug(
+                'build-tools folder not found {}'.format(join(*args)))
+            return [0]
         for v in os.listdir(join(*args)):
             try:
                 versions.append(self._process_version_string(v))
