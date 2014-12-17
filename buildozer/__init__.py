@@ -6,7 +6,7 @@ Generic Python packager for Android / iOS. Desktop later.
 
 '''
 
-__version__ = '0.19'
+__version__ = '0.20-dev'
 
 import os
 import re
