@@ -107,14 +107,15 @@ class TargetAndroid(Target):
             self.javac_cmd = self._locate_java('javac')
             self.keytool_cmd = self._locate_java('keytool')
 
-        # Check for C header <zlib.h>.
-        _, _, returncode_dpkg = self.buildozer.cmd(
-                'dpkg --version', break_on_error= False)
-        is_debian_like = (returncode_dpkg == 0)
-        if is_debian_like:
-            if not self.buildozer.file_exists('/usr/include/zlib.h'):
-                message = 'zlib headers must be installed, run: sudo apt-get install zlib1g-dev'
-                raise BuildozerException(message)
+            # Check for C header <zlib.h>.
+            _, _, returncode_dpkg = self.buildozer.cmd(
+                    'dpkg --version', break_on_error= False)
+            is_debian_like = (returncode_dpkg == 0)
+            if is_debian_like and \
+                not self.buildozer.file_exists('/usr/include/zlib.h'):
+                    raise BuildozerException(
+                        'zlib headers must be installed, '
+                        'run: sudo apt-get install zlib1g-dev')
 
         # Need to add internally installed ant to path for external tools
         # like adb to use
