@@ -47,6 +47,7 @@ setup(
         'buildozer.scripts'],
     package_data={'buildozer': ['default.spec']},
     include_package_data=True,
+    install_requires=['pexpect'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

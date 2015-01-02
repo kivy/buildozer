@@ -13,6 +13,7 @@ import re
 import sys
 import zipfile
 import select
+import codecs
 from buildozer.jsonstore import JsonStore
 from sys import stdout, stderr, exit
 from re import search
@@ -324,7 +325,7 @@ class Buildozer(object):
                 process.returncode)
 
     def cmd_expect(self, command, **kwargs):
-        from buildozer.libs.pexpect import spawn
+        from pexpect import spawnu
 
         # prepare the environ, based on the system + our own env
         env = copy(environ)
@@ -337,7 +338,7 @@ class Buildozer(object):
         show_output = kwargs.pop('show_output')
 
         if show_output:
-            kwargs['logfile'] = stdout
+            kwargs['logfile'] = codecs.getwriter('utf8')(stdout)
 
         if not sensible:
             self.debug('Run (expect) {0!r}'.format(command))
@@ -345,7 +346,7 @@ class Buildozer(object):
             self.debug('Run (expect) {0!r} ...'.format(command.split()[0]))
 
         self.debug('Cwd {}'.format(kwargs.get('cwd')))
-        return spawn(command, **kwargs)
+        return spawnu(command, **kwargs)
 
     def check_configuration_tokens(self):
         '''Ensure the spec file is 'correct'.
