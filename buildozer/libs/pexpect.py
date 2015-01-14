@@ -89,6 +89,8 @@ __revision__ = '$Revision: 399 $'
 __all__ = ['ExceptionPexpect', 'EOF', 'TIMEOUT', 'spawn', 'run', 'which',
     'split_command_line', '__version__', '__revision__']
 
+PY2 = sys.version_info[0] == 2
+
 # Exception classes used by this module.
 class ExceptionPexpect(Exception):
 
@@ -834,10 +836,16 @@ class spawn (object):
                 raise EOF ('End Of File (EOF) in read_nonblocking(). Empty string style platform.')
 
             if self.logfile is not None:
-                self.logfile.write (s.decode(encoding='UTF-8'))
+                if PY2:
+                    self.logfile.write (s)
+                else:
+                    self.logfile.write (s.decode(encoding='UTF-8'))
                 self.logfile.flush()
             if self.logfile_read is not None:
-                self.logfile_read.write (s.decode(encoding='UTF-8'))
+                if PY2:
+                    self.logfile_read.write (s)
+                else:
+                    self.logfile_read.write (s.decode(encoding='UTF-8'))
                 self.logfile_read.flush()
 
             return s
@@ -1378,7 +1386,10 @@ class spawn (object):
                 c = self.read_nonblocking (self.maxread, timeout)
                 freshlen = len(c)
                 time.sleep (0.0001)
-                incoming = incoming + c.decode(encoding='UTF-8')
+                if PY2:
+                    incoming = incoming + c
+                else:
+                    incoming = incoming + c.decode(encoding='UTF-8')
                 if timeout is not None:
                     timeout = end_time - time.time()
         except EOF as e:
