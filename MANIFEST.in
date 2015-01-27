@@ -1,2 +1,3 @@
 include *COPYING
+include *CHANGELOG.md
 recursive-include buildozer *.spec
