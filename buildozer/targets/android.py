@@ -354,6 +354,19 @@ class TargetAndroid(Target):
         return package_versions[-1]
 
     def _install_android_packages(self):
+
+        # if any of theses value change into the buildozer.spec, retry the
+        # update
+        cache_key = 'android:sdk_installation'
+        cache_value = [
+            self.android_api,
+            self.android_minapi,
+            self.android_ndk_version,
+            self.android_sdk_dir,
+            self.android_ndk_dir]
+        if self.buildozer.state.get(cache_key, None) == cache_value:
+            return True
+
         # 3 pass installation.
         if not os.access(self.android_cmd, os.X_OK):
             self.buildozer.cmd('chmod ug+x {}'.format(self.android_cmd))
@@ -381,6 +394,9 @@ class TargetAndroid(Target):
                 self._android_update_sdk(android_package)
 
         self.buildozer.info('Android packages installation done.')
+
+        self.buildozer.state[cache_key] = cache_value
+        self.buildozer.state.sync()
 
     def install_platform(self):
         cmd = self.buildozer.cmd
