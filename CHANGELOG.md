@@ -4,6 +4,15 @@ Changelog
 %%version%% (unreleased)
 ------------------------
 
+- Setup.py: add changelog in the long description. [Mathieu Virbel]
+
+- Bump to 0.24. [Mathieu Virbel]
+
+0.24 (2015-01-27)
+-----------------
+
+- Bump to 0.24. [Mathieu Virbel]
+
 - Bump to 0.23. [Mathieu Virbel]
 
 0.23 (2015-01-27)
