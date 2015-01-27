@@ -3,6 +3,7 @@ Buildozer
 '''
 
 from setuptools import setup
+from os.path import dirname, join
 import codecs
 import os
 import re
@@ -24,10 +25,17 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
+curdir = dirname(__file__)
+with open(join(curdir, "README.rst")) as fd:
+    readme = fd.read()
+with open(join(curdir, "CHANGELOG.md")) as fd:
+    changelog = fd.read()
+
 setup(
     name='buildozer',
     version=find_version('buildozer', '__init__.py'),
     description='Generic Python packager for Android / iOS and Desktop',
+    long_description=readme + "\n\n" + changelog,
     author='Mathieu Virbel',
     author_email='mat@kivy.org',
     url='http://github.com/kivy/buildozer',
