@@ -448,13 +448,6 @@ class TargetAndroid(Target):
         if not exists(dist_dir):
             need_compile = 1
 
-        # whitelist p4a
-        p4a_whitelist = self.buildozer.config.getlist('app', 'android.p4a_whitelist')
-        if p4a_whitelist:
-            with open(join(self.pa_dir, 'src', 'whitelist.txt'), 'w') as fd:
-                for wl in p4a_whitelist:
-                    fd.write(wl + '\n')
-
         if not need_compile:
             self.buildozer.info('Distribution already compiled, pass.')
             return
@@ -483,6 +476,13 @@ class TargetAndroid(Target):
         if package_domain:
             package = package_domain + '.' + package
         return package.lower()
+
+    def _generate_whitelist(self, dist_dir):
+        p4a_whitelist = self.buildozer.config.getlist('app', 'android.p4a_whitelist')
+        whitelist_fn = join(dist_dir, 'whitelist.txt')
+        with open(whitelist_fn, 'w') as fd:
+            for wl in p4a_whitelist:
+                fd.write(wl + '\n')
 
     def build_package(self):
         dist_name = self.buildozer.config.get('app', 'package.name')
@@ -514,6 +514,9 @@ class TargetAndroid(Target):
 
         # add src files
         self._add_java_src(dist_dir)
+
+        # generate the whitelist if needed
+        self._generate_whitelist(dist_dir)
 
         # build the app
         build_cmd = (
