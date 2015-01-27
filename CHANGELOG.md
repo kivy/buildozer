@@ -4,6 +4,17 @@ Changelog
 %%version%% (unreleased)
 ------------------------
 
+- Bump to 0.23. [Mathieu Virbel]
+
+0.23 (2015-01-27)
+-----------------
+
+- Bump to 0.23. [Mathieu Virbel]
+
+- Reference the changelog.md in the manifest.in. [Mathieu Virbel]
+
+- Auto generate changelog when releasing now. [Mathieu Virbel]
+
 - Bump to 0.23dev. [Mathieu Virbel]
 
 0.22 (2015-01-27)
