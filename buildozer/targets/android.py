@@ -494,7 +494,7 @@ class TargetAndroid(Target):
         return package.lower()
 
     def _generate_whitelist(self, dist_dir):
-        p4a_whitelist = self.buildozer.config.getlist('app', 'android.p4a_whitelist')
+        p4a_whitelist = self.buildozer.config.getlist('app', 'android.p4a_whitelist') or []
         whitelist_fn = join(dist_dir, 'whitelist.txt')
         with open(whitelist_fn, 'w') as fd:
             for wl in p4a_whitelist:
