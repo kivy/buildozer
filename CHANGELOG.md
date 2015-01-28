@@ -4,6 +4,17 @@ Changelog
 %%version%% (unreleased)
 ------------------------
 
+- Merge pull request #172 from kived/fix-whitelist. [Ryan Pessa]
+
+  ensure whitelist always has a list
+
+- Bump to 0.26dev. [Mathieu Virbel]
+
+0.25 (2015-01-27)
+-----------------
+
+- Bump to 0.25. [Mathieu Virbel]
+
 - Setup.py: add changelog in the long description. [Mathieu Virbel]
 
 - Bump to 0.24. [Mathieu Virbel]
