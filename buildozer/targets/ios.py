@@ -67,7 +67,6 @@ class TargetIos(Target):
         checkbin('Xcode xcodebuild', 'xcodebuild')
         checkbin('Xcode xcode-select', 'xcode-select')
         checkbin('Git git', 'git')
-        checkbin('Mercurial', 'hg')
         checkbin('Cython cython', 'cython')
         checkbin('pkg-config', 'pkg-config')
         checkbin('autoconf', 'autoconf')
@@ -100,21 +99,48 @@ class TargetIos(Target):
             cmd('git clean -dxf', cwd=ios_dir)
             cmd('git pull origin master', cwd=ios_dir)
 
-        self.fruitstrap_dir = fruitstrap_dir = join(self.buildozer.platform_dir,
-                'fruitstrap')
-        if not self.buildozer.file_exists(fruitstrap_dir):
-            cmd('git clone git://github.com/mpurland/fruitstrap.git',
+        self.ios_deploy_dir = ios_deploy_dir = join(self.buildozer.platform_dir,
+                'ios-deploy')
+        if not self.buildozer.file_exists(ios_deploy_dir):
+            cmd('git clone https://github.com/phonegap/ios-deploy',
                     cwd=self.buildozer.platform_dir)
 
-    def compile_platform(self):
-        state = self.buildozer.state
-        is_compiled = state.get('ios.platform.compiled', '')
-        if not is_compiled:
-            self.buildozer.cmd('tools/build-all.sh', cwd=self.ios_dir)
-        state['ios.platform.compiled'] = '1'
+    def get_available_packages(self):
+        available_modules = self.buildozer.cmd(
+                './toolchain.py recipes --compact',
+                cwd=self.ios_dir, get_stdout=True)[0]
+        return available_modules.splitlines()[0].split()
 
-        if not self.buildozer.file_exists(self.fruitstrap_dir, 'fruitstrap'):
-            self.buildozer.cmd('make fruitstrap', cwd=self.fruitstrap_dir)
+    def compile_platform(self):
+        # for ios, the compilation depends really on the app requirements.
+        # compile the distribution only if the requirements changed.
+        last_requirements = self.buildozer.state.get('ios.requirements', '')
+        app_requirements = self.buildozer.config.getlist('app', 'requirements',
+                '')
+
+        # we need to extract the requirements that kivy-ios knows about
+        available_modules = self.get_available_packages()
+        onlyname = lambda x: x.split('==')[0]
+        ios_requirements = [x for x in app_requirements if onlyname(x) in
+                            available_modules]
+
+        need_compile = 0
+        if last_requirements != ios_requirements:
+            need_compile = 1
+
+        if not need_compile:
+            self.buildozer.info('Distribution already compiled, pass.')
+            return
+
+        modules_str = ' '.join(ios_requirements)
+        self.buildozer.cmd('./toolchain.py build {}'.format(modules_str),
+                           cwd=self.ios_dir)
+
+        if not self.buildozer.file_exists(self.ios_deploy_dir, 'ios-deploy'):
+            self.buildozer.cmd('make ios-deploy', cwd=self.ios_deploy_dir)
+
+        self.buildozer.state['ios.requirements'] = ios_requirements
+        self.buildozer.state.sync()
 
     def _get_package(self):
         config = self.buildozer.config
@@ -131,14 +157,14 @@ class TargetIos(Target):
         app_name = self.buildozer.namify(self.buildozer.config.get('app',
             'package.name'))
 
-        self.app_project_dir = join(self.ios_dir, 'app-{0}'.format(app_name.lower()))
+        self.app_project_dir = join(self.ios_dir, '{0}-ios'.format(app_name.lower()))
         if not self.buildozer.file_exists(self.app_project_dir):
-            self.buildozer.cmd('tools/create-xcode-project.sh {0} {1}'.format(
+            self.buildozer.cmd('./toolchain.py create {0} {1}'.format(
                 app_name, self.buildozer.app_dir),
                 cwd=self.ios_dir)
         else:
-            self.buildozer.cmd('tools/populate-project.sh {0} {1}'.format(
-                app_name, self.buildozer.app_dir),
+            self.buildozer.cmd('./toolchain.py update {0}-ios'.format(
+                app_name),
                 cwd=self.ios_dir)
 
         # fix the plist
@@ -165,7 +191,7 @@ class TargetIos(Target):
         mode = 'Debug' if self.build_mode == 'debug' else 'Release'
         self.buildozer.cmd('xcodebuild -configuration {} clean build'.format(mode),
                 cwd=self.app_project_dir)
-        ios_app_dir = 'app-{app_lower}/build/{mode}-iphoneos/{app_lower}.app'.format(
+        ios_app_dir = '{app_lower}-ios/build/{mode}-iphoneos/{app_lower}.app'.format(
                 app_lower=app_name.lower(), mode=mode)
         self.buildozer.state['ios:latestappdir'] = ios_app_dir
 
@@ -199,11 +225,11 @@ class TargetIos(Target):
 
     def cmd_deploy(self, *args):
         super(TargetIos, self).cmd_deploy(*args)
-        self._run_fruitstrap(gdb=False)
+        self._run_ios_deploy(lldb=False)
 
     def cmd_run(self, *args):
         super(TargetIos, self).cmd_run(*args)
-        self._run_fruitstrap(gdb=True)
+        self._run_ios_deploy(lldb=True)
 
     def cmd_xcode(self, *args):
         '''Open the xcode project.
@@ -216,7 +242,7 @@ class TargetIos(Target):
         self.buildozer.cmd('open {}.xcodeproj'.format(
             app_name), cwd=join(ios_dir, 'app-{}'.format(app_name)))
 
-    def _run_fruitstrap(self, gdb=False):
+    def _run_ios_deploy(self, lldb=False):
         state = self.buildozer.state
         if 'ios:latestappdir' not in state:
             self.buildozer.error(
@@ -224,16 +250,16 @@ class TargetIos(Target):
             return
         ios_app_dir = state.get('ios:latestappdir')
 
-        if gdb:
-            gdb_mode = '-d'
+        if lldb:
+            debug_mode = '-d'
             self.buildozer.info('Deploy and start the application')
         else:
-            gdb_mode = ''
+            debug_mode = ''
             self.buildozer.info('Deploy the application')
 
-        self.buildozer.cmd('{fruitstrap} {gdb} -b {app_dir}'.format(
-            fruitstrap=join(self.fruitstrap_dir, 'fruitstrap'),
-            gdb=gdb_mode, app_dir=ios_app_dir),
+        self.buildozer.cmd('{iosdeploy} {debug_mode} -b {app_dir}'.format(
+            iosdeploy=join(self.ios_deploy_dir, 'ios-deploy'),
+            debug_mode=debug_mode, app_dir=ios_app_dir),
             cwd=self.ios_dir, show_output=True)
 
     def _get_icon(self):
@@ -322,7 +348,7 @@ class TargetIos(Target):
                 get_stdout=True)[0]
 
         lines = output.splitlines()[:-1]
-        lines = ['"{}"'.format(x.split('"')[1]) for x in lines]
+        lines = [u'"{}"'.format(x.split('"')[1]) for x in lines]
         return lines
 
     def _unlock_keychain(self):
