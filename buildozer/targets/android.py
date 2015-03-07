@@ -464,6 +464,17 @@ class TargetAndroid(Target):
         if not exists(dist_dir):
             need_compile = 1
 
+        source_dirs = {'P4A_{}_DIR'.format(name[20:]):
+                           realpath(expanduser(value))
+                       for name, value in self.buildozer.config.items('app')
+                       if name.startswith('requirements.source.')}
+        if source_dirs:
+            need_compile = 1
+            self.buildozer.environ.update(source_dirs)
+            self.buildozer.info('Using custom source dirs:\n    {}'.format(
+                '\n    '.join(['{} = {}'.format(k, v)
+                             for k, v in source_dirs.items()])))
+
         if not need_compile:
             self.buildozer.info('Distribution already compiled, pass.')
             return

@@ -9,7 +9,7 @@ if sys.platform != 'darwin':
 import plistlib
 from buildozer import BuildozerCommandException
 from buildozer.target import Target, no_config
-from os.path import join, basename
+from os.path import join, basename, expanduser, realpath
 from getpass import getpass
 
 PHP_TEMPLATE = '''
@@ -127,6 +127,17 @@ class TargetIos(Target):
         need_compile = 0
         if last_requirements != ios_requirements:
             need_compile = 1
+
+        source_dirs = {'{}_DIR'.format(name[20:]):
+                            realpath(expanduser(value))
+                       for name, value in self.buildozer.config.items('app')
+                       if name.startswith('requirements.source.')}
+        if source_dirs:
+            need_compile = 1
+            self.buildozer.environ.update(source_dirs)
+            self.buildozer.info('Using custom source dirs:\n    {}'.format(
+                '\n    '.join(['{} = {}'.format(k, v)
+                               for k, v in source_dirs.items()])))
 
         if not need_compile:
             self.buildozer.info('Distribution already compiled, pass.')
