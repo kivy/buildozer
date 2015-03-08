@@ -93,7 +93,7 @@ class TargetIos(Target):
         cmd = self.buildozer.cmd
         self.ios_dir = ios_dir = join(self.buildozer.platform_dir, 'kivy-ios')
         if not self.buildozer.file_exists(ios_dir):
-            cmd('git clone git://github.com/kivy/kivy-ios',
+            cmd('git clone https://github.com/kivy/kivy-ios',
                     cwd=self.buildozer.platform_dir)
         elif self.platform_update:
             cmd('git clean -dxf', cwd=ios_dir)

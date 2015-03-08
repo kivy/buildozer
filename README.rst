@@ -24,7 +24,7 @@ Usage example
 #. Install buildozer::
 
     # latest dev
-    git clone git://github.com/kivy/buildozer
+    git clone https://github.com/kivy/buildozer
     cd buildozer
     sudo python2.7 setup.py install
 
