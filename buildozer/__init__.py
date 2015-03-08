@@ -89,7 +89,7 @@ class BuildozerException(Exception):
 class BuildozerCommandException(BuildozerException):
     '''
     Exception raised when an external command failed.
-    
+
     See: `Buildozer.cmd()`.
     '''
     pass
@@ -97,7 +97,7 @@ class BuildozerCommandException(BuildozerException):
 
 class Buildozer(object):
 
-    standard_cmds = ('distclean', 'update', 'debug', 'release', 
+    standard_cmds = ('distclean', 'update', 'debug', 'release',
                      'deploy', 'run', 'serve')
 
     def __init__(self, filename='buildozer.spec', target=None):
@@ -973,10 +973,10 @@ class Buildozer(object):
         '''If effective user id is 0, display a warning and require
         user input to continue (or to cancel)'''
 
-        try:  # ensure same result in python2 and python3
-            input = raw_input
-        except NameError:
-            pass
+        if IS_PY3:
+            input_func = input
+        else:
+            input_func = raw_input
 
         warn_on_root = self.config.getdefault('buildozer', 'warn_on_root', '1')
         euid = os.geteuid()
@@ -985,11 +985,10 @@ class Buildozer(object):
             print('\033[91mThis is \033[1mnot\033[0m \033[91mrecommended, and may lead to problems later.\033[0m')
             cont = None
             while cont not in ('y', 'n'):
-                cont = input('Are you sure you want to continue [y/n]? ')
+                cont = input_func('Are you sure you want to continue [y/n]? ')
 
             if cont == 'n':
                 sys.exit()
-            
 
     def cmd_init(self, *args):
         '''Create a initial buildozer.spec in the current directory
@@ -1003,8 +1002,8 @@ class Buildozer(object):
     def cmd_distclean(self, *args):
         '''Clean the whole Buildozer environment.
         '''
-        print("Warning: Your ndk, sdk and all other cached packages will be"+\
-            " removed. Continue? (y/n)")
+        print("Warning: Your ndk, sdk and all other cached packages will be"
+              " removed. Continue? (y/n)")
         if sys.stdin.readline().lower()[0] == 'y':
             self.info('Clean the global build directory')
             if not exists(self.global_buildozer_dir):
