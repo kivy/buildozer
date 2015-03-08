@@ -317,6 +317,16 @@ class Buildozer(object):
         process.communicate()
         if process.returncode != 0 and break_on_error:
             self.error('Command failed: {0}'.format(command))
+            self.error('')
+            self.error('Buildozer failed to execute the last command')
+            if self.log_level <= 1:
+                self.error('If the error is not obvious, please raise the log_level to 2')
+                self.error('and retry the latest command.')
+            else:
+                self.error('The error might be hidden in the log above this error')
+                self.error('Please read the full log, and search for it before')
+                self.error('raising an issue with buildozer itself.')
+            self.error('In case of a bug report, please add a full log with log_level = 2')
             raise BuildozerCommandException()
         if ret_stdout:
             ret_stdout = b''.join(ret_stdout)
