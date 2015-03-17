@@ -128,7 +128,8 @@ class TargetIos(Target):
         if last_requirements != ios_requirements:
             need_compile = 1
 
-        source_dirs = {'{}_DIR'.format(name[20:]):
+        # len('requirements.source.') == 20, so use name[20:]
+        source_dirs = {'{}_DIR'.format(name[20:].upper()):
                             realpath(expanduser(value))
                        for name, value in self.buildozer.config.items('app')
                        if name.startswith('requirements.source.')}

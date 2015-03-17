@@ -464,6 +464,7 @@ class TargetAndroid(Target):
         if not exists(dist_dir):
             need_compile = 1
 
+        # len('requirements.source.') == 20, so use name[20:]
         source_dirs = {'P4A_{}_DIR'.format(name[20:]):
                            realpath(expanduser(value))
                        for name, value in self.buildozer.config.items('app')
