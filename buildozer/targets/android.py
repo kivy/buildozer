@@ -23,6 +23,7 @@ import io
 from pipes import quote
 from sys import platform, executable
 from buildozer import BuildozerException
+from buildozer import IS_PY3
 from buildozer.target import Target
 from os import environ
 from os.path import exists, join, realpath, expanduser, basename, relpath
@@ -699,7 +700,10 @@ class TargetAndroid(Target):
         # recreate the project.properties
         with io.open(project_fn, 'w', encoding='utf-8') as fd:
             for line in content:
-                fd.write(line.decode('utf-8'))
+                if IS_PY3:
+                    fd.write(line)
+                else:
+                    fd.write(line.decode('utf-8'))
             for index, ref in enumerate(references):
                 fd.write(u'android.library.reference.{}={}\n'.format(
                     index + 1, ref))
