@@ -252,7 +252,7 @@ class TargetIos(Target):
 
         ios_dir = ios_dir = join(self.buildozer.platform_dir, 'kivy-ios')
         self.buildozer.cmd('open {}.xcodeproj'.format(
-            app_name), cwd=join(ios_dir, 'app-{}'.format(app_name)))
+            app_name), cwd=join(ios_dir, '{}-ios'.format(app_name)))
 
     def _run_ios_deploy(self, lldb=False):
         state = self.buildozer.state
