@@ -315,9 +315,6 @@ class TargetAndroid(Target):
                 break
             child.sendline('y')
 
-    def _process_version_string(self, version_string):
-        return parse(version_string)
-
     def _build_package_string(self, package_name, version_list):
         version_string = '.'.join([str(ver) for ver in version_list])
         return '{}-{}'.format(package_name, version_string)
@@ -330,7 +327,7 @@ class TargetAndroid(Target):
             return [0]
         for v in os.listdir(join(*args)):
             try:
-                versions.append(self._process_version_string(v))
+                versions.append(parse(v))
             except:
                 pass
         if not versions:
@@ -346,7 +343,7 @@ class TargetAndroid(Target):
             if not p.startswith(key):
                 continue
             version_string = p.split(key)[-1]
-            version = self._process_version_string(version_string)
+            version = parse(version_string)
             package_versions.append(version)
         if not package_versions:
             return
