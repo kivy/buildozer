@@ -333,8 +333,7 @@ class TargetAndroid(Target):
             self.buildozer.error(
                 'Unable to find the latest version for {}'.format(join(*args)))
             return [0]
-        versions.sort()
-        return versions[-1]
+        return max(versions)
 
     def _find_latest_package(self, packages, key):
         package_versions = []
@@ -346,8 +345,7 @@ class TargetAndroid(Target):
             package_versions.append(version)
         if not package_versions:
             return
-        package_versions.sort()
-        return package_versions[-1]
+        return max(package_versions)
 
     def _install_android_packages(self):
 
