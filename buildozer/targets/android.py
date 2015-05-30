@@ -315,9 +315,8 @@ class TargetAndroid(Target):
                 break
             child.sendline('y')
 
-    def _build_package_string(self, package_name, version_list):
-        version_string = '.'.join([str(ver) for ver in version_list])
-        return '{}-{}'.format(package_name, version_string)
+    def _build_package_string(self, package_name, version):
+        return '{}-{}'.format(package_name, version)
 
     def _read_version_subdir(self, *args):
         versions = []
