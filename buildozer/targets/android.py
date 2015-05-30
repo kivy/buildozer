@@ -29,6 +29,7 @@ from os.path import exists, join, realpath, expanduser, basename, relpath
 from shutil import copyfile
 from glob import glob
 
+from buildozer.libs.version import parse
 
 
 class TargetAndroid(Target):
@@ -315,8 +316,7 @@ class TargetAndroid(Target):
             child.sendline('y')
 
     def _process_version_string(self, version_string):
-        version = [int(i) for i in version_string.split(".")]
-        return version
+        return parse(version_string)
 
     def _build_package_string(self, package_name, version_list):
         version_string = '.'.join([str(ver) for ver in version_list])
