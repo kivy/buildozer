@@ -989,8 +989,13 @@ class Buildozer(object):
             input_func = raw_input
 
         warn_on_root = self.config.getdefault('buildozer', 'warn_on_root', '1')
-        euid = os.geteuid()
-        if warn_on_root == '1' and euid == 0:
+        try:
+            euid = os.geteuid() == 0
+        except AttributeError:
+            if sys.platform == 'win32':
+                import ctypes
+            euid = ctypes.windll.shell32.IsUserAnAdmin() != 0
+        if warn_on_root == '1' and euid:
             print('\033[91m\033[1mBuildozer is running as root!\033[0m')
             print('\033[91mThis is \033[1mnot\033[0m \033[91mrecommended, and may lead to problems later.\033[0m')
             cont = None
