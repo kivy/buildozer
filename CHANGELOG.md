@@ -4,9 +4,104 @@ Changelog
 %%version%% (unreleased)
 ------------------------
 
+- Add missing files for libs. [Mathieu Virbel]
+
+- Merge pull request #176 from kivy/use_pip_pexpect. [Mathieu Virbel]
+
+  use upstream pexpect instead of shipping it
+
+- Use upstream pexpect instead of shipping it. [gabriel pettier]
+
+  this version allows unicode parsing, with spawnu
+  wrap stdout with codecs.getwriter('utf8') to avoid another unicode error
+
+- Merge pull request #191 from pohmelie/master. [Mathieu Virbel]
+
+  some python 3 compatibility
+
+- Some python 3 compatibility. [pohmelie]
+
+- Merge pull request #192 from jaynakus/master. [Mathieu Virbel]
+
+  Windows fix
+
+- Master. [jaynakus]
+
+  Root detection os.geteuid() does not work on win32 environment and
+  throws AttributeError. Fixed
+
+- Merge pull request #194 from cbenhagen/patch-1. [Mathieu Virbel]
+
+  fix ios targets xcode command
+
+- Fix ios targets xcode command. [Ben Hagen]
+
+- Merge pull request #197 from kived/android-dist-failure. [Mathieu
+  Virbel]
+
+  check for complete dist instead of dist dir
+
+- Check for complete dist instead of dist dir. [Ryan Pessa]
+
+- Use max() instead of sort() + [-1] [gabriel pettier]
+
+- Stop messing with version completly, don't split or join. [gabriel
+  pettier]
+
+- Completly remove self._process_version_string, since parse() is
+  simpler. [gabriel pettier]
+
+- Needs testing, should fix #201 using pypa implementation of PEP440.
+  [gabriel pettier]
+
+  https://github.com/pypa/packaging/blob/master/packaging/version.py
+
+- Merge pull request #185 from kived/custom-source-dirs. [Mathieu
+  Virbel]
+
+  allow custom source folders in buildozer.spec
+
+- Use uppercase name for ios source dirs. [Ryan Pessa]
+
+- Allow custom source folders in buildozer.spec. [Ryan Pessa]
+
+- Bump version to 0.28dev after release. [Mathieu Virbel]
+
+- Version 0.27. [Mathieu Virbel]
+
+- Add a note when a command failed to execute. This will give user few
+  step to do before reporting an issue we cant help with it. Closes
+  #177. [Mathieu Virbel]
+
+- Try to not break with python3. Closes #174. [Mathieu Virbel]
+
+- Replace git:// with https://. Closes #178. [Mathieu Virbel]
+
+- Merge branch 'master' of ssh://github.com/kivy/buildozer. [Mathieu
+  Virbel]
+
+- Merge pull request #184 from kived/log-color-fix. [Ryan Pessa]
+
+  fix black text in log
+
+- Fix black text in log. [Ryan Pessa]
+
+- Ios: fix ios target for the new kivy-ios toolchain, plus use ios-
+  deploy from phonegaps instead of the old/non-working fruitstrap.
+  [Mathieu Virbel]
+
+- Bump to 0.27dev. [Mathieu Virbel]
+
+0.26 (2015-01-28)
+-----------------
+
+- Bump to 0.26. [Mathieu Virbel]
+
 - Merge pull request #172 from kived/fix-whitelist. [Ryan Pessa]
 
   ensure whitelist always has a list
+
+- Ensure whitelist always has a list. [Ryan Pessa]
 
 - Bump to 0.26dev. [Mathieu Virbel]
 
@@ -61,16 +156,39 @@ Changelog
 - Merge pull request #168 from chozabu/diff_default_indentation.
   [Mathieu Virbel]
 
-  removed some indentation in example info, added to actual comments
-  inste...
+  removed some indentation in example info, added to actual comments inste...
+
+- Removed some indentation in example info, added to actual comments
+  instead for clarity. [Chozabu]
 
 - Bump to 0.20-dev. [Mathieu Virbel]
+
+0.19 (2014-12-17)
+-----------------
 
 - Bump to 0.19. [Mathieu Virbel]
 
 - Upgrade ant tool, as ant < 1.9 cannot handle java 8. [Mathieu Virbel]
 
 - Bump to 0.19-dev. [Mathieu Virbel]
+
+0.18 (2014-12-17)
+-----------------
+
+Fix
+~~~
+
+- Logic to compare versions "not installed" with "contain minor"(ex:
+  20.0.1) [attakei]
+
+  method bulldozer.targets.android.TargetAndroid._install_android_packages()
+  If build-tools is not installed, then variable "v_build_tools" is string = '0'.
+  If latest version contains minor version code ~ example 19.0.3 ~, then variable "ver" is list = [19, 0, 3].
+
+  In that case, build-tools is not enable to install, because expression([19, 0, 3] > '0') returns False.
+
+Other
+~~~~~
 
 - Bump to 0.18. [Mathieu Virbel]
 
@@ -80,29 +198,56 @@ Changelog
 
   fix build error and allow redirecting build folder
 
+- Fix build error and allow redirecting build folder. [Oliver Marks]
+
+  fixes #161 checks if build-tools exists and returns if it does not so it can be fetched
+  fixes #162 set builddir in you spec file so the packages are created outside your project
+  builddir = /tmp/buildozer/  # for example
+
 - Merge pull request #160 from attakei/master. [Mathieu Virbel]
 
   Remove duplicated checkbin().
+
+- Remove duplicated checkbin() [attakei]
 
 - Merge pull request #156 from attakei/patches/resolve_compare_versions.
   [Mathieu Virbel]
 
   Fixed logic to compare with “non installed” with “minor version upped"
 
+- Delete print for debug. [attakei]
+
+- Skip invalid name as version in build-tools directory.(ex: .DS_Store)
+  [attakei]
+
 - Merge pull request #157 from nickyspag/master. [Akshay Arora]
 
   added note about buildozer not having anything to do with buildozer.io
 
+- Link. [Nicholas Spagnoletti]
+
+- Note about buildozer.io. [Nicholas Spagnoletti]
+
 - Merge pull request #155 from attakei/patches/lock_java_file_encoding.
   [Akshay Arora]
 
-  Set "UTF-8" to java file.encoding for android update command
-  explicitly
+  Set "UTF-8" to java file.encoding for android update command explicitly
+
+- Set UTF-8 for android update command explicitly. [attakei]
+
+  Fix for fail in to update android package. It is happened to meet under the following conditions both.
+
+  * User environment is not used UTF-8 in default file.encoding in java
+  * Android-sdk license text is included not-ASCII code characters.
+
+  If user define JAVA_TOOL_OPTIONS in env, inherit it.
 
 - Merge pull request #148 from chozabu/clarify_reqs_example. [Mathieu
   Virbel]
 
   added example to default.spec requirements showing comma seperation
+
+- Added example to requirements. [Chozabu]
 
 - Bump to 0.17-dev. [Mathieu Virbel]
 
@@ -113,6 +258,42 @@ Changelog
 
 - Merge branch 'master' of ssh://github.com/kivy/buildozer. [Mathieu
   Virbel]
+
+- Merge pull request #133 from FeralBytes/master. [Mathieu Virbel]
+
+  Make pexpect.py Python 3 Compatable
+
+- Make pexpect.py Python 3 Compatable. [FeralBytes]
+
+  Warning changes have been not tested against Python 2!
+  If the code works in Python2 then this patch resolves Buildozer Issue #131.
+  https://github.com/kivy/buildozer/issues/131
+
+- Merge pull request #134 from dessant/patch-1. [Mathieu Virbel]
+
+  Specs doc revision
+
+- Specs doc revision. [dessant]
+
+- Merge pull request #139 from excessivedemon/master. [Mathieu Virbel]
+
+  Fix for android.library_references path issue
+
+- Fix for pathing issue when android.p4a_dir is defined (not using the
+  default one downloaded by buildozer) and entries in
+  android.library_references use relative paths from source.dir. [John
+  Mark Diaz]
+
+- Merge pull request #144 from droundy/master. [Mathieu Virbel]
+
+  Test in file_rename if target directory exists.
+
+- Test in file_rename if target directory exists. [David Roundy]
+
+  This is an attempt to give a reasonable error message in cases where
+  we are about to crash.  In particular, when android.sdk_path has a
+  path that does not exist, buildozer should provide a hint as to what
+  might have gone wrong.
 
 - Bump to 0.17-dev. [Mathieu Virbel]
 
@@ -130,6 +311,10 @@ Changelog
 
   Added check for buildozer running as root
 
+- Fixed warn_on_root config check. [Alexander Taylor]
+
+- Added root warning and settings token toggle. [Alexander Taylor]
+
 - Android: manually check the installed version for the build-tools, in
   order to install the latest one. without -a in android list sdk, we
   cannot known if a new build-tools is available or not. [Mathieu
@@ -145,13 +330,21 @@ Changelog
 
   Fix #115
 
+- Avoid blind chmod on android_cmd. [Manuel Bua]
+
+  Check for the missing exec bit before attempting to change it instead.
+
 - Merge pull request #118 from techtonik/master. [Mathieu Virbel]
 
   Execute buildozer as "python -m buildozer"
 
+- Execute buildozer as "python -m buildozer" [anatoly techtonik]
+
 - Merge pull request #119 from techtonik/patch-1. [Mathieu Virbel]
 
   Add link to the right android python project
+
+- Add link to the right android python project. [anatoly techtonik]
 
 - Bump to 0.16-dev. [Mathieu Virbel]
 
@@ -164,14 +357,22 @@ Changelog
 
   Ignore UTF-8 decoding errors. Closes #108
 
+- Ignore UTF-8 decoding errors. Closes #108. [Ben Hagen]
+
 - Merge pull request #111 from cbenhagen/patch-1. [Akshay Arora]
 
   chmod ug+x android_cmd
+
+- Chmod ug+x android_cmd. [Ben Hagen]
+
+  android_cmd needs to be made executable before its first use.
 
 - Missing use buildozer.debug. [qua-non]
 
 - Merge branch 'master' of ssh://github.com/kivy/buildozer. [Mathieu
   Virbel]
+
+- More detailed Android instructions. [Ben Rousch]
 
 - Add support for copying libraries for armeabi, armeabi-v7a, x86, mips.
   closes #63. [Mathieu Virbel]
@@ -189,6 +390,12 @@ Changelog
 
 - Merge branch 'master' of ssh://github.com/kivy/buildozer. [Mathieu
   Virbel]
+
+- Merge pull request #98 from b3ni/master. [Mathieu Virbel]
+
+  p4a whitelist
+
+- P4a whitelist. [benito]
 
 - Correctly pass android.minapi/api to build.py. closes #93. [Mathieu
   Virbel]
@@ -251,12 +458,34 @@ Changelog
 - Merge branch 'master' of ssh://github.com/kivy/buildozer. [Mathieu
   Virbel]
 
+- Merge pull request #79 from kivy/buildozer_clean. [Mathieu Virbel]
+
+  implement the `clean` command.
+
+- Rename `clean` to `distclean` [qua-non]
+
+- Merge branch 'buildozer_clean' of http://github.com/kivy/buildozer
+  into buildozer_clean. [qua-non]
+
+- Implement the `clean` command. [qua-non]
+
+- Implement the `clean` command. [qua-non]
+
+- Merge pull request #81 from inclement/master. [Mathieu Virbel]
+
+  Delete dist dir if running distribute.sh
+
+- Delete dist dir if running distribute.sh. [Alexander Taylor]
+
 - Install libs as well. [Mathieu Virbel]
 
 - Merge branch 'relpath' of https://github.com/inclement/buildozer into
   inclement-relpath. [Mathieu Virbel]
 
-  Conflicts:         buildozer/targets/android.py
+  Conflicts:
+  	buildozer/targets/android.py
+
+- Added realpath modifier to p4a_dir token. [Alexander Taylor]
 
 - Correctly update and download Android SDK with tools/platform-tools
   /build-tools if available. And install the API if necessary. closes
@@ -272,19 +501,57 @@ Changelog
 
   Fixed garden install for newer virtualenvs
 
+- Fixed garden install for newer virtualenvs. [Ben Rousch]
+
 - Merge pull request #96 from pengjia/master. [Akshay Arora]
 
   fix ln if soft link existed
+
+- Fix ln if soft link existed. [Peter Peng]
 
 - Merge pull request #41 from Ian-Foote/garden_requirements. [Akshay
   Arora]
 
   Garden requirements
 
+- Use Garden package from PyPI instead of github. [Ian Foote]
+
+- Merge branch 'master' into garden_requirements. [Ian Foote]
+
+- Use garden version 0.1.1. [Ian Foote]
+
+- Specify version of garden to use. [Ian Foote]
+
+- Use kivy-garden's version of garden. [Ian Foote]
+
+  Tweak garden_requirements.
+
+- Remove garden script from tools. [Ian Foote]
+
+- Merge remote-tracking branch 'origin/garden_requirements' into
+  garden_requirements. [Ian Foote]
+
+  Conflicts:
+  	buildozer/__init__.py
+
+- Install garden packages listed in buildozer.spec. [Ian Foote]
+
+  Requires local copy of garden script.
+
+- Ensure garden script is available. [Ian Foote]
+
+- Specify cwd for garden cmd. Use --app arg. [Ian Foote]
+
+- Allow specifying garden packages in buildozer.spec. [Ian Foote]
+
 - Merge pull request #85 from inclement/p4a_dir_fixes. [Alexander
   Taylor]
 
   Documented env var checking and fixed a bug in the p4a_dir check
+
+- Doc: Documented environment variable checking. [Alexander Taylor]
+
+- Fixed p4a installation to check correct env var. [Alexander Taylor]
 
 - Bump to 0.10-dev. [Mathieu Virbel]
 
@@ -295,24 +562,71 @@ Changelog
 
   Updated Android NDK default version to 9c
 
+- Updated Android NDK default version to 9c. [Ben Rousch]
+
 - Merge pull request #60 from inclement/p4a. [Mathieu Virbel]
 
   Add ability to choose python-for-android directory
+
+- Variable renaming for clarity. [Alexander Taylor]
+
+- Added app.p4a_dir token. [Alexander Taylor]
+
+- Added a few comments and formatting changes. [Alexander Taylor]
+
+- Added env check during config build. [Alexander Taylor]
+
+- Added env var checking to all config get methods. [Alexander Taylor]
+
+  The new method replaces the manual env var parsing with simply setting
+  the config's value to the env var value. This lets the normal parsing
+  methods do the work later, to avoid duplication of effort.
+
+- Added env var querying for default and bool. [Alexander Taylor]
+
+- Minor code cleanup (formatting) [Alexander Taylor]
+
+- Made p4a distribution dir name == app.package.name. [Alexander Taylor]
+
+- Added BUILDOZER_P4A_DIR env var behaviour. [Alexander Taylor]
 
 - Merge pull request #78 from josephlee021/master. [qua-non]
 
   Add 'bin' to suggested default directory excludes
 
+- Add bin to suggested default directory excludes. [josephlee021]
+
+  Prevent packaging apks in apks in apks...
+
 - Merge pull request #75 from inclement/readme3. [Gabriel Pettier]
 
   Clarified wording in README
+
+- Clarified wording in README. [Alexander Taylor]
 
 - Merge pull request #65 from inclement/packagename. [qua-non]
 
   Check for package name starting with number
 
+- Rearranged package.name check to avoid crash. [Alexander Taylor]
+
+  Buildozer would previously crash if a package name was '', as it checked
+  for zero length *and* tried to check if the first character was a
+  number.
+
+- Added check for package name starting with number. [Alexander Taylor]
+
 - Merge branch 'master' of ssh://github.com/kivy/buildozer. [Mathieu
   Virbel]
+
+- Merge pull request #62 from alanjds/patch-1. [Mathieu Virbel]
+
+  [FIX] Detect 32/64 bit on Windows, to download Android NDK
+
+- [FIX] Detect 32/64 bit on Windows, to download Android NDK. [Alan
+  Justino da Silva]
+
+  Grabbed the answer from StackOverflow, and should work for other OSes too, but kept for Windows only.
 
 - Correctly check requirements if a specific version is used
   (package==version will check the requirement only on package, not the
@@ -338,9 +652,14 @@ Changelog
 
   Added --private and --dir Android storage option
 
+- Added --private and --dir Android storage option. [Ben Rousch]
+
 - Merge pull request #49 from brousch/serve_command. [Mathieu Virbel]
 
   Added a 'serve' command to serve bin/ over SimpleHTTPServer
+
+- Added a 'serve' command to serve bin/ over SimpleHTTPServer. [Ben
+  Rousch]
 
 0.8 (2013-10-29)
 ----------------
@@ -358,48 +677,78 @@ Changelog
 
   Update default Android NDK to r9
 
+- Update defauly Android NDK to r9. [Ben Rousch]
+
 - Merge pull request #48 from brousch/patch-3. [qua-non]
 
   Fixed another 'Unknown' typo
+
+- Fixed another 'Unknown' typo. [Ben Rousch]
 
 - Merge pull request #51 from brousch/android.wakelock. [qua-non]
 
   Added android.wakelock option
 
+- Added android.wakelock option. [Ben Rousch]
+
 - Merge pull request #47 from brousch/patch-1. [qua-non]
 
   Fixed spelling of 'Unknown'
+
+- Fixed spelling of 'Unknown' [Ben Rousch]
 
 - Merge pull request #46 from brousch/patch-2. [qua-non]
 
   Fixed missing 'r' on ANDROIDNDKVER environment export
 
+- Fixed missing 'r' on ANDROIDNDKVER environment export. [Ben Rousch]
+
 - Merge pull request #44 from kivy/android_branch. [Mathieu Virbel]
 
   make sure android.branch works with fresh clone
+
+- Make sure android.branch works with fresh clone. [qua-non]
 
 - Merge pull request #26 from kivy/fix_service_path. [Mathieu Virbel]
 
   add applibs in path for service too
 
+- Add applibs in path for service too. [tshirtman]
+
 - Merge pull request #25 from kivy/autofix_distribute. [Mathieu Virbel]
 
-  fix distribute install before installing every dependencies, fix a few
-  i...
+  fix distribute install before installing every dependencies, fix a few i...
+
+- Fix distribute install before installing every dependencies, fix a few
+  issues. [tshirtman]
+
+  maybe not the cleanest way, though
 
 - Merge pull request #40 from nithinbose87/master. [Gabriel Pettier]
 
   Fixed a typo in setdefault description
 
+- Fixed a typo in setdefault description. [Nithin Bose]
+
 - Merge pull request #38 from Ian-Foote/package_paths. [Mathieu Virbel]
 
   Package paths
+
+- Add sitecustomize.py, copy into app_dir on build. [Ian Foote]
+
+- Fix typo 'versionning' -> 'versioning'. [Ian Foote]
 
 0.7 (2013-09-11)
 ----------------
 
 - Merge branch 'master' of ssh://github.com/kivy/buildozer. [Mathieu
   Virbel]
+
+- Merge pull request #23 from brousch/master. [Gabriel Pettier]
+
+  Fixed hard-coded Android API 14
+
+- Fixed hard-coded Android API 14. [Ben Rousch]
 
 - Bump to 0.7. [Mathieu Virbel]
 
@@ -441,6 +790,12 @@ Changelog
 
   Fixed #18: Builds fail on Ubuntu 13.04 with zlib.h missing.
 
+- Merge branch 'master' of https://github.com/kivy/buildozer. [Thomas
+  Aglassinger]
+
+  Conflicts:
+  	buildozer/targets/android.py
+
 - Avoid empty lines when checking adb serials. [Mathieu Virbel]
 
 - Avoid start message of adb. [Mathieu Virbel]
@@ -452,6 +807,25 @@ Changelog
 - Merge pull request #19 from fabiankreutz/master. [Mathieu Virbel]
 
   Europython sprint updates
+
+- Merge branch 'master' of https://github.com/kivy/buildozer. [Fabian
+  Kreutz]
+
+- Europython sprint: Fix for prior ndk-url fix: uname()[4] for 32bit is
+  not x86. [Fabian Kreutz]
+
+- Europython sprint: put internally provided ant into os-path. [Fabian
+  Kreutz]
+
+- Europython sprint: Typo and better error message for missing version
+  definition. [Fabian Kreutz]
+
+- Europython sprint outcome: enable download of 64bit NDK version.
+  [Fabian Kreutz]
+
+- * Fixed #18: Builds fail on Ubuntu 13.04 with zlib.h missing. * Fixed
+  missing rebuild of build.py when the previous build failed. [Thomas
+  Aglassinger]
 
 - Enhance error message when version capture failed. Credits goes to
   Dabian Snovna. [Mathieu Virbel]
@@ -465,6 +839,8 @@ Changelog
 
   copy the generated apk back from remote
 
+- Copy the generated apk back from remote. [qua-non]
+
 - Allows multiple devices in ANDROID_SERIAL env variables, separated
   with comma. [Mathieu Virbel]
 
@@ -477,9 +853,22 @@ Changelog
 
   Ouya support
 
+- Add android.ouya.category and android.ouya.icon.filename options to
+  buildozer.spec. [Bob the Hamster]
+
 - Merge pull request #15 from bob-the-hamster/add-jars. [Mathieu Virbel]
 
   android.add_jars config option
+
+- Add android.add_jars config option for bundling extra Java .jar files
+  (for example: OUYA-ODK/libs/*.jar) [Bob the Hamster]
+
+- Merge branch 'master' of https://github.com/kivy/buildozer. [Bob the
+  Hamster]
+
+  Conflicts:
+  	buildozer/__init__.py
+  	buildozer/targets/android.py
 
 - Add support for orientation and fullscreen (working on android only
   right now.) [Mathieu Virbel]
@@ -489,8 +878,9 @@ Changelog
 
 - Fixes for the android.branch feature. [tshirtman]
 
-  Use getdefault instead of get (duh) Add commented option to
-  default.spec for documentation
+  Use getdefault instead of get (duh)
+  Add commented option to default.spec for documentation
+
   fix: #12
 
 - Update README.rst. [Mathieu Virbel]
@@ -511,10 +901,39 @@ Changelog
 - Fix get_config_list when the string is empty. closes #8. [Mathieu
   Virbel]
 
+- Presplash.filename and icon.filename only worked if source.dir was .
+  For any other value of source.dir presplash and icon were broken. [Bob
+  the Hamster]
+
+- _get_config_list() was incorrectly returning [""] instead of [] for
+  blank config lists. [Bob the Hamster]
+
+- Revert "When android.permissions list is left blank, it contains a
+  null string [""]" [Bob the Hamster]
+
+  This reverts commit aa0a7f8195716a4487dd1ab8c863be7930e45c06.
+
+- When android.permissions list is left blank, it contains a null string
+  [""] Filter this out when checking permission validity, and when
+  building --permission command line args. [Bob the Hamster]
+
+  Also fix two typos in the error message for an unknown permission
+
+- Merge branch 'master' of github.com:kivy/buildozer. [tshirtman]
+
 - Merge branch 'master' of ssh://github.com/kivy/buildozer. [Mathieu
   Virbel]
 
 - Fix config list when a default value is given. [Mathieu Virbel]
+
+- Add expanduser in android sdk/ndk paths configuration. [tshirtman]
+
+  fix: #3
+
+- Allow to use branch in python-for-android. [tshirtman]
+
+- Merge branch 'master' of https://github.com/kivy/buildozer.
+  [tshirtman]
 
 - Rework how buildozer-remote pipeline commands works (support stdin
   now.) [Mathieu Virbel]
@@ -541,6 +960,9 @@ Changelog
 
 - Add icon and presplash support. [Mathieu Virbel]
 
+- Merge branch 'master' of https://github.com/kivy/buildozer.
+  [tshirtman]
+
 - Virtualenv: avoid to reinstall applibs except if requirements changed.
   [Mathieu Virbel]
 
@@ -555,6 +977,20 @@ Changelog
   loaded. [Mathieu Virbel]
 
 - Avoid double-logging of commands. [Mathieu Virbel]
+
+- Merge branch 'master' of https://github.com/kivy/buildozer.
+  [tshirtman]
+
+  Conflicts:
+  	.gitignore
+
+- More work on iOS target. [Mathieu Virbel]
+
+- Self.error doesn't exit. [Mathieu Virbel]
+
+- Add missing default methods in target.py. [Mathieu Virbel]
+
+- Check configuration token when target is set. [Mathieu Virbel]
 
 - Fix debug() issue, and avoid % in print. [Mathieu Virbel]
 
@@ -581,6 +1017,8 @@ Changelog
 - Typo. [Mathieu Virbel]
 
 - Bump to 0.3-dev. [Mathieu Virbel]
+
+- Initial commit. [Mathieu Virbel]
 
 0.2 (2012-12-20)
 ----------------
