@@ -455,7 +455,9 @@ class TargetAndroid(Target):
 
         dist_name = self.buildozer.config.get('app', 'package.name')
         dist_dir = join(self.pa_dir, 'dist', dist_name)
-        if not exists(dist_dir):
+        dist_file = join(dist_dir, 'private', 'include', 'python2.7',
+                         'pyconfig.h')
+        if not exists(dist_file):
             need_compile = 1
 
         # len('requirements.source.') == 20, so use name[20:]
