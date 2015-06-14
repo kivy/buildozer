@@ -324,7 +324,7 @@ class TargetAndroid(Target):
         if not os.path.exists(join(*args)):
             self.buildozer.debug(
                 'build-tools folder not found {}'.format(join(*args)))
-            return [0]
+            return parse("0")
         for v in os.listdir(join(*args)):
             try:
                 versions.append(parse(v))
@@ -333,7 +333,7 @@ class TargetAndroid(Target):
         if not versions:
             self.buildozer.error(
                 'Unable to find the latest version for {}'.format(join(*args)))
-            return [0]
+            return parse("0")
         return max(versions)
 
     def _find_latest_package(self, packages, key):
