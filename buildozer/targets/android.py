@@ -341,9 +341,12 @@ class TargetAndroid(Target):
         for p in packages:
             if not p.startswith(key):
                 continue
-            version_string = p.split(key)[-1]
-            version = parse(version_string)
-            package_versions.append(version)
+            try:
+                version_string = p.split(key)[-1]
+                version = parse(version_string)
+                package_versions.append(version)
+            except ValueError:
+                pass
         if not package_versions:
             return
         return max(package_versions)
