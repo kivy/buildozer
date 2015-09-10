@@ -596,6 +596,12 @@ class Buildozer(object):
             self.cmd('tar xjf {0}'.format(archive), cwd=cwd)
             return
 
+        if archive.endswith('.bin'):
+            # To process the bin files for linux and darwin systems
+            self.cmd('chmod a+x {0}'.format(archive),cwd=cwd)
+            self.cmd('./{0}'.format(archive),cwd=cwd)
+            return
+
         if archive.endswith('.zip'):
             archive = join(cwd, archive)
             zf = zipfile.ZipFile(archive)
