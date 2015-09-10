@@ -256,17 +256,28 @@ class TargetAndroid(Target):
             self.buildozer.info('Android NDK found at {0}'.format(ndk_dir))
             return ndk_dir
 
+        import re
+        _version = re.search('(.+?)[a-z]', self.android_ndk_version).group(1)
+        
         self.buildozer.info('Android NDK is missing, downloading')
         if platform in ('win32', 'cygwin'):
             # Checking of 32/64 bits at Windows from: http://stackoverflow.com/a/1405971/798575
             import struct
             archive = 'android-ndk-r{0}-windows-{1}.zip'
             is_64 = (8*struct.calcsize("P") == 64)
+
         elif platform in ('darwin', ):
-            archive = 'android-ndk-r{0}-darwin-{1}.tar.bz2'
+            if int(_version) > 9:
+                archive = 'android-ndk-r{0}-darwin-{1}.bin'
+            else:
+                archive = 'android-ndk-r{0}-darwin-{1}.tar.bz2'
             is_64 = (os.uname()[4] == 'x86_64')
+
         elif platform.startswith('linux'):
-            archive = 'android-ndk-r{0}-linux-{1}.tar.bz2'
+            if int(_version) > 9: # if greater than 9, take it as .bin file
+                archive = 'android-ndk-r{0}-linux-{1}.bin'
+            else:
+                archive = 'android-ndk-r{0}-linux-{1}.tar.bz2'
             is_64 = (os.uname()[4] == 'x86_64')
         else:
             raise SystemError('Unsupported platform: {0}'.format(platform))
