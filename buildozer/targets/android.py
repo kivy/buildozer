@@ -413,7 +413,8 @@ class TargetAndroid(Target):
                 cmd('ln -sf {} ./python-for-android'.format(system_p4a_dir),
                     cwd = self.buildozer.platform_dir)
             else:
-                cmd('git clone -b old_toolchain --single-branch https://github.com/kivy/python-for-android.git',
+                cmd('git clone -b old_toolchain --single-branch '
+                    'https://github.com/kivy/python-for-android.git',
                     cwd=self.buildozer.platform_dir)
         elif self.platform_update:
             cmd('git clean -dxf', cwd=pa_dir)
