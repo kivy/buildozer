@@ -11,8 +11,8 @@ import sys
 if sys.platform == 'win32':
     raise NotImplementedError('Windows platform not yet working for Android')
 
-ANDROID_API = '14'
-ANDROID_MINAPI = '8'
+ANDROID_API = '21'
+ANDROID_MINAPI = '9'
 ANDROID_SDK_VERSION = '21'
 ANDROID_NDK_VERSION = '9c'
 APACHE_ANT_VERSION = '1.9.4'
@@ -258,7 +258,7 @@ class TargetAndroid(Target):
 
         import re
         _version = re.search('(.+?)[a-z]', self.android_ndk_version).group(1)
-        
+
         self.buildozer.info('Android NDK is missing, downloading')
         if platform in ('win32', 'cygwin'):
             # Checking of 32/64 bits at Windows from: http://stackoverflow.com/a/1405971/798575
