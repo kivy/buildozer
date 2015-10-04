@@ -11,7 +11,7 @@ import sys
 if sys.platform == 'win32':
     raise NotImplementedError('Windows platform not yet working for Android')
 
-ANDROID_API = '21'
+ANDROID_API = '14'
 ANDROID_MINAPI = '9'
 ANDROID_SDK_VERSION = '21'
 ANDROID_NDK_VERSION = '9c'
