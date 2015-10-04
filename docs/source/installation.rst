@@ -25,7 +25,7 @@ Android on Ubuntu 14.10 (64bit)
     sudo pip install --upgrade cython==0.21
     sudo dpkg --add-architecture i386
     sudo apt-get update
-    sudo apt-get install build-essential ccache git lib32z1 lib32z1-dev python2.7 python2.7-dev openjdk-7-jdk unzip zlib1g-dev
+    sudo apt-get install build-essential ccache git lib32stdc++6 lib32z1 lib32z1-dev python2.7 python2.7-dev openjdk-7-jdk unzip zlib1g-dev
 
 Android on Ubuntu 13.10 (64bit)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
