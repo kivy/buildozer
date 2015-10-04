@@ -7,6 +7,7 @@ from os.path import dirname, join
 import codecs
 import os
 import re
+import io
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -25,10 +26,11 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
+
 curdir = dirname(__file__)
-with open(join(curdir, "README.rst")) as fd:
+with io.open(join(curdir, "README.rst"), encoding="utf-8") as fd:
     readme = fd.read()
-with open(join(curdir, "CHANGELOG.md")) as fd:
+with io.open(join(curdir, "CHANGELOG.md"), encoding="utf-8") as fd:
     changelog = fd.read()
 
 setup(
@@ -41,24 +43,24 @@ setup(
     url='http://github.com/kivy/buildozer',
     license='MIT',
     packages=[
-        'buildozer',
-        'buildozer.targets',
-        'buildozer.libs',
-        'buildozer.scripts'],
+        'buildozer', 'buildozer.targets', 'buildozer.libs', 'buildozer.scripts'
+    ],
     package_data={'buildozer': ['default.spec']},
     include_package_data=True,
     install_requires=['pexpect'],
     classifiers=[
-        'Development Status :: 4 - Beta',
-        'Intended Audience :: Developers',
+        'Development Status :: 4 - Beta', 'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.1',
         'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3'],
+        'Programming Language :: Python :: 3.3'
+    ],
     entry_points={
         'console_scripts': [
             'buildozer=buildozer.scripts.client:main',
-            'buildozer-remote=buildozer.scripts.remote:main']})
+            'buildozer-remote=buildozer.scripts.remote:main'
+        ]
+    })
