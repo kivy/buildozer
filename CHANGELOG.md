@@ -4,6 +4,79 @@ Changelog
 %%version%% (unreleased)
 ------------------------
 
+- Fix default SDK version. [Mathieu Virbel]
+
+  Closes #149
+  Closes #205
+
+- Add android.ant_path in default.spec. Closes #209. [Mathieu Virbel]
+
+- Avoid recompilation everytime we do android debug if we are using
+  requirements.source. Compile only if source string change. If the user
+  want to recompile the underlaying source, it need to clean then debug.
+  Closes #210. [Mathieu Virbel]
+
+- Add missing lib32stdc++6 in installation instructions. [Mathieu
+  Virbel]
+
+- Fix encoding issue. Closes #225. [Mathieu Virbel]
+
+- Api 14 nor 21 exists anymore, set the default to 19 (minimum is still
+  9) [Mathieu Virbel]
+
+- Fix doc issue about clean. Closes #189. [Mathieu Virbel]
+
+- Add check on aidl / 64 bits platform, and refer on installation
+  instructions if it can't be runned. [Mathieu Virbel]
+
+  Closes #228
+
+- Fix invalid api change. [Mathieu Virbel]
+
+- Yapf. [Mathieu Virbel]
+
+- Kivy minimum api version is 9, not 8 as before. [Mathieu Virbel]
+
+- Merge pull request #233 from inclement/p4a_revamp_redirect. [Alexander
+  Taylor]
+
+  Changed p4a download to pull old_toolchain branch
+
+- Pep8 fix for buildozer p4a target change. [Alexander Taylor]
+
+- Changed p4a download to pull old_toolchain branch. [Alexander Taylor]
+
+- Merge pull request #230 from dvenkatsagar/ndk_r10_support. [Akshay
+  Arora]
+
+  Added support for downloading and handling android ndk r10 versions. Fixes #229 and #227
+
+- Added support for downloading and handling android ndk r10 versions. *
+  android ndk r10 versions are only avalable in ".bin" format. *
+  Modified the _install_android_ndk function in
+  /buildozer/targets/android.py.   - Checks the version of ndk given in
+  the spec file, whether its greater than 9. If it is greater than 9,
+  generate the link containing the .bin url. * Modified the file_extract
+  function in /buildozer/__init__.py   - Introduced the functionality to
+  handle .bin files. [Sagar DV]
+
+- Merge pull request #206 from denys-duchier/install-build-tools.
+  [Mathieu Virbel]
+
+  make _read_version_subdir return parse('0') instead of [0], otherwise…
+
+- Make _read_version_subdir return parse('0') instead of [0], otherwise
+  it cannot be meaningfully compared to an actual version. [Denys
+  Duchier]
+
+- Bump version to 0.30dev after release. [Mathieu Virbel]
+
+- Version 0.29. [Mathieu Virbel]
+
+- Remove old CHANGES.md. [Mathieu Virbel]
+
+- Update changelog. [Mathieu Virbel]
+
 - Add missing files for libs. [Mathieu Virbel]
 
 - Merge pull request #176 from kivy/use_pip_pexpect. [Mathieu Virbel]
