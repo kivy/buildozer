@@ -195,7 +195,8 @@ class TargetAndroid(Target):
             _winreg.HKEY_LOCAL_MACHINE,
             r"SOFTWARE\JavaSoft\Java Development Kit") as jdk:  #@UndefinedVariable
             current_version, _type = _winreg.QueryValueEx(
-                jdk, "CurrentVersion")  #@UndefinedVariable
+                jdk, "CurrentVersion"
+            )  #@UndefinedVariable
             with _winreg.OpenKey(jdk,
                                  current_version) as cv:  #@UndefinedVariable
                 java_home, _type = _winreg.QueryValueEx(cv, "JavaHome"
@@ -423,19 +424,25 @@ class TargetAndroid(Target):
         self.buildozer.debug('Check that aidl can be executed')
         v_build_tools = self._read_version_subdir(
             self.android_sdk_dir, 'build-tools')
-        aidl_cmd = join(self.android_sdk_dir, 'build-tools', str(v_build_tools), 'aidl')
+        aidl_cmd = join(self.android_sdk_dir, 'build-tools',
+                        str(v_build_tools), 'aidl')
         self.buildozer.checkbin('Aidl', aidl_cmd)
-        _, _, returncode = self.buildozer.cmd(aidl_cmd, break_on_error=False, show_output=False)
+        _, _, returncode = self.buildozer.cmd(aidl_cmd,
+                                              break_on_error=False,
+                                              show_output=False)
         if returncode != 1:
             self.buildozer.error('Aidl cannot be executed')
             if sys.maxint > 2 ** 32:
                 self.buildozer.error('')
-                self.buildozer.error('You might have missed to install 32bits libs')
-                self.buildozer.error('Check http://buildozer.readthedocs.org/en/latest/installation.html')
+                self.buildozer.error(
+                    'You might have missed to install 32bits libs')
+                self.buildozer.error(
+                    'Check http://buildozer.readthedocs.org/en/latest/installation.html')
                 self.buildozer.error('')
             else:
                 self.buildozer.error('')
-                self.buildozer.error('In case of a bug report, please add a full log with log_level = 2')
+                self.buildozer.error(
+                    'In case of a bug report, please add a full log with log_level = 2')
                 self.buildozer.error('')
             raise BuildozerException()
 
@@ -520,11 +527,15 @@ class TargetAndroid(Target):
             if name.startswith('requirements.source.')
         }
         if source_dirs:
-            need_compile = 1
             self.buildozer.environ.update(source_dirs)
             self.buildozer.info('Using custom source dirs:\n    {}'.format(
                 '\n    '.join(['{} = {}'.format(k, v)
                                for k, v in source_dirs.items()])))
+
+        last_source_requirements = self.buildozer.state.get(
+            'android.requirements.source', {})
+        if source_dirs != last_source_requirements:
+            need_compile = 1
 
         if not need_compile:
             self.buildozer.info('Distribution already compiled, pass.')
@@ -545,6 +556,7 @@ class TargetAndroid(Target):
 
         # ensure we will not compile again
         self.buildozer.state['android.requirements'] = android_requirements
+        self.buildozer.state['android.requirements.source'] = source_dirs
         self.buildozer.state.sync()
 
     def _get_package(self):
