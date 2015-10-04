@@ -257,6 +257,7 @@ class TargetAndroid(Target):
         self.buildozer.file_rename(unpacked, sdk_dir,
                                    cwd=self.buildozer.global_platform_dir)
         self.buildozer.info('Android SDK installation done.')
+
         return sdk_dir
 
     def _install_android_ndk(self):
@@ -401,6 +402,8 @@ class TargetAndroid(Target):
         if ver and ver > v_build_tools:
             self._android_update_sdk(self._build_package_string('build-tools',
                                                                 ver))
+        # 2.bis check aidl can be runned
+        self._check_aidl(v_build_tools)
 
         # 3. finally, install the android for the current api
         android_platform = join(self.android_sdk_dir, 'platforms',
@@ -413,8 +416,29 @@ class TargetAndroid(Target):
 
         self.buildozer.info('Android packages installation done.')
 
+
         self.buildozer.state[cache_key] = cache_value
         self.buildozer.state.sync()
+
+    def _check_aidl(self, v_build_tools):
+        self.buildozer.debug('Check that aidl can be executed')
+        v_build_tools = self._read_version_subdir(
+            self.android_sdk_dir, 'build-tools')
+        aidl_cmd = join(self.android_sdk_dir, 'build-tools', str(v_build_tools), 'aidl')
+        self.buildozer.checkbin('Aidl', aidl_cmd)
+        _, _, returncode = self.buildozer.cmd(aidl_cmd, break_on_error=False, show_output=False)
+        if returncode != 1:
+            self.buildozer.error('Aidl cannot be executed')
+            if sys.maxint > 2 ** 32:
+                self.buildozer.error('')
+                self.buildozer.error('You might have missed to install 32bits libs')
+                self.buildozer.error('Check http://buildozer.readthedocs.org/en/latest/installation.html')
+                self.buildozer.error('')
+            else:
+                self.buildozer.error('')
+                self.buildozer.error('In case of a bug report, please add a full log with log_level = 2')
+                self.buildozer.error('')
+            raise BuildozerException()
 
     def install_platform(self):
         cmd = self.buildozer.cmd
