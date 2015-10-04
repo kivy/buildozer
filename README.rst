@@ -6,16 +6,16 @@ This tool is currently in alpha.
 Buildozer is a tool for creating application packages easily.
 
 The goal is to have one "buildozer.spec" file in your app directory, describing
-your application requirements and settings such as title, icon, included modules 
+your application requirements and settings such as title, icon, included modules
 etc. Buildozer will use that spec to create a package for Android, iOS, Windows,
-OSX and/or Linux. 
+OSX and/or Linux.
 
-Buildozer currently supports packaging for Android via the `python-for-android 
+Buildozer currently supports packaging for Android via the `python-for-android
 <http://github.com/kivy/python-for-android/>`_
 project, and for iOS via the kivy-ios project. Support for other operating systems
 is intended in the future.
 
-Note that this tool has nothing to do with the eponymous online build service 
+Note that this tool has nothing to do with the eponymous online build service
 `buildozer.io <http://buildozer.io />`_.
 
 Usage example
@@ -42,10 +42,8 @@ Usage example
 
 Example of commands::
 
-    # buildozer commands
-    buildozer clean
-
     # buildozer target command
+    buildozer android clean
     buildozer android update
     buildozer android deploy
     buildozer android debug
@@ -107,4 +105,3 @@ config, along with the environment variables that would override them.
 - ``title`` -> ``$APP_TITLE``
 - ``package.name`` -> ``$APP_PACKAGE_NAME``
 - ``android.p4a_dir`` -> ``$APP_ANDROID_P4A_DIR``
-
