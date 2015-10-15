@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/usr/bin/qemu-system-x86_64 -redir tcp:3213::22 -vga qxl -display sdl -netdev user,id=user.0 -device virtio-net,netdev=user.0 -drive file=output-from-netboot-iso/ubuntu.qcow2,if=virtio -boot once=d -name sanitytest -machine type=pc-1.0,accel=kvm -m 512M -vnc 0.0.0.0:47

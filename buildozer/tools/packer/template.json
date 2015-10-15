@@ -1,0 +1,46 @@
+{
+    "variables": {
+        "disk_size": "20480",
+        "disk_format": "ovf",
+        "ssh_username": "kivy",
+        "ssh_password": "kivy",
+        "hostname": "ubuntu"
+    },
+    "description": "Build a Xubuntu Virtual Machine",
+    "builders": [{
+        "type": "virtualbox-iso",
+        "name": "from-netboot-iso",
+        "http_directory": "http",
+        "iso_checksum": "4c58dcf09083cd3aa602eb1b79810a0ff58b7c21",
+        "iso_checksum_type": "sha1",
+        "iso_url": "http://archive.ubuntu.com/ubuntu/dists/vivid/main/installer-i386/current/images/netboot/mini.iso",
+        "ssh_username": "{{user `ssh_username`}}",
+        "ssh_password": "{{user `ssh_password`}}",
+        "boot_wait": "3s",
+        "boot_command": [
+            "<esc><wait>",
+            "/linux noapic preseed/url=http://{{.HTTPIP}}:{{.HTTPPort}}/preseed.cfg ",
+            "hostname={{user `hostname`}} ",
+            "debian-installer=en_US auto locale=en_US kbd-chooser/method=us ",
+            "fb=false ",
+            "keyboard-configuration/modelcode=SKIP keyboard-configuration/layout=USA ",
+            "keyboard-configuration/variant=USA console-setup/ask_detect=false ",
+            "initrd=/initrd.gz -- <enter>"
+        ],
+        "disk_size": "{{user `disk_size`}}",
+        "format": "{{user `disk_format`}}",
+        "headless": false,
+        "shutdown_command": "echo {{user `ssh_password`}} | sudo -S shutdown -P now",
+        "vm_name": "ubuntu",
+        "ssh_wait_timeout": "120m"
+    }],
+    "provisioners": [{
+        "type": "shell",
+        "execute_command": "echo {{user `ssh_password`}} | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
+        "scripts": [
+            "scripts/additional-packages.sh",
+            "scripts/minimize.sh"
+        ]
+    }],
+    "post-processors": []
+}
