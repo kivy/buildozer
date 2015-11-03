@@ -614,7 +614,7 @@ class TargetAndroid(Target):
             '{python} build.py --name {name}'
             ' --version {version}'
             ' --package {package}'
-            ' --{storage_type} {appdir}'
+            ' --{storage_type} "{appdir}"'
             ' --sdk {androidsdk}'
             ' --minsdk {androidminsdk}').format(
                 python=executable,
