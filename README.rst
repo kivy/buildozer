@@ -31,9 +31,6 @@ Usage example
     # via pip (latest stable)
     sudo pip install buildozer
 
-    # via easy_install
-    sudo easy_install buildozer
-
 #. Go into your application directory and do::
 
     buildozer init
