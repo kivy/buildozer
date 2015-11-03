@@ -121,7 +121,7 @@ Contributing
 ------------
 
 We love pull requests and discussing novel ideas. Check out our
-[contribution guide](http://kivy.org/docs/contribute.html) and
+`contribution guide <http://kivy.org/docs/contribute.html>`_ and
 feel free to improve buildozer.
 
 The following mailing list and IRC channel are used exclusively for
@@ -139,5 +139,5 @@ IRC channel:
 License
 -------
 
-- Buildozer is released under the terms of the MIT License. Please refer to the
-  LICENSE file.
+Buildozer is released under the terms of the MIT License. Please refer to the
+LICENSE file.
