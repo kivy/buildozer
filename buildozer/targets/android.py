@@ -35,7 +35,6 @@ from buildozer.libs.version import parse
 
 class TargetAndroid(Target):
     targetname = 'android'
-    p4a_branch = "old_toolchain"
     p4a_directory = "python-for-android"
     p4a_apk_cmd = "python build.py"
 
@@ -463,6 +462,8 @@ class TargetAndroid(Target):
 
     def install_platform(self):
         cmd = self.buildozer.cmd
+        source = self.buildozer.config.getdefault('app', 'android.branch',
+                                                  'old_toolchain')
         self.pa_dir = pa_dir = join(self.buildozer.platform_dir,
                                     self.p4a_directory)
         system_p4a_dir = self.buildozer.config.getdefault('app',
@@ -479,15 +480,14 @@ class TargetAndroid(Target):
                 cmd(
                     ('git clone -b {} --single-branch '
                      'https://github.com/kivy/python-for-android.git '
-                     '{}').format(self.p4a_branch, self.p4a_directory),
+                     '{}').format(source, self.p4a_directory),
                     cwd=self.buildozer.platform_dir)
             elif self.platform_update:
                 cmd('git clean -dxf', cwd=pa_dir)
-                cmd('git pull origin {}'.format(self.p4a_branch), cwd=pa_dir)
+                cmd('git pull origin {}'.format(source), cwd=pa_dir)
 
-        source = self.buildozer.config.getdefault('app', 'android.branch')
         if source:
-            cmd('git checkout  %s' % (source), cwd=pa_dir)
+            cmd('git checkout {branch}'.format(branch=source), cwd=pa_dir)
 
         self._install_apache_ant()
         self._install_android_sdk()
