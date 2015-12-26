@@ -112,6 +112,9 @@ class TargetOSX(Target):
 
         self.buildozer.info('Create {}.app'.format(package_name))
         cwd = join(self.buildozer.platform_dir,'kivy-sdk-packager-master', 'osx')
+        # remove kivy from app_deps
+        app_deps = ','.join(
+            [word for word in app_deps if 'kivy' not in word])
         check_output(
             ('python', 'package_app.py', source_dir,
              '--icon={}'.format(icon),
@@ -120,7 +123,7 @@ class TargetOSX(Target):
              '--bundlename={}'.format(title),
              '--bundleid={}'.format(domain),
              '--bundleversion={}'.format(version),
-             #'--deps={}'.format(app_deps),
+             '--deps={}'.format(app_deps),
              '--displayname={}'.format(title)
              ),
             cwd=cwd)
