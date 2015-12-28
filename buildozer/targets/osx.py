@@ -47,6 +47,35 @@ class TargetOSX(Target):
         check_call(('unzip', 'master.zip'), cwd=platdir)
         check_call(('rm', 'master.zip'), cwd=platdir)
 
+    def download_kivy(self, cwd, kivy='Kivy2'):
+        self.buildozer.info('Downloading kivy...')
+        if not exists(cwd+'/'+kivy+'.7z'):
+            check_call(
+                ('curl', '-O', '-L',
+                'http://kivy.org/downloads/tests/{}.7z'.format(kivy)),
+                cwd=cwd)
+        if not exists(cwd+'/Keka.app'):
+            if exists('/Applications/Keka.app'):
+                check_call(
+                    ('cp', '-a', '/Applications/Keka.app', './Keka.app'),
+                     cwd=cwd)
+            else:
+                check_call(('curl', '-o',
+                    'http://www.kekaosx.com/release/Keka-1.0.4-intel.dmg'),
+                    cwd=cwd)
+                check_call(
+                    ('hdiutil', 'attach', 'Keka-1.0.4-intel.dmg'),
+                    cwd=cwd)
+                check_call(
+                    ('cp', '-a','/Volumes/Keka/Keka.app',
+                    './Keka.app'), cwd=cwd)
+                check_call(('hdutil', 'detach', '/Volumes/Keka'))
+        check_call(
+            ('Keka.app/Contents/Resources/keka7z',
+            'x', '{}.7z'.format(kivy)), cwd=cwd)
+        check_call(('rm', '-rf', '{}.7z'.format('Kivy2')), cwd=cwd)
+        check_call(('mv', '{}.app'.format(kivy), 'Kivy.app'),cwd=cwd)
+
     def ensure_kivyapp(self):
         self.buildozer.info('check if Kivy.app exists in local dir')
         kivy_app_dir = join(
@@ -57,11 +86,7 @@ class TargetOSX(Target):
                 return
         # check if Kivy.app exists in /Applications
         if not exists('/Applications/Kivy.app'):
-            # download kivy.app
-            #TODO: Fix ME
-            check_call(
-                "curl -O -L http://github.com/kivy/kivy/files/Kivy.app",
-                cwd=kivy_app_dir)
+            self.download_kivy(kivy_app_dir)
             return
         else:
             self.buildozer.info('Kivy.app found at /Applications/Kivy.app')
@@ -70,7 +95,6 @@ class TargetOSX(Target):
                 ('cp', '-a', '/Applications/Kivy.app',
                 join(kivy_app_dir, 'Kivy.app')))
         return
-
 
     def check_requirements(self):
         self.ensure_sdk()
@@ -115,18 +139,21 @@ class TargetOSX(Target):
         # remove kivy from app_deps
         app_deps = ','.join(
             [word for word in app_deps if 'kivy' not in word])
-        check_output(
-            ('python', 'package_app.py', source_dir,
-             '--icon={}'.format(icon),
-             '--author={}'.format(author),
-             '--appname={}'.format(package_name),
+        cmd = [
+            'python', 'package_app.py', source_dir,
+            '--appname={}'.format(package_name),
              '--bundlename={}'.format(title),
              '--bundleid={}'.format(domain),
              '--bundleversion={}'.format(version),
              '--deps={}'.format(app_deps),
              '--displayname={}'.format(title)
-             ),
-            cwd=cwd)
+             ]
+        if icon:
+            cmd.append('--icon={}'.format(icon))
+        if author:
+            cmd.append('--author={}'.format(author))
+
+        check_output(cmd, cwd=cwd)
         self.buildozer.info('{}.app created.'.format(package_name))
         self.buildozer.info('Creating {}.dmg'.format(package_name))
         check_output(
