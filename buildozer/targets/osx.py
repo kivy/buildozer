@@ -122,7 +122,6 @@ class TargetOSX(Target):
         bcgl = bc.getlist
         package_name = bcg('app', 'package.name')
         domain = bcg('app', 'package.domain')
-        source_dir = abspath(bcg('app', 'source.dir'))
         title = bcg('app', 'title')
         app_deps = bcgl('app', 'requirements', '')
         garden_deps = bcgl('app', 'garden_requirements', '')
@@ -140,12 +139,12 @@ class TargetOSX(Target):
         app_deps = ','.join(
             [word for word in app_deps if 'kivy' not in word])
         cmd = [
-            'python', 'package_app.py', source_dir,
+            'python', 'package_app.py', self.buildozer.app_dir,
             '--appname={}'.format(package_name),
              '--bundlename={}'.format(title),
              '--bundleid={}'.format(domain),
              '--bundleversion={}'.format(version),
-             '--deps={}'.format(app_deps),
+             #'--deps={}'.format(app_deps),
              '--displayname={}'.format(title)
              ]
         if icon:
@@ -164,36 +163,24 @@ class TargetOSX(Target):
         binpath = join(
             self.buildozer.builddir or
             dirname(abspath(self.buildozer.specfilename)), 'bin')
-        print binpath
         check_output(
             ('cp', '-a', package_name+'.dmg', binpath),
             cwd=cwd)
         self.buildozer.info('All Done!')
 
     def compile_platform(self):
-        print('compile_platform')
         pass
 
     def install_platform(self):
-        print('install_platform')
-        # cmd = self.buildozer.cmd
-        # self.pa_dir = pa_dir = join(self.buildozer.platform_dir,
-        #                             'cpython')
-
-        # source = self.buildozer.config.getdefault('app', 'python.branch')
-        # if source:
-        #     cmd('git checkout  %s' % (source), cwd=pa_dir)
-
         # ultimate configuration check.
         # some of our configuration cannot be check without platform.
-        # self.check_configuration_tokens()
+        self.check_configuration_tokens()
         #
-        # self.buildozer.environ.update({
-        #     'PACKAGES_PATH': self.buildozer.global_packages_dir,
-        #     })
+        self.buildozer.environ.update({
+            'PACKAGES_PATH': self.buildozer.global_packages_dir,
+            })
 
     def get_custom_commands(self):
-        print('get custom commands')
         result = []
         for x in dir(self):
             if not x.startswith('cmd_'):
@@ -204,7 +191,6 @@ class TargetOSX(Target):
         return result
 
     def get_available_packages(self):
-        print('get_available_packages')
         return ['kivy']
 
     def run_commands(self, args):
@@ -261,7 +247,7 @@ class TargetOSX(Target):
         self.buildozer.prepare_for_build()
         self.build_mode = 'debug'
         self.check_build_prepared()
-        #self.buildozer.build()
+        self.buildozer.build()
 
     def cmd_release(self, *args):
         self.buildozer.prepare_for_build()

@@ -158,10 +158,6 @@ class Buildozer(object):
         self.info('Check requirements for {0}'.format(self.targetname))
         self.target.check_requirements()
 
-        if self.targetname == 'osx':
-            self.target.build_package()
-            return
-
         self.info('Install platform')
         self.target.install_platform()
 
