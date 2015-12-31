@@ -51,13 +51,19 @@ requirements = kivy
 # (str) Supported orientation (one of landscape, portrait or all)
 orientation = landscape
 
-# (bool) Indicate if the application should be fullscreen or not
-fullscreen = 1
+#
+# OSX Specific
+#
 
+#
+# author = © Copyright Info
 
 #
 # Android specific
 #
+
+# (bool) Indicate if the application should be fullscreen or not
+fullscreen = 1
 
 # (list) Permissions
 #android.permissions = INTERNET
