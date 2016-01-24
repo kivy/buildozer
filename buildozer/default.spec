@@ -51,6 +51,9 @@ requirements = kivy
 # (str) Supported orientation (one of landscape, portrait or all)
 orientation = landscape
 
+# (list) List of service to declare
+#services = NAME:ENTRYPOINT_TO_PY,NAME2:ENTRYPOINT2_TO_PY
+
 #
 # OSX Specific
 #
@@ -141,6 +144,12 @@ fullscreen = 1
 # (list) Android library project to add (will be added in the
 # project.properties automatically.)
 #android.library_references =
+
+# (str) Android logcat filters to use
+#android.logcat_filters = *:S python:D
+
+# (bool) Copy library instead of making a libpymodules.so
+#android.copy_libs = 1
 
 #
 # iOS specific
