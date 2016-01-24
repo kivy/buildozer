@@ -818,6 +818,8 @@ class Buildozer(object):
 
     @property
     def bin_dir(self):
+        if self.builddir:
+            return join(self.builddir, 'bin')
         return join(self.root_dir, 'bin')
 
     @property
