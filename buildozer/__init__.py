@@ -821,7 +821,7 @@ class Buildozer(object):
     @property
     def bin_dir(self):
         if self.bin_apk_dir:
-            return join(self.bin_apk_dir, 'bin')
+            return self.bin_apk_dir
         return join(self.root_dir, 'bin')
 
     @property
