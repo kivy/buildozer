@@ -36,7 +36,7 @@ from buildozer.libs.version import parse
 class TargetAndroid(Target):
     p4a_branch = "old_toolchain"
     p4a_directory = "python-for-android"
-    p4a_apk_cmd = "{python} build.py"
+    p4a_apk_cmd = "python build.py"
 
     @property
     def android_sdk_version(self):
