@@ -193,7 +193,10 @@ class TargetAndroid(Target):
     def _set_win32_java_home(self):
         if 'JAVA_HOME' in self.buildozer.environ:
             return
-        import _winreg
+        if platform in ('win32'):
+            import _winreg
+        elif platform in ('cygwin'):
+            import cygwinreg as _winreg
         with _winreg.OpenKey(
                 _winreg.HKEY_LOCAL_MACHINE,
                 r"SOFTWARE\JavaSoft\Java Development Kit") as jdk:  #@UndefinedVariable
