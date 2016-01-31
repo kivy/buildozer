@@ -47,7 +47,6 @@ class TargetAndroidNew(TargetAndroid):
         # wrapper from previous old_toolchain to new toolchain
         dist_name = self.buildozer.config.get('app', 'package.name')
         cmd = [self.p4a_apk_cmd, "--dist_name", dist_name]
-        print cmd, build_cmd
         for args in build_cmd:
             option, values = args[0], args[1:]
             if option == "debug":
