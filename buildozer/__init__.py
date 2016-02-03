@@ -469,10 +469,9 @@ class Buildozer(object):
         self.cmd('curl http://python-distribute.org/distribute_setup.py | venv/bin/python', get_stdout=True, cwd=self.buildozer_dir)
 
         self.debug('Install requirement {} in virtualenv'.format(module))
-        self.cmd('pip install --download-cache={} --target={} {}'.format(
-                self.global_cache_dir, self.applibs_dir, module),
-                env=self.env_venv,
-                cwd=self.buildozer_dir)
+        self.cmd('pip install --target={} {}'.format(self.applibs_dir, module),
+                 env=self.env_venv,
+                 cwd=self.buildozer_dir)
 
     def check_garden_requirements(self):
         '''Ensure required garden packages are available to be included.
