@@ -59,7 +59,9 @@ class TargetAndroidNew(TargetAndroid):
                 continue
             elif option == "--sdk":
                 cmd.append("--android_api")
-                cmd.extend(values)
+                values = list(values)
+                values[0] = self.buildozer.config.getdefault('app', 'android.api', self.android_api)
+                cmd.extend(tuple(values))
             else:
                 cmd.extend(args)
 
