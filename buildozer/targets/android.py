@@ -459,8 +459,8 @@ class TargetAndroid(Target):
         cmd = self.buildozer.cmd
         self.pa_dir = pa_dir = join(self.buildozer.platform_dir,
                                     self.p4a_directory)
-        system_p4a_dir = self.buildozer.config.getdefault('app',
-                                                          'android.p4a_dir')
+        system_p4a_dir = expanduser(self.buildozer.config.getdefault('app',
+                                                          'android.p4a_dir'))
         if system_p4a_dir:
             self.pa_dir = pa_dir = system_p4a_dir
             if not self.buildozer.file_exists(pa_dir):
