@@ -464,8 +464,10 @@ class TargetAndroid(Target):
         if system_p4a_dir:
             self.pa_dir = pa_dir = system_p4a_dir
             if not self.buildozer.file_exists(pa_dir):
-                self.buildozer.critical(
-                    'Path for android.p4a_dir doesnt exists')
+                self.buildozer.error(
+                    'Path for android.p4a_dir does not exist')
+                self.buildozer.error('')
+                raise BuildozerException()
         else:
             if not self.buildozer.file_exists(pa_dir):
                 cmd(
