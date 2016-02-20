@@ -401,8 +401,13 @@ class TargetAndroid(Target):
 
         # 1. update the tool and platform-tools if needed
         packages = self._android_list_sdk()
+        skip_upd = self.buildozer.config.getdefault('app',
+                                                    'android.skip_update', False)
         if 'tools' in packages or 'platform-tools' in packages:
-            self._android_update_sdk('tools,platform-tools')
+            if not skip_upd:
+                self._android_update_sdk('tools,platform-tools')
+            else:
+                self.buildozer.info('Skipping Android SDK update due to spec file setting')
 
         # 2. install the latest build tool
         v_build_tools = self._read_version_subdir(self.android_sdk_dir,
