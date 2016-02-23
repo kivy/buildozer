@@ -102,7 +102,7 @@ class TargetIos(Target):
         self.ios_deploy_dir = ios_deploy_dir = join(self.buildozer.platform_dir,
                 'ios-deploy')
         if not self.buildozer.file_exists(ios_deploy_dir):
-            cmd('git clone https://github.com/phonegap/ios-deploy',
+            cmd('git clone --branch 1.7.0 https://github.com/phonegap/ios-deploy',
                     cwd=self.buildozer.platform_dir)
 
     def get_available_packages(self):
