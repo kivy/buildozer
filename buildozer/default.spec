@@ -101,6 +101,11 @@ fullscreen = 1
 # (list) python-for-android whitelist
 #android.p4a_whitelist =
 
+# (bool) If True, then skip trying to update the Android sdk
+# This can be useful to avoid excess Internet downloads or save time
+# when an update is due and you just want to test/build your package
+# android.skip_update = False
+
 # (str) Android entry point, default is ok for Kivy-based app
 #android.entrypoint = org.renpy.android.PythonActivity
 
