@@ -9,8 +9,9 @@ A recipe allows you to compile libraries / python extension for the mobile.
 Most of the time, the default compilation instructions doesn't work for the
 target, as ARM compiler / Android NDK introduce specifities that the library
 you want doesn't handle correctly, and you'll need to patch. Also, because the
-Android platform cannot load more than 64 dynamic library, we have a mechanism
-to bundle all of them in one to ensure you'll not hit this limitation.
+Android platform cannot load more than 64 inline dynamic libraries, we have a
+mechanism to bundle all of them in one to ensure you'll not hit this
+limitation.
 
 To test your own recipe via Buildozer, you need to:
 
