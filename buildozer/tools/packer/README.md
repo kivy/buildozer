@@ -17,4 +17,4 @@ You want to edit `http/preseed.cfg` and `template.json` before building an image
 # TODO
 
   - [compact the image](https://crysol.github.io/recipe/2013-10-15/virtualbox-compact-vmdk-images/)
-  - trigger a build, torrent creation and gdrive upload when buildozer is released
+  - trigger a build on travis, torrent creation and gdrive upload when buildozer is released
