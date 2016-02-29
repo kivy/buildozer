@@ -743,19 +743,20 @@ class TargetAndroid(Target):
         self.execute_build_package(build_cmd)
 
         # XXX found how the apk name is really built from the title
-        bl = '\'" ,'
-        apktitle = ''.join([x for x in config.get('app', 'title') if x not in
-                            bl])
-        apk = '{title}-{version}-{mode}.apk'.format(title=apktitle,
-                                                    version=version,
-                                                    mode=mode)
+        bl = u'\'" ,'
+        apktitle = ''.join([x for x in config.get('app', 'title').decode('utf-8')
+                            if x not in bl])
+        apk = u'{title}-{version}-{mode}.apk'.format(
+            title=apktitle,
+            version=version,
+            mode=mode)
 
         # copy to our place
         copyfile(join(dist_dir, 'bin', apk), join(self.buildozer.bin_dir, apk))
 
         self.buildozer.info('Android packaging done!')
-        self.buildozer.info('APK {0} available in the bin directory'.format(
-            apk))
+        self.buildozer.info(
+            u'APK {0} available in the bin directory'.format(apk))
         self.buildozer.state['android:latestapk'] = apk
         self.buildozer.state['android:latestmode'] = self.build_mode
 
