@@ -351,7 +351,10 @@ class Buildozer(object):
         show_output = kwargs.pop('show_output')
 
         if show_output:
-            kwargs['logfile'] = codecs.getwriter('utf8')(stdout)
+            if IS_PY3:
+                kwargs['logfile'] = codecs.getwriter('utf8')(stdout.buffer)
+            else:
+                kwargs['logfile'] = codecs.getwriter('utf8')(stdout)
 
         if not sensible:
             self.debug('Run (expect) {0!r}'.format(command))
