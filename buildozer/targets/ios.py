@@ -201,7 +201,7 @@ class TargetIos(Target):
         plistlib.writePlist(plist, plist_rfn)
 
         mode = 'Debug' if self.build_mode == 'debug' else 'Release'
-        self.buildozer.cmd('xcodebuild -configuration {} clean build'.format(mode),
+        self.buildozer.cmd('xcodebuild -configuration {} ENABLE_BITCODE=NO clean build'.format(mode),
                 cwd=self.app_project_dir)
         ios_app_dir = '{app_lower}-ios/build/{mode}-iphoneos/{app_lower}.app'.format(
                 app_lower=app_name.lower(), mode=mode)
