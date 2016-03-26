@@ -1,5 +1,5 @@
 '''
-Android target, based on python-for-android project
+Android target, based on python-for-android project (old toolchain)
 '''
 #
 # Android target

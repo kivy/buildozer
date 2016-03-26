@@ -1,5 +1,5 @@
 '''
-iOS target, based on kivy-ios project. (not working yet.)
+iOS target, based on kivy-ios project
 '''
 
 import sys
