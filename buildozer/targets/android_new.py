@@ -1,4 +1,7 @@
 # coding=utf-8
+'''
+Android target, based on python-for-android project (new toolchain)
+'''
 
 from buildozer.targets.android import TargetAndroid
 from os.path import join, expanduser
