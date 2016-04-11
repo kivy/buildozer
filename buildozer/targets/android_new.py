@@ -57,9 +57,8 @@ class TargetAndroidNew(TargetAndroid):
             elif option == "release":
                 cmd.append("--release")
                 continue
-            if option in ("--window", ):
-                # missing option in sdl2 bootstrap yet
-                continue
+            if option == "--window":
+                cmd.append("--window")
             elif option == "--sdk":
                 cmd.append("--android_api")
                 cmd.extend(values)
