@@ -97,14 +97,14 @@ class TargetIos(Target):
             custom_kivy_ios = join(self.buildozer.root_dir, custom_kivy_ios)
         if not self.buildozer.file_exists(ios_dir):
             if custom_kivy_ios:
-                cmd('cp -r "{}" .'.format(custom_kivy_ios), cwd=self.buildozer.platform_dir)
+                cmd('mkdir -p "{}"'.format(ios_dir))
+                cmd('cp -r "{}"/* "{}"/'.format(custom_kivy_ios, ios_dir))
             else:
                 cmd('git clone https://github.com/kivy/kivy-ios',
                         cwd=self.buildozer.platform_dir)
         elif self.platform_update:
             if custom_kivy_ios:
-                cmd('rm -rf "{}"'.format(ios_dir))
-                cmd('cp -r "{}" .'.format(custom_kivy_ios), cwd=self.buildozer.platform_dir)
+                cmd('cp -r "{}"/* "{}"/'.format(custom_kivy_ios, ios_dir))
             else:
                 cmd('git clean -dxf', cwd=ios_dir)
                 cmd('git pull origin master', cwd=ios_dir)
