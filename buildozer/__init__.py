@@ -451,6 +451,9 @@ class Buildozer(object):
         '''
         requirements = self.config.getlist('app', 'requirements', '')
         target_available_packages = self.target.get_available_packages()
+        if target_available_packages is True:
+            # target handles all packages!
+            return
 
         # remove all the requirements that the target can compile
         onlyname = lambda x: x.split('==')[0]
