@@ -744,8 +744,10 @@ class TargetAndroid(Target):
 
         # XXX found how the apk name is really built from the title
         bl = u'\'" ,'
-        apktitle = ''.join([x for x in config.get('app', 'title').decode('utf-8')
-                            if x not in bl])
+        apptitle = config.get('app', 'title')
+        if hasattr(apptitle, 'decode'):
+            apptitle = apptitle.decode('utf-8')
+        apktitle = ''.join([x for x in apptitle if x not in bl])
         apk = u'{title}-{version}-{mode}.apk'.format(
             title=apktitle,
             version=version,
