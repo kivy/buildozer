@@ -4,7 +4,7 @@ Android target, based on python-for-android project (new toolchain)
 '''
 
 from buildozer.targets.android import TargetAndroid
-from os.path import join, expanduser
+from os.path import join, expanduser, realpath
 
 
 class TargetAndroidNew(TargetAndroid):
@@ -29,6 +29,18 @@ class TargetAndroidNew(TargetAndroid):
         dist_name = self.buildozer.config.get('app', 'package.name')
         requirements = ','.join(android_requirements)
         options = []
+
+        source_dirs = {
+            'P4A_{}_DIR'.format(name[20:]): realpath(expanduser(value))
+            for name, value in self.buildozer.config.items('app')
+            if name.startswith('requirements.source.')
+            }
+        if source_dirs:
+            self.buildozer.environ.update(source_dirs)
+            self.buildozer.info('Using custom source dirs:\n    {}'.format(
+                '\n    '.join(['{} = {}'.format(k, v)
+                               for k, v in source_dirs.items()])))
+
         if self.buildozer.config.getbooldefault('app', 'android.copy_libs', True):
             options.append("--copy-libs")
         available_modules = self.buildozer.cmd(
