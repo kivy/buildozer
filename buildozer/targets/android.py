@@ -34,6 +34,7 @@ from buildozer.libs.version import parse
 
 
 class TargetAndroid(Target):
+    targetname = 'android'
     p4a_branch = "old_toolchain"
     p4a_directory = "python-for-android"
     p4a_apk_cmd = "python build.py"
@@ -838,6 +839,18 @@ class TargetAndroid(Target):
             serials.append(serial.split()[0])
         self._serials = serials
         return serials
+
+    def cmd_adb(self, *args):
+        self.check_requirements()
+        self.install_platform()
+        args = args[0]
+        if args and args[0] == '--alias':
+            print('To set up ADB in this shell session, execute:')
+            print('    alias adb=$(buildozer {} adb --alias 2>&1 >/dev/null)'
+                  .format(self.targetname))
+            sys.stderr.write(self.adb_cmd + '\n')
+        else:
+            self.buildozer.cmd(' '.join([self.adb_cmd] + args))
 
     def cmd_deploy(self, *args):
         super(TargetAndroid, self).cmd_deploy(*args)

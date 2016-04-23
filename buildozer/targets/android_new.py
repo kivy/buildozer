@@ -2,12 +2,14 @@
 '''
 Android target, based on python-for-android project (new toolchain)
 '''
+import sys
 
 from buildozer.targets.android import TargetAndroid
 from os.path import join, expanduser, realpath
 
 
 class TargetAndroidNew(TargetAndroid):
+    targetname = 'android_new'
     p4a_branch = "master"
     p4a_directory = "python-for-android-master"
     p4a_apk_cmd = "apk --bootstrap=sdl2"
@@ -102,6 +104,18 @@ class TargetAndroidNew(TargetAndroid):
         if not entrypoint:
             self.buildozer.config.set('app', 'android.entrypoint',  'org.kivy.android.PythonActivity')
         return super(TargetAndroidNew, self).cmd_run(*args)
+
+    def cmd_p4a(self, *args):
+        self.check_requirements()
+        self.install_platform()
+        args = args[0]
+        if args and args[0] == '--alias':
+            print('To set up p4a in this shell session, execute:')
+            print('    alias p4a=$(buildozer {} p4a --alias 2>&1 >/dev/null)'
+                  .format(self.targetname))
+            sys.stderr.write('PYTHONPATH={} {}\n'.format(self.pa_dir, self._p4a_cmd))
+        else:
+            self._p4a(' '.join(args) if args else '')
 
 
 def get_target(buildozer):

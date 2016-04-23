@@ -52,8 +52,13 @@ class Target(object):
 
         result = []
         last_command = []
-        for arg in args:
-            if not arg.startswith('--'):
+        while args:
+            arg = args.pop(0)
+            if arg == '--':
+                if last_command:
+                    last_command += args
+                    break
+            elif not arg.startswith('--'):
                 if last_command:
                     result.append(last_command)
                     last_command = []
