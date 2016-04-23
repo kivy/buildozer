@@ -10,12 +10,21 @@ from os.path import join, expanduser, realpath
 class TargetAndroidNew(TargetAndroid):
     p4a_branch = "master"
     p4a_directory = "python-for-android-master"
-    p4a_apk_cmd = "python -m pythonforandroid.toolchain apk --bootstrap=sdl2"
+    p4a_apk_cmd = "apk --bootstrap=sdl2"
+
+    def __init__(self, buildozer):
+        super(TargetAndroidNew, self).__init__(buildozer)
+        self._build_dir = join(self.buildozer.platform_dir, 'build')
+        self._p4a_cmd = ('python -m pythonforandroid.toolchain '
+                         '--storage-dir={} ').format(self._build_dir)
+
+    def _p4a(self, cmd, **kwargs):
+        kwargs.setdefault('cwd', self.pa_dir)
+        return self.buildozer.cmd(self._p4a_cmd + cmd, **kwargs)
 
     def get_available_packages(self):
-        available_modules = self.buildozer.cmd(
-            "python -m pythonforandroid.toolchain recipes --compact",
-            cwd=self.pa_dir,
+        available_modules = self._p4a(
+            "recipes --compact",
             get_stdout=True)[0]
         return available_modules.splitlines()[0].split()
 
@@ -43,11 +52,9 @@ class TargetAndroidNew(TargetAndroid):
 
         if self.buildozer.config.getbooldefault('app', 'android.copy_libs', True):
             options.append("--copy-libs")
-        available_modules = self.buildozer.cmd(
-            ("python -m pythonforandroid.toolchain "
-             "create --dist_name={} --bootstrap={} --requirements={} --arch armeabi-v7a {}").format(
+        available_modules = self._p4a(
+            "create --dist_name={} --bootstrap={} --requirements={} --arch armeabi-v7a {}".format(
                  dist_name, "sdl2", requirements, " ".join(options)),
-            cwd=self.pa_dir,
             get_stdout=True)[0]
 
     def _update_libraries_references(self, dist_dir):
@@ -55,8 +62,7 @@ class TargetAndroidNew(TargetAndroid):
         pass
 
     def get_dist_dir(self, dist_name):
-        return expanduser(join("~", ".local", "share", "python-for-android",
-                               'dists', dist_name))
+        return join(self._build_dir, 'dists', dist_name)
 
     def execute_build_package(self, build_cmd):
         # wrapper from previous old_toolchain to new toolchain
@@ -88,7 +94,7 @@ class TargetAndroidNew(TargetAndroid):
             cmd.append("--copy-libs")
 
         cmd = " ".join(cmd)
-        self.buildozer.cmd(cmd, cwd=self.pa_dir)
+        self._p4a(cmd)
 
     def cmd_run(self, *args):
         entrypoint = self.buildozer.config.getdefault(
