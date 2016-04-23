@@ -115,7 +115,7 @@ class TargetAndroidNew(TargetAndroid):
                   .format(self.targetname))
             sys.stderr.write('PYTHONPATH={} {}\n'.format(self.pa_dir, self._p4a_cmd))
         else:
-            self._p4a(' '.join(*args))
+            self._p4a(' '.join(args) if args else '')
 
 
 def get_target(buildozer):
