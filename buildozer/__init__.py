@@ -700,6 +700,9 @@ class Buildozer(object):
         exclude_exts = self.config.getlist('app', 'source.exclude_exts', '')
         exclude_dirs = self.config.getlist('app', 'source.exclude_dirs', '')
         exclude_patterns = self.config.getlist('app', 'source.exclude_patterns', '')
+        include_patterns = self.config.getlist('app',
+                                               'source.include_patterns',
+                                               '')
         app_dir = self.app_dir
 
         self.debug('Copy application source from {}'.format(source_dir))
@@ -726,14 +729,19 @@ class Buildozer(object):
                     if filtered_root.startswith(exclude_dir):
                         is_excluded = True
                         break
-                if is_excluded:
-                    continue
 
                 # pattern matching
-                for pattern in exclude_patterns:
+                if not is_excluded:
+                    # match pattern if not ruled out by exclude_dirs
+                    for pattern in exclude_patterns:
+                        if fnmatch(filtered_root, pattern):
+                            is_excluded = True
+                            break
+                for pattern in include_patterns:
                     if fnmatch(filtered_root, pattern):
-                        is_excluded = True
+                        is_excluded = False
                         break
+
                 if is_excluded:
                     continue
 
@@ -742,7 +750,7 @@ class Buildozer(object):
                 if fn.startswith('.'):
                     continue
 
-                # exclusion by pattern matching
+                # pattern matching
                 is_excluded = False
                 dfn = fn.lower()
                 if filtered_root:
@@ -750,6 +758,10 @@ class Buildozer(object):
                 for pattern in exclude_patterns:
                     if fnmatch(dfn, pattern):
                         is_excluded = True
+                        break
+                for pattern in include_patterns:
+                    if fnmatch(dfn, pattern):
+                        is_excluded = False
                         break
                 if is_excluded:
                     continue
