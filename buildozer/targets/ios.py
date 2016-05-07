@@ -92,12 +92,22 @@ class TargetIos(Target):
     def install_platform(self):
         cmd = self.buildozer.cmd
         self.ios_dir = ios_dir = join(self.buildozer.platform_dir, 'kivy-ios')
+        custom_kivy_ios = self.buildozer.config.getdefault('app', 'ios.kivy_ios_dir')
+        if custom_kivy_ios:
+            custom_kivy_ios = join(self.buildozer.root_dir, custom_kivy_ios)
         if not self.buildozer.file_exists(ios_dir):
-            cmd('git clone https://github.com/kivy/kivy-ios',
-                    cwd=self.buildozer.platform_dir)
+            if custom_kivy_ios:
+                cmd('mkdir -p "{}"'.format(ios_dir))
+                cmd('cp -r "{}"/* "{}"/'.format(custom_kivy_ios, ios_dir))
+            else:
+                cmd('git clone https://github.com/kivy/kivy-ios',
+                        cwd=self.buildozer.platform_dir)
         elif self.platform_update:
-            cmd('git clean -dxf', cwd=ios_dir)
-            cmd('git pull origin master', cwd=ios_dir)
+            if custom_kivy_ios:
+                cmd('cp -r "{}"/* "{}"/'.format(custom_kivy_ios, ios_dir))
+            else:
+                cmd('git clean -dxf', cwd=ios_dir)
+                cmd('git pull origin master', cwd=ios_dir)
 
         self.ios_deploy_dir = ios_deploy_dir = join(self.buildozer.platform_dir,
                 'ios-deploy')
