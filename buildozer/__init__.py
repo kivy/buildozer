@@ -831,7 +831,7 @@ class Buildozer(object):
 
     @property
     def root_dir(self):
-        return realpath(join(dirname(self.specfilename)))
+        return realpath(dirname(self.specfilename))
 
     @property
     def buildozer_dir(self):
