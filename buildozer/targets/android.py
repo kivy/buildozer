@@ -485,11 +485,13 @@ class TargetAndroid(Target):
                     cwd=self.buildozer.platform_dir)
             elif self.platform_update:
                 cmd('git clean -dxf', cwd=pa_dir)
-                current_branch = cmd('git rev-parse --abbrev-ref HEAD', get_stdout=True, cwd=pa_dir)[0].strip()
+                current_branch = cmd('git rev-parse --abbrev-ref HEAD',
+                                     get_stdout=True, cwd=pa_dir)[0].strip()
                 if current_branch == source:
                     cmd('git pull', cwd=pa_dir)
                 else:
-                    cmd('git fetch --tags origin {0}:{0}'.format(source), cwd=pa_dir)
+                    cmd('git fetch --tags origin {0}:{0}'.format(source),
+                        cwd=pa_dir)
                     cmd('git checkout {}'.format(source), cwd=pa_dir)
 
         self._install_apache_ant()
