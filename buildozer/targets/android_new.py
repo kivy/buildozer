@@ -5,6 +5,7 @@ Android target, based on python-for-android project (new toolchain)
 import sys
 
 from buildozer.targets.android import TargetAndroid
+from buildozer import USE_COLOR
 from os.path import join, expanduser, realpath
 
 
@@ -17,8 +18,9 @@ class TargetAndroidNew(TargetAndroid):
     def __init__(self, buildozer):
         super(TargetAndroidNew, self).__init__(buildozer)
         self._build_dir = join(self.buildozer.platform_dir, 'build')
-        self._p4a_cmd = ('python -m pythonforandroid.toolchain '
-                         '--storage-dir={} ').format(self._build_dir)
+        color = 'always' if USE_COLOR else 'never'
+        self._p4a_cmd = ('python -m pythonforandroid.toolchain --color={} '
+                         '--storage-dir={} ').format(color, self._build_dir)
 
     def _p4a(self, cmd, **kwargs):
         kwargs.setdefault('cwd', self.pa_dir)
