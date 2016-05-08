@@ -200,12 +200,8 @@ class TargetIos(Target):
         plist['CFBundleVersion'] = '{}.{}'.format(version,
                 self.buildozer.build_id)
 
-        # add icon
-        icon = self._get_icon()
-        if icon:
-            plist['CFBundleIconFiles'] = [icon]
-            plist['CFBundleIcons'] = {'CFBundlePrimaryIcon': {
-                'UIPrerenderedIcon': False, 'CFBundleIconFiles': [icon]}}
+        # add icons
+        self._create_icons()
 
         # ok, write the modified plist.
         plistlib.writePlist(plist, plist_rfn)
@@ -284,8 +280,7 @@ class TargetIos(Target):
             debug_mode=debug_mode, app_dir=ios_app_dir),
             cwd=self.ios_dir, show_output=True)
 
-    def _get_icon(self):
-        # check the icon size, must be 72x72 or 144x144
+    def _create_icons(self):
         icon = self.buildozer.config.getdefault('app', 'icon.filename', '')
         if not icon:
             return
@@ -293,40 +288,10 @@ class TargetIos(Target):
         if not self.buildozer.file_exists(icon_fn):
             self.buildozer.error('Icon {} does not exists'.format(icon_fn))
             return
-        output = self.buildozer.cmd('file {}'.format(icon),
-                cwd=self.buildozer.app_dir, get_stdout=True)[0]
-        if not output:
-            self.buildozer.error('Unable to read icon {}'.format(icon_fn))
-            return
-        # output is something like: 
-        # "data/cancel.png: PNG image data, 50 x 50, 8-bit/color RGBA,
-        # non-interlaced"
-        info = output.splitlines()[0].split(',')
-        fmt = info[0].split(':')[-1].strip()
-        if fmt != 'PNG image data':
-            self.buildozer.error('Only PNG icon are accepted, {} invalid'.format(icon_fn))
-            return
-        size = [int(x.strip()) for x in info[1].split('x')]
-        if size != [72, 72] and size != [144, 144]:
-            # icon cannot be used like that, it need a resize.
-            self.buildozer.error('Invalid PNG size, must be 72x72 or 144x144. Resampling.')
-            nearest_size = 144
-            if size[0] < 144:
-                nearest_size = 72
 
-            icon_basename = 'icon-{}.png'.format(nearest_size)
-            self.buildozer.file_copy(icon_fn, join(self.app_project_dir,
-                icon_basename))
-            self.buildozer.cmd('sips -z {0} {0} {1}'.format(nearest_size,
-                icon_basename), cwd=self.app_project_dir)
-        else:
-            # icon ok, use it as it.
-            icon_basename = 'icon-{}.png'.format(size[0])
-            self.buildozer.file_copy(icon_fn, join(self.app_project_dir,
-                icon_basename))
-
-        icon_fn = join(self.app_project_dir, icon_basename)
-        return icon_fn
+        self.buildozer.cmd('./toolchain.py icon {} {}'.format(
+            self.app_project_dir, icon_fn),
+            cwd=self.ios_dir)
 
     def _create_index(self):
         # TODO
