@@ -130,6 +130,7 @@ class Buildozer(object):
         except:
             pass
         self.builddir = self.config.getdefault('buildozer', 'builddir', None)
+        self.bin_apk_dir = self.config.getdefault('buildozer', 'bin_dir', None)
 
         self.targetname = None
         self.target = None
@@ -420,17 +421,18 @@ class Buildozer(object):
         self.mkdir(self.global_buildozer_dir)
         self.mkdir(self.global_cache_dir)
 
-        # create local dir
-        specdir = dirname(self.specfilename)
-        if self.builddir:
-            specdir = self.builddir
+        # create local .buildozer/ dir
+        self.mkdir(self.buildozer_dir)
+        # create local bin/ dir
+        self.mkdir(self.bin_dir)
 
-        self.mkdir(join(specdir, '.buildozer'))
-        self.mkdir(join(specdir, 'bin'))
         self.mkdir(self.applibs_dir)
         self.state = JsonStore(join(self.buildozer_dir, 'state.db'))
 
         if self.targetname:
+            specdir = dirname(self.specfilename)
+            if self.builddir:
+                specdir = self.builddir
             target = self.targetname
             self.mkdir(join(self.global_platform_dir, target, 'platform'))
             self.mkdir(join(specdir, '.buildozer', target, 'platform'))
@@ -832,6 +834,8 @@ class Buildozer(object):
 
     @property
     def bin_dir(self):
+        if self.bin_apk_dir:
+            return self.bin_apk_dir
         return join(self.root_dir, 'bin')
 
     @property
