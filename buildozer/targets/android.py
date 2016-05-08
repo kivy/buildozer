@@ -36,6 +36,7 @@ from buildozer.libs.version import parse
 class TargetAndroid(Target):
     targetname = 'android'
     p4a_directory = "python-for-android"
+    p4a_branch = 'old_toolchain'
     p4a_apk_cmd = "python build.py"
 
     @property
@@ -463,7 +464,7 @@ class TargetAndroid(Target):
     def install_platform(self):
         cmd = self.buildozer.cmd
         source = self.buildozer.config.getdefault('app', 'android.branch',
-                                                  'old_toolchain')
+                                                  self.p4a_branch)
         self.pa_dir = pa_dir = join(self.buildozer.platform_dir,
                                     self.p4a_directory)
         system_p4a_dir = self.buildozer.config.getdefault('app',
