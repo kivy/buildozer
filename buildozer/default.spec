@@ -182,6 +182,13 @@ log_level = 1
 # (int) Display warning if buildozer is run as root (0 = False, 1 = True)
 warn_on_root = 1
 
+# (str) Path to build artifact storage, absolute or relative to spec file
+# Defaults to ./.buildozer
+# build_dir = build/buildozer
+
+# (str) Path to build output (i.e. .apk, .ipa) storage
+# Defaults to ./bin
+# bin_dir = ../bin
 
 #    -----------------------------------------------------------------------------
 #    List as sections

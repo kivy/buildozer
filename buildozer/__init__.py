@@ -129,8 +129,18 @@ class Buildozer(object):
                 'buildozer', 'log_level', '1'))
         except:
             pass
-        self.builddir = self.config.getdefault('buildozer', 'builddir', None)
-        self.bin_apk_dir = self.config.getdefault('buildozer', 'bin_dir', None)
+
+        build_dir = self.config.getdefault('buildozer', 'builddir', None)
+        if build_dir:
+            # for backwards compatibility, append .buildozer to builddir
+            build_dir = join(build_dir, '.buildozer')
+        self.build_dir = self.config.getdefault('buildozer', 'build_dir', build_dir)
+
+        if self.build_dir:
+            self.build_dir = realpath(join(self.root_dir, self.build_dir))
+        self.user_bin_dir = self.config.getdefault('buildozer', 'bin_dir', None)
+        if self.user_bin_dir:
+            self.user_bin_dir = realpath(join(self.root_dir, self.user_bin_dir))
 
         self.targetname = None
         self.target = None
@@ -414,7 +424,7 @@ class Buildozer(object):
 
         if not exists(self.specfilename):
             print('No {0} found in the current directory. Abandon.'.format(
-                    self.specfilename))
+                self.specfilename))
             exit(1)
 
         # create global dir
@@ -429,14 +439,11 @@ class Buildozer(object):
         self.mkdir(self.applibs_dir)
         self.state = JsonStore(join(self.buildozer_dir, 'state.db'))
 
-        if self.targetname:
-            specdir = dirname(self.specfilename)
-            if self.builddir:
-                specdir = self.builddir
-            target = self.targetname
+        target = self.targetname
+        if target:
             self.mkdir(join(self.global_platform_dir, target, 'platform'))
-            self.mkdir(join(specdir, '.buildozer', target, 'platform'))
-            self.mkdir(join(specdir, '.buildozer', target, 'app'))
+            self.mkdir(join(self.buildozer_dir, target, 'platform'))
+            self.mkdir(join(self.buildozer_dir, target, 'app'))
 
     def check_application_requirements(self):
         '''Ensure the application requirements are all available and ready to be
@@ -828,14 +835,14 @@ class Buildozer(object):
 
     @property
     def buildozer_dir(self):
-        if self.builddir:
-            return join(self.builddir, '.buildozer')
+        if self.build_dir:
+            return self.build_dir
         return join(self.root_dir, '.buildozer')
 
     @property
     def bin_dir(self):
-        if self.bin_apk_dir:
-            return self.bin_apk_dir
+        if self.user_bin_dir:
+            return self.user_bin_dir
         return join(self.root_dir, 'bin')
 
     @property
