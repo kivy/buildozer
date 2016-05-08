@@ -25,20 +25,14 @@ class TargetAndroidNew(TargetAndroid):
         return self.buildozer.cmd(self._p4a_cmd + cmd, **kwargs)
 
     def get_available_packages(self):
-        available_modules = self._p4a(
-            "recipes --compact",
-            get_stdout=True)[0]
-        return available_modules.splitlines()[0].split()
+        return True
 
     def compile_platform(self):
         app_requirements = self.buildozer.config.getlist(
             'app', 'requirements', '')
-        available_modules = self.get_available_packages()
         onlyname = lambda x: x.split('==')[0]
-        android_requirements = [x for x in app_requirements
-                                if onlyname(x) in available_modules]
         dist_name = self.buildozer.config.get('app', 'package.name')
-        requirements = ','.join(android_requirements)
+        requirements = ','.join(app_requirements)
         options = []
 
         source_dirs = {
