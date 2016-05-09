@@ -23,34 +23,38 @@ Usage example
 
 #. Install buildozer::
 
-    # latest dev
+    # via pip (latest stable, recommended)
+    sudo pip install buildozer
+
+    # latest dev version
+    sudo pip install https://github.com/kivy/buildozer/archive/master.zip
+
+    # git clone, for working on buildozer
     git clone https://github.com/kivy/buildozer
     cd buildozer
-    sudo python2.7 setup.py install
-
-    # via pip (latest stable)
-    sudo pip install buildozer
+    python setup.py build
+    sudo pip install -e .
 
 #. Go into your application directory and do::
 
     buildozer init
     # edit the buildozer.spec, then
-    buildozer android debug deploy run
+    buildozer android_new debug deploy run
 
 Example of commands::
 
     # buildozer target command
-    buildozer android clean
-    buildozer android update
-    buildozer android deploy
-    buildozer android debug
-    buildozer android release
+    buildozer android_new clean
+    buildozer android_new update
+    buildozer android_new deploy
+    buildozer android_new debug
+    buildozer android_new release
 
     # or all in one (compile in debug, deploy on device)
-    buildozer android debug deploy
+    buildozer android_new debug deploy
 
     # set the default command if nothing set
-    buildozer setdefault android debug deploy run
+    buildozer setdefault android_new debug deploy run
 
 
 Usage
@@ -58,26 +62,47 @@ Usage
 
 ::
 
-    Usage: buildozer [--verbose] [target] [command1] [command2]
+    Usage:
+        buildozer [--profile <name>] [--verbose] [target] <command>...
+        buildozer --version
 
     Available targets:
-      android            Android target, based on python-for-android project
-      ios                iOS target, based on kivy-ios project. (not working yet.)
+      android            Android target, based on python-for-android project (old toolchain)
+      ios                iOS target, based on kivy-ios project
+      android_new        Android target, based on python-for-android project (new toolchain)
 
     Global commands (without target):
-      clean              Clean the whole Buildozer environment.
+      distclean          Clean the whole Buildozer environment.
       help               Show the Buildozer help.
       init               Create a initial buildozer.spec in the current directory
-      setdefault         Set the default command to do when no arguments are given
+      serve              Serve the bin directory via SimpleHTTPServer
+      setdefault         Set the default command to run when no arguments are given
       version            Show the Buildozer version
 
     Target commands:
-      clean              Clean the target environment
-      update             Update the target dependencies
-      debug              Build the application in debug mode
-      release            Build the application in release mode
-      deploy             Deploy the application on the device
-      run                Run the application on the device
+      clean      Clean the target environment
+      update     Update the target dependencies
+      debug      Build the application in debug mode
+      release    Build the application in release mode
+      deploy     Deploy the application on the device
+      run        Run the application on the device
+      serve      Serve the bin directory via SimpleHTTPServer
+
+    Target "android" commands:
+      adb                Run adb from the Android SDK. Args must come after --, or
+                         use --alias to make an alias
+      logcat             Show the log from the device
+
+    Target "ios" commands:
+      list_identities    List the available identities to use for signing.
+      xcode              Open the xcode project.
+
+    Target "android_new" commands:
+      adb                Run adb from the Android SDK. Args must come after --, or
+                         use --alias to make an alias
+      logcat             Show the log from the device
+      p4a                Run p4a commands. Args must come after --, or use --alias
+                         to make an alias
 
 
 

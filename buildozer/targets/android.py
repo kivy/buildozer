@@ -846,6 +846,11 @@ class TargetAndroid(Target):
         return serials
 
     def cmd_adb(self, *args):
+        '''
+        Run adb from the Android SDK.
+        Args must come after --, or use
+        --alias to make an alias
+        '''
         self.check_requirements()
         self.install_platform()
         args = args[0]

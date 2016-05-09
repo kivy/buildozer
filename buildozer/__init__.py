@@ -6,7 +6,7 @@ Generic Python packager for Android / iOS. Desktop later.
 
 '''
 
-__version__ = '0.32dev'
+__version__ = '0.32'
 
 import os
 import re
@@ -14,6 +14,7 @@ import sys
 import zipfile
 import select
 import codecs
+import textwrap
 from buildozer.jsonstore import JsonStore
 from sys import stdout, stderr, exit
 from re import search
@@ -957,7 +958,8 @@ class Buildozer(object):
             for command, doc in commands:
                 if not doc:
                     continue
-                doc = doc.strip().splitlines()[0].strip()
+                doc = textwrap.fill(textwrap.dedent(doc).strip(), 59,
+                                    subsequent_indent=' ' * 21)
                 print('  {0:<18} {1}'.format(command, doc))
 
         print('')
@@ -1069,7 +1071,7 @@ class Buildozer(object):
         self.usage()
 
     def cmd_setdefault(self, *args):
-        '''Set the default command to do when to arguments are given
+        '''Set the default command to run when no arguments are given
         '''
         self.check_build_layout()
         self.state['buildozer:defaultcommand'] = args

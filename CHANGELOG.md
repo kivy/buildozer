@@ -1,5 +1,24 @@
 # Change Log
 
+## [v0.32](https://github.com/kivy/buildozer/tree/v0.32) (2016-05-09)
+[Full Changelog](https://github.com/kivy/buildozer/compare/v0.31...v0.32)
+
+- Added `source.include_patterns` app option
+- Added `android_new` target to use the python-for-android revamp toolchain
+- Added `build_dir` and `bin_dir` buildozer options
+- Stopped using pip `--download-cache` flag, as it has been removed from recent pip versions
+- Always use ios-deploy 1.7.0 - newer versions are completely different
+- Fix bugs with Unicode app titles
+- Fix bugs with directory handling
+- Support using a custom kivy-ios dir
+- Add `adb` command to android/android_new targets
+- Disable bitcode on iOS builds (needed for newer Xcode)
+- Fix `api`/`minapi` values for android target
+- Use kivy-ios to build icons for all supported sizes
+- Fix p4a branch handling
+- Let p4a handle pure-Python packages (android_new)
+- Use colored output in p4a (android_new)
+
 ## [v0.31](https://github.com/kivy/buildozer/tree/v0.31) (2016-01-07)
 [Full Changelog](https://github.com/kivy/buildozer/compare/0.30...v0.31)
 

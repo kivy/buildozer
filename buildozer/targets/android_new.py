@@ -102,6 +102,10 @@ class TargetAndroidNew(TargetAndroid):
         return super(TargetAndroidNew, self).cmd_run(*args)
 
     def cmd_p4a(self, *args):
+        '''
+        Run p4a commands. Args must come after --, or
+        use --alias to make an alias
+        '''
         self.check_requirements()
         self.install_platform()
         args = args[0]
