@@ -13,7 +13,7 @@ class TargetAndroidNew(TargetAndroid):
     targetname = 'android_new'
     p4a_branch = "master"
     p4a_directory = "python-for-android-master"
-    p4a_apk_cmd = "apk --bootstrap=sdl2"
+    p4a_apk_cmd = "apk --bootstrap="
 
     def __init__(self, buildozer):
         super(TargetAndroidNew, self).__init__(buildozer)
@@ -21,6 +21,9 @@ class TargetAndroidNew(TargetAndroid):
         color = 'always' if USE_COLOR else 'never'
         self._p4a_cmd = ('python -m pythonforandroid.toolchain --color={} '
                          '--storage-dir={} ').format(color, self._build_dir)
+        self._p4a_bootstrap = self.buildozer.config.getdefault(
+            'app', 'android.bootstrap', 'sdl2')
+        self.p4a_apk_cmd += self._p4a_bootstrap
 
     def _p4a(self, cmd, **kwargs):
         kwargs.setdefault('cwd', self.pa_dir)
@@ -52,7 +55,7 @@ class TargetAndroidNew(TargetAndroid):
             options.append("--copy-libs")
         available_modules = self._p4a(
             "create --dist_name={} --bootstrap={} --requirements={} --arch armeabi-v7a {}".format(
-                 dist_name, "sdl2", requirements, " ".join(options)),
+                 dist_name, self._p4a_bootstrap, requirements, " ".join(options)),
             get_stdout=True)[0]
 
     def _update_libraries_references(self, dist_dir):

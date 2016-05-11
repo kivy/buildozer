@@ -109,6 +109,9 @@ fullscreen = 1
 # when an update is due and you just want to test/build your package
 # android.skip_update = False
 
+# (str) Bootstrap to use for android builds (android_new only)
+# android.bootstrap = sdl2
+
 # (str) Android entry point, default is ok for Kivy-based app
 #android.entrypoint = org.renpy.android.PythonActivity
 
