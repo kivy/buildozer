@@ -161,7 +161,7 @@ class TargetOSX(Target):
         self.buildozer.info('{}.dmg created'.format(package_name))
         self.buildozer.info('moving {}.dmg to bin.'.format(package_name))
         binpath = join(
-            self.buildozer.builddir or
+            self.buildozer.build_dir or
             dirname(abspath(self.buildozer.specfilename)), 'bin')
         check_output(
             ('cp', '-a', package_name+'.dmg', binpath),
