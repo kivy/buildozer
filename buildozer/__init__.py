@@ -461,6 +461,14 @@ class Buildozer(object):
         requirements = [x for x in requirements if onlyname(x) not in
                 target_available_packages]
 
+        if requirements and hasattr(sys, 'real_prefix'):
+            e = self.error
+            e('virtualenv is needed to install pure-Python modules, but')
+            e('virtualenv does not support nesting, and you are running')
+            e('buildozer in one. Please run buildozer outside of a')
+            e('virtualenv instead.')
+            exit(1)
+
         # did we already installed the libs ?
         if exists(self.applibs_dir) and \
             self.state.get('cache.applibs', '') == requirements:
