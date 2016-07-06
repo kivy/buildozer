@@ -19,11 +19,11 @@ class TargetAndroidNew(TargetAndroid):
         super(TargetAndroidNew, self).__init__(buildozer)
         self._build_dir = join(self.buildozer.platform_dir, 'build')
         color = 'always' if USE_COLOR else 'never'
-        self._p4a_cmd = ('python -m pythonforandroid.toolchain --color={} '
-                         '--storage-dir={} ').format(color, self._build_dir)
+        self._p4a_cmd = ('python -m pythonforandroid.toolchain ')
         self._p4a_bootstrap = self.buildozer.config.getdefault(
             'app', 'android.bootstrap', 'sdl2')
-        self.p4a_apk_cmd += self._p4a_bootstrap
+        self.p4a_apk_cmd += ('{} --color={} --storage-dir={}'.format(
+            self._p4a_bootstrap, self.color, self._build_dir)
 
     def _p4a(self, cmd, **kwargs):
         kwargs.setdefault('cwd', self.pa_dir)
