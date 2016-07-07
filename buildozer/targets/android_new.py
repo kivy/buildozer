@@ -22,7 +22,7 @@ class TargetAndroidNew(TargetAndroid):
         self._p4a_cmd = ('python -m pythonforandroid.toolchain ')
         self._p4a_bootstrap = self.buildozer.config.getdefault(
             'app', 'android.bootstrap', 'sdl2')
-        self.p4a_apk_cmd += ('{}'.format(self._p4a_bootstrap)
+        self.p4a_apk_cmd += self._p4a_bootstrap
         color = 'always' if USE_COLOR else 'never'
         self.extra_p4a_args = ' --color={} --storage-dir={}'.format(
             color, self._build_dir)
