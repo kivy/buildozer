@@ -14,20 +14,22 @@ class TargetAndroidNew(TargetAndroid):
     p4a_branch = "master"
     p4a_directory = "python-for-android-master"
     p4a_apk_cmd = "apk --bootstrap="
+    extra_p4a_args = ''
 
     def __init__(self, buildozer):
         super(TargetAndroidNew, self).__init__(buildozer)
         self._build_dir = join(self.buildozer.platform_dir, 'build')
-        color = 'always' if USE_COLOR else 'never'
         self._p4a_cmd = ('python -m pythonforandroid.toolchain ')
         self._p4a_bootstrap = self.buildozer.config.getdefault(
             'app', 'android.bootstrap', 'sdl2')
-        self.p4a_apk_cmd += ('{} --color={} --storage-dir={}'.format(
-            self._p4a_bootstrap, color, self._build_dir))
+        self.p4a_apk_cmd += ('{}'.format(self._p4a_bootstrap)
+        color = 'always' if USE_COLOR else 'never'
+        self.extra_p4a_args = ' --color={} --storage-dir={}'.format(
+            color, self._build_dir)
 
     def _p4a(self, cmd, **kwargs):
         kwargs.setdefault('cwd', self.pa_dir)
-        return self.buildozer.cmd(self._p4a_cmd + cmd, **kwargs)
+        return self.buildozer.cmd(self._p4a_cmd + cmd + self.extra_p4a_args, **kwargs)
 
     def get_available_packages(self):
         return True
