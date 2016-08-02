@@ -39,6 +39,7 @@ class TargetAndroidNew(TargetAndroid):
             'app', 'requirements', '')
         onlyname = lambda x: x.split('==')[0]
         dist_name = self.buildozer.config.get('app', 'package.name')
+        local_recipes = self.buildozer.config.get('app', 'p4a.local_recipes')
         requirements = ','.join(app_requirements)
         options = []
 
@@ -55,6 +56,10 @@ class TargetAndroidNew(TargetAndroid):
 
         if self.buildozer.config.getbooldefault('app', 'android.copy_libs', True):
             options.append("--copy-libs")
+        # support for recipes in a local directory within the project
+        if local_recipes:
+            options.append('--local-recipes')
+            options.append(local_recipes)
         available_modules = self._p4a(
             "create --dist_name={} --bootstrap={} --requirements={} --arch armeabi-v7a {}".format(
                  dist_name, self._p4a_bootstrap, requirements, " ".join(options)),
@@ -70,6 +75,7 @@ class TargetAndroidNew(TargetAndroid):
     def execute_build_package(self, build_cmd):
         # wrapper from previous old_toolchain to new toolchain
         dist_name = self.buildozer.config.get('app', 'package.name')
+        local_recipes = self.buildozer.config.get('app', 'p4a.local_recipes')
         cmd = [self.p4a_apk_cmd, "--dist_name", dist_name]
         for args in build_cmd:
             option, values = args[0], args[1:]
@@ -95,6 +101,11 @@ class TargetAndroidNew(TargetAndroid):
         # support for copy-libs
         if self.buildozer.config.getbooldefault('app', 'android.copy_libs', True):
             cmd.append("--copy-libs")
+
+        # support for recipes in a local directory within the project
+        if local_recipes:
+            cmd.append('--local-recipes')
+            cmd.append(local_recipes)
 
         cmd = " ".join(cmd)
         self._p4a(cmd)
