@@ -39,7 +39,7 @@ class TargetAndroidNew(TargetAndroid):
             'app', 'requirements', '')
         onlyname = lambda x: x.split('==')[0]
         dist_name = self.buildozer.config.get('app', 'package.name')
-        local_recipes = self.buildozer.config.get('app', 'p4a.local_recipes')
+        local_recipes = self.get_local_recipes_dir()
         requirements = ','.join(app_requirements)
         options = []
 
@@ -72,10 +72,14 @@ class TargetAndroidNew(TargetAndroid):
     def get_dist_dir(self, dist_name):
         return join(self._build_dir, 'dists', dist_name)
 
+    def get_local_recipes_dir(self):
+        local_recipes = self.buildozer.config.get('app', 'p4a.local_recipes')
+        return realpath(expanduser(local_recipes)) if local_recipes else None
+
     def execute_build_package(self, build_cmd):
         # wrapper from previous old_toolchain to new toolchain
         dist_name = self.buildozer.config.get('app', 'package.name')
-        local_recipes = self.buildozer.config.get('app', 'p4a.local_recipes')
+        local_recipes = self.get_local_recipes_dir()
         cmd = [self.p4a_apk_cmd, "--dist_name", dist_name]
         for args in build_cmd:
             option, values = args[0], args[1:]
