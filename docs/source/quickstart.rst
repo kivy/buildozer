@@ -48,6 +48,10 @@ You can combine the compilation with the deployment::
 
     buildozer -v android debug deploy run logcat
 
+To save the logcat output into a file named `my_log.txt` (the file will appear in your currend directory)::
+
+    buildozer -v android debug deploy run logcat > my_log.txt
+
 You can also set this line at the default command to do if Buildozer is started
 without any arguments::
 
