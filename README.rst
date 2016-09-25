@@ -18,10 +18,10 @@ is intended in the future.
 Note that this tool has nothing to do with the eponymous online build service
 `buildozer.io <http://buildozer.io />`_.
 
-Usage example
--------------
+Installing Buildozer with python2 support:
+------------------------------------------
 
-#. Install buildozer::
+#. Install buildozer: 
 
     # via pip (latest stable, recommended)
     sudo pip install buildozer
@@ -35,13 +35,50 @@ Usage example
     python setup.py build
     sudo pip install -e .
 
-#. Go into your application directory and do::
+#. Go into your application directory and run::
 
     buildozer init
     # edit the buildozer.spec, then
     buildozer android_new debug deploy run
 
-Example of commands::
+Installing Buildozer with python3 support:
+------------------------------------------
+
+The pip package does not yet support python3.
+
+#. Install buildozer from source::
+
+    git clone https://github.com/kivy/buildozer
+    cd buildozer
+    python setup.py build
+    sudo pip install -e 
+
+#. Download and extract the crystax ndk somewhere (~/.buildozer/crystax-ndk is one option): https://www.crystax.net/en/download
+#. Go into your application directory and execute::
+
+    buildozer init
+
+#. Edit the buildozer.spec file to fit your application
+#. Edit the "requirements" line of buildozer.spec so it starts with at least the following::
+
+    requirements = python3crystax,kivy
+
+#. Edit the buildozer.spec andriod.ndk line to point to the directory where you extracted the crystax-ndk::
+
+    android.ndk_path = ~/.buildozer/crystax-ndk
+
+#. Finally, build, deploy and run the app on your phone::
+
+    buildozer android_new debug deploy run
+
+#.  Please note the "android_new" buildozer target, and use that for any and all buildozer commands you run (even if the docs just say "android").  Python3 only works with the *android_new* toolchain.
+    
+
+    
+Examples of Buildozer commands:
+--------------------------------
+
+::
 
     # buildozer target command
     buildozer android_new clean
