@@ -21,7 +21,7 @@ Note that this tool has nothing to do with the eponymous online build service
 Installing Buildozer with python2 support:
 ------------------------------------------
 
-#. Install buildozer: 
+#. Install buildozer:: 
 
     # via pip (latest stable, recommended)
     sudo pip install buildozer
@@ -71,7 +71,7 @@ The pip package does not yet support python3.
 
     buildozer android_new debug deploy run
 
-#.  Please note the "android_new" buildozer target, and use that for any and all buildozer commands you run (even if the docs just say "android").  Python3 only works with the *android_new* toolchain.
+#.  Please note the "android_new" buildozer target, and use that for any and all buildozer commands you run (even if the docs just say "android").  Python3 only works with the **android_new** toolchain.
     
 
     
