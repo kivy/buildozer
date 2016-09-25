@@ -59,11 +59,11 @@ The pip package does not yet support python3.
     buildozer init
 
 #. Edit the buildozer.spec file to fit your application
-#. Edit the "requirements" line of buildozer.spec so it starts with at least the following::
+#. Edit the "requirements" line of buildozer.spec so it starts with at least the following:
 
     requirements = python3crystax,kivy
 
-#. Edit the buildozer.spec andriod.ndk line to point to the directory where you extracted the crystax-ndk::
+#. Edit the buildozer.spec andriod.ndk line to point to the directory where you extracted the crystax-ndk:
 
     android.ndk_path = ~/.buildozer/crystax-ndk
 
