@@ -60,7 +60,7 @@ The pip package does not yet support python3.
 
 #. Edit the buildozer.spec file to fit your application
 
-#. Make sure the following lines are in your buildozer.spec file.  This is required right now for python3 support:
+#. Make sure the following lines are in your buildozer.spec file.  This is required right now for python3 support::
   
     #Require python3crystax:
     requirements = python3crystax,kivy
