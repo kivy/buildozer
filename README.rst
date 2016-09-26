@@ -59,13 +59,17 @@ The pip package does not yet support python3.
     buildozer init
 
 #. Edit the buildozer.spec file to fit your application
-#. Edit the "requirements" line of buildozer.spec so it starts with at least the following:
 
+#. Make sure the following lines are in your buildozer.spec file.  This is required right now for python3 support:
+  
+    #Require python3crystax:
     requirements = python3crystax,kivy
 
-#. Edit the buildozer.spec andriod.ndk line to point to the directory where you extracted the crystax-ndk:
+    #Point to the directory where you extracted the crystax-ndk:
+    android.ndk_path = <Your install path here.  Use ~ for home DIR>
 
-    android.ndk_path = ~/.buildozer/crystax-ndk
+    #To fix a "configparser.NoOptionError: No option 'p4a.local_recipes' in section: 'app'" issue:
+    p4a.local_recipes =
 
 #. Finally, build, deploy and run the app on your phone::
 
