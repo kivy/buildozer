@@ -73,7 +73,7 @@ class TargetAndroidNew(TargetAndroid):
         return join(self._build_dir, 'dists', dist_name)
 
     def get_local_recipes_dir(self):
-        local_recipes = self.buildozer.config.get('app', 'p4a.local_recipes')
+        local_recipes = self.buildozer.config.getdefault('app', 'p4a.local_recipes')
         return realpath(expanduser(local_recipes)) if local_recipes else None
 
     def execute_build_package(self, build_cmd):

@@ -101,6 +101,9 @@ fullscreen = 1
 # (str) python-for-android git clone directory (if empty, it will be automatically cloned from github)
 #android.p4a_dir =
 
+# (str) The directory in which python-for-android should look for your own build recipes (if any)
+#p4a.local_recipes = 
+
 # (list) python-for-android whitelist
 #android.p4a_whitelist =
 
