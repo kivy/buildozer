@@ -27,6 +27,7 @@ from buildozer import IS_PY3
 from buildozer.target import Target
 from os import environ
 from os.path import exists, join, realpath, expanduser, basename, relpath
+from platform import architecture
 from shutil import copyfile
 from glob import glob
 
@@ -447,7 +448,7 @@ class TargetAndroid(Target):
                                               show_output=False)
         if returncode != 1:
             self.buildozer.error('Aidl cannot be executed')
-            if sys.maxint > 2**32:
+            if architecture()[0] == '64bit':
                 self.buildozer.error('')
                 self.buildozer.error(
                     'You might have missed to install 32bits libs')
