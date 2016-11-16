@@ -116,6 +116,7 @@ class Buildozer(object):
         self.config.getlistvalues = self._get_config_list_values
         self.config.getdefault = self._get_config_default
         self.config.getbooldefault = self._get_config_bool
+        self.config.getrawdefault = self._get_config_raw_default
 
         if exists(filename):
             self.config.read(filename)
@@ -1195,6 +1196,15 @@ class Buildozer(object):
         if not self.config.has_option(section, token):
             return default
         return self.config.getboolean(section, token)
+
+    def _get_config_raw_default(self, section, token, default=None, section_sep="=", split_char=" "):
+        l_section = '{}:{}'.format(section, token)
+        if self.config.has_section(l_section):
+            return [section_sep.join(item) for item in self.config.items(l_section)]
+        if not self.config.has_option(section, token):
+            return default.split(split_char)
+        return self.config.get(section, token).split(split_char)
+
 
 def set_config_from_envs(config):
     '''Takes a ConfigParser, and checks every section/token for an
