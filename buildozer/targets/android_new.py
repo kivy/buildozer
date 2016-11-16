@@ -28,6 +28,8 @@ class TargetAndroidNew(TargetAndroid):
             color, self._build_dir)
 
     def _p4a(self, cmd, **kwargs):
+        if not hasattr(self, "pa_dir"):
+            self.pa_dir = join(self.buildozer.platform_dir, self.p4a_directory)
         kwargs.setdefault('cwd', self.pa_dir)
         return self.buildozer.cmd(self._p4a_cmd + cmd + self.extra_p4a_args, **kwargs)
 
