@@ -113,6 +113,16 @@ class TargetAndroidNew(TargetAndroid):
             cmd.append('--local-recipes')
             cmd.append(local_recipes)
 
+        # support for blacklist/whitelist filename
+        whitelist_src = self.buildozer.config.getdefault('app', 'android.p4a_whitelist_src', None)
+        blacklist_src = self.buildozer.config.getdefault('app', 'android.p4a_blacklist_src', None)
+        if whitelist_src:
+            cmd.append('--whitelist')
+            cmd.append(realpath(whitelist_src))
+        if blacklist_src:
+            cmd.append('--blacklist')
+            cmd.append(realpath(blacklist_src))
+
         cmd = " ".join(cmd)
         self._p4a(cmd)
 
