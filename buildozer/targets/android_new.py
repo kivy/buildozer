@@ -139,6 +139,13 @@ class TargetAndroidNew(TargetAndroid):
         else:
             self._p4a(' '.join(args) if args else '')
 
+    def cmd_clean(self, *args):
+        '''
+        Clean the build and distribution
+        '''
+        self._p4a("clean_builds")
+        self._p4a("clean_dists")
+
 
 def get_target(buildozer):
     buildozer.targetname = "android"
