@@ -15,7 +15,7 @@ Targeting Android
 
 If you target Android, you must install at least Cython, few build libs, and a
 Java SDK. Some binaries of the Android SDK are still in 32 bits, so you need
-few 32bits libraries available::
+few 32bits libraries available:
 
 Android on Ubuntu 15.10 (64bit)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
