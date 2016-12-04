@@ -56,6 +56,9 @@ without any arguments::
     # now just type buildozer, and it will do the default command
     buildozer
 
+To save the logcat output into a file named `my_log.txt` (the file will appear in your current directory)::
+
+    buildozer -v android debug deploy run logcat > my_log.txt
 
 Install on non-connected devices
 --------------------------------
