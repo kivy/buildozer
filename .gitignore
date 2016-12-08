@@ -28,3 +28,10 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 MANIFEST
+
+# Eclipse
+.project
+.pydevproject
+
+# Custom virtualenv location
+venv
