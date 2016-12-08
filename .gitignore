@@ -32,6 +32,7 @@ MANIFEST
 # Eclipse
 .project
 .pydevproject
+.settings
 
 # Custom virtualenv location
 venv
