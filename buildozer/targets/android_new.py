@@ -26,6 +26,9 @@ class TargetAndroidNew(TargetAndroid):
         color = 'always' if USE_COLOR else 'never'
         self.extra_p4a_args = ' --color={} --storage-dir={}'.format(
             color, self._build_dir)
+        hook = self.buildozer.config.getdefault("app", "p4a.hook", None)
+        if hook is not None:
+            self.extra_p4a_args += ' --hook={}'.format(realpath(hook))
 
     def _p4a(self, cmd, **kwargs):
         if not hasattr(self, "pa_dir"):
@@ -66,10 +69,6 @@ class TargetAndroidNew(TargetAndroid):
             "create --dist_name={} --bootstrap={} --requirements={} --arch armeabi-v7a {}".format(
                  dist_name, self._p4a_bootstrap, requirements, " ".join(options)),
             get_stdout=True)[0]
-
-    def _update_libraries_references(self, dist_dir):
-        # UNSUPPORTED YET
-        pass
 
     def get_dist_dir(self, dist_name):
         return join(self._build_dir, 'dists', dist_name)
