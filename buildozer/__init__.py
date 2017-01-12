@@ -825,7 +825,7 @@ class Buildozer(object):
         if not self.file_exists(main_py):
             #self.error('Unable to patch main_py to add applibs directory.')
             return
-        
+
         header = (b'import sys, os; '
                    b'sys.path = [os.path.join(os.getcwd(),'
                    b'"..", "_applibs")] + sys.path\n')
