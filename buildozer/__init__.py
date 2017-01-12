@@ -826,16 +826,11 @@ class Buildozer(object):
             #self.error('Unable to patch main_py to add applibs directory.')
             return
         
-        with open(main_py, 'rb') as fd:
-            data = fd.read()
-        if IS_PY3:
-            header = (b'import sys, os; '
+        header = (b'import sys, os; '
                    b'sys.path = [os.path.join(os.getcwd(),'
                    b'"..", "_applibs")] + sys.path\n')
-        else:
-            header = ('import sys, os; '
-                  'sys.path = [os.path.join(os.getcwd(),'
-                  '"..", "_applibs")] + sys.path\n')
+        with open(main_py, 'rb') as fd:
+            data = fd.read()
         data = header + data
         with open(main_py, 'wb') as fd:
             fd.write(data)
