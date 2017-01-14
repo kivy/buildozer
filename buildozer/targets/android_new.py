@@ -19,7 +19,7 @@ class TargetAndroidNew(TargetAndroid):
     def __init__(self, buildozer):
         super(TargetAndroidNew, self).__init__(buildozer)
         self._build_dir = join(self.buildozer.platform_dir, 'build')
-        self._p4a_cmd = ('python -m pythonforandroid.toolchain ')
+        self._p4a_cmd = 'python -m pythonforandroid.toolchain '
         self._p4a_bootstrap = self.buildozer.config.getdefault(
             'app', 'android.bootstrap', 'sdl2')
         self.p4a_apk_cmd += self._p4a_bootstrap
@@ -66,8 +66,9 @@ class TargetAndroidNew(TargetAndroid):
             options.append('--local-recipes')
             options.append(local_recipes)
         available_modules = self._p4a(
-            "create --dist_name={} --bootstrap={} --requirements={} --arch armeabi-v7a {}".format(
-                 dist_name, self._p4a_bootstrap, requirements, " ".join(options)),
+            "create --dist_name={} --bootstrap={} --requirements={} --arch {} {}".format(
+                 dist_name, self._p4a_bootstrap, requirements,
+                 self.buildozer.config.getdefault('app', 'android.arch', "armeabi-v7a"), " ".join(options)),
             get_stdout=True)[0]
 
     def get_dist_dir(self, dist_name):
@@ -121,6 +122,9 @@ class TargetAndroidNew(TargetAndroid):
         if blacklist_src:
             cmd.append('--blacklist')
             cmd.append(realpath(blacklist_src))
+
+        cmd.append('--arch')
+        cmd.append(self.buildozer.config.getdefault('app', 'android.arch', "armeabi-v7a"))
 
         cmd = " ".join(cmd)
         self._p4a(cmd)
