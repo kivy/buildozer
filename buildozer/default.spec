@@ -168,7 +168,7 @@ fullscreen = 1
 # (bool) Copy library instead of making a libpymodules.so
 #android.copy_libs = 1
 
-# (str) The Android arch to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
+# (str) The Android arch to build for, choices: armeabi-v7a, arm64-v8a, x86
 android.arch = armeabi-v7a
 
 #
