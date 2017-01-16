@@ -66,7 +66,7 @@ class TargetAndroidNew(TargetAndroid):
             options.append('--local-recipes')
             options.append(local_recipes)
         available_modules = self._p4a(
-            "create --dist_name={} --bootstrap={} --requirements={} --arch={} --symlink-java-src={} {}".format(
+            "create --dist_name={} --bootstrap={} --requirements={} --arch={} --symlink-java-src {} {}".format(
                  dist_name, self._p4a_bootstrap, requirements,
                  self.buildozer.config.getdefault('app', 'android.arch', "armeabi-v7a"),
                  self.buildozer.config.getdefault('app', 'android.symlink-java-src', False), " ".join(options)),
@@ -125,9 +125,6 @@ class TargetAndroidNew(TargetAndroid):
             cmd.append(realpath(blacklist_src))
 
         cmd.append('--arch={}'.format(self.buildozer.config.getdefault('app', 'android.arch', "armeabi-v7a")))
-
-        cmd.append('--symlink-java-src={}'.format(
-            self.buildozer.config.getdefault('app', 'android.symlink-java-src', False)))
 
         cmd = " ".join(cmd)
         self._p4a(cmd)
