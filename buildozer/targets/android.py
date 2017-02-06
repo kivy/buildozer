@@ -292,7 +292,7 @@ class TargetAndroid(Target):
 
         elif platform.startswith('linux'):
             if int(_version) > 9:  # if greater than 9, take it as .bin file
-                archive = 'android-ndk-r{0}-linux-{1}.bin'
+                archive = 'android-ndk-r{0}-linux-{1}.zip'
             else:
                 archive = 'android-ndk-r{0}-linux-{1}.tar.bz2'
             is_64 = (os.uname()[4] == 'x86_64')
@@ -303,7 +303,7 @@ class TargetAndroid(Target):
         unpacked = 'android-ndk-r{0}'
         archive = archive.format(self.android_ndk_version, architecture)
         unpacked = unpacked.format(self.android_ndk_version)
-        url = 'http://dl.google.com/android/ndk/'
+        url = 'http://dl.google.com/android/repository/'
         self.buildozer.download(url,
                                 archive,
                                 cwd=self.buildozer.global_platform_dir)
@@ -755,6 +755,14 @@ class TargetAndroid(Target):
 
         self.execute_build_package(build_cmd)
 
+        try:
+            self.buildozer.hook("android_pre_build_apk")
+            self.execute_build_package(build_cmd)
+            self.buildozer.hook("android_post_build_apk")
+        except:
+            # maybe the hook fail because the apk is not
+            pass
+
         # XXX found how the apk name is really built from the title
         bl = u'\'" ,'
         apptitle = config.get('app', 'title')
@@ -814,7 +822,7 @@ class TargetAndroid(Target):
         with io.open(project_fn, 'w', encoding='utf-8') as fd:
             fd.writelines(content)
             for index, ref in enumerate(references):
-                fd.write(u'\nandroid.library.reference.{}={}'.format(index + 1,
+                fd.write(u'android.library.reference.{}={}\n'.format(index + 1,
                                                                      ref))
 
         self.buildozer.debug('project.properties updated')
