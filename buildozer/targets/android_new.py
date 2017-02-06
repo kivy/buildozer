@@ -4,6 +4,7 @@ Android target, based on python-for-android project (new toolchain)
 '''
 import sys
 
+import buildozer
 from buildozer.targets.android import TargetAndroid
 from buildozer import USE_COLOR
 from os.path import join, expanduser, realpath
@@ -13,7 +14,7 @@ class TargetAndroidNew(TargetAndroid):
     targetname = 'android_new'
     p4a_branch = "master"
     p4a_directory = "python-for-android-master"
-    p4a_apk_cmd = "apk --bootstrap="
+    p4a_apk_cmd = "apk --debug --bootstrap="
     extra_p4a_args = ''
 
     def __init__(self, buildozer):
@@ -89,6 +90,7 @@ class TargetAndroidNew(TargetAndroid):
                 continue
             elif option == "release":
                 cmd.append("--release")
+                cmd.append("--sign")
                 continue
             if option == "--window":
                 cmd.append("--window")
