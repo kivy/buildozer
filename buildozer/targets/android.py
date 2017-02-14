@@ -751,7 +751,7 @@ class TargetAndroid(Target):
             mode = 'debug'
         else:
             build_cmd += [("release", )]
-            mode = 'release'
+            mode = 'release-unsigned'
 
         self.execute_build_package(build_cmd)
 
