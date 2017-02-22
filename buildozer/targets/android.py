@@ -292,7 +292,7 @@ class TargetAndroid(Target):
 
         elif platform.startswith('linux'):
             if int(_version) > 9:  # if greater than 9, take it as .bin file
-                archive = 'android-ndk-r{0}-linux-{1}.zip'
+                archive = 'android-ndk-r{0}-linux-{1}.bin'
             else:
                 archive = 'android-ndk-r{0}-linux-{1}.tar.bz2'
             is_64 = (os.uname()[4] == 'x86_64')
