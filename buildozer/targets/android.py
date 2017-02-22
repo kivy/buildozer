@@ -252,7 +252,7 @@ class TargetAndroid(Target):
             raise SystemError('Unsupported platform: {0}'.format(platform))
 
         archive = archive.format(self.android_sdk_version)
-        url = 'http://dl.google.com/android/ndk/'
+        url = 'http://dl.google.com/android/'
         self.buildozer.download(url,
                                 archive,
                                 cwd=self.buildozer.global_platform_dir)
