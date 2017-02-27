@@ -243,8 +243,13 @@ class Buildozer(object):
         self.debug('Search for {0}'.format(msg))
         if exists(fn):
             return realpath(fn)
-        for dn in environ['PATH'].split(':'):
-            rfn = realpath(join(dn, fn))
+        is_win = sys.platform in ('win32', 'cygwin')
+        path = environ['PATH'].split(';' if is_win else ':')
+        for dn in path:
+            if is_win:
+                rfn = realpath(join(dn, fn+".exe"))
+            else:
+                rfn = realpath(join(dn, fn))
             if exists(rfn):
                 self.debug(' -> found at {0}'.format(rfn))
                 return rfn
@@ -609,10 +614,13 @@ class Buildozer(object):
     def file_extract(self, archive, cwd=None):
         if archive.endswith('.tgz') or archive.endswith('.tar.gz'):
             # XXX tarfile doesn't work for NDK-r8c :(
-            #tf = tarfile.open(archive, 'r:*')
-            #tf.extractall(path=cwd)
-            #tf.close()
-            self.cmd('tar xzf {0}'.format(archive), cwd=cwd)
+            # tf = tarfile.open(archive, 'r:*')
+            # tf.extractall(path=cwd)
+            # tf.close()
+            if sys.platform in ('win32', 'cygwin'):
+                self.cmd('gzip -d -c {0} | tar x'.format(archive), cwd=cwd)
+            else:
+                self.cmd('tar xzf {0}'.format(archive), cwd=cwd)
             return
 
         if archive.endswith('.tbz2') or archive.endswith('.tar.bz2'):
@@ -622,8 +630,8 @@ class Buildozer(object):
 
         if archive.endswith('.bin'):
             # To process the bin files for linux and darwin systems
-            self.cmd('chmod a+x {0}'.format(archive),cwd=cwd)
-            self.cmd('./{0}'.format(archive),cwd=cwd)
+            self.cmd('chmod a+x {0}'.format(archive), cwd=cwd)
+            self.cmd('./{0}'.format(archive), cwd=cwd)
             return
 
         if archive.endswith('.zip'):
@@ -908,8 +916,7 @@ class Buildozer(object):
                 continue
             target = fn[:-3]
             try:
-                m = __import__('buildozer.targets.{0}'.format(target),
-                        fromlist=['buildozer'])
+                m = __import__('buildozer.targets.{0}'.format(target), fromlist=['buildozer'])
                 yield target, m
             except NotImplementedError:
                 pass
