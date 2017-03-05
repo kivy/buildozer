@@ -137,7 +137,7 @@ class TargetAndroid(Target):
         checkbin('Java compiler (javac)', self.javac_cmd)
         checkbin('Java keytool (keytool)', self.keytool_cmd)
 
-    def check_configuration_tokens(self):
+    def check_configuration_tokens(self, **kwargs):
         errors = []
 
         # check the permission
@@ -242,9 +242,7 @@ class TargetAndroid(Target):
 
         archive = archive.format(self.android_sdk_version)
         url = 'http://dl.google.com/android/'
-        self.buildozer.download(url,
-                                archive,
-                                cwd=self.buildozer.global_platform_dir)
+        self.buildozer.download(url, archive, cwd=self.buildozer.global_platform_dir)
 
         self.buildozer.info('Unpacking Android SDK')
         self.buildozer.file_extract(archive, cwd=self.buildozer.global_platform_dir)
