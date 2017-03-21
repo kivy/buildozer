@@ -627,10 +627,7 @@ class Buildozer(object):
             return
 
         if archive.endswith('.zip'):
-            archive = join(cwd, archive)
-            zf = zipfile.ZipFile(archive)
-            zf.extractall(path=cwd)
-            zf.close()
+            self.cmd('unzip {}'.format(join(cwd, archive)), cwd=cwd)
             return
 
         raise Exception('Unhandled extraction for type {0}'.format(archive))
@@ -826,9 +823,9 @@ class Buildozer(object):
             #self.error('Unable to patch main_py to add applibs directory.')
             return
 
-        header = ('import sys, os; '
-                  'sys.path = [os.path.join(os.getcwd(),'
-                  '"..", "_applibs")] + sys.path\n')
+        header = (b'import sys, os; '
+                   b'sys.path = [os.path.join(os.getcwd(),'
+                   b'"..", "_applibs")] + sys.path\n')
         with open(main_py, 'rb') as fd:
             data = fd.read()
         data = header + data

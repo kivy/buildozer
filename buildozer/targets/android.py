@@ -604,6 +604,11 @@ class TargetAndroid(Target):
     def get_dist_dir(self, dist_name):
         return join(self.pa_dir, 'dist', dist_name)
 
+    @property
+    def dist_dir(self):
+        dist_name = self.buildozer.config.get('app', 'package.name')
+        return self.get_dist_dir(dist_name)
+
     def execute_build_package(self, build_cmd):
         dist_name = self.buildozer.config.get('app', 'package.name')
         cmd = [self.p4a_apk_cmd]
@@ -750,6 +755,14 @@ class TargetAndroid(Target):
 
         self.execute_build_package(build_cmd)
 
+        try:
+            self.buildozer.hook("android_pre_build_apk")
+            self.execute_build_package(build_cmd)
+            self.buildozer.hook("android_post_build_apk")
+        except:
+            # maybe the hook fail because the apk is not
+            pass
+
         # XXX found how the apk name is really built from the title
         bl = u'\'" ,'
         apptitle = config.get('app', 'title')
@@ -807,11 +820,7 @@ class TargetAndroid(Target):
 
         # recreate the project.properties
         with io.open(project_fn, 'w', encoding='utf-8') as fd:
-            for line in content:
-                if IS_PY3:
-                    fd.write(line)
-                else:
-                    fd.write(line.decode('utf-8'))
+            fd.writelines(content)
             for index, ref in enumerate(references):
                 fd.write(u'android.library.reference.{}={}\n'.format(index + 1,
                                                                      ref))
@@ -930,3 +939,4 @@ class TargetAndroid(Target):
 
 def get_target(buildozer):
     return TargetAndroid(buildozer)
+

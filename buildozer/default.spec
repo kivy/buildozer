@@ -109,7 +109,10 @@ fullscreen = 1
 #android.p4a_dir =
 
 # (str) The directory in which python-for-android should look for your own build recipes (if any)
-#p4a.local_recipes = 
+#p4a.local_recipes =
+
+# (str) Filename to the hook for p4a
+#p4a.hook =
 
 # (list) python-for-android whitelist
 #android.p4a_whitelist =
@@ -171,6 +174,9 @@ fullscreen = 1
 
 # (bool) Copy library instead of making a libpymodules.so
 #android.copy_libs = 1
+
+# (str) The Android arch to build for, choices: armeabi-v7a, arm64-v8a, x86
+android.arch = armeabi-v7a
 
 #
 # iOS specific

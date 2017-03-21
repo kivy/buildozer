@@ -4,6 +4,7 @@ Android target, based on python-for-android project (new toolchain)
 '''
 import sys
 
+import buildozer
 from buildozer.targets.android import TargetAndroid
 from buildozer import USE_COLOR
 from os.path import join, expanduser, realpath
@@ -13,19 +14,22 @@ class TargetAndroidNew(TargetAndroid):
     targetname = 'android_new'
     p4a_branch = "master"
     p4a_directory = "python-for-android-master"
-    p4a_apk_cmd = "apk --bootstrap="
+    p4a_apk_cmd = "apk --debug --bootstrap="
     extra_p4a_args = ''
 
     def __init__(self, buildozer):
         super(TargetAndroidNew, self).__init__(buildozer)
         self._build_dir = join(self.buildozer.platform_dir, 'build')
-        self._p4a_cmd = ('python -m pythonforandroid.toolchain ')
+        self._p4a_cmd = 'python -m pythonforandroid.toolchain '
         self._p4a_bootstrap = self.buildozer.config.getdefault(
             'app', 'android.bootstrap', 'sdl2')
         self.p4a_apk_cmd += self._p4a_bootstrap
         color = 'always' if USE_COLOR else 'never'
         self.extra_p4a_args = ' --color={} --storage-dir={}'.format(
             color, self._build_dir)
+        hook = self.buildozer.config.getdefault("app", "p4a.hook", None)
+        if hook is not None:
+            self.extra_p4a_args += ' --hook={}'.format(realpath(hook))
 
     def _p4a(self, cmd, **kwargs):
         if not hasattr(self, "pa_dir"):
@@ -63,13 +67,10 @@ class TargetAndroidNew(TargetAndroid):
             options.append('--local-recipes')
             options.append(local_recipes)
         available_modules = self._p4a(
-            "create --dist_name={} --bootstrap={} --requirements={} --arch armeabi-v7a {}".format(
-                 dist_name, self._p4a_bootstrap, requirements, " ".join(options)),
+            "create --dist_name={} --bootstrap={} --requirements={} --arch {} {}".format(
+                 dist_name, self._p4a_bootstrap, requirements,
+                 self.buildozer.config.getdefault('app', 'android.arch', "armeabi-v7a"), " ".join(options)),
             get_stdout=True)[0]
-
-    def _update_libraries_references(self, dist_dir):
-        # UNSUPPORTED YET
-        pass
 
     def get_dist_dir(self, dist_name):
         return join(self._build_dir, 'dists', dist_name)
@@ -89,6 +90,7 @@ class TargetAndroidNew(TargetAndroid):
                 continue
             elif option == "release":
                 cmd.append("--release")
+                cmd.append("--sign")
                 continue
             if option == "--window":
                 cmd.append("--window")
@@ -128,6 +130,9 @@ class TargetAndroidNew(TargetAndroid):
         if blacklist_src:
             cmd.append('--blacklist')
             cmd.append(realpath(blacklist_src))
+
+        cmd.append('--arch')
+        cmd.append(self.buildozer.config.getdefault('app', 'android.arch', "armeabi-v7a"))
 
         cmd = " ".join(cmd)
         self._p4a(cmd)

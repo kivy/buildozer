@@ -14,6 +14,7 @@ var
 sdist
 develop-eggs
 .installed.cfg
+.idea
 
 # Installer logs
 pip-log.txt
@@ -29,6 +30,8 @@ pip-log.txt
 .mr.developer.cfg
 MANIFEST
 
+release\.log\.utf-8\.tmp
+
 # Eclipse
 .project
 .pydevproject
@@ -36,3 +39,4 @@ MANIFEST
 
 # Custom virtualenv location
 venv
+
