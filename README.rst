@@ -170,7 +170,8 @@ you to have a ready to use vm for building android application. But
 the current one have many flaw.
 We're in the process to deliver a new VM that fixes most of them.
 
-# Using shared folders
+Using shared folders
+++++++++++++++++++++
 
 The Virtualbox Guest tools are outdated, install the latest one:
 - in the Virtualbox: `Devices` -> `Install Guest Additions CD images`
@@ -183,13 +184,16 @@ The `kivy` user is not in the `vboxsf` groups, so in a terminal:
 VirtualBox filesystem doesn't support symlink anymore (don't
 try the setextradata solution, it doesn't work.). So you must
 do the build outside the shared folder. One solution:
+
 - `sudo mkdir /build/buildozer-myapp`
 - `sudo chown kivy /build/buildozer-myapp`
 - In your buildozer.spec, section `[buildozer]`, set `build_dir = /build/buildozer-myapp`
 
-# No space left
+No space left
++++++++++++++
 
 If you build on the current VM, you'll hit the no space left on device:
+
 - Stop your VM
 - Adjust the disk size to 20GB: `VBoxManage modifyhd ~/Downloads/Buildozer/Buildozer.vdi --resize 20000`
 - Download the http://www.slitaz.org/en/get/#stable
@@ -206,7 +210,8 @@ If you build on the current VM, you'll hit the no space left on device:
 - Reset/Restart the VM
 - Check your disk is 20GB: `df -h`
 
-# Using your devices via the VM
+Using your devices via the VM
++++++++++++++++++++++++++++++
 
 There is a little icon on the bottom left that represent an USB plug.
 Select it, and select your android device on it. Then you can check:
