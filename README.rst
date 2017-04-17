@@ -53,23 +53,18 @@ The pip package does not yet support python3.
     python setup.py build
     sudo pip install -e 
 
-#. Download and extract the crystax ndk somewhere (~/.buildozer/crystax-ndk is one option): https://www.crystax.net/en/download
+#. Download and extract the Crystax NDK somewhere (~/.buildozer/crystax-ndk is one option): https://www.crystax.net/en/download
 #. Go into your application directory and execute::
 
     buildozer init
 
-#. Edit the buildozer.spec file to fit your application
-
 #. Make sure the following lines are in your buildozer.spec file.::
   
-    #Require python3crystax:
+    # Require python3crystax:
     requirements = python3crystax,kivy
 
-    #Point to the directory where you extracted the crystax-ndk:
+    # Point to the directory where you extracted the crystax-ndk:
     android.ndk_path = <Your install path here.  Use ~ for home DIR>
-
-    #To fix a "configparser.NoOptionError: No option 'p4a.local_recipes' in section: 'app'" issue:
-    p4a.local_recipes =
 
 #. Finally, build, deploy and run the app on your phone::
 
