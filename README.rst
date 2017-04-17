@@ -179,6 +179,7 @@ The Virtualbox Guest tools are outdated, install the latest one:
 - in the guest/linux: Go to the cdrom and run the installer
 
 The `kivy` user is not in the `vboxsf` groups, so in a terminal:
+
 - `sudo adduser kivy vboxsf`
 - reboot the vm
 
