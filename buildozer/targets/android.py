@@ -415,19 +415,17 @@ class TargetAndroid(Target):
                                                   'build-tools')
         packages = self._android_list_sdk(include_all=True)
         ver = self._find_latest_package(packages, 'build-tools-')
-        if ver and ver > v_build_tools:
-            self._android_update_sdk(self._build_package_string('build-tools',
-                                                                ver))
+        if ver and ver > v_build_tools and not skip_upd:
+            self._android_update_sdk(self._build_package_string('build-tools', ver))
         # 2.bis check aidl can be runned
         self._check_aidl(v_build_tools)
 
         # 3. finally, install the android for the current api
-        android_platform = join(self.android_sdk_dir, 'platforms',
-                                'android-{0}'.format(self.android_api))
+        android_platform = join(self.android_sdk_dir, 'platforms', 'android-{0}'.format(self.android_api))
         if not self.buildozer.file_exists(android_platform):
             packages = self._android_list_sdk()
             android_package = 'android-{}'.format(self.android_api)
-            if android_package in packages:
+            if android_package in packages and not skip_upd:
                 self._android_update_sdk(android_package)
 
         self.buildozer.info('Android packages installation done.')
