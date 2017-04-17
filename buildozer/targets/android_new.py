@@ -20,7 +20,8 @@ class TargetAndroidNew(TargetAndroid):
     def __init__(self, buildozer):
         super(TargetAndroidNew, self).__init__(buildozer)
         self._build_dir = join(self.buildozer.platform_dir, 'build')
-        self._p4a_cmd = 'python -m pythonforandroid.toolchain '
+        executable = sys.executable or 'python'
+        self._p4a_cmd = '{} -m pythonforandroid.toolchain '.format(executable)
         self._p4a_bootstrap = self.buildozer.config.getdefault(
             'app', 'android.bootstrap', 'sdl2')
         self.p4a_apk_cmd += self._p4a_bootstrap
