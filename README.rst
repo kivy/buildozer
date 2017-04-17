@@ -165,7 +165,7 @@ config, along with the environment variables that would override them.
 Buildozer Virtual Machine
 -------------------------
 
-The current virtual machine (available via kivy.org/downloads/) allow
+The current virtual machine (available via https://kivy.org/downloads/) allow
 you to have a ready to use vm for building android application. But
 the current one have many flaw.
 We're in the process to deliver a new VM that fixes most of them.
@@ -174,6 +174,7 @@ Using shared folders
 ++++++++++++++++++++
 
 The Virtualbox Guest tools are outdated, install the latest one:
+
 - in the Virtualbox: `Devices` -> `Install Guest Additions CD images`
 - in the guest/linux: Go to the cdrom and run the installer
 
@@ -215,6 +216,7 @@ Using your devices via the VM
 
 There is a little icon on the bottom left that represent an USB plug.
 Select it, and select your android device on it. Then you can check:
+
 - `buildozer android_new adb -- devices`
 
 If it doesn't, use Google. They are so many differents way / issues
