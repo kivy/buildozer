@@ -582,8 +582,6 @@ class Buildozer(object):
         result = []
         for pattern in patterns:
             matches = glob(expanduser(pattern.strip()))
-            if not matches:
-                return
             result.extend(matches)
         return result
 
