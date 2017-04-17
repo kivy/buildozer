@@ -187,8 +187,8 @@ VirtualBox filesystem doesn't support symlink anymore (don't
 try the setextradata solution, it doesn't work.). So you must
 do the build outside the shared folder. One solution:
 
-- `sudo mkdir /build/buildozer-myapp`
-- `sudo chown kivy /build/buildozer-myapp`
+- `sudo mkdir /build`
+- `sudo chown kivy /build`
 - In your buildozer.spec, section `[buildozer]`, set `build_dir = /build/buildozer-myapp`
 
 No space left
