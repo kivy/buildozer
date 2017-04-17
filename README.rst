@@ -1,8 +1,6 @@
 Buildozer
 =========
 
-This tool is currently in alpha.
-
 Buildozer is a tool for creating application packages easily.
 
 The goal is to have one "buildozer.spec" file in your app directory, describing
