@@ -1,8 +1,6 @@
 Buildozer
 =========
 
-This tool is currently in alpha.
-
 Buildozer is a tool for creating application packages easily.
 
 The goal is to have one "buildozer.spec" file in your app directory, describing
@@ -18,10 +16,10 @@ is intended in the future.
 Note that this tool has nothing to do with the eponymous online build service
 `buildozer.io <http://buildozer.io />`_.
 
-Usage example
--------------
+Installing Buildozer with python2 support:
+------------------------------------------
 
-#. Install buildozer::
+#. Install buildozer:: 
 
     # via pip (latest stable, recommended)
     sudo pip install buildozer
@@ -35,13 +33,49 @@ Usage example
     python setup.py build
     sudo pip install -e .
 
-#. Go into your application directory and do::
+#. Go into your application directory and run::
 
     buildozer init
     # edit the buildozer.spec, then
     buildozer android_new debug deploy run
 
-Example of commands::
+Installing Buildozer with python3 support:
+------------------------------------------
+
+The pip package does not yet support python3.
+
+#. Install buildozer from source::
+
+    git clone https://github.com/kivy/buildozer
+    cd buildozer
+    python setup.py build
+    sudo pip install -e 
+
+#. Download and extract the Crystax NDK somewhere (~/.buildozer/crystax-ndk is one option): https://www.crystax.net/en/download
+#. Go into your application directory and execute::
+
+    buildozer init
+
+#. Make sure the following lines are in your buildozer.spec file.::
+  
+    # Require python3crystax:
+    requirements = python3crystax,kivy
+
+    # Point to the directory where you extracted the crystax-ndk:
+    android.ndk_path = <Your install path here.  Use ~ for home DIR>
+
+#. Finally, build, deploy and run the app on your phone::
+
+    buildozer android_new debug deploy run
+
+#.  Please note the "android_new" buildozer target, and use that for any and all buildozer commands you run (even if the docs just say "android").  Python3 only works with the **android_new** toolchain.
+    
+
+    
+Examples of Buildozer commands:
+--------------------------------
+
+::
 
     # buildozer target command
     buildozer android_new clean
@@ -127,6 +161,68 @@ config, along with the environment variables that would override them.
 - ``title`` -> ``$APP_TITLE``
 - ``package.name`` -> ``$APP_PACKAGE_NAME``
 - ``android.p4a_dir`` -> ``$APP_ANDROID_P4A_DIR``
+
+Buildozer Virtual Machine
+-------------------------
+
+The current virtual machine (available via https://kivy.org/downloads/) allow
+you to have a ready to use vm for building android application. But
+the current one have many flaw.
+We're in the process to deliver a new VM that fixes most of them.
+
+Using shared folders
+++++++++++++++++++++
+
+The Virtualbox Guest tools are outdated, install the latest one:
+
+- in the Virtualbox: `Devices` -> `Install Guest Additions CD images`
+- in the guest/linux: Go to the cdrom and run the installer
+
+The `kivy` user is not in the `vboxsf` groups, so in a terminal:
+
+- `sudo adduser kivy vboxsf`
+- reboot the vm
+
+VirtualBox filesystem doesn't support symlink anymore (don't
+try the setextradata solution, it doesn't work.). So you must
+do the build outside the shared folder. One solution:
+
+- `sudo mkdir /build`
+- `sudo chown kivy /build`
+- In your buildozer.spec, section `[buildozer]`, set `build_dir = /build/buildozer-myapp`
+
+No space left
++++++++++++++
+
+If you build on the current VM, you'll hit the no space left on device:
+
+- Stop your VM
+- Adjust the disk size to 20GB: `VBoxManage modifyhd ~/Downloads/Buildozer/Buildozer.vdi --resize 20000`
+- Download the http://www.slitaz.org/en/get/#stable
+- In the virtualbox, `Devices` -> `Optical Drive` -> Select the slitaz iso
+- Reboot the VM
+- In slitaz, open a terminal, and unmount the swap: `swapoff -a`
+- Open gparted
+  - delete sda2
+  - extend sda1 to 18000
+  - add a primary partition, set the format to linux-swap
+  - you should have a sda2 partition
+  - save
+- Unmount the slitaz iso `Devices` -> `Optical Drive` -> `Eject`
+- Reset/Restart the VM
+- Check your disk is 20GB: `df -h`
+
+Using your devices via the VM
++++++++++++++++++++++++++++++
+
+There is a little icon on the bottom left that represent an USB plug.
+Select it, and select your android device on it. Then you can check:
+
+- `buildozer android_new adb -- devices`
+
+If it doesn't, use Google. They are so many differents way / issues
+depending your phone that Google will be your only source of
+information, not us :)
 
 Support
 -------
