@@ -67,6 +67,8 @@ class TargetAndroidNew(TargetAndroid):
         if local_recipes:
             options.append('--local-recipes')
             options.append(local_recipes)
+        if self.buildozer.config.getbooldefault('app', 'p4a.force_build', False):
+            options.append('--force-build')
         available_modules = self._p4a(
             "create --dist_name={} --bootstrap={} --requirements={} --arch {} {}".format(
                  dist_name, self._p4a_bootstrap, requirements,
@@ -131,6 +133,9 @@ class TargetAndroidNew(TargetAndroid):
         if blacklist_src:
             cmd.append('--blacklist')
             cmd.append(realpath(blacklist_src))
+
+        if self.buildozer.config.getbooldefault('app', 'p4a.force_build', False):
+            cmd.append('--force-build')
 
         cmd.append('--arch')
         cmd.append(self.buildozer.config.getdefault('app', 'android.arch', "armeabi-v7a"))

@@ -120,6 +120,9 @@ fullscreen = 0
 # (str) Filename to the hook for p4a
 #p4a.hook =
 
+# (bool) Whether to force compilation of a new distribution
+#p4a.force_build = False
+
 # (list) python-for-android whitelist
 #android.p4a_whitelist =
 
