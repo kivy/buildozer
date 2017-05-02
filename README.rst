@@ -49,7 +49,7 @@ The pip package does not yet support python3.
     git clone https://github.com/kivy/buildozer
     cd buildozer
     python setup.py build
-    sudo pip install -e 
+    sudo pip install -e .
 
 #. Download and extract the Crystax NDK somewhere (~/.buildozer/crystax-ndk is one option): https://www.crystax.net/en/download
 #. Go into your application directory and execute::

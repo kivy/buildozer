@@ -819,10 +819,9 @@ class TargetAndroid(Target):
 
         # recreate the project.properties
         with io.open(project_fn, 'w', encoding='utf-8') as fd:
-            fd.writelines(content)
+            fd.writelines((line.encode('utf-8') for line in content))
             for index, ref in enumerate(references):
-                fd.write(u'android.library.reference.{}={}\n'.format(index + 1,
-                                                                     ref))
+                fd.write(u'android.library.reference.{}={}\n'.format(index + 1, ref))
 
         self.buildozer.debug('project.properties updated')
 
@@ -890,8 +889,8 @@ class TargetAndroid(Target):
         for serial in self.serials:
             self.buildozer.environ['ANDROID_SERIAL'] = serial
             self.buildozer.info('Deploy on {}'.format(serial))
-            self.buildozer.cmd('{0} install -r {1}'.format(self.adb_cmd,
-                                                           full_apk),
+            self.buildozer.cmd('{0} install -r "{1}"'.format(
+                               self.adb_cmd, full_apk),
                                cwd=self.buildozer.global_platform_dir)
         self.buildozer.environ.pop('ANDROID_SERIAL', None)
 
@@ -938,4 +937,3 @@ class TargetAndroid(Target):
 
 def get_target(buildozer):
     return TargetAndroid(buildozer)
-
