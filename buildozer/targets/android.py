@@ -763,23 +763,36 @@ class TargetAndroid(Target):
             pass
 
         # XXX found how the apk name is really built from the title
-        bl = u'\'" ,'
-        apptitle = config.get('app', 'title')
-        if hasattr(apptitle, 'decode'):
-            apptitle = apptitle.decode('utf-8')
-        apktitle = ''.join([x for x in apptitle if x not in bl])
-        apk = u'{title}-{version}-{mode}.apk'.format(
-            title=apktitle,
-            version=version,
-            mode=mode)
+        if exists(join(dist_dir, "build.gradle")):
+            # on gradle build, the apk use the package name, and have no version
+            packagename = config.get('app', 'package.name')
+            apk = u'{packagename}-{mode}.apk'.format(
+                packagename=packagename, mode=mode)
+            apk_dir = join(dist_dir, "build", "outputs", "apk")
+            apk_dest = u'{packagename}-{version}-{mode}.apk'.format(
+                packagename=packagename, mode=mode, version=version)
+
+        else:
+            # on ant, the apk use the title, and have version
+            bl = u'\'" ,'
+            apptitle = config.get('app', 'title')
+            if hasattr(apptitle, 'decode'):
+                apptitle = apptitle.decode('utf-8')
+            apktitle = ''.join([x for x in apptitle if x not in bl])
+            apk = u'{title}-{version}-{mode}.apk'.format(
+                title=apktitle,
+                version=version,
+                mode=mode)
+            apk_dir = join(dist_dir, "bin")
+            apk_dest = apk
 
         # copy to our place
-        copyfile(join(dist_dir, 'bin', apk), join(self.buildozer.bin_dir, apk))
+        copyfile(join(apk_dir, apk), join(self.buildozer.bin_dir, apk_dest))
 
         self.buildozer.info('Android packaging done!')
         self.buildozer.info(
-            u'APK {0} available in the bin directory'.format(apk))
-        self.buildozer.state['android:latestapk'] = apk
+            u'APK {0} available in the bin directory'.format(apk_dest))
+        self.buildozer.state['android:latestapk'] = apk_dest
         self.buildozer.state['android:latestmode'] = self.build_mode
 
     def _update_libraries_references(self, dist_dir):
