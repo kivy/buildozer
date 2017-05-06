@@ -845,7 +845,10 @@ class TargetAndroid(Target):
 
     def _add_java_src(self, dist_dir):
         java_src = self.buildozer.config.getlist('app', 'android.add_src', [])
-        src_dir = join(dist_dir, 'src')
+        if exists(join(dist_dir, "build.gradle")):
+            src_dir = join(dist_dir, "src", "main", "java")
+        else:
+            src_dir = join(dist_dir, 'src')
         for pattern in java_src:
             for fn in glob(expanduser(pattern.strip())):
                 last_component = basename(fn)

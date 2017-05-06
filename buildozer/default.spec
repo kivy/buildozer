@@ -144,6 +144,14 @@ fullscreen = 0
 # directory containing the files)
 #android.add_src =
 
+# (list) Android AAR archives to add (currently works only with sdl2_gradle
+# bootstrap)
+#android.add_aars =
+
+# (list) Gradle dependencies to add (currently works only with sdl2_gradle
+# bootstrap)
+#android.gradle_dependencies =
+
 # (str) python-for-android branch to use, if not master, useful to try
 # not yet merged features.
 #android.branch = master

@@ -4,9 +4,8 @@ Android target, based on python-for-android project (new toolchain)
 '''
 import sys
 
-import buildozer
-from buildozer.targets.android import TargetAndroid
 from buildozer import USE_COLOR
+from buildozer.targets.android import TargetAndroid
 from os.path import join, expanduser, realpath
 
 
@@ -17,8 +16,8 @@ class TargetAndroidNew(TargetAndroid):
     p4a_apk_cmd = "apk --debug --bootstrap="
     extra_p4a_args = ''
 
-    def __init__(self, buildozer):
-        super(TargetAndroidNew, self).__init__(buildozer)
+    def __init__(self, *args, **kwargs):
+        super(TargetAndroidNew, self).__init__(*args, **kwargs)
         self._build_dir = join(self.buildozer.platform_dir, 'build')
         executable = sys.executable or 'python'
         self._p4a_cmd = '{} -m pythonforandroid.toolchain '.format(executable)
@@ -133,6 +132,18 @@ class TargetAndroidNew(TargetAndroid):
         if blacklist_src:
             cmd.append('--blacklist')
             cmd.append(realpath(blacklist_src))
+
+        # support for aars
+        aars = self.buildozer.config.getlist('app', 'android.add_aars', [])
+        for aar in aars:
+            cmd.append('--add-aar')
+            cmd.append(realpath(aar))
+
+        # support for gradle dependencies
+        gradle_dependencies = self.buildozer.config.getlist('app', 'android.gradle_dependencies', [])
+        for gradle_dependency in gradle_dependencies:
+            cmd.append('--depend')
+            cmd.append(gradle_dependency)
 
         cmd.append('--arch')
         cmd.append(self.buildozer.config.getdefault('app', 'android.arch', "armeabi-v7a"))
