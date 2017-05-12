@@ -69,7 +69,7 @@ class TargetOSX(Target):
                 self.buildozer.info(
                     'Downloading Keka as dependency (to install Kivy)')
                 check_call(
-                    ('curl', '-O', 'https://github.com/aonez/Keka/releases/download/v1.0.8/Keka-1.0.8.dmg'),
+                    ('curl', '-O', 'http://www.kekaosx.com/release/Keka-1.0.8.dmg'),
                     cwd=cwd)
                 check_call(('hdiutil', 'attach', 'Keka-1.0.8.dmg'), cwd=cwd)
                 check_call(('cp', '-a','/Volumes/Keka/Keka.app', './Keka.app'), cwd=cwd)
