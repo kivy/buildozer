@@ -4,16 +4,16 @@
         "disk_format": "ovf",
         "ssh_username": "kivy",
         "ssh_password": "kivy",
-        "hostname": "ubuntu"
+        "hostname": "kivyvm"
     },
     "description": "Build a Xubuntu Virtual Machine",
     "builders": [{
         "type": "virtualbox-iso",
         "name": "from-netboot-iso",
         "http_directory": "http",
-        "iso_checksum": "4c58dcf09083cd3aa602eb1b79810a0ff58b7c21",
+        "iso_checksum": "6131e2cc90cf30407af18f3f1af16c54bf58ffc8",
         "iso_checksum_type": "sha1",
-        "iso_url": "http://archive.ubuntu.com/ubuntu/dists/vivid/main/installer-i386/current/images/netboot/mini.iso",
+        "iso_url": "http://archive.ubuntu.com/ubuntu/dists/zesty/main/installer-amd64/current/images/netboot/mini.iso",
         "ssh_username": "{{user `ssh_username`}}",
         "ssh_password": "{{user `ssh_password`}}",
         "boot_wait": "3s",
@@ -31,13 +31,17 @@
         "format": "{{user `disk_format`}}",
         "headless": false,
         "shutdown_command": "echo {{user `ssh_password`}} | sudo -S shutdown -P now",
-        "vm_name": "ubuntu",
+        "vm_name": "Kivy/Buildozer VM",
+        "guest_os_type": "Ubuntu_64",
+        "guest_additions_path": "/root",
         "ssh_wait_timeout": "120m"
     }],
     "provisioners": [{
         "type": "shell",
         "execute_command": "echo {{user `ssh_password`}} | {{ .Vars }} sudo -E -S sh '{{ .Path }}'",
         "scripts": [
+            "scripts/install-virtualbox-guest-additions.sh",
+            "scripts/setup.sh",
             "scripts/additional-packages.sh",
             "scripts/minimize.sh"
         ]

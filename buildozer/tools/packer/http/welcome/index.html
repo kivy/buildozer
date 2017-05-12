@@ -1,0 +1,67 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Kivy/Buildozer VM</title>
+    <link rel="stylesheet" href="milligram.min.css">
+    <link rel="stylesheet" href="buildozer.css"
+</head>
+<body>
+
+<h1>Welcome to the Kivy/Buildozer VM</h1>
+<p id="menu">
+    <a href="https://github.com/kivy/buildozer">Github</a> -
+    <a href="https://buildozer.readthedocs.io/en/latest/">Documentation</a>
+</p>
+
+<p>
+    Thanks for using Kivy/Buildozer VM. It has been installed only for
+    packaging Kivy application for Android.<br/>
+    <b>Credentials</b>: username: <code>kivy</code> / password: <code>kivy</code>
+</p>
+
+<h2>How to use the VM</h2>
+<p>
+    Buildozer has been used to build a project and should be functionnal
+    for yours. It is preferrable to add a Shared Folder and build from there.
+    By the time we shipped the VM and you using it, you may need to
+    <a href="#update-buildozer">update buildozer</a>.
+</p>
+<p>
+    Go into your project directory, then:
+    <pre># Just build your application
+buildozer android_new debug
+
+# Build your application, deploy on the phone,
+# run it, and display the logs from the phone
+buildozer android_new debug deploy run logcat</pre>
+</p>
+<p class="warning">
+    Virtualbox doesn't support symlink in Shared Folder anymore. So buildozer
+    will fail during the build.<br/>
+    We already created a <code>/build</code> directory where you can put your
+    build in it. Edit your <code>buildozer.ini</code>:
+    <pre>[buildozer]
+build_dir = /build/buildozer-myapp</pre>
+</p>
+
+<a name="update-buildozer"></a>
+<h2>Update buildozer</h2>
+<p>
+    The buildozer version you have may be outdated, as well as the dependencies.
+    The best is to regulary update buildozer:
+    <pre>sudo pip install -U buildozer</pre>
+</p>
+
+<h2>Cleaning cache</h2>
+
+<p>
+    The simplest way to update kivy and other modules is to clean all the
+    buildozer cache, and rebuild everything.
+
+    <pre>rm -rf ~/.buildozer/android/packages</pre>
+<p>
+
+
+
+</body>
+</html>
