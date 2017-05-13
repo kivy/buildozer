@@ -9,7 +9,7 @@
     "description": "Build a Xubuntu Virtual Machine",
     "builders": [{
         "type": "virtualbox-iso",
-        "name": "from-netboot-iso",
+        "name": "kivy-buildozer-vm",
         "http_directory": "http",
         "iso_checksum": "6131e2cc90cf30407af18f3f1af16c54bf58ffc8",
         "iso_checksum_type": "sha1",
