@@ -5,3 +5,11 @@ body {
 pre {
     padding: 20px;
 }
+
+.warning {
+    background-color: #fff5f6;
+    border-left: 2px solid #c0392b;
+    padding: 20px;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1px;
+}

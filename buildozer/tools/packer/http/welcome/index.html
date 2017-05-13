@@ -21,31 +21,66 @@
 
 <h2>How to use the VM</h2>
 <p>
-    Buildozer has been used to build a project and should be functionnal
-    for yours. It is preferrable to add a Shared Folder and build from there.
+    Buildozer is ready to be used. You'll need internet connection for
+    download the Android SDK/NDK (automatically done), and during the first
+    compilation.
+    <br/>
+    It is preferrable to add a <a href="#sharefolder">share a folder
+    </a> between your host and the VM, then build from there.<br/>
+
     By the time we shipped the VM and you using it, you may need to
     <a href="#update-buildozer">update buildozer</a>.
 </p>
 <p>
-    Go into your project directory, then:
-    <pre># Just build your application
-buildozer android_new debug
-
-# Build your application, deploy on the phone,
-# run it, and display the logs from the phone
-buildozer android_new debug deploy run logcat</pre>
+    <b>Don't try to use latest Android SDK or NDK</b>. The defaults from buildozer
+    works: Android SDK 20, Android NDK 9c. Recent Android SDK doesn't work
+    the same as before (no more android command), and python-for-android
+    project have issues with it. As for NDK, you can use r13c, it works too.
 </p>
-<p class="warning">
+<ol>
+    <li>First time only, in your project directory: <code>buildozer init</code></li>
+    <li>Adjust the <code>buildozer.spec</code>:
+        <pre>[buildozer]
+# change the name of your app
+package.name = myapp
+
+# change the domain of your package
+package.domain = com.mydomain
+
+# specify hostpython2 manually. If you want to use python 3, check buildozer
+# README about it, the VM is not preinstalled for that.
+requirements = hostpython2,kivy
+
+[buildozer]
+# update the build directory (issue with virtualbox shared folder and symlink)
+build_dir = /build/myapp
+</pre></li>
+    <li>Build your application: <code>buildozer android_new debug</code></li>
+    <li>Build and deploy, run and get the logs: <code>buildozer android_new debug deploy run logcat</code></li>
+</ol>
+
+<h2 id="sharefolder">Share a folder</h2>
+<p>
+    Virtualbox allows you to share a folder between your computer and the
+    VM. To do, just:
+    <ol>
+        <li>Go into Devices &lt; Shared Folders &lt; Shared Folders Settings</li>
+        <li>Add a new folder, select the automount option</li>
+        <li>Reboot the VM (that's easier)</li>
+        <li>You'll find your new directory at <code>/media/sf_directoryname</code></li>
+    </ol>
+</p>
+
+<div class="warning">
     Virtualbox doesn't support symlink in Shared Folder anymore. So buildozer
     will fail during the build.<br/>
     We already created a <code>/build</code> directory where you can put your
     build in it. Edit your <code>buildozer.ini</code>:
     <pre>[buildozer]
 build_dir = /build/buildozer-myapp</pre>
-</p>
+</div>
 
-<a name="update-buildozer"></a>
-<h2>Update buildozer</h2>
+<h2 id="update-buildozer">Update buildozer</h2>
 <p>
     The buildozer version you have may be outdated, as well as the dependencies.
     The best is to regulary update buildozer:

@@ -38,15 +38,17 @@ sed -i "s:Greybird:Adwaita:g" /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xsetting
 sed -i "s:Greybird:Adwaita:g" /etc/xdg/xdg-xubuntu/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
 sed -i "s:Greybird:Adwaita:g" /etc/xdg/xdg-xubuntu/xfce4/xfconf/xfce-perchannel-xml/xfwm4.xml
 sed -i "s:Greybird:Adwaita:g" /etc/xdg/xdg-xubuntu/xfce4/xfconf/xfce-perchannel-xml/xfce4-notifyd.xml
+sed -i "s:elementary-xfce-darker:elementary-xfce-darkest:g" /etc/xdg/xdg-xubuntu/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
 sed -i "s:elementary-xfce-dark:elementary-xfce-darkest:g" /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml
 
 # add desktop icon
 wget $PACKER_HTTP_ADDR/buildozer.desktop
 mkdir -p /home/kivy/Desktop
 cp buildozer.desktop /home/kivy/Desktop/
-chown kivy.kivy /home/kivy/Desktop
+chown kivy.kivy -R /home/kivy/Desktop
+chmod +x /home/kivy/Desktop/buildozer.desktop
 mv buildozer.desktop /usr/share/applications/
-sed -i "s:^favorites=.*$:favorites=buildozer.desktop,exo-terminal-emulator.desktop,exo-web-browser.desktop,exo-file-manager.desktop,org.gnome.Software.desktop,xfhelp4.desktop:g" /etc/xdg/xdg-xubuntu/xfce4/whiskermenu/defaults.rc
+sed -i "s:^favorites=.*$:favorites=buildozer.desktop,exo-terminal-emulator.desktop,exo-web-browser.desktop,xfce-keyboard-settings.desktop,exo-file-manager.desktop,org.gnome.Software.desktop,xfhelp4.desktop:g" /etc/xdg/xdg-xubuntu/xfce4/whiskermenu/defaults.rc
 
 # copy welcome directory
 mkdir -p /usr/share/applications/buildozer-welcome
