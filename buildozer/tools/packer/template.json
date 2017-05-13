@@ -33,7 +33,7 @@
         "shutdown_command": "echo {{user `ssh_password`}} | sudo -S shutdown -P now",
         "vm_name": "Kivy/Buildozer VM",
         "guest_os_type": "Ubuntu_64",
-        "guest_additions_path": "/root",
+        "guest_additions_mode": "attach",
         "ssh_wait_timeout": "120m"
     }],
     "provisioners": [{

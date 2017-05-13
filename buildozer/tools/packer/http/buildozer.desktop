@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Buildozer
+Exec=firefox -url "file:///usr/share/applications/buildozer-welcome/index.html" -width 600 -height 800
+Icon=/usr/share/applications/buildozer-welcome/icon.png
+Categories=Application;Development;favourite;
