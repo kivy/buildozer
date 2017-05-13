@@ -19,7 +19,7 @@ Note that this tool has nothing to do with the eponymous online build service
 Installing Buildozer with python2 support:
 ------------------------------------------
 
-#. Install buildozer:: 
+#. Install buildozer::
 
     # via pip (latest stable, recommended)
     sudo pip install buildozer
@@ -57,7 +57,7 @@ The pip package does not yet support python3.
     buildozer init
 
 #. Make sure the following lines are in your buildozer.spec file.::
-  
+
     # Require python3crystax:
     requirements = python3crystax,kivy
 
@@ -69,9 +69,9 @@ The pip package does not yet support python3.
     buildozer android_new debug deploy run
 
 #.  Please note the "android_new" buildozer target, and use that for any and all buildozer commands you run (even if the docs just say "android").  Python3 only works with the **android_new** toolchain.
-    
 
-    
+
+
 Examples of Buildozer commands:
 --------------------------------
 
@@ -166,21 +166,15 @@ Buildozer Virtual Machine
 -------------------------
 
 The current virtual machine (available via https://kivy.org/downloads/) allow
-you to have a ready to use vm for building android application. But
-the current one have many flaw.
-We're in the process to deliver a new VM that fixes most of them.
+you to have a ready to use vm for building android application.
 
 Using shared folders
 ++++++++++++++++++++
 
-The Virtualbox Guest tools are outdated, install the latest one:
+If the Virtualbox Guest tools are outdated, install the latest one:
 
 - in the Virtualbox: `Devices` -> `Install Guest Additions CD images`
 - in the guest/linux: Go to the cdrom and run the installer
-
-The `kivy` user is not in the `vboxsf` groups, so in a terminal:
-
-- `sudo adduser kivy vboxsf`
 - reboot the vm
 
 VirtualBox filesystem doesn't support symlink anymore (don't
@@ -190,27 +184,6 @@ do the build outside the shared folder. One solution:
 - `sudo mkdir /build`
 - `sudo chown kivy /build`
 - In your buildozer.spec, section `[buildozer]`, set `build_dir = /build/buildozer-myapp`
-
-No space left
-+++++++++++++
-
-If you build on the current VM, you'll hit the no space left on device:
-
-- Stop your VM
-- Adjust the disk size to 20GB: `VBoxManage modifyhd ~/Downloads/Buildozer/Buildozer.vdi --resize 20000`
-- Download the http://www.slitaz.org/en/get/#stable
-- In the virtualbox, `Devices` -> `Optical Drive` -> Select the slitaz iso
-- Reboot the VM
-- In slitaz, open a terminal, and unmount the swap: `swapoff -a`
-- Open gparted
-  - delete sda2
-  - extend sda1 to 18000
-  - add a primary partition, set the format to linux-swap
-  - you should have a sda2 partition
-  - save
-- Unmount the slitaz iso `Devices` -> `Optical Drive` -> `Eject`
-- Reset/Restart the VM
-- Check your disk is 20GB: `df -h`
 
 Using your devices via the VM
 +++++++++++++++++++++++++++++
