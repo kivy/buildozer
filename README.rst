@@ -10,8 +10,11 @@ OSX and/or Linux.
 
 Buildozer currently supports packaging for Android via the `python-for-android
 <http://github.com/kivy/python-for-android/>`_
-project, and for iOS via the kivy-ios project. Support for other operating systems
-is intended in the future.
+project, and for iOS via the kivy-ios project. iOS and OSX are still under work.
+
+For Android: please have a look at `Android-SDK-NDK-Informations 
+<https://github.com/kivy/kivy/wiki/Android-SDK-NDK-Informations>`_. Please note that
+the default SDK/NDK coded in Buildozer works for Python 2.
 
 We provide a ready-to-use `Virtual Machine for Virtualbox <https://kivy.org/#download>`_.
 
