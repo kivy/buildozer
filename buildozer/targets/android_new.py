@@ -11,7 +11,7 @@ from os.path import join, expanduser, realpath
 
 class TargetAndroidNew(TargetAndroid):
     targetname = 'android_new'
-    p4a_branch = "master"
+    p4a_branch = "stable"
     p4a_directory = "python-for-android-master"
     p4a_apk_cmd = "apk --debug --bootstrap="
     extra_p4a_args = ''
