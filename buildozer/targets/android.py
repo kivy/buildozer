@@ -462,17 +462,17 @@ class TargetAndroid(Target):
 
     def install_platform(self):
         cmd = self.buildozer.cmd
-        source = self.buildozer.config.getdefault('app', 'android.branch',
+        source = self.buildozer.config.getdefault('app', 'p4a.branch',
                                                   self.p4a_branch)
         self.pa_dir = pa_dir = join(self.buildozer.platform_dir,
                                     self.p4a_directory)
         system_p4a_dir = self.buildozer.config.getdefault('app',
-                                                          'android.p4a_dir')
+                                                          'p4a.source_dir')
         if system_p4a_dir:
             self.pa_dir = pa_dir = expanduser(system_p4a_dir)
             if not self.buildozer.file_exists(pa_dir):
                 self.buildozer.error(
-                    'Path for android.p4a_dir does not exist')
+                    'Path for p4a.source_dir does not exist')
                 self.buildozer.error('')
                 raise BuildozerException()
         else:
@@ -594,7 +594,7 @@ class TargetAndroid(Target):
 
     def _generate_whitelist(self, dist_dir):
         p4a_whitelist = self.buildozer.config.getlist(
-            'app', 'android.p4a_whitelist') or []
+            'app', 'android.whitelist') or []
         whitelist_fn = join(dist_dir, 'whitelist.txt')
         with open(whitelist_fn, 'w') as fd:
             for wl in p4a_whitelist:

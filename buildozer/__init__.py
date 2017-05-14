@@ -381,6 +381,7 @@ class Buildozer(object):
         '''Ensure the spec file is 'correct'.
         '''
         self.info('Check configuration tokens')
+        self.migrate_configuration_tokens()
         get = self.config.getdefault
         errors = []
         adderror = errors.append
@@ -417,6 +418,25 @@ class Buildozer(object):
                 print(error)
             exit(1)
 
+    def migrate_configuration_tokens(self):
+        config = self.config
+        if config.has_section("app"):
+            migration = (
+                ("android.p4a_dir", "p4a.source_dir"),
+                ("android.p4a_whitelist", "android.whitelist"),
+                ("android.bootstrap", "p4a.bootstrap"),
+                ("android.branch", "p4a.branch"),
+                ("android.p4a_whitelist_src", "android.whitelist_src"),
+                ("android.p4a_blacklist_src", "android.blacklist_src")
+            )
+            for entry_old, entry_new in migration:
+                if not config.has_option("app", entry_old):
+                    continue
+                value = config.get("app", entry_old)
+                config.set("app", entry_new, value)
+                config.remove_option("app", entry_old)
+                self.error("In section [app]: {} is deprecated, rename to {}!".format(
+                    entry_old, entry_new))
 
     def check_build_layout(self):
         '''Ensure the build (local and global) directory layout and files are

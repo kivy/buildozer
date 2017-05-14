@@ -22,7 +22,7 @@ class TargetAndroidNew(TargetAndroid):
         executable = sys.executable or 'python'
         self._p4a_cmd = '{} -m pythonforandroid.toolchain '.format(executable)
         self._p4a_bootstrap = self.buildozer.config.getdefault(
-            'app', 'android.bootstrap', 'sdl2')
+            'app', 'p4a.bootstrap', 'sdl2')
         self.p4a_apk_cmd += self._p4a_bootstrap
         color = 'always' if USE_COLOR else 'never'
         self.extra_p4a_args = ' --color={} --storage-dir={}'.format(
@@ -124,8 +124,8 @@ class TargetAndroidNew(TargetAndroid):
             cmd.append(local_recipes)
 
         # support for blacklist/whitelist filename
-        whitelist_src = self.buildozer.config.getdefault('app', 'android.p4a_whitelist_src', None)
-        blacklist_src = self.buildozer.config.getdefault('app', 'android.p4a_blacklist_src', None)
+        whitelist_src = self.buildozer.config.getdefault('app', 'android.whitelist_src', None)
+        blacklist_src = self.buildozer.config.getdefault('app', 'android.blacklist_src', None)
         if whitelist_src:
             cmd.append('--whitelist')
             cmd.append(realpath(whitelist_src))

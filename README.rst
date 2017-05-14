@@ -162,7 +162,7 @@ config, along with the environment variables that would override them.
 
 - ``title`` -> ``$APP_TITLE``
 - ``package.name`` -> ``$APP_PACKAGE_NAME``
-- ``android.p4a_dir`` -> ``$APP_ANDROID_P4A_DIR``
+- ``p4a.source_dir`` -> ``$APP_P4A_SOURCE_DIR``
 
 Buildozer Virtual Machine
 -------------------------
