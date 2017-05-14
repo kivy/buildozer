@@ -2,6 +2,7 @@
 '''
 Android target, based on python-for-android project (new toolchain)
 '''
+
 import sys
 
 from buildozer import USE_COLOR

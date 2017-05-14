@@ -20,6 +20,8 @@ APACHE_ANT_VERSION = '1.9.4'
 import traceback
 import os
 import io
+import re
+import ast
 from pipes import quote
 from sys import platform, executable
 from buildozer import BuildozerException
@@ -461,6 +463,25 @@ class TargetAndroid(Target):
             raise BuildozerException()
 
     def install_platform(self):
+        self._install_p4a()
+        self._install_apache_ant()
+        self._install_android_sdk()
+        self._install_android_ndk()
+        self._install_android_packages()
+
+        # ultimate configuration check.
+        # some of our configuration cannot be check without platform.
+        self.check_configuration_tokens()
+
+        self.buildozer.environ.update({
+            'PACKAGES_PATH': self.buildozer.global_packages_dir,
+            'ANDROIDSDK': self.android_sdk_dir,
+            'ANDROIDNDK': self.android_ndk_dir,
+            'ANDROIDAPI': self.android_api,
+            'ANDROIDNDKVER': 'r{}'.format(self.android_ndk_version)
+        })
+
+    def _install_p4a(self):
         cmd = self.buildozer.cmd
         source = self.buildozer.config.getdefault('app', 'p4a.branch',
                                                   self.p4a_branch)
@@ -493,22 +514,19 @@ class TargetAndroid(Target):
                         cwd=pa_dir)
                     cmd('git checkout {}'.format(source), cwd=pa_dir)
 
-        self._install_apache_ant()
-        self._install_android_sdk()
-        self._install_android_ndk()
-        self._install_android_packages()
-
-        # ultimate configuration check.
-        # some of our configuration cannot be check without platform.
-        self.check_configuration_tokens()
-
-        self.buildozer.environ.update({
-            'PACKAGES_PATH': self.buildozer.global_packages_dir,
-            'ANDROIDSDK': self.android_sdk_dir,
-            'ANDROIDNDK': self.android_ndk_dir,
-            'ANDROIDAPI': self.android_api,
-            'ANDROIDNDKVER': 'r{}'.format(self.android_ndk_version)
-        })
+        # also install dependencies (currently, only setup.py knows about it)
+        # let's extract them.
+        try:
+            with open(join(self.pa_dir, "setup.py")) as fd:
+                setup = fd.read()
+                deps = re.findall("install_reqs = (\[[^\]]*\])", setup, re.DOTALL | re.MULTILINE)[1]
+                deps = ast.literal_eval(deps)
+        except Exception:
+            deps = []
+        pip_deps = []
+        for dep in deps:
+            pip_deps.append('"{}"'.format(dep))
+        cmd('pip install -q --user {}'.format(" ".join(pip_deps)))
 
     def get_available_packages(self):
         available_modules = self.buildozer.cmd('./distribute.sh -l',
