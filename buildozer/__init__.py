@@ -152,6 +152,7 @@ class Buildozer(object):
     def set_target(self, target):
         '''Set the target to use (one of buildozer.targets, such as "android")
         '''
+        target = self.translate_target(target)
         self.targetname = target
         m = __import__('buildozer.targets.{0}'.format(target),
                 fromlist=['buildozer'])
@@ -914,6 +915,23 @@ class Buildozer(object):
     # command line invocation
     #
 
+    def translate_target(self, target, inverse=False):
+        # FIXME at some point, refactor to remove completely android old toolchain
+        if inverse:
+            if target == "android":
+                target = "android_old"
+            elif target == "android_new":
+                target = "android"
+        else:
+            if target == "android":
+                target = "android_new"
+            elif target == "android_new":
+                self.error("ERROR: The target android_new is now android")
+                exit(1)
+            elif target == "android_old":
+                target = "android"
+        return target
+
     def targets(self):
         for fn in listdir(join(dirname(__file__), 'targets')):
             if fn.startswith('.') or fn.startswith('__'):
@@ -924,7 +942,7 @@ class Buildozer(object):
             try:
                 m = __import__('buildozer.targets.{0}'.format(target),
                         fromlist=['buildozer'])
-                yield target, m
+                yield self.translate_target(target, inverse=True), m
             except NotImplementedError:
                 pass
             except:
@@ -1032,8 +1050,8 @@ class Buildozer(object):
 
         # maybe it's a target?
         targets = [x[0] for x in self.targets()]
-        if command not in targets:
-            print('Unknown command/target {}'.format(command))
+        if self.translate_target(command, inverse=True) not in targets:
+            print('Unknown command/target {}'.format(self.translate_target(command, inverse=True)))
             exit(1)
 
         self.set_target(command)

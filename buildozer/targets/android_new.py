@@ -1,6 +1,6 @@
 # coding=utf-8
 '''
-Android target, based on python-for-android project (new toolchain)
+Android target, based on python-for-android project
 '''
 
 import sys
@@ -11,7 +11,7 @@ from os.path import join, expanduser, realpath
 
 
 class TargetAndroidNew(TargetAndroid):
-    targetname = 'android_new'
+    targetname = 'android'
     p4a_branch = "stable"
     p4a_directory = "python-for-android-master"
     p4a_apk_cmd = "apk --debug --bootstrap="

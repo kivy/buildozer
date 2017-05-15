@@ -28,6 +28,7 @@ from buildozer.libs.version import parse
 
 
 class TargetOSX(Target):
+    targetname = "osx"
 
     def ensure_sdk(self):
         self.buildozer.info('Check if kivy-sdk-packager exists')

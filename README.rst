@@ -12,7 +12,7 @@ Buildozer currently supports packaging for Android via the `python-for-android
 <http://github.com/kivy/python-for-android/>`_
 project, and for iOS via the kivy-ios project. iOS and OSX are still under work.
 
-For Android: please have a look at `Android-SDK-NDK-Informations 
+For Android: please have a look at `Android-SDK-NDK-Informations
 <https://github.com/kivy/kivy/wiki/Android-SDK-NDK-Informations>`_. Please note that
 the default SDK/NDK coded in Buildozer works for Python 2.
 
@@ -42,7 +42,7 @@ Installing Buildozer with python2 support:
 
     buildozer init
     # edit the buildozer.spec, then
-    buildozer android_new debug deploy run
+    buildozer android debug deploy run
 
 Installing Buildozer with python3 support:
 ------------------------------------------
@@ -71,10 +71,9 @@ The pip package does not yet support python3.
 
 #. Finally, build, deploy and run the app on your phone::
 
-    buildozer android_new debug deploy run
+    buildozer android debug deploy run
 
-#.  Please note the "android_new" buildozer target, and use that for any and all buildozer commands you run (even if the docs just say "android").  Python3 only works with the **android_new** toolchain.
-
+#.  Please note the "android" buildozer target, and use that for any and all buildozer commands you run (even if the docs just say "android").
 
 
 Examples of Buildozer commands:
@@ -83,17 +82,17 @@ Examples of Buildozer commands:
 ::
 
     # buildozer target command
-    buildozer android_new clean
-    buildozer android_new update
-    buildozer android_new deploy
-    buildozer android_new debug
-    buildozer android_new release
+    buildozer android clean
+    buildozer android update
+    buildozer android deploy
+    buildozer android debug
+    buildozer android release
 
     # or all in one (compile in debug, deploy on device)
-    buildozer android_new debug deploy
+    buildozer android debug deploy
 
     # set the default command if nothing set
-    buildozer setdefault android_new debug deploy run
+    buildozer setdefault android debug deploy run
 
 
 Usage
@@ -106,9 +105,9 @@ Usage
         buildozer --version
 
     Available targets:
-      android            Android target, based on python-for-android project (old toolchain)
-      ios                iOS target, based on kivy-ios project
-      android_new        Android target, based on python-for-android project (new toolchain)
+      android        Android target, based on python-for-android project
+      ios            iOS target, based on kivy-ios project
+      android_old    Android target, based on python-for-android project (old toolchain)
 
     Global commands (without target):
       distclean          Clean the whole Buildozer environment.
@@ -127,7 +126,7 @@ Usage
       run        Run the application on the device
       serve      Serve the bin directory via SimpleHTTPServer
 
-    Target "android" commands:
+    Target "android_old" commands:
       adb                Run adb from the Android SDK. Args must come after --, or
                          use --alias to make an alias
       logcat             Show the log from the device
@@ -136,7 +135,7 @@ Usage
       list_identities    List the available identities to use for signing.
       xcode              Open the xcode project.
 
-    Target "android_new" commands:
+    Target "android" commands:
       adb                Run adb from the Android SDK. Args must come after --, or
                          use --alias to make an alias
       logcat             Show the log from the device
@@ -196,7 +195,7 @@ Using your devices via the VM
 There is a little icon on the bottom left that represent an USB plug.
 Select it, and select your android device on it. Then you can check:
 
-- `buildozer android_new adb -- devices`
+- `buildozer android adb -- devices`
 
 If it doesn't, use Google. They are so many differents way / issues
 depending your phone that Google will be your only source of

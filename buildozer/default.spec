@@ -198,7 +198,7 @@ android.arch = armeabi-v7a
 # (str) Filename to the hook for p4a
 #p4a.hook =
 
-# (str) Bootstrap to use for android builds (android_new only)
+# (str) Bootstrap to use for android builds
 # p4a.bootstrap = sdl2
 
 
