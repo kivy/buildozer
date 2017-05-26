@@ -843,7 +843,10 @@ class Buildozer(object):
                    b'"..", "_applibs")] + sys.path\n')
         with open(main_py, 'rb') as fd:
             data = fd.read()
-        data = header + data
+        if IS_PY3:
+            data = bytes(header, 'utf8') + data
+        else:
+            data = header + data
         with open(main_py, 'wb') as fd:
             fd.write(data)
         self.info('Patched service/main.py to include applibs')
