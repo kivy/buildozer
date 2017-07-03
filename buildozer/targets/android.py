@@ -403,33 +403,37 @@ class TargetAndroid(Target):
         if not os.access(self.android_cmd, os.X_OK):
             self.buildozer.cmd('chmod ug+x {}'.format(self.android_cmd))
 
-        # 1. update the tool and platform-tools if needed
-        packages = self._android_list_sdk()
+        # check the sdk skip update option.
         skip_upd = self.buildozer.config.getdefault('app',
                                                     'android.skip_update', False)
-        if 'tools' in packages or 'platform-tools' in packages:
-            if not skip_upd:
+
+        # 1. update the tool and platform-tools if needed
+        if not skip_upd:
+            packages = self._android_list_sdk()
+            if 'tools' in packages or 'platform-tools' in packages:
                 self._android_update_sdk('tools,platform-tools')
-            else:
-                self.buildozer.info('Skipping Android SDK update due to spec file setting')
+        else:
+            self.buildozer.info('Skipping Android SDK update due to spec file setting')
 
         # 2. install the latest build tool
         v_build_tools = self._read_version_subdir(self.android_sdk_dir,
                                                   'build-tools')
-        packages = self._android_list_sdk(include_all=True)
-        ver = self._find_latest_package(packages, 'build-tools-')
-        if ver and ver > v_build_tools and not skip_upd:
-            self._android_update_sdk(self._build_package_string('build-tools', ver))
+        if not skip_upd:
+            packages = self._android_list_sdk(include_all=True)
+            ver = self._find_latest_package(packages, 'build-tools-')
+            if ver and ver > v_build_tools:
+                self._android_update_sdk(self._build_package_string('build-tools', ver))
         # 2.bis check aidl can be runned
         self._check_aidl(v_build_tools)
 
         # 3. finally, install the android for the current api
         android_platform = join(self.android_sdk_dir, 'platforms', 'android-{0}'.format(self.android_api))
-        if not self.buildozer.file_exists(android_platform):
-            packages = self._android_list_sdk()
-            android_package = 'android-{}'.format(self.android_api)
-            if android_package in packages and not skip_upd:
-                self._android_update_sdk(android_package)
+        if not skip_upd:
+            if not self.buildozer.file_exists(android_platform):
+                packages = self._android_list_sdk()
+                android_package = 'android-{}'.format(self.android_api)
+                if android_package in packages:
+                    self._android_update_sdk(android_package)
 
         self.buildozer.info('Android packages installation done.')
 
