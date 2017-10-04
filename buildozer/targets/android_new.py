@@ -98,8 +98,6 @@ class TargetAndroidNew(TargetAndroid):
             elif option == "--sdk":
                 cmd.append("--android_api")
                 cmd.extend(values)
-                cmd.append("--sdk")
-                cmd.extend(values)
             else:
                 cmd.extend(args)
 
