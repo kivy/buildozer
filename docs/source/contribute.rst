@@ -22,7 +22,7 @@ To test your own recipe via Buildozer, you need to:
 
 #. Change your `buildozer.spec` to reference your version::
 
-     android.p4a_dir = /path/to/your/python-for-android
+     p4a.source_dir = /path/to/your/python-for-android
 
 #. Copy your recipe into `python-for-android/recipes/YOURLIB/recipe.sh`
 

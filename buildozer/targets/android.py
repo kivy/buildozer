@@ -20,6 +20,8 @@ APACHE_ANT_VERSION = '1.9.4'
 import traceback
 import os
 import io
+import re
+import ast
 from pipes import quote
 from sys import platform, executable
 from buildozer import BuildozerException
@@ -35,7 +37,7 @@ from buildozer.libs.version import parse
 
 
 class TargetAndroid(Target):
-    targetname = 'android'
+    targetname = 'android_old'
     p4a_directory = "python-for-android"
     p4a_branch = 'old_toolchain'
     p4a_apk_cmd = "python build.py"
@@ -461,18 +463,37 @@ class TargetAndroid(Target):
             raise BuildozerException()
 
     def install_platform(self):
+        self._install_p4a()
+        self._install_apache_ant()
+        self._install_android_sdk()
+        self._install_android_ndk()
+        self._install_android_packages()
+
+        # ultimate configuration check.
+        # some of our configuration cannot be check without platform.
+        self.check_configuration_tokens()
+
+        self.buildozer.environ.update({
+            'PACKAGES_PATH': self.buildozer.global_packages_dir,
+            'ANDROIDSDK': self.android_sdk_dir,
+            'ANDROIDNDK': self.android_ndk_dir,
+            'ANDROIDAPI': self.android_api,
+            'ANDROIDNDKVER': 'r{}'.format(self.android_ndk_version)
+        })
+
+    def _install_p4a(self):
         cmd = self.buildozer.cmd
-        source = self.buildozer.config.getdefault('app', 'android.branch',
+        source = self.buildozer.config.getdefault('app', 'p4a.branch',
                                                   self.p4a_branch)
         self.pa_dir = pa_dir = join(self.buildozer.platform_dir,
                                     self.p4a_directory)
         system_p4a_dir = self.buildozer.config.getdefault('app',
-                                                          'android.p4a_dir')
+                                                          'p4a.source_dir')
         if system_p4a_dir:
             self.pa_dir = pa_dir = expanduser(system_p4a_dir)
             if not self.buildozer.file_exists(pa_dir):
                 self.buildozer.error(
-                    'Path for android.p4a_dir does not exist')
+                    'Path for p4a.source_dir does not exist')
                 self.buildozer.error('')
                 raise BuildozerException()
         else:
@@ -493,22 +514,19 @@ class TargetAndroid(Target):
                         cwd=pa_dir)
                     cmd('git checkout {}'.format(source), cwd=pa_dir)
 
-        self._install_apache_ant()
-        self._install_android_sdk()
-        self._install_android_ndk()
-        self._install_android_packages()
-
-        # ultimate configuration check.
-        # some of our configuration cannot be check without platform.
-        self.check_configuration_tokens()
-
-        self.buildozer.environ.update({
-            'PACKAGES_PATH': self.buildozer.global_packages_dir,
-            'ANDROIDSDK': self.android_sdk_dir,
-            'ANDROIDNDK': self.android_ndk_dir,
-            'ANDROIDAPI': self.android_api,
-            'ANDROIDNDKVER': 'r{}'.format(self.android_ndk_version)
-        })
+        # also install dependencies (currently, only setup.py knows about it)
+        # let's extract them.
+        try:
+            with open(join(self.pa_dir, "setup.py")) as fd:
+                setup = fd.read()
+                deps = re.findall("install_reqs = (\[[^\]]*\])", setup, re.DOTALL | re.MULTILINE)[1]
+                deps = ast.literal_eval(deps)
+        except Exception:
+            deps = []
+        pip_deps = []
+        for dep in deps:
+            pip_deps.append('"{}"'.format(dep))
+        cmd('pip install -q --user {}'.format(" ".join(pip_deps)))
 
     def get_available_packages(self):
         available_modules = self.buildozer.cmd('./distribute.sh -l',
@@ -594,7 +612,7 @@ class TargetAndroid(Target):
 
     def _generate_whitelist(self, dist_dir):
         p4a_whitelist = self.buildozer.config.getlist(
-            'app', 'android.p4a_whitelist') or []
+            'app', 'android.whitelist') or []
         whitelist_fn = join(dist_dir, 'whitelist.txt')
         with open(whitelist_fn, 'w') as fd:
             for wl in p4a_whitelist:
@@ -763,23 +781,36 @@ class TargetAndroid(Target):
             pass
 
         # XXX found how the apk name is really built from the title
-        bl = u'\'" ,'
-        apptitle = config.get('app', 'title')
-        if hasattr(apptitle, 'decode'):
-            apptitle = apptitle.decode('utf-8')
-        apktitle = ''.join([x for x in apptitle if x not in bl])
-        apk = u'{title}-{version}-{mode}.apk'.format(
-            title=apktitle,
-            version=version,
-            mode=mode)
+        if exists(join(dist_dir, "build.gradle")):
+            # on gradle build, the apk use the package name, and have no version
+            packagename = config.get('app', 'package.name')
+            apk = u'{packagename}-{mode}.apk'.format(
+                packagename=packagename, mode=mode)
+            apk_dir = join(dist_dir, "build", "outputs", "apk")
+            apk_dest = u'{packagename}-{version}-{mode}.apk'.format(
+                packagename=packagename, mode=mode, version=version)
+
+        else:
+            # on ant, the apk use the title, and have version
+            bl = u'\'" ,'
+            apptitle = config.get('app', 'title')
+            if hasattr(apptitle, 'decode'):
+                apptitle = apptitle.decode('utf-8')
+            apktitle = ''.join([x for x in apptitle if x not in bl])
+            apk = u'{title}-{version}-{mode}.apk'.format(
+                title=apktitle,
+                version=version,
+                mode=mode)
+            apk_dir = join(dist_dir, "bin")
+            apk_dest = apk
 
         # copy to our place
-        copyfile(join(dist_dir, 'bin', apk), join(self.buildozer.bin_dir, apk))
+        copyfile(join(apk_dir, apk), join(self.buildozer.bin_dir, apk_dest))
 
         self.buildozer.info('Android packaging done!')
         self.buildozer.info(
-            u'APK {0} available in the bin directory'.format(apk))
-        self.buildozer.state['android:latestapk'] = apk
+            u'APK {0} available in the bin directory'.format(apk_dest))
+        self.buildozer.state['android:latestapk'] = apk_dest
         self.buildozer.state['android:latestmode'] = self.build_mode
 
     def _update_libraries_references(self, dist_dir):
@@ -819,7 +850,12 @@ class TargetAndroid(Target):
 
         # recreate the project.properties
         with io.open(project_fn, 'w', encoding='utf-8') as fd:
-            fd.writelines((line.encode('utf-8') for line in content))
+            try:
+                fd.writelines((line.encode('utf-8') for line in content))
+            except:
+                fd.writelines(content)
+            if not content[-1].endswith(u'\n'):
+                fd.write(u'\n')
             for index, ref in enumerate(references):
                 fd.write(u'android.library.reference.{}={}\n'.format(index + 1, ref))
 
@@ -827,7 +863,10 @@ class TargetAndroid(Target):
 
     def _add_java_src(self, dist_dir):
         java_src = self.buildozer.config.getlist('app', 'android.add_src', [])
-        src_dir = join(dist_dir, 'src')
+        if exists(join(dist_dir, "build.gradle")):
+            src_dir = join(dist_dir, "src", "main", "java")
+        else:
+            src_dir = join(dist_dir, 'src')
         for pattern in java_src:
             for fn in glob(expanduser(pattern.strip())):
                 last_component = basename(fn)

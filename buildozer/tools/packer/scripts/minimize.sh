@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Remove unwanted applications
+apt-get -y remove --purge libreoffice*
+apt-get -y remove --purge pidgin*
+apt-get -y remove --purge thunderbird*
+apt-get -y remove --purge fonts-noto-cjk
+
 # Remove APT cache
 apt-get -y --purge autoremove
 apt-get -y clean
@@ -9,13 +15,13 @@ find /var/log -type f | while read f; do echo -ne '' > $f; done;
 
 # Whiteout root
 count=`df --sync -kP / | tail -n1  | awk -F ' ' '{print $4}'`;
-let count--
+count=$(expr $count - 1)
 dd if=/dev/zero of=/tmp/whitespace bs=1024 count=$count;
 rm /tmp/whitespace;
 
 # Whiteout /boot
 count=`df --sync -kP /boot | tail -n1 | awk -F ' ' '{print $4}'`;
-let count--
+count=$(expr $count - 1)
 dd if=/dev/zero of=/boot/whitespace bs=1024 count=$count;
 rm /boot/whitespace;
 

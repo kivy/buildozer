@@ -1,0 +1,7 @@
+## Release 2.0 - 13 May 2017
+
+- Brand new VM image using latest zesty (x)ubuntu (64 bits)
+- Image created for Virtualbox 5.1.22, with guest-tools
+- Increase disk space to 20GB
+- /build can store buildozer builds (specify with build_dir=/build/myapp)
+- Rewrite welcome document

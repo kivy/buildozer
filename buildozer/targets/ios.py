@@ -20,7 +20,7 @@ $ipas = glob('*.ipa');
 $provisioningProfiles = glob('*.mobileprovision');
 $plists = glob('*.plist');
 
-$sr = stristr( $_SERVER['SCRIPT_URI'], '.php' ) === false ? 
+$sr = stristr( $_SERVER['SCRIPT_URI'], '.php' ) === false ?
     $_SERVER['SCRIPT_URI'] : dirname($_SERVER['SCRIPT_URI']) . '/';
 $provisioningProfile = $sr . $provisioningProfiles[0];
 $ipa = $sr . $ipas[0];
@@ -28,8 +28,8 @@ $itmsUrl = urlencode( $sr . 'index.php?plist=' . str_replace( '.plist', '', $pli
 
 
 if ($_GET['plist']) {
-    $plist = file_get_contents( dirname(__FILE__) 
-        . DIRECTORY_SEPARATOR 
+    $plist = file_get_contents( dirname(__FILE__)
+        . DIRECTORY_SEPARATOR
         . preg_replace( '/![A-Za-z0-9-_]/i', '', $_GET['plist']) . '.plist' );
     $plist = str_replace('_URL_', $ipa, $plist);
     header('content-type: application/xml');
@@ -59,6 +59,7 @@ li { padding: 1em; }
 '''
 
 class TargetIos(Target):
+    targetname = "ios"
 
     def check_requirements(self):
         checkbin = self.buildozer.checkbin
