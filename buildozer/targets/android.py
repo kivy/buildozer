@@ -851,7 +851,7 @@ class TargetAndroid(Target):
         # recreate the project.properties
         with io.open(project_fn, 'w', encoding='utf-8') as fd:
             try:
-                fd.writelines((line.encode('utf-8') for line in content))
+                fd.writelines((line.decode('utf-8') for line in content))
             except:
                 fd.writelines(content)
             if not content[-1].endswith(u'\n'):
