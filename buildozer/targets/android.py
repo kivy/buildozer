@@ -850,12 +850,12 @@ class TargetAndroid(Target):
 
         # recreate the project.properties
         with io.open(project_fn, 'w', encoding='utf-8') as fd:
-            lines = [
-                line if isinstance(line, unicode) else line.decode('utf-8')
-                for line in content
-            ]
-            fd.writelines(lines)
-            if not content[-1].endswith(u'\n'):
+
+            try:
+                fd.writelines((line.decode('utf-8') for line in content))
+            except:
+                fd.writelines(content)
+            if content and not content[-1].endswith(u'\n'):
                 fd.write(u'\n')
             for index, ref in enumerate(references):
                 fd.write(u'android.library.reference.{}={}\n'.format(index + 1, ref))
