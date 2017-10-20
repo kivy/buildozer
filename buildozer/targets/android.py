@@ -526,7 +526,12 @@ class TargetAndroid(Target):
         pip_deps = []
         for dep in deps:
             pip_deps.append('"{}"'.format(dep))
-        cmd('pip install -q --user {}'.format(" ".join(pip_deps)))
+        # Check if we are running inside virtualenv
+        # Ref: http://stackoverflow.com/questions/1871549/python-determine-if-running-inside-virtualenv
+        if(hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix)):
+            cmd('pip install -q {}'.format(" ".join(pip_deps)))
+        else:
+            cmd('pip install -q --user {}'.format(" ".join(pip_deps)))
 
     def get_available_packages(self):
         available_modules = self.buildozer.cmd('./distribute.sh -l',
