@@ -768,7 +768,7 @@ class TargetAndroid(Target):
             mode = 'debug'
         else:
             build_cmd += [("release", )]
-            mode = 'release'
+            mode = 'release-unsigned'
 
         self.execute_build_package(build_cmd)
 
@@ -850,6 +850,7 @@ class TargetAndroid(Target):
 
         # recreate the project.properties
         with io.open(project_fn, 'w', encoding='utf-8') as fd:
+
             try:
                 fd.writelines((line.decode('utf-8') for line in content))
             except:
