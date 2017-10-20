@@ -32,11 +32,3 @@ MANIFEST
 
 release\.log\.utf-8\.tmp
 
-# Eclipse
-.project
-.pydevproject
-.settings
-
-# Custom virtualenv location
-venv
-
