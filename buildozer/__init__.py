@@ -311,7 +311,7 @@ class Buildozer(object):
                     ret_stdout.append(chunk)
                 if show_output:
                     if IS_PY3:
-                        stdout.write(chunk.decode('utf-8'))
+                        stdout.write(str(chunk))
                     else:
                         stdout.write(chunk)
             if fd_stderr in readx:
