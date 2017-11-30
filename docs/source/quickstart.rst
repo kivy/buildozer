@@ -8,7 +8,7 @@ Init and build for Android
 
 #. Buildozer will try to guess the version of your application, by searching a
    line like `__version__ = "1.0.3"` in your `main.py`. Ensure you have one at
-   the start of your application. It is not mandatory but heavilly advised.
+   the start of your application. It is not mandatory but heavily advised.
 
 #. Create a `buildozer.spec` file, with::
 
