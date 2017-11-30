@@ -334,7 +334,7 @@ def _parse_letter_version(letter, number):
         return letter, int(number)
 
 
-_local_version_seperators = re.compile(r"[\._-]")
+_local_version_separators = re.compile(r"[\._-]")
 
 
 def _parse_local_version(local):
@@ -344,7 +344,7 @@ def _parse_local_version(local):
     if local is not None:
         return tuple(
             part.lower() if not part.isdigit() else int(part)
-            for part in _local_version_seperators.split(local)
+            for part in _local_version_separators.split(local)
         )
 
 
