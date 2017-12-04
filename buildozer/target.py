@@ -1,4 +1,5 @@
 from sys import exit
+import os
 
 
 def no_config(f):
