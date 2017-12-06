@@ -270,43 +270,52 @@ class TargetAndroid(Target):
 
         return sdk_dir
 
+    def _get_android_ndk_url(self):
+        import re
+        _version = int(re.search('(.+?)[a-z]', self.android_ndk_version).group(1))
+
+        if platform in ('win32', 'cygwin'):
+            # Checking of 32/64 bits at Windows from: http://stackoverflow.com/a/1405971/798575
+            import struct
+            _is_64 = (8 * struct.calcsize("P") == 64)
+            if _version < 8:
+                _platform = 'windows'
+            else:
+                _platform = 'windows-{0}'.format('x86_64' if _is_64 else 'x86')
+            _extention = 'zip'
+
+        elif platform in ('darwin', ):
+            _is_64 = (os.uname()[4] == 'x86_64')
+            _platform = 'darwin-{0}'.format('x86_64' if _is_64 else 'x86')
+            _extention = 'zip' if _version > 9 else 'tar.bz2'
+
+        elif platform.startswith('linux'):
+            _is_64 = (os.uname()[4] == 'x86_64')
+            _platform = 'linux-{0}'.format('x86_64' if _is_64 else 'x86')
+            _extention = 'zip' if _version > 9 else 'tar.bz2'
+        else:
+            raise SystemError('Unsupported platform: {0}'.format(platform))
+
+        url = 'http://dl.google.com/android/{0}/'.format( \
+                  'repository' if _version > 9 else 'ndk')
+        archive = 'android-ndk-r{0}-{1}.{2}'.format( \
+                  self.android_ndk_version, _platform, _extention)
+        unpacked = 'android-ndk-r{0}'.format( \
+                  self.android_ndk_version)
+
+        return url, archive, unpacked
+
     def _install_android_ndk(self):
         ndk_dir = self.android_ndk_dir
         if self.buildozer.file_exists(ndk_dir):
             self.buildozer.info('Android NDK found at {0}'.format(ndk_dir))
             return ndk_dir
 
-        import re
-        _version = re.search('(.+?)[a-z]', self.android_ndk_version).group(1)
 
         self.buildozer.info('Android NDK is missing, downloading')
-        if platform in ('win32', 'cygwin'):
-            # Checking of 32/64 bits at Windows from: http://stackoverflow.com/a/1405971/798575
-            import struct
-            archive = 'android-ndk-r{0}-windows-{1}.zip'
-            is_64 = (8 * struct.calcsize("P") == 64)
 
-        elif platform in ('darwin', ):
-            if int(_version) > 9:
-                archive = 'android-ndk-r{0}-darwin-{1}.bin'
-            else:
-                archive = 'android-ndk-r{0}-darwin-{1}.tar.bz2'
-            is_64 = (os.uname()[4] == 'x86_64')
+        url, archive, unpacked = self._get_android_ndk_url() 
 
-        elif platform.startswith('linux'):
-            if int(_version) > 9:  # if greater than 9, take it as .bin file
-                archive = 'android-ndk-r{0}-linux-{1}.bin'
-            else:
-                archive = 'android-ndk-r{0}-linux-{1}.tar.bz2'
-            is_64 = (os.uname()[4] == 'x86_64')
-        else:
-            raise SystemError('Unsupported platform: {0}'.format(platform))
-
-        architecture = 'x86_64' if is_64 else 'x86'
-        unpacked = 'android-ndk-r{0}'
-        archive = archive.format(self.android_ndk_version, architecture)
-        unpacked = unpacked.format(self.android_ndk_version)
-        url = 'http://dl.google.com/android/ndk/'
         self.buildozer.download(url,
                                 archive,
                                 cwd=self.buildozer.global_platform_dir)
