@@ -272,7 +272,7 @@ class TargetAndroid(Target):
 
     def _get_android_ndk_url(self):
         import re
-        _version = int(re.search('(.+?)[a-z]', self.android_ndk_version).group(1))
+        _version = int(re.search('([0-9]+)[a-z]?', self.android_ndk_version).group(1))
 
         if platform in ('win32', 'cygwin'):
             # Checking of 32/64 bits at Windows from: http://stackoverflow.com/a/1405971/798575
