@@ -270,43 +270,52 @@ class TargetAndroid(Target):
 
         return sdk_dir
 
+    def _get_android_ndk_url(self):
+        import re
+        _version = int(re.search('([0-9]+)[a-z]?', self.android_ndk_version).group(1))
+
+        if platform in ('win32', 'cygwin'):
+            # Checking of 32/64 bits at Windows from: http://stackoverflow.com/a/1405971/798575
+            import struct
+            _is_64 = (8 * struct.calcsize("P") == 64)
+            if _version < 8:
+                _platform = 'windows'
+            else:
+                _platform = 'windows-{0}'.format('x86_64' if _is_64 else 'x86')
+            _extention = 'zip'
+
+        elif platform in ('darwin', ):
+            _is_64 = (os.uname()[4] == 'x86_64')
+            _platform = 'darwin-{0}'.format('x86_64' if _is_64 else 'x86')
+            _extention = 'zip' if _version > 9 else 'tar.bz2'
+
+        elif platform.startswith('linux'):
+            _is_64 = (os.uname()[4] == 'x86_64')
+            _platform = 'linux-{0}'.format('x86_64' if _is_64 else 'x86')
+            _extention = 'zip' if _version > 9 else 'tar.bz2'
+        else:
+            raise SystemError('Unsupported platform: {0}'.format(platform))
+
+        url = 'http://dl.google.com/android/{0}/'.format( \
+                  'repository' if _version > 9 else 'ndk')
+        archive = 'android-ndk-r{0}-{1}.{2}'.format( \
+                  self.android_ndk_version, _platform, _extention)
+        unpacked = 'android-ndk-r{0}'.format( \
+                  self.android_ndk_version)
+
+        return url, archive, unpacked
+
     def _install_android_ndk(self):
         ndk_dir = self.android_ndk_dir
         if self.buildozer.file_exists(ndk_dir):
             self.buildozer.info('Android NDK found at {0}'.format(ndk_dir))
             return ndk_dir
 
-        import re
-        _version = re.search('(.+?)[a-z]', self.android_ndk_version).group(1)
 
         self.buildozer.info('Android NDK is missing, downloading')
-        if platform in ('win32', 'cygwin'):
-            # Checking of 32/64 bits at Windows from: http://stackoverflow.com/a/1405971/798575
-            import struct
-            archive = 'android-ndk-r{0}-windows-{1}.zip'
-            is_64 = (8 * struct.calcsize("P") == 64)
 
-        elif platform in ('darwin', ):
-            if int(_version) > 9:
-                archive = 'android-ndk-r{0}-darwin-{1}.bin'
-            else:
-                archive = 'android-ndk-r{0}-darwin-{1}.tar.bz2'
-            is_64 = (os.uname()[4] == 'x86_64')
+        url, archive, unpacked = self._get_android_ndk_url() 
 
-        elif platform.startswith('linux'):
-            if int(_version) > 9:  # if greater than 9, take it as .bin file
-                archive = 'android-ndk-r{0}-linux-{1}.bin'
-            else:
-                archive = 'android-ndk-r{0}-linux-{1}.tar.bz2'
-            is_64 = (os.uname()[4] == 'x86_64')
-        else:
-            raise SystemError('Unsupported platform: {0}'.format(platform))
-
-        architecture = 'x86_64' if is_64 else 'x86'
-        unpacked = 'android-ndk-r{0}'
-        archive = archive.format(self.android_ndk_version, architecture)
-        unpacked = unpacked.format(self.android_ndk_version)
-        url = 'http://dl.google.com/android/ndk/'
         self.buildozer.download(url,
                                 archive,
                                 cwd=self.buildozer.global_platform_dir)
@@ -781,28 +790,40 @@ class TargetAndroid(Target):
             pass
 
         # XXX found how the apk name is really built from the title
-        if exists(join(dist_dir, "build.gradle")):
-            # on gradle build, the apk use the package name, and have no version
-            packagename = config.get('app', 'package.name')
-            apk = u'{packagename}-{mode}.apk'.format(
-                packagename=packagename, mode=mode)
-            apk_dir = join(dist_dir, "build", "outputs", "apk")
+        packagename = config.get('app', 'package.name')
+        apptitle = config.get('app', 'title')
+        if hasattr(apptitle, 'decode'):
+            apptitle = apptitle.decode('utf-8')
+        bl = u'\'" ,'
+        apktitle = ''.join([x for x in apptitle if x not in bl])
+        # on gradle build, the apk use the package name, and have no version
+        apk_gradle = u'{packagename}-{mode}.apk'.format(
+            packagename=packagename, mode=mode)
+        apk_dir_gradle = join(dist_dir, "build", "outputs", "apk")
+        apk_exists_gradle = exists(join(apk_dir_gradle, apk_gradle))
+        # on ant, the apk use the title, and have version
+        apk_ant = u'{title}-{version}-{mode}.apk'.format(
+            title=apktitle,
+            version=version,
+            mode=mode)
+        apk_dir_ant = join(dist_dir, "bin")
+        apk_exists_ant = exists(join(apk_dir_ant, apk_ant))
+
+        if apk_exists_gradle and not apk_exists_ant:
+            self.buildozer.info('Found APK file built by gradle')
+            apk, apk_dir = apk_gradle, apk_dir_gradle
             apk_dest = u'{packagename}-{version}-{mode}.apk'.format(
                 packagename=packagename, mode=mode, version=version)
-
-        else:
-            # on ant, the apk use the title, and have version
-            bl = u'\'" ,'
-            apptitle = config.get('app', 'title')
-            if hasattr(apptitle, 'decode'):
-                apptitle = apptitle.decode('utf-8')
-            apktitle = ''.join([x for x in apptitle if x not in bl])
-            apk = u'{title}-{version}-{mode}.apk'.format(
-                title=apktitle,
-                version=version,
-                mode=mode)
-            apk_dir = join(dist_dir, "bin")
+        elif not apk_exists_gradle and apk_exists_ant:
+            self.buildozer.info('Found APK file built by ant')
+            apk, apk_dir = apk_ant, apk_dir_ant
             apk_dest = apk
+        elif not apk_exists_gradle and not apk_exists_ant:
+            self.buildozer.error('Unable to find neither gradle nor ant built .apk file')
+            raise SystemError('Unable to find .apk file')
+        else:
+            self.buildozer.error('Conflict both gradle and ant built .apk file found')
+            raise SystemError('Conflict .apk file')
 
         # copy to our place
         copyfile(join(apk_dir, apk), join(self.buildozer.bin_dir, apk_dest))
@@ -864,14 +885,14 @@ class TargetAndroid(Target):
 
     def _add_java_src(self, dist_dir):
         java_src = self.buildozer.config.getlist('app', 'android.add_src', [])
+        src_dirs = [join(dist_dir, 'src')]
         if exists(join(dist_dir, "build.gradle")):
-            src_dir = join(dist_dir, "src", "main", "java")
-        else:
-            src_dir = join(dist_dir, 'src')
+            src_dirs.append(join(dist_dir, "src", "main", "java"))
         for pattern in java_src:
             for fn in glob(expanduser(pattern.strip())):
                 last_component = basename(fn)
-                self.buildozer.file_copytree(fn, join(src_dir, last_component))
+                for src_dir in src_dirs:
+                    self.buildozer.file_copytree(fn, join(src_dir, last_component))
 
     @property
     def serials(self):
