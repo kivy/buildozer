@@ -527,7 +527,10 @@ class TargetAndroid(Target):
         pip_deps = []
         for dep in deps:
             pip_deps.append('"{}"'.format(dep))
-        cmd('pip install -q --user {}'.format(" ".join(pip_deps)))
+        if hasattr(sys, 'real_prefix'):
+            cmd('pip install -q {}'.format(" ".join(pip_deps)))
+        else:
+            cmd('pip install -q --user {}'.format(" ".join(pip_deps)))
 
     def get_available_packages(self):
         available_modules = self.buildozer.cmd('./distribute.sh -l',
