@@ -10,7 +10,7 @@ Section [app]
 - `title`: String, title of your application.
   
   It might be possible that some characters are not working depending on the
-  targeted paltform. It's best to try and see if everything works as expected.
+  targeted platform. It's best to try and see if everything works as expected.
   Try to avoid too long titles, as they will also not fit in the title
   displayed under the icon.
 
@@ -32,14 +32,14 @@ Section [app]
   The location must be a directory that contains a `main.py` file. It defaults
   to the directory where `buildozer.spec` is.
 
-- `source.include_exts`: List, files' extensions to include.
+- `source.include_exts`: List, file extensions to include.
 
   By default, not all files in your `source.dir` are included, but only some
   of them (`py,png,jpg,kv,atlas`), depending on the extension. Feel free to
   add your own extensions, or use an empty value if you want to include
   everything.
 
-- `source.exclude_exts`: List, files' extensions to exclude.
+- `source.exclude_exts`: List, file extensions to exclude.
 
   In contrary to `source.include_exts`, you could include all the files you
   want except the ones that end with an extension listed in this token. If
@@ -115,7 +115,7 @@ Section [app]
   have different requirements depending the platform. Currently, Buildozer
   works well only with Android, iOS support is not great on this.
 
-  The image must be a JPG or PNG, preferable with Power-of-two size. Ie, an
+  The image must be a JPG or PNG, preferable with Power-of-two size, e.g., a
   512x512 image is perfect to target all the devices. The image is not fitted,
   scaled, or anything on the device. If you provide a too-large image, it might
   not fit on small screens.

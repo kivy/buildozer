@@ -58,30 +58,17 @@ class TargetOSX(Target):
                 'Kivy.app'), cwd=cwd)
 
         else:
-            if not exists(join(cwd, 'Kivy{}.7z'.format(py_branch))):
+            if not exists(join(cwd, 'Kivy{}.dmg'.format(py_branch))):
                 self.buildozer.info('Downloading kivy...')
                 check_call(
-                    ('curl', '-L', '-o', 'Kivy{}.7z'.format(py_branch),
-                    'http://kivy.org/downloads/{}/Kivy-{}-osx-python{}.7z'\
+                    ('curl', '-L', '-o', 'Kivy{}.dmg'.format(py_branch),
+                    'http://kivy.org/downloads/{}/Kivy-{}-osx-python{}.dmg'\
                     .format(current_kivy_vers, current_kivy_vers, py_branch)),
                     cwd=cwd)
 
-            if not exists(join(cwd, 'Keka.app')):
-                self.buildozer.info(
-                    'Downloading Keka as dependency (to install Kivy)')
-                check_call(
-                    ('curl', '-O', 'http://www.kekaosx.com/release/Keka-1.0.8.dmg'),
-                    cwd=cwd)
-                check_call(('hdiutil', 'attach', 'Keka-1.0.8.dmg'), cwd=cwd)
-                check_call(('cp', '-a','/Volumes/Keka/Keka.app', './Keka.app'), cwd=cwd)
-                check_call(('hdiutil', 'detach', '/Volumes/Keka'))
-
             self.buildozer.info('Extracting and installing Kivy...')
-            check_call(
-                (join(cwd, 'Keka.app/Contents/MacOS/Keka'),
-                join(cwd, 'Kivy{}.7z').format(py_branch)), cwd=cwd)
-            check_call(('rm', 'Kivy{}.7z'.format(py_branch)), cwd=cwd)
-            check_call(('mv', 'Kivy{}.app'.format(py_branch), 'Kivy.app'),cwd=cwd)
+            check_call(('hdiutil', 'attach', cwd + '/Kivy{}.dmg'.format(py_branch)))
+            check_call(('cp', '-a', '/Volumes/Kivy/Kivy.app', './Kivy.app'), cwd=cwd)
 
     def ensure_kivyapp(self):
         self.buildozer.info('check if Kivy.app exists in local dir')
