@@ -866,10 +866,19 @@ class TargetAndroid(Target):
 
     def _add_java_src(self, dist_dir):
         java_src = self.buildozer.config.getlist('app', 'android.add_src', [])
-        if exists(join(dist_dir, "build.gradle")):
+
+        gradle_files = ["build.gradle", "gradle", "gradlew"]
+        is_gradle_build = any((
+            exists(join(dist_dir, x)) for x in gradle_files))
+        if is_gradle_build:
             src_dir = join(dist_dir, "src", "main", "java")
+            self.buildozer.info(
+                "Gradle project detected, copy files {}".format(src_dir))
         else:
             src_dir = join(dist_dir, 'src')
+            self.buildozer.info(
+                "Ant project detected, copy files in {}".format(src_dir))
+
         for pattern in java_src:
             for fn in glob(expanduser(pattern.strip())):
                 last_component = basename(fn)
