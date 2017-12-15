@@ -478,6 +478,7 @@ class TargetAndroid(Target):
             'ANDROIDSDK': self.android_sdk_dir,
             'ANDROIDNDK': self.android_ndk_dir,
             'ANDROIDAPI': self.android_api,
+            'ANDROIDMINAPI': self.android_minapi,
             'ANDROIDNDKVER': 'r{}'.format(self.android_ndk_version)
         })
 
@@ -818,7 +819,9 @@ class TargetAndroid(Target):
         project_fn = join(dist_dir, 'project.properties')
 
         if not self.buildozer.file_exists(project_fn):
-            content = ['target=android-{}\n'.format(self.android_api)]
+            content = [
+                'target=android-{}\n'.format(self.android_api),
+                'APP_PLATFORM={}\n'.format(self.android_minapi)]
         else:
             with io.open(project_fn, encoding='utf-8') as fd:
                 content = fd.readlines()
