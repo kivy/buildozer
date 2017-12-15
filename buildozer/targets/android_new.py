@@ -4,6 +4,7 @@ Android target, based on python-for-android project
 '''
 
 import sys
+import os
 
 from buildozer import USE_COLOR
 from buildozer.targets.android import TargetAndroid
@@ -94,7 +95,8 @@ class TargetAndroidNew(TargetAndroid):
                 continue
             elif option == "release":
                 cmd.append("--release")
-                cmd.append("--sign")
+                if self.check_p4a_sign_env(True):
+                    cmd.append("--sign")
                 continue
             if option == "--window":
                 cmd.append("--window")
@@ -152,6 +154,24 @@ class TargetAndroidNew(TargetAndroid):
 
         cmd = " ".join(cmd)
         self._p4a(cmd)
+
+    def get_release_mode(self):
+        if self.check_p4a_sign_env():
+            return "release"
+        return "release-unsigned"
+
+    def check_p4a_sign_env(self, error=False):
+        keys = ["KEYALIAS", "KEYSTORE_PASSWD", "KEYSTORE", "KEYALIAS_PASSWD"]
+        check = True
+        for key in keys:
+            key = "P4A_RELEASE_{}".format(key)
+            if key not in os.environ:
+                if error:
+                    self.buildozer.error(
+                        ("Asking for release but {} is missing"
+                         "--sign will not be passed").format(key))
+                check = False
+        return check
 
     def cmd_run(self, *args):
         entrypoint = self.buildozer.config.getdefault(
