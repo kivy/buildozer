@@ -527,7 +527,12 @@ class TargetAndroid(Target):
         pip_deps = []
         for dep in deps:
             pip_deps.append('"{}"'.format(dep))
-        cmd('pip install -q --user {}'.format(" ".join(pip_deps)))
+
+        # in virtualenv or conda env
+        options = "--user"
+        if "VIRTUAL_ENV" in os.environ or "CONDA_PREFIX" in os.environ:
+            options = ""
+        cmd('pip install -q {} {}'.format(options, " ".join(pip_deps)))
 
     def get_available_packages(self):
         available_modules = self.buildozer.cmd('./distribute.sh -l',
