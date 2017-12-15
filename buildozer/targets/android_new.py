@@ -31,6 +31,9 @@ class TargetAndroidNew(TargetAndroid):
         hook = self.buildozer.config.getdefault("app", "p4a.hook", None)
         if hook is not None:
             self.extra_p4a_args += ' --hook={}'.format(realpath(hook))
+        port = self.buildozer.config.getdefault('app', 'p4a.port', None)
+        if port is not None:
+            self.extra_p4a_args += ' --port={}'.format(port)
 
     def _p4a(self, cmd, **kwargs):
         if not hasattr(self, "pa_dir"):
