@@ -774,7 +774,7 @@ class TargetAndroid(Target):
             mode = 'debug'
         else:
             build_cmd += [("release", )]
-            mode = 'release-unsigned'
+            mode = self.get_release_mode()
 
         self.execute_build_package(build_cmd)
 
@@ -787,7 +787,10 @@ class TargetAndroid(Target):
             pass
 
         # XXX found how the apk name is really built from the title
-        if exists(join(dist_dir, "build.gradle")):
+        gradle_files = ["build.gradle", "gradle", "gradlew"]
+        is_gradle_build = any((
+            exists(join(dist_dir, x)) for x in gradle_files))
+        if is_gradle_build:
             # on gradle build, the apk use the package name, and have no version
             packagename = config.get('app', 'package.name')
             apk = u'{packagename}-{mode}.apk'.format(
@@ -818,6 +821,9 @@ class TargetAndroid(Target):
             u'APK {0} available in the bin directory'.format(apk_dest))
         self.buildozer.state['android:latestapk'] = apk_dest
         self.buildozer.state['android:latestmode'] = self.build_mode
+
+    def get_release_mode(self):
+        return "release-unsigned"
 
     def _update_libraries_references(self, dist_dir):
         # ensure the project.properties exist
