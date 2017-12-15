@@ -146,7 +146,7 @@ fullscreen = 0
 # bootstrap)
 #android.gradle_dependencies =
 
-# (str) python-for-android branch to use, defaults to master
+# (str) python-for-android branch to use, defaults to stable
 #p4a.branch = stable
 
 # (str) OUYA Console category. Should be one of GAME or APP
