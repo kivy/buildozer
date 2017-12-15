@@ -769,7 +769,7 @@ class TargetAndroid(Target):
             mode = 'debug'
         else:
             build_cmd += [("release", )]
-            mode = 'release'
+            mode = 'release-unsigned'
 
         self.execute_build_package(build_cmd)
 
@@ -853,11 +853,12 @@ class TargetAndroid(Target):
 
         # recreate the project.properties
         with io.open(project_fn, 'w', encoding='utf-8') as fd:
+
             try:
-                fd.writelines((line.encode('utf-8') for line in content))
+                fd.writelines((line.decode('utf-8') for line in content))
             except:
                 fd.writelines(content)
-            if not content[-1].endswith(u'\n'):
+            if content and not content[-1].endswith(u'\n'):
                 fd.write(u'\n')
             for index, ref in enumerate(references):
                 fd.write(u'android.library.reference.{}={}\n'.format(index + 1, ref))
