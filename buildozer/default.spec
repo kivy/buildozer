@@ -222,6 +222,9 @@ android.arch = armeabi-v7a
 
 [buildozer]
 
+# (str) build type ('auto' - default/auto detect, 'ant' - use ant, 'gradle' - use gradle)
+# build_type = 'auto'
+
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
 log_level = 1
 
