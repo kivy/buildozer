@@ -780,8 +780,9 @@ class TargetAndroid(Target):
             # maybe the hook fail because the apk is not
             pass
 
+        build_type = config.getdefault('buildozer', 'build_type', 'auto')
         # XXX found how the apk name is really built from the title
-        if exists(join(dist_dir, "build.gradle")):
+        if build_type == 'auto' and exists(join(dist_dir, "build.gradle")) or build_type == 'gradle':
             # on gradle build, the apk use the package name, and have no version
             packagename = config.get('app', 'package.name')
             apk = u'{packagename}-{mode}.apk'.format(
