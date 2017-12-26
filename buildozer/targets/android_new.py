@@ -4,6 +4,7 @@ Android target, based on python-for-android project
 '''
 
 import sys
+import os
 
 from buildozer import USE_COLOR
 from buildozer.targets.android import TargetAndroid
@@ -13,7 +14,7 @@ from os.path import join, expanduser, realpath
 class TargetAndroidNew(TargetAndroid):
     targetname = 'android'
     p4a_branch = "stable"
-    p4a_directory = "python-for-android-master"
+    p4a_directory = "python-for-android-new-toolchain"
     p4a_apk_cmd = "apk --debug --bootstrap="
     extra_p4a_args = ''
 
@@ -31,6 +32,9 @@ class TargetAndroidNew(TargetAndroid):
         hook = self.buildozer.config.getdefault("app", "p4a.hook", None)
         if hook is not None:
             self.extra_p4a_args += ' --hook={}'.format(realpath(hook))
+        port = self.buildozer.config.getdefault('app', 'p4a.port', None)
+        if port is not None:
+            self.extra_p4a_args += ' --port={}'.format(port)
 
     def _p4a(self, cmd, **kwargs):
         if not hasattr(self, "pa_dir"):
@@ -91,14 +95,13 @@ class TargetAndroidNew(TargetAndroid):
                 continue
             elif option == "release":
                 cmd.append("--release")
-                cmd.append("--sign")
+                if self.check_p4a_sign_env(True):
+                    cmd.append("--sign")
                 continue
             if option == "--window":
                 cmd.append("--window")
             elif option == "--sdk":
                 cmd.append("--android_api")
-                cmd.extend(values)
-                cmd.append("--sdk")
                 cmd.extend(values)
             else:
                 cmd.extend(args)
@@ -151,6 +154,24 @@ class TargetAndroidNew(TargetAndroid):
 
         cmd = " ".join(cmd)
         self._p4a(cmd)
+
+    def get_release_mode(self):
+        if self.check_p4a_sign_env():
+            return "release"
+        return "release-unsigned"
+
+    def check_p4a_sign_env(self, error=False):
+        keys = ["KEYALIAS", "KEYSTORE_PASSWD", "KEYSTORE", "KEYALIAS_PASSWD"]
+        check = True
+        for key in keys:
+            key = "P4A_RELEASE_{}".format(key)
+            if key not in os.environ:
+                if error:
+                    self.buildozer.error(
+                        ("Asking for release but {} is missing"
+                         "--sign will not be passed").format(key))
+                check = False
+        return check
 
     def cmd_run(self, *args):
         entrypoint = self.buildozer.config.getdefault(

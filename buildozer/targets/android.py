@@ -478,6 +478,7 @@ class TargetAndroid(Target):
             'ANDROIDSDK': self.android_sdk_dir,
             'ANDROIDNDK': self.android_ndk_dir,
             'ANDROIDAPI': self.android_api,
+            'ANDROIDMINAPI': self.android_minapi,
             'ANDROIDNDKVER': 'r{}'.format(self.android_ndk_version)
         })
 
@@ -526,7 +527,12 @@ class TargetAndroid(Target):
         pip_deps = []
         for dep in deps:
             pip_deps.append('"{}"'.format(dep))
-        cmd('pip install -q --user {}'.format(" ".join(pip_deps)))
+
+        # in virtualenv or conda env
+        options = "--user"
+        if "VIRTUAL_ENV" in os.environ or "CONDA_PREFIX" in os.environ:
+            options = ""
+        cmd('pip install -q {} {}'.format(options, " ".join(pip_deps)))
 
     def get_available_packages(self):
         available_modules = self.buildozer.cmd('./distribute.sh -l',
@@ -768,7 +774,7 @@ class TargetAndroid(Target):
             mode = 'debug'
         else:
             build_cmd += [("release", )]
-            mode = 'release-unsigned'
+            mode = self.get_release_mode()
 
         self.execute_build_package(build_cmd)
 
@@ -782,7 +788,11 @@ class TargetAndroid(Target):
 
         build_type = config.getdefault('buildozer', 'build_type', 'auto')
         # XXX found how the apk name is really built from the title
-        if build_type == 'auto' and exists(join(dist_dir, "build.gradle")) or build_type == 'gradle':
+        
+        gradle_files = ["build.gradle", "gradle", "gradlew"]
+        is_gradle_build = build_type == 'gradle' or \
+                          build_type == 'auto' and any((exists(join(dist_dir, x)) for x in gradle_files)) 
+        if is_gradle_build:
             # on gradle build, the apk use the package name, and have no version
             packagename = config.get('app', 'package.name')
             apk = u'{packagename}-{mode}.apk'.format(
@@ -814,12 +824,17 @@ class TargetAndroid(Target):
         self.buildozer.state['android:latestapk'] = apk_dest
         self.buildozer.state['android:latestmode'] = self.build_mode
 
+    def get_release_mode(self):
+        return "release-unsigned"
+
     def _update_libraries_references(self, dist_dir):
         # ensure the project.properties exist
         project_fn = join(dist_dir, 'project.properties')
 
         if not self.buildozer.file_exists(project_fn):
-            content = ['target=android-{}\n'.format(self.android_api)]
+            content = [
+                'target=android-{}\n'.format(self.android_api),
+                'APP_PLATFORM={}\n'.format(self.android_minapi)]
         else:
             with io.open(project_fn, encoding='utf-8') as fd:
                 content = fd.readlines()
@@ -865,10 +880,19 @@ class TargetAndroid(Target):
 
     def _add_java_src(self, dist_dir):
         java_src = self.buildozer.config.getlist('app', 'android.add_src', [])
-        if exists(join(dist_dir, "build.gradle")):
+
+        gradle_files = ["build.gradle", "gradle", "gradlew"]
+        is_gradle_build = any((
+            exists(join(dist_dir, x)) for x in gradle_files))
+        if is_gradle_build:
             src_dir = join(dist_dir, "src", "main", "java")
+            self.buildozer.info(
+                "Gradle project detected, copy files {}".format(src_dir))
         else:
             src_dir = join(dist_dir, 'src')
+            self.buildozer.info(
+                "Ant project detected, copy files in {}".format(src_dir))
+
         for pattern in java_src:
             for fn in glob(expanduser(pattern.strip())):
                 last_component = basename(fn)
