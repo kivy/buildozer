@@ -201,6 +201,9 @@ android.arch = armeabi-v7a
 # (str) Bootstrap to use for android builds
 # p4a.bootstrap = sdl2
 
+# (int) port number to specify an explicit --port= p4a argument (eg for bootstrap flask)
+#p4a.port =
+
 
 #
 # iOS specific
