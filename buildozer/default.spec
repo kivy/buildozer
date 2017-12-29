@@ -146,6 +146,9 @@ fullscreen = 0
 # bootstrap)
 #android.gradle_dependencies =
 
+# (list) Java classes to add as activities to the manifest.
+#android.add_activites = com.example.ExampleActivity
+
 # (str) python-for-android branch to use, defaults to stable
 #p4a.branch = stable
 
