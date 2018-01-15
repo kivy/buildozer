@@ -786,7 +786,7 @@ class TargetAndroid(Target):
             # maybe the hook fail because the apk is not
             pass
 
-        build_type = config.getdefault('buildozer', 'build_type', 'auto')
+        build_type = config.getdefault('app', 'android.java_build_tool', 'auto')
         # XXX found how the apk name is really built from the title
         
         gradle_files = ["build.gradle", "gradle", "gradlew"]

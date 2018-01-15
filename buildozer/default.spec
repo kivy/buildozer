@@ -146,6 +146,9 @@ fullscreen = 0
 # bootstrap)
 #android.gradle_dependencies =
 
+# (str) build type ('auto' - default/auto detect, 'ant' - use ant, 'gradle' - use gradle)
+#android.java_build_tool = 'auto'
+
 # (str) python-for-android branch to use, defaults to stable
 #p4a.branch = stable
 
@@ -221,9 +224,6 @@ android.arch = armeabi-v7a
 
 
 [buildozer]
-
-# (str) build type ('auto' - default/auto detect, 'ant' - use ant, 'gradle' - use gradle)
-# build_type = 'auto'
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
 log_level = 1
