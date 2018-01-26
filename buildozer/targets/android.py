@@ -719,6 +719,11 @@ class TargetAndroid(Target):
                 raise SystemError('Failed to find jar file: {}'.format(
                     pattern))
 
+        # add Java activity
+        add_activities = config.getlist('app', 'android.add_activities', [])
+        for activity in add_activities:
+            build_cmd += [("--add-activity", activity)]
+        
         # add presplash
         presplash = config.getdefault('app', 'presplash.filename', '')
         if presplash:
