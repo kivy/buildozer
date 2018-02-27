@@ -27,7 +27,7 @@ class TargetAndroidNew(TargetAndroid):
             'app', 'p4a.bootstrap', 'sdl2')
         self.p4a_apk_cmd += self._p4a_bootstrap
         color = 'always' if USE_COLOR else 'never'
-        self.extra_p4a_args = ' --color={} --storage-dir={}'.format(
+        self.extra_p4a_args = ' --color={} --storage-dir="{}"'.format(
             color, self._build_dir)
         hook = self.buildozer.config.getdefault("app", "p4a.hook", None)
         if hook is not None:
