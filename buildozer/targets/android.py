@@ -773,6 +773,12 @@ class TargetAndroid(Target):
             build_cmd += [("--intent-filters", join(self.buildozer.root_dir,
                                                     intent_filters))]
 
+        # activity launch mode
+        launch_mode = config.getdefault(
+            'app', 'android.manifest.launch_mode', '')
+        if launch_mode:
+            build_cmd += [("--activity-launch-mode", launch_mode)]
+
         # build only in debug right now.
         if self.build_mode == 'debug':
             build_cmd += [("debug", )]
