@@ -76,6 +76,20 @@ The pip package does not yet support python3.
 #.  Please note the "android" buildozer target, and use that for any and all buildozer commands you run (even if the docs just say "android").
 
 
+Buildozer Docker image
+----------------------
+
+A Dockerfile is available to use buildozer through a Docker environment.
+
+#. Build with::
+
+    docker build --tag=buildozer .
+
+#. Run with::
+
+    docker run --volume "$(pwd)":/home/user/hostcwd buildozer --version
+
+
 Examples of Buildozer commands:
 --------------------------------
 
