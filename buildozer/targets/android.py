@@ -719,6 +719,11 @@ class TargetAndroid(Target):
                 raise SystemError('Failed to find jar file: {}'.format(
                     pattern))
 
+        # add Java activity
+        add_activities = config.getlist('app', 'android.add_activities', [])
+        for activity in add_activities:
+            build_cmd += [("--add-activity", activity)]
+        
         # add presplash
         presplash = config.getdefault('app', 'presplash.filename', '')
         if presplash:
@@ -767,6 +772,12 @@ class TargetAndroid(Target):
         if intent_filters:
             build_cmd += [("--intent-filters", join(self.buildozer.root_dir,
                                                     intent_filters))]
+
+        # activity launch mode
+        launch_mode = config.getdefault(
+            'app', 'android.manifest.launch_mode', '')
+        if launch_mode:
+            build_cmd += [("--activity-launch-mode", launch_mode)]
 
         # build only in debug right now.
         if self.build_mode == 'debug':

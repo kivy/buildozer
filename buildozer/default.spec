@@ -149,6 +149,9 @@ fullscreen = 0
 # (str) build type ('auto' - default/auto detect, 'ant' - use ant, 'gradle' - use gradle)
 #android.java_build_tool = 'auto'
 
+# (list) Java classes to add as activities to the manifest.
+#android.add_activites = com.example.ExampleActivity
+
 # (str) python-for-android branch to use, defaults to stable
 #p4a.branch = stable
 
@@ -161,6 +164,9 @@ fullscreen = 0
 
 # (str) XML file to include as an intent filters in <activity> tag
 #android.manifest.intent_filters =
+
+# (str) launchMode to set for the main activity
+#android.manifest.launch_mode = standard
 
 # (list) Android additionnal libraries to copy into libs/armeabi
 #android.add_libs_armeabi = libs/android/*.so
