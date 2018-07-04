@@ -32,7 +32,7 @@ from os.path import exists, join, realpath, expanduser, basename, relpath
 from platform import architecture
 from shutil import copyfile
 from glob import glob
-
+from distutils.version import LooseVersion
 from buildozer.libs.version import parse
 
 
@@ -798,9 +798,22 @@ class TargetAndroid(Target):
             pass
 
         # XXX found how the apk name is really built from the title
+        #gradle_files = ["build.gradle", "gradle", "gradlew"]
+        #is_gradle_build = any((
+        #    exists(join(dist_dir, x)) for x in gradle_files))
+        #if is_gradle_build:
+	__sdk_dir = self.android_sdk_dir
+        build_tools_versions = os.listdir(join(__sdk_dir, 'build-tools'))
+        build_tools_versions = sorted(build_tools_versions, key=LooseVersion)
+        build_tools_version = build_tools_versions[-1]
         gradle_files = ["build.gradle", "gradle", "gradlew"]
-        is_gradle_build = any((
-            exists(join(dist_dir, x)) for x in gradle_files))
+        is_gradle_build = any((exists(join(dist_dir, x)) for x in gradle_files)) and build_tools_version >= '25.0'
+
+
+        
+        # gradle_files = ["build.gradle", "gradle", "gradlew"]
+        # is_gradle_build = any((
+        #     exists(join(dist_dir, x)) for x in gradle_files))
         if is_gradle_build:
             # on gradle build, the apk use the package name, and have no version
             packagename = config.get('app', 'package.name')
