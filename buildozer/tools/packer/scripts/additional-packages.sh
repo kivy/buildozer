@@ -11,7 +11,3 @@ apt-get -y install lib32stdc++6 lib32z1 lib32ncurses5
 apt-get -y install build-essential
 apt-get -y install git openjdk-8-jdk --no-install-recommends zlib1g-dev
 pip install cython buildozer python-for-android
-
-# latest sh is too slow, use a previous working version
-# CF https://github.com/amoffat/sh/issues/378
-pip install sh\<1.12.5
