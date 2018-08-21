@@ -111,9 +111,6 @@ class TargetOSX(Target):
 
     def build_package(self):
         self.buildozer.info('Building package')
-        kivy_app_dir = join(
-            self.buildozer.platform_dir,
-            'kivy-sdk-packager-master', 'osx', 'Kivy.app')
 
         bc = self.buildozer.config
         bcg = bc.get
@@ -122,14 +119,9 @@ class TargetOSX(Target):
         domain = bcg('app', 'package.domain')
         title = bcg('app', 'title')
         app_deps = open('requirements.txt').read()
-        garden_deps = bcgl('app', 'garden_requirements', '')
         icon = bc.getdefault('app', 'icon.filename', '')
         version = self.buildozer.get_version()
         author = bc.getdefault('app', 'author', '')
-
-        #print(title, package_name, domain, version,
-        #    source_dir, app_deps, garden_deps, icon, author)
-        #return
 
         self.buildozer.info('Create {}.app'.format(package_name))
         cwd = join(self.buildozer.platform_dir,'kivy-sdk-packager-master', 'osx')

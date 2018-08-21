@@ -48,7 +48,6 @@ class TargetAndroidNew(TargetAndroid):
     def compile_platform(self):
         app_requirements = self.buildozer.config.getlist(
             'app', 'requirements', '')
-        onlyname = lambda x: x.split('==')[0]
         dist_name = self.buildozer.config.get('app', 'package.name')
         local_recipes = self.get_local_recipes_dir()
         requirements = ','.join(app_requirements)
