@@ -14,15 +14,18 @@ project, and for iOS via the kivy-ios project. iOS and OSX are still under work.
 
 For Android: please have a look at `Android-SDK-NDK-Informations
 <https://github.com/kivy/kivy/wiki/Android-SDK-NDK-Informations>`_. Please note that
-the default SDK/NDK coded in Buildozer works for Python 2.
+the default SDK/NDK coded in Buildozer works for target Python 2.
+For target Python 3 see `Installing Buildozer with target Python 3 (CrystaX)
+<#installing-buildozer-with-target-python-3-crystax>`_.
+For host Python, both versions are seamlessly supported.
 
 We provide a ready-to-use `Virtual Machine for Virtualbox <https://kivy.org/#download>`_.
 
 Note that this tool has nothing to do with the eponymous online build service
 `buildozer.io <http://buildozer.io />`_.
 
-Installing Buildozer with python2 support:
-------------------------------------------
+Installing Buildozer with target Python 2 (default):
+----------------------------------------------------
 
 #. Install buildozer::
 
@@ -44,22 +47,13 @@ Installing Buildozer with python2 support:
     # edit the buildozer.spec, then
     buildozer android debug deploy run
 
-Installing Buildozer with python3 support:
-------------------------------------------
+Installing Buildozer with target Python 3 (CrystaX):
+----------------------------------------------------
 
-The pip package does not yet support python3.
-
-#. Install buildozer from source::
-
-    git clone https://github.com/kivy/buildozer
-    cd buildozer
-    python setup.py build
-    sudo pip install -e .
+After following the steps above to install buildozer and generate the default spec file,
+you need to setup Crystax NDK as described below.
 
 #. Download and extract the Crystax NDK somewhere (~/.buildozer/crystax-ndk is one option): https://www.crystax.net/en/download
-#. Go into your application directory and execute::
-
-    buildozer init
 
 #. Make sure the following lines are in your buildozer.spec file.::
 
@@ -73,7 +67,6 @@ The pip package does not yet support python3.
 
     buildozer android debug deploy run
 
-#.  Please note the "android" buildozer target, and use that for any and all buildozer commands you run (even if the docs just say "android").
 
 
 Buildozer Docker image
