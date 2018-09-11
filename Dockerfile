@@ -64,6 +64,6 @@ COPY buildozer.spec main.py ${WORK_DIR}/
 
 RUN buildozer android debug || /bin/true
 
-CMD "tail -f /var/log/faillog"
+CMD tail -f /var/log/faillog
 
 #ENTRYPOINT ["buildozer"]
