@@ -62,7 +62,7 @@ USER ${USER}
 
 COPY buildozer.spec .
 
-RUN buildozer android debug
+RUN buildozer android debug || /bin/true
 
 CMD "tail -f /var/log/faillog"
 
