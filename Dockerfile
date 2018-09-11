@@ -60,6 +60,10 @@ RUN chown user /home/user/ -R
 
 USER ${USER}
 
+COPY buildozer.spec .
+
+RUN buildozer android debug
+
 CMD "tail -f /var/log/faillog"
 
 #ENTRYPOINT ["buildozer"]
