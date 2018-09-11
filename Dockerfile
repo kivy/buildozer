@@ -68,6 +68,11 @@ COPY buildozer.spec main.py ${WORK_DIR}/
 
 RUN echo buildozer android debug || /bin/true
 
+RUN echo compile snake example game \
+ && git clone https://github.com/amatelin/Kivy-snake-tutorial.git \
+ && cd Kivy-snake-tutorial.git \
+ && buildozer android debug || /bin/true
+
 CMD tail -f /var/log/faillog
 
 #ENTRYPOINT ["buildozer"]
