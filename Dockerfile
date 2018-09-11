@@ -19,7 +19,7 @@ RUN apt update -qq > /dev/null && \
     apt install -qq --yes --no-install-recommends \
     locales && \
     locale-gen en_US.UTF-8 && \
-    apt install -qq --yes mc nano wget curl pkg-config autoconf automake libtool
+    apt install -qq --yes mc openssh-client nano wget curl pkg-config autoconf automake libtool
 ENV LANG="en_US.UTF-8" \
     LANGUAGE="en_US.UTF-8" \
     LC_ALL="en_US.UTF-8"
