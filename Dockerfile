@@ -18,7 +18,8 @@ ENV WORK_DIR="${HOME_DIR}/hostcwd" \
 RUN apt update -qq > /dev/null && \
     apt install -qq --yes --no-install-recommends \
     locales && \
-    locale-gen en_US.UTF-8
+    locale-gen en_US.UTF-8 && \
+    apt install -qq --yes mc nano wget curl
 ENV LANG="en_US.UTF-8" \
     LANGUAGE="en_US.UTF-8" \
     LC_ALL="en_US.UTF-8"
@@ -52,4 +53,11 @@ RUN cd /tmp/ && buildozer init && buildozer android adb -- version && cd -
 RUN sed s/'name="java.source" value="1.5"'/'name="java.source" value="7"'/ -i ${HOME_DIR}/.buildozer/android/platform/android-sdk-20/tools/ant/build.xml
 RUN sed s/'name="java.target" value="1.5"'/'name="java.target" value="7"'/ -i ${HOME_DIR}/.buildozer/android/platform/android-sdk-20/tools/ant/build.xml
 
-ENTRYPOINT ["buildozer"]
+USER root
+RUN time chown user /home/user/ -R
+
+USER ${USER}
+
+CMD "tail -f /var/log/faillog"
+
+#ENTRYPOINT ["buildozer"]
