@@ -62,7 +62,9 @@ USER ${USER}
 
 COPY buildozer.spec main.py ${WORK_DIR}/
 
-RUN buildozer android debug || /bin/true
+RUN echo buildozer android debug || /bin/true
+
+RUN cd ~/.buildozer/android/platform/&& rm -vf android-ndk*.tar* android-sdk*.tgz apache-ant*.tar.gz || /bin/true
 
 CMD tail -f /var/log/faillog
 
