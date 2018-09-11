@@ -60,7 +60,7 @@ RUN chown user /home/user/ -R
 
 USER ${USER}
 
-COPY buildozer.spec .
+COPY buildozer.spec main.py ${WORK_DIR}/
 
 RUN buildozer android debug || /bin/true
 
