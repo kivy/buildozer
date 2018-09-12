@@ -60,17 +60,19 @@ RUN sed s/'name="java.target" value="1.5"'/'name="java.target" value="7"'/ -i ${
 #  && tar -xvf crystax.tar.xz && rm ~/.buildozer/crystax.tar.xz 
 
 USER root
-RUN chown user /home/user/ -R
+RUN chown user /home/user/ -R && chown user /home/user/hostcwd
 
 USER ${USER}
 
-COPY buildozer.spec main.py ${WORK_DIR}/
+COPY buildozer.spec main.py patch-zmey.patch ${WORK_DIR}/
 
-RUN echo buildozer android debug || /bin/true
+RUN echo buildozer android debug || mkdir -p ~/bin && echo cp /home/user/hostcwd/.buildozer/android/platform/build/dists/myapp/bin/MyApplication-0.1-debug.apk . >~/bin/apkcp.sh && chmod 777 ~/bin/apkcp.sh && /bin/true
 
 RUN echo compile snake example game \
  && git clone https://github.com/amatelin/Kivy-snake-tutorial.git \
  && cd Kivy-snake-tutorial.git \
+ && mv ${WORK_DIR}/patch-zmey.patch . \
+ && patch -p0 <patch-zmey.patch \
  && buildozer android debug || /bin/true
 
 CMD tail -f /var/log/faillog
