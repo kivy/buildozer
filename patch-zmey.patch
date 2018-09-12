@@ -1,0 +1,11 @@
+--- buildozer.spec.new  2018-09-12 17:21:37.990086956 +0300
++++ buildozer.spec      2018-09-12 17:21:13.523925065 +0300
+@@ -65,7 +65,7 @@
+ #android.minapi = 8
+ 
+ # (int) Android SDK version to use
+-android.sdk = 19
++#android.sdk = 21
+ 
+ # (str) Android NDK version to use
+ #android.ndk = 9c
