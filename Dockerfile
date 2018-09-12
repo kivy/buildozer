@@ -75,7 +75,7 @@ RUN echo compile snake example game \
  && cd Kivy-snake-tutorial.git \
  && mv ${WORK_DIR}/patch-zmey.patch . \
  && patch -p0 <patch-zmey.patch \
- && buildozer android debug || /bin/true
+ && buildozer android debug || cp /home/user/hostcwd/Kivy-snake-tutorial/.buildozer/android/platform/build/dists/Ouroboros/bin/Ouroboros-1.0.0-debug.apk  ${WORK_DIR}/ && /bin/true
 
 CMD tail -f /var/log/faillog
 
