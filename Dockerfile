@@ -72,7 +72,7 @@ RUN echo compile snake example game \
  && git clone https://github.com/amatelin/Kivy-snake-tutorial.git \
  && echo make apkcp.sh command for copy builded component in folder home/usr/bin \
  && mkdir -p ~/bin && echo cp /home/user/hostcwd/.buildozer/android/platform/build/dists/myapp/bin/MyApplication-0.1-debug.apk . >~/bin/apkcp.sh && chmod 777 ~/bin/apkcp.sh \
- && cd Kivy-snake-tutorial.git \
+ && cd Kivy-snake-tutorial \
  && mv ${WORK_DIR}/patch-zmey.patch . \
  && patch -p0 <patch-zmey.patch \
  && buildozer android debug || cp /home/user/hostcwd/Kivy-snake-tutorial/.buildozer/android/platform/build/dists/Ouroboros/bin/Ouroboros-1.0.0-debug.apk  ${WORK_DIR}/ && /bin/true
