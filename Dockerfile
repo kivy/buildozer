@@ -66,10 +66,12 @@ USER ${USER}
 
 COPY buildozer.spec main.py patch-zmey.patch ${WORK_DIR}/
 
-RUN echo buildozer android debug || mkdir -p ~/bin && echo cp /home/user/hostcwd/.buildozer/android/platform/build/dists/myapp/bin/MyApplication-0.1-debug.apk . >~/bin/apkcp.sh && chmod 777 ~/bin/apkcp.sh && /bin/true
+RUN buildozer android debug || /bin/true
 
 RUN echo compile snake example game \
  && git clone https://github.com/amatelin/Kivy-snake-tutorial.git \
+ && echo make apkcp.sh command for copy builded component in folder home/usr/bin \
+ && mkdir -p ~/bin && echo cp /home/user/hostcwd/.buildozer/android/platform/build/dists/myapp/bin/MyApplication-0.1-debug.apk . >~/bin/apkcp.sh && chmod 777 ~/bin/apkcp.sh \
  && cd Kivy-snake-tutorial.git \
  && mv ${WORK_DIR}/patch-zmey.patch . \
  && patch -p0 <patch-zmey.patch \
