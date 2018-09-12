@@ -75,7 +75,7 @@ fullscreen = 1
 #android.permissions = INTERNET
 
 # (int) Android API to use
-#android.api = 19
+android.api = 19
 
 # (int) Minimum API required
 #android.minapi = 9
@@ -177,7 +177,7 @@ fullscreen = 1
 [buildozer]
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
-log_level = 1
+log_level = 2
 
 # (int) Display warning if buildozer is run as root (0 = False, 1 = True)
 warn_on_root = 1
