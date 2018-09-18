@@ -60,7 +60,7 @@ RUN sed s/'name="java.target" value="1.5"'/'name="java.target" value="7"'/ -i ${
 #  && tar -xvf crystax.tar.xz && rm ~/.buildozer/crystax.tar.xz 
 
 USER root
-RUN chown user /home/user/ -R && chown -R user /home/user/hostcwd
+RUN time chown user /home/user/ -R && chown -R user /home/user/hostcwd
 
 USER ${USER}
 
@@ -75,7 +75,7 @@ RUN echo compile snake example game \
  && cd Kivy-snake-tutorial \
  && mv ${WORK_DIR}/patch-zmey.patch . \
  && patch -p0 <patch-zmey.patch \
- && buildozer android debug || echo "Fix build Snake" && cp /home/user/hostcwd/Kivy-snake-tutorial/.buildozer/android/platform/build/dists/Ouroboros/bin/Ouroboros-1.0.0-debug.apk  ${WORK_DIR}/ && /bin/true
+ && buildozer android debug || echo "Fix build Snake" && cp /home/user/hostcwd/Kivy-snake-tutorial/.buildozer/android/platform/build/dists/Ouroboros/bin/Ouroboros-1.0.0-debug.apk  ${WORK_DIR}/ && date && /bin/true
 
 CMD tail -f /var/log/faillog
 
