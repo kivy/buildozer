@@ -59,14 +59,14 @@ RUN sed s/'name="java.target" value="1.5"'/'name="java.target" value="7"'/ -i ${
 #  && cd ~/.buildozer/ \
 #  && tar -xvf crystax.tar.xz && rm ~/.buildozer/crystax.tar.xz 
 
-USER root
-RUN time chown user /home/user/ -R && chown -R user /home/user/hostcwd
+#USER root
+#RUN time chown user /home/user/ -R && chown -R user /home/user/hostcwd
 
-USER ${USER}
+#USER ${USER}
 
 COPY buildozer.spec main.py patch-zmey.patch ${WORK_DIR}/
 
-RUN buildozer android debug || echo "Fix build hello world" && /bin/true
+RUN time buildozer android debug || echo "Fix build hello world" && /bin/true
 
 RUN echo compile snake example game \
  && git clone https://github.com/amatelin/Kivy-snake-tutorial.git \
@@ -75,7 +75,7 @@ RUN echo compile snake example game \
  && cd Kivy-snake-tutorial \
  && mv ${WORK_DIR}/patch-zmey.patch . \
  && patch -p0 <patch-zmey.patch \
- && buildozer android debug || echo "Fix build Snake" && cp /home/user/hostcwd/Kivy-snake-tutorial/.buildozer/android/platform/build/dists/Ouroboros/bin/Ouroboros-1.0.0-debug.apk  ${WORK_DIR}/ && date && /bin/true
+ && time buildozer android debug || echo "Fix build Snake" && cp /home/user/hostcwd/Kivy-snake-tutorial/.buildozer/android/platform/build/dists/Ouroboros/bin/Ouroboros-1.0.0-debug.apk  ${WORK_DIR}/ && date && /bin/true
 
 CMD tail -f /var/log/faillog
 
