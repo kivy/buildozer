@@ -1,5 +1,5 @@
---- buildozer.spec      2018-09-13 11:39:22.699005651 +0400
-+++ buildozer.spec.1    2018-09-13 11:42:34.601071199 +0400
+--- buildozer.spec      2018-09-19 07:32:14.279989224 +0000
++++ buildozer.spec.default      2018-09-19 07:32:52.986992074 +0000
 @@ -65,7 +65,7 @@
  #android.minapi = 8
  
@@ -9,3 +9,12 @@
  
  # (str) Android NDK version to use
  #android.ndk = 9c
+@@ -144,7 +144,7 @@
+ [buildozer]
+ 
+ # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
+-log_level = 1
++log_level = 2
+ 
+ # (int) Display warning if buildozer is run as root (0 = False, 1 = True)
+ warn_on_root = 1
