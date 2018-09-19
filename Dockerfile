@@ -59,10 +59,10 @@ RUN sed s/'name="java.target" value="1.5"'/'name="java.target" value="7"'/ -i ${
 #  && cd ~/.buildozer/ \
 #  && tar -xvf crystax.tar.xz && rm ~/.buildozer/crystax.tar.xz 
 
-#USER root
-#RUN time chown user /home/user/ -R && chown -R user /home/user/hostcwd
+USER root
+RUN time chown user /home/user/ -R && chown -R user /home/user/hostcwd
 
-#USER ${USER}
+USER ${USER}
 
 COPY buildozer.spec main.py patch-zmey.patch ${WORK_DIR}/
 
