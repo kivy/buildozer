@@ -250,13 +250,23 @@ class TargetAndroid(Target):
             archive = 'android-sdk_r{0}-macosx.zip'
             unpacked = 'android-sdk-macosx'
         elif platform.startswith('linux'):
-            archive = 'android-sdk_r{0}-linux.tgz'
-            unpacked = 'android-sdk-linux'
+            if self.android_sdk_version < 25:
+                archive = 'android-sdk_r{0}-linux.tgz'
+                unpacked = 'android-sdk-linux'
+            else:
+                archive = 'tools_r{0}-linux.zip'
+                unpacked = 'tools'
+                self.buildozer.mkdir(sdk_dir)
+                sdk_dir = sdk_dir + '/tools'
         else:
             raise SystemError('Unsupported platform: {0}'.format(platform))
 
         archive = archive.format(self.android_sdk_version)
-        url = 'http://dl.google.com/android/'
+        if self.android_sdk_version < 25:
+            url = 'http://dl.google.com/android/'
+        else:
+            url = 'http://dl.google.com/android/repository/'
+
         self.buildozer.download(url,
                                 archive,
                                 cwd=self.buildozer.global_platform_dir)
@@ -295,7 +305,9 @@ class TargetAndroid(Target):
             is_64 = (os.uname()[4] == 'x86_64')
 
         elif platform.startswith('linux'):
-            if int(_version) > 9:  # if greater than 9, take it as .bin file
+            if int(_version) > 10:  # if greater than 10, take it as .zip file
+                archive = 'android-ndk-r{0}-linux-{1}.zip'
+            elif int(_version) > 9:  # if greater than 9, take it as .bin file
                 archive = 'android-ndk-r{0}-linux-{1}.bin'
             else:
                 archive = 'android-ndk-r{0}-linux-{1}.tar.bz2'
@@ -307,7 +319,11 @@ class TargetAndroid(Target):
         unpacked = 'android-ndk-r{0}'
         archive = archive.format(self.android_ndk_version, architecture)
         unpacked = unpacked.format(self.android_ndk_version)
-        url = 'http://dl.google.com/android/ndk/'
+        if int(_version) > 10:
+            url = 'http://dl.google.com/android/repository/'
+        else:
+            url = 'http://dl.google.com/android/ndk/'
+
         self.buildozer.download(url,
                                 archive,
                                 cwd=self.buildozer.global_platform_dir)
@@ -724,7 +740,7 @@ class TargetAndroid(Target):
         add_activities = config.getlist('app', 'android.add_activities', [])
         for activity in add_activities:
             build_cmd += [("--add-activity", activity)]
-        
+
         # add presplash
         presplash = config.getdefault('app', 'presplash.filename', '')
         if presplash:
