@@ -146,7 +146,10 @@ fullscreen = 0
 # bootstrap)
 #android.gradle_dependencies =
 
-# (str) python-for-android branch to use, defaults to master
+# (list) Java classes to add as activities to the manifest.
+#android.add_activites = com.example.ExampleActivity
+
+# (str) python-for-android branch to use, defaults to stable
 #p4a.branch = stable
 
 # (str) OUYA Console category. Should be one of GAME or APP
@@ -158,6 +161,9 @@ fullscreen = 0
 
 # (str) XML file to include as an intent filters in <activity> tag
 #android.manifest.intent_filters =
+
+# (str) launchMode to set for the main activity
+#android.manifest.launch_mode = standard
 
 # (list) Android additional libraries to copy into libs/armeabi
 #android.add_libs_armeabi = libs/android/*.so
@@ -200,6 +206,9 @@ android.arch = armeabi-v7a
 
 # (str) Bootstrap to use for android builds
 # p4a.bootstrap = sdl2
+
+# (int) port number to specify an explicit --port= p4a argument (eg for bootstrap flask)
+#p4a.port =
 
 
 #

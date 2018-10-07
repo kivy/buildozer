@@ -255,7 +255,7 @@ class Version(_BaseVersion):
 
         # Pre-release
         if self._version.pre is not None:
-            parts.append("".join(str(x) for x in self._version.pre))
+            parts.append("-" + "".join(str(x) for x in self._version.pre))
 
         # Post-release
         if self._version.post is not None:
