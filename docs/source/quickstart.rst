@@ -8,7 +8,7 @@ Init and build for Android
 
 #. Buildozer will try to guess the version of your application, by searching a
    line like `__version__ = "1.0.3"` in your `main.py`. Ensure you have one at
-   the start of your application. It is not mandatory but heavilly advised.
+   the start of your application. It is not mandatory but heavily advised.
 
 #. Create a `buildozer.spec` file, with::
 
@@ -26,7 +26,7 @@ Init and build for Android
    The first build will be slow, as it will download the Android SDK, NDK, and
    others tools needed for the compilation.
    Don't worry, thoses files will be saved in a global directory and will be
-   shared accross the different project you'll manage with Buildozer.
+   shared across the different project you'll manage with Buildozer.
 
 #. At the end, you should have an APK file in the `bin/` directory.
 
