@@ -1177,7 +1177,7 @@ class Buildozer(object):
 
     def _get_config_list(self, section, token, default=None, with_values=False):
         # monkey-patch method for ConfigParser
-        # get a key as a list of string, seperated from the comma
+        # get a key as a list of string, separated from the comma
 
         # check if an env var exists that should replace the file config
         set_config_token_from_env(section, token, self.config)
