@@ -421,7 +421,7 @@ class TargetAndroid(Target):
         ver = self._find_latest_package(packages, 'build-tools-')
         if ver and ver > v_build_tools and not skip_upd:
             self._android_update_sdk(self._build_package_string('build-tools', ver))
-        # 2.bis check aidl can be runned
+        # 2. check aidl can be run
         self._check_aidl(v_build_tools)
 
         # 3. finally, install the android for the current api
