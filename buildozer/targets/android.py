@@ -523,8 +523,10 @@ class TargetAndroid(Target):
                 setup = fd.read()
                 deps = re.findall("install_reqs = (\[[^\]]*\])", setup, re.DOTALL | re.MULTILINE)[1]
                 deps = ast.literal_eval(deps)
-        except Exception:
-            deps = []
+        except IOError:
+            self.buildozer.error('Failed to read python-for-android setup.py at {}'.format(
+                join(self.pa_dir, 'setup.py')))
+            exit(1)
         pip_deps = []
         for dep in deps:
             pip_deps.append('"{}"'.format(dep))
