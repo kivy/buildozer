@@ -521,13 +521,13 @@ class TargetAndroid(Target):
         try:
             with open(join(self.pa_dir, "setup.py")) as fd:
                 setup = fd.read()
-                deps = re.findall("install_reqs = (\[[^\]]*\])", setup, re.DOTALL | re.MULTILINE)[1]
+                deps = re.findall("^install_reqs = (\[[^\]]*\])", setup, re.DOTALL | re.MULTILINE)[0]
                 deps = ast.literal_eval(deps)
         except Exception:
             deps = []
         pip_deps = []
         for dep in deps:
-            pip_deps.append('"{}"'.format(dep))
+            pip_deps.append("'{}'".format(dep))
 
         # in virtualenv or conda env
         options = "--user"
