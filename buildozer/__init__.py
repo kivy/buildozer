@@ -20,9 +20,9 @@ from sys import stdout, stderr, exit
 from re import search
 from os.path import join, exists, dirname, realpath, splitext, expanduser
 from subprocess import Popen, PIPE
-from os import environ, unlink, rename, walk, sep, listdir, makedirs
+from os import environ, unlink, walk, sep, listdir, makedirs
 from copy import copy
-from shutil import copyfile, rmtree, copytree
+from shutil import copyfile, rmtree, copytree, move
 from fnmatch import fnmatch
 try:
     from urllib.request import FancyURLopener
@@ -613,7 +613,7 @@ class Buildozer(object):
         if not os.path.isdir(os.path.dirname(target)):
             self.error(('Rename {0} to {1} fails because {2} is not a '
                         'directory').format(source, target, target))
-        rename(source, target)
+        move(source, target)
 
     def file_copy(self, source, target, cwd=None):
         if cwd:
