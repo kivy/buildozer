@@ -11,6 +11,8 @@ import sys
 if sys.platform == 'win32':
     raise NotImplementedError('Windows platform not yet working for Android')
 
+PIP_COMMAND = 'pip' if (sys.version_info[0] < 3) else 'pip3'
+
 ANDROID_API = '19'
 ANDROID_MINAPI = '9'
 ANDROID_SDK_VERSION = '20'
@@ -535,7 +537,7 @@ class TargetAndroid(Target):
         options = "--user"
         if "VIRTUAL_ENV" in os.environ or "CONDA_PREFIX" in os.environ:
             options = ""
-        cmd('pip install -q {} {}'.format(options, " ".join(pip_deps)))
+        cmd('{} install -q {} {}'.format(PIP_COMMAND, options, " ".join(pip_deps)))
 
     def get_available_packages(self):
         available_modules = self.buildozer.cmd('./distribute.sh -l',
@@ -726,7 +728,7 @@ class TargetAndroid(Target):
         add_activities = config.getlist('app', 'android.add_activities', [])
         for activity in add_activities:
             build_cmd += [("--add-activity", activity)]
-        
+
         # add presplash
         presplash = config.getdefault('app', 'presplash.filename', '')
         if presplash:
