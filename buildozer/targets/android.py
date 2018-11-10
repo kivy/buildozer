@@ -535,7 +535,7 @@ class TargetAndroid(Target):
         options = "--user"
         if "VIRTUAL_ENV" in os.environ or "CONDA_PREFIX" in os.environ:
             options = ""
-        cmd('python -m pip install -q {} {}'.format(options, " ".join(pip_deps)))
+        cmd('{} -m pip install -q {} {}'.format(executable, options, " ".join(pip_deps)))
 
     def get_available_packages(self):
         available_modules = self.buildozer.cmd('./distribute.sh -l',
