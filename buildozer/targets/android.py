@@ -11,6 +11,9 @@ import sys
 if sys.platform == 'win32':
     raise NotImplementedError('Windows platform not yet working for Android')
 
+from platform import uname
+WSL = 'Microsoft' in uname()[2]
+
 ANDROID_API = '19'
 ANDROID_MINAPI = '9'
 ANDROID_SDK_VERSION = '20'
@@ -22,6 +25,7 @@ import os
 import io
 import re
 import ast
+import sh
 from pipes import quote
 from sys import platform, executable
 from buildozer import BuildozerException
@@ -410,7 +414,36 @@ class TargetAndroid(Target):
                                                     'android.skip_update', False)
         if 'tools' in packages or 'platform-tools' in packages:
             if not skip_upd:
+                if WSL:
+                    # WSL (Windows Subsystem for Linux) allows running
+                    # linux from windows 10, but some windows
+                    # limitations still apply, namely you can't rename a
+                    # directory that a program was started from, which
+                    # is what the tools updates cause, and we end up
+                    # with an empty dir, so we need to run from a
+                    # different place, and the updater is still looking
+                    # for things in tools, and specifically renames the
+                    # tool dir, hence, moving and making a symlink
+                    # works.
+                    sh.mv(
+                        join(self.android_sdk_dir, 'tools'),
+                        join(self.android_sdk_dir, 'tools.save')
+                    )
+                    sh.ln(
+                        '-s',
+                        join(self.android_sdk_dir, 'tools.save'),
+                        join(self.android_sdk_dir, 'tools')
+                    )
+                old_android_cmd = self.android_cmd
+                self.android_cmd = join(
+                    self.android_sdk_dir,
+                    'tools.save',
+                    self.android_cmd.split('/')[-1]
+                )
                 self._android_update_sdk('tools,platform-tools')
+                self.android_cmd = old_android_cmd
+                if WSL:
+                    sh.rm('-rf', join(self.android_sdk_dir, 'tools.save'))
             else:
                 self.buildozer.info('Skipping Android SDK update due to spec file setting')
 
