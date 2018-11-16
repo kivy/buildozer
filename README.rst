@@ -15,8 +15,10 @@ project, and for iOS via the kivy-ios project. iOS and OSX are still under work.
 For Android: please have a look at `Android-SDK-NDK-Informations
 <https://github.com/kivy/kivy/wiki/Android-SDK-NDK-Informations>`_. Please note that
 the default SDK/NDK coded in Buildozer works for target Python 2.
-For target Python 3 see `Installing Buildozer with target Python 3 (CrystaX)
-<#installing-buildozer-with-target-python-3-crystax>`_.
+For target Python 3, use appropriate SDK/NDK as per the documentation, and ensure you
+have `python3` in your requirements.
+You can still use Crystax Python 3, see `Installing Buildozer with target Python 3
+(CrystaX) <#installing-buildozer-with-target-python-3-crystax>`_.
 For host Python, both versions are seamlessly supported.
 
 We provide a ready-to-use `Virtual Machine for Virtualbox <https://kivy.org/#download>`_.
@@ -24,7 +26,7 @@ We provide a ready-to-use `Virtual Machine for Virtualbox <https://kivy.org/#dow
 Note that this tool has nothing to do with the eponymous online build service
 `buildozer.io <http://buildozer.io />`_.
 
-Installing Buildozer with target Python 2 (default):
+Installing Buildozer with target Python 3 (default):
 ----------------------------------------------------
 
 #. Install buildozer::
@@ -47,15 +49,15 @@ Installing Buildozer with target Python 2 (default):
     # edit the buildozer.spec, then
     buildozer android debug deploy run
 
-Installing Buildozer with target Python 3 (native):
----------------------------------------------------
+Installing Buildozer with target Python 2:
+-----------------------------------------
 
-#. Follow the same installation and buildozer init as Python 2
+#. Follow the same installation and buildozer init as Python 3
 
 #. Make sure the following lines are in your buildozer.spec file.::
 
-    # Require python3
-    requirements = python3,kivy
+    # Changes python3 to python2
+    requirements = python2,kivy
 
 #. Finally, build, deploy and run the app on your phone::
 
