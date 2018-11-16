@@ -47,8 +47,23 @@ Installing Buildozer with target Python 2 (default):
     # edit the buildozer.spec, then
     buildozer android debug deploy run
 
-Installing Buildozer with target Python 3 (CrystaX):
-----------------------------------------------------
+Installing Buildozer with target Python 3 (native):
+---------------------------------------------------
+
+#. Follow the same installation and buildozer init as Python 2
+
+#. Make sure the following lines are in your buildozer.spec file.::
+
+    # Require python3
+    requirements = python3,kivy
+
+#. Finally, build, deploy and run the app on your phone::
+
+    buildozer android debug deploy run
+    
+    
+Installing Buildozer with target Python 3 (CrystaX, deprecated):
+----------------------------------------------------------------
 
 After following the steps above to install buildozer and generate the default spec file,
 you need to setup Crystax NDK as described below.
