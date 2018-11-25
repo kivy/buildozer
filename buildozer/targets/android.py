@@ -299,7 +299,9 @@ class TargetAndroid(Target):
             is_64 = (os.uname()[4] == 'x86_64')
 
         elif platform.startswith('linux'):
-            if int(_version) > 9:  # if greater than 9, take it as .bin file
+            if int(_version) > 10:
+                archive = 'android-ndk-r{0}-linux-{1}.zip'
+            elif int(_version) > 9:  # if greater than 9, take it as .bin file
                 archive = 'android-ndk-r{0}-linux-{1}.bin'
             else:
                 archive = 'android-ndk-r{0}-linux-{1}.tar.bz2'
@@ -311,7 +313,7 @@ class TargetAndroid(Target):
         unpacked = 'android-ndk-r{0}'
         archive = archive.format(self.android_ndk_version, architecture)
         unpacked = unpacked.format(self.android_ndk_version)
-        url = 'http://dl.google.com/android/ndk/'
+        url = 'http://dl.google.com/android/repository/'
         self.buildozer.download(url,
                                 archive,
                                 cwd=self.buildozer.global_platform_dir)
