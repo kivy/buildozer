@@ -434,15 +434,17 @@ class TargetAndroid(Target):
                         join(self.android_sdk_dir, 'tools.save'),
                         join(self.android_sdk_dir, 'tools')
                     )
-                old_android_cmd = self.android_cmd
-                self.android_cmd = join(
-                    self.android_sdk_dir,
-                    'tools.save',
-                    self.android_cmd.split('/')[-1]
-                )
+                    old_android_cmd = self.android_cmd
+                    self.android_cmd = join(
+                        self.android_sdk_dir,
+                        'tools.save',
+                        self.android_cmd.split('/')[-1]
+                    )
+
                 self._android_update_sdk('tools,platform-tools')
-                self.android_cmd = old_android_cmd
+
                 if WSL:
+                    self.android_cmd = old_android_cmd
                     sh.rm('-rf', join(self.android_sdk_dir, 'tools.save'))
             else:
                 self.buildozer.info('Skipping Android SDK update due to spec file setting')
