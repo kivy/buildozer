@@ -12,8 +12,8 @@ Buildozer currently supports packaging for Android via the `python-for-android
 <http://github.com/kivy/python-for-android/>`_
 project, and for iOS via the kivy-ios project. iOS and OSX are still under work.
 
-For Android: please have a look at `Android-SDK-NDK-Informations
-<https://github.com/kivy/kivy/wiki/Android-SDK-NDK-Informations>`_. Please note that
+For Android: please have a look at `Android-SDK-NDK-Information
+<https://github.com/kivy/kivy/wiki/Android-SDK-NDK-Information>`_. Please note that
 the default SDK/NDK coded in Buildozer works for target Python 2.
 For target Python 3, use appropriate SDK/NDK as per the documentation, and ensure you
 have `python3` in your requirements.
