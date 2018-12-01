@@ -100,7 +100,7 @@ fullscreen = 0
 #android.ndk = 9c
 
 # (int) Android NDK API to use (optional). This is the minimum API your app will support. 
-#android.ndk.api = 19
+#android.ndk_api = 19
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 #android.private_storage = True

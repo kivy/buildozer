@@ -29,7 +29,7 @@ class TargetAndroidNew(TargetAndroid):
         color = 'always' if USE_COLOR else 'never'
         self.extra_p4a_args = ' --color={} --storage-dir="{}"'.format(
             color, self._build_dir)
-        ndk_api = self.buildozer.config.getdefault('app', 'android.ndk.api', None)
+        ndk_api = self.buildozer.config.getdefault('app', 'android.ndk_api', None)
         if ndk_api is not None:
             self.extra_p4a_args += ' --ndk-api={}'.format(ndk_api)
         hook = self.buildozer.config.getdefault("app", "p4a.hook", None)
