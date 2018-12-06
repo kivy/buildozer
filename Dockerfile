@@ -30,10 +30,11 @@ RUN apt install -qq --yes --no-install-recommends \
 
 # https://buildozer.readthedocs.io/en/latest/installation.html#android-on-ubuntu-18-04-64bit
 RUN dpkg --add-architecture i386 && apt update -qq > /dev/null && \
-	apt install -qq --yes --no-install-recommends \
-	build-essential ccache git libncurses5:i386 libstdc++6:i386 libgtk2.0-0:i386 \
-	libpangox-1.0-0:i386 libpangoxft-1.0-0:i386 libidn11:i386 python2.7 \
-	python2.7-dev openjdk-8-jdk unzip zlib1g-dev zlib1g:i386 time
+        apt install -qq --yes --no-install-recommends \
+        build-essential ccache git libncurses5:i386 libstdc++6:i386 libgtk2.0-0:i386 \
+        libpangox-1.0-0:i386 libpangoxft-1.0-0:i386 libidn11:i386 python2.7 \
+        python2.7-dev openjdk-8-jdk unzip zlib1g-dev zlib1g:i386 python3 python3-dev time \
+     && apt install -qq --yes python3-virtualenv python3-pip
 
 # prepares non root env
 RUN useradd --create-home --shell /bin/bash ${USER}
@@ -41,41 +42,46 @@ RUN useradd --create-home --shell /bin/bash ${USER}
 RUN usermod -append --groups sudo ${USER}
 RUN echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-USER ${USER}
 WORKDIR ${WORK_DIR}
 
+#COPY . .
+
+#RUN chown user /home/user/ -Rv
+
+USER ${USER}
+
+# Crystax-NDK
+ARG CRYSTAX_NDK_VERSION=10.3.2
+ARG CRYSTAX_HASH=7305b59a3cee178a58eeee86fe78ad7bef7060c6d22cdb027e8d68157356c4c0
+ARG cachebuildozerver=0.34
+ARG cachebuildozersha=40b94a55aad8056a8298ad83b650ad3af3cb98e96642dc31a207161ecadac391
+ARG cachebuildozerfile=cachebuildozer034.tar.gz
+
 # installs buildozer and dependencies
-RUN pip install --user Cython==0.25.2 buildozer
+RUN pip install --user Cython==0.25.2 appdirs buildozer==0.34 sh
 # calling buildozer adb command should trigger SDK/NDK first install and update
 # but it requires a buildozer.spec file
 RUN cd /tmp/ && buildozer init && buildozer android adb -- version \
+    # fix https://github.com/kivy/buildozer/issues/751
     && cd ~/.buildozer/android/platform/&& rm -vf android-ndk*.tar* android-sdk*.tgz apache-ant*.tar.gz \
-    && cd -
-# fixes source and target JDK version, refs https://github.com/kivy/buildozer/issues/625
-RUN sed s/'name="java.source" value="1.5"'/'name="java.source" value="7"'/ -i ${HOME_DIR}/.buildozer/android/platform/android-sdk-20/tools/ant/build.xml
-RUN sed s/'name="java.target" value="1.5"'/'name="java.target" value="7"'/ -i ${HOME_DIR}/.buildozer/android/platform/android-sdk-20/tools/ant/build.xml
+    && cd - && cd ${WORK_DIR} \
+    && set -ex \
+  && wget https://www.crystax.net/download/crystax-ndk-${CRYSTAX_NDK_VERSION}-linux-x86_64.tar.xz?interactive=true -O ~/.buildozer/crystax-${CRYSTAX_NDK_VERSION}.tar.xz \
+  && cd ~/.buildozer/ \
+  && echo "${CRYSTAX_HASH}  crystax-${CRYSTAX_NDK_VERSION}.tar.xz" | sha256sum -c \
+  && time tar -xf crystax-${CRYSTAX_NDK_VERSION}.tar.xz && rm ~/.buildozer/crystax-${CRYSTAX_NDK_VERSION}.tar.xz \
+  && cd ~ && sudo wget --quiet https://github.com/homdx/buildozer/releases/download/${cachebuildozerver}/${cachebuildozerfile} \
+  && echo "${cachebuildozersha}  ${cachebuildozerfile}" | sha256sum -c \
+  && sudo chown user ${cachebuildozerfile} && sudo chown user ${WORK_DIR} -R \
+  && cd ${WORK_DIR} && echo tar -xf /home/user/cachebuildozer034.tar.gz >cachebuildozer034.sh && chmod +x cachebuildozer034.sh && sudo mv -v cachebuildozer034.sh /bin
 
-#RUN wget https://www.crystax.net/download/crystax-ndk-10.3.1-linux-x86_64.tar.xz?interactive=true -O ~/.buildozer/crystax.tar.xz \
-#  && cd ~/.buildozer/ \
-#  && tar -xvf crystax.tar.xz && rm ~/.buildozer/crystax.tar.xz 
+#COPY . app
 
-USER root
-RUN time chown user /home/user/ -R && chown -R user /home/user/hostcwd
+#RUN sudo chown user ${WORK_DIR}/app -Rv
 
-USER ${USER}
+#USER ${USER}
 
-COPY buildozer.spec main.py patch-zmey.patch ${WORK_DIR}/
-
-RUN time buildozer android debug || echo "Fix build hello world" && /bin/true
-
-RUN echo compile snake example game \
- && git clone https://github.com/amatelin/Kivy-snake-tutorial.git \
- && echo make apkcp.sh command for copy builded component in folder home/usr/bin \
- && mkdir -p ~/bin && echo cp /home/user/hostcwd/.buildozer/android/platform/build/dists/myapp/bin/MyApplication-0.1-debug.apk . >~/bin/apkcp.sh && chmod 777 ~/bin/apkcp.sh \
- && cd Kivy-snake-tutorial \
- && mv ${WORK_DIR}/patch-zmey.patch . \
- && patch -p0 <patch-zmey.patch \
- && time buildozer android debug || echo "Fix build Snake" && cp /home/user/hostcwd/Kivy-snake-tutorial/.buildozer/android/platform/build/dists/Ouroboros/bin/Ouroboros-1.0.0-debug.apk  ${WORK_DIR}/ && date && /bin/true
+#RUN cd ${WORK_DIR}/app && tar -xf /home/user/${cachebuildozerfile} && buildozer android debug || echo fix apk
 
 CMD tail -f /var/log/faillog
 
