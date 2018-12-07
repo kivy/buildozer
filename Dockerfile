@@ -63,6 +63,10 @@ RUN pip install --user Cython==0.25.2 appdirs buildozer==0.34 sh
 # but it requires a buildozer.spec file
 RUN cd /tmp/ && buildozer init && buildozer android adb -- version \
     # fix https://github.com/kivy/buildozer/issues/751
+    && cd ~ \
+# fixes source and target JDK version, refs https://github.com/kivy/buildozer/issues/625
+    && sed s/'name="java.source" value="1.5"'/'name="java.source" value="7"'/ -i ${HOME_DIR}/.buildozer/android/platform/android-sdk-20/tools/ant/build.xml \
+    && sed s/'name="java.target" value="1.5"'/'name="java.target" value="7"'/ -i ${HOME_DIR}/.buildozer/android/platform/android-sdk-20/tools/ant/build.xml \
     && cd ~/.buildozer/android/platform/&& rm -vf android-ndk*.tar* android-sdk*.tgz apache-ant*.tar.gz \
     && cd - && cd ${WORK_DIR} \
     && set -ex \
