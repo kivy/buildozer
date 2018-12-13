@@ -849,7 +849,7 @@ class TargetAndroid(Target):
             packagename = config.get('app', 'package.name')
             apk = u'{packagename}-{mode}.apk'.format(
                 packagename=packagename, mode=mode)
-            apk_dir = join(dist_dir, "build", "outputs", "apk")
+            apk_dir = join(dist_dir, "build", "outputs", "apk", mode)
             apk_dest = u'{packagename}-{version}-{mode}.apk'.format(
                 packagename=packagename, mode=mode, version=version)
 
