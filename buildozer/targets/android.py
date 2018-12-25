@@ -275,16 +275,7 @@ class TargetAndroid(Target):
 
         return sdk_dir
 
-    def _install_android_ndk(self):
-        ndk_dir = self.android_ndk_dir
-        if self.buildozer.file_exists(ndk_dir):
-            self.buildozer.info('Android NDK found at {0}'.format(ndk_dir))
-            return ndk_dir
-
-        import re
-        _version = re.search('(.+?)[a-z]', self.android_ndk_version).group(1)
-
-        self.buildozer.info('Android NDK is missing, downloading')
+    def _ndk_download_paths(self, _version):
         if platform in ('win32', 'cygwin'):
             # Checking of 32/64 bits at Windows from: http://stackoverflow.com/a/1405971/798575
             import struct
@@ -309,11 +300,27 @@ class TargetAndroid(Target):
         else:
             raise SystemError('Unsupported platform: {0}'.format(platform))
 
-        architecture = 'x86_64' if is_64 else 'x86'
+        arch = 'x86_64' if is_64 else 'x86'
         unpacked = 'android-ndk-r{0}'
-        archive = archive.format(self.android_ndk_version, architecture)
+        archive = archive.format(self.android_ndk_version, arch)
         unpacked = unpacked.format(self.android_ndk_version)
+
         url = 'http://dl.google.com/android/repository/'
+        if int(_version) <= 9:
+            url = 'http://dl.google.com/android/ndk/'
+
+        return archive, unpacked, url
+
+    def _install_android_ndk(self):
+        ndk_dir = self.android_ndk_dir
+        if self.buildozer.file_exists(ndk_dir):
+            self.buildozer.info('Android NDK found at {0}'.format(ndk_dir))
+            return ndk_dir
+
+        _version = re.search('(.+?)[a-z]', self.android_ndk_version).group(1)
+
+        self.buildozer.info('Android NDK is missing, downloading')
+        archive, unpacked, url = self._ndk_download_paths(_version)
         self.buildozer.download(url,
                                 archive,
                                 cwd=self.buildozer.global_platform_dir)
