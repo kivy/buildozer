@@ -313,7 +313,7 @@ class TargetAndroid(Target):
         unpacked = 'android-ndk-r{0}'
         archive = archive.format(self.android_ndk_version, architecture)
         unpacked = unpacked.format(self.android_ndk_version)
-        url = 'http://dl.google.com/android/repository/'
+        url = 'http://dl.google.com/android/ndk/'
         self.buildozer.download(url,
                                 archive,
                                 cwd=self.buildozer.global_platform_dir)
