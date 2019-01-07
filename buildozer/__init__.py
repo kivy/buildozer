@@ -744,7 +744,7 @@ class Buildozer(object):
 
         rmtree(self.app_dir)
 
-        for root, dirs, files in walk(source_dir):
+        for root, dirs, files in walk(source_dir, followlinks=True):
             # avoid hidden directory
             if True in [x.startswith('.') for x in root.split(sep)]:
                 continue
