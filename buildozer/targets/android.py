@@ -737,6 +737,8 @@ class TargetAndroid(Target):
                                         self.android_api)),
             ("--minsdk", config.getdefault('app', 'android.minapi',
                                            self.android_minapi)),
+            ("--ndk-api", config.getdefault('app', 'android.minapi',
+                                            self.android_minapi)),
         ]
         is_private_storage = config.getbooldefault(
             'app', 'android.private_storage', True)
