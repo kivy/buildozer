@@ -28,8 +28,7 @@ COPY . /src
 RUN apt update -qq > /dev/null && \
     apt install -qq --yes --no-install-recommends \
     locales && \
-    locale-gen en_US.UTF-8 && \
-    apt install -qq --yes mc openssh-client nano wget curl pkg-config autoconf automake libtool
+    locale-gen en_US.UTF-8
 ENV LANG="en_US.UTF-8" \
     LANGUAGE="en_US.UTF-8" \
     LC_ALL="en_US.UTF-8"
@@ -59,26 +58,9 @@ RUN pip install --user Cython==0.25.2 $BDOZER_REQ
 
 # calling buildozer adb command should trigger SDK/NDK first install and update
 # but it requires a buildozer.spec file
-RUN cd /tmp/ && buildozer init && buildozer android adb -- version \
-    && cd ~/.buildozer/android/platform/&& rm -vf android-ndk*.tar* android-sdk*.tgz apache-ant*.tar.gz \
-    && cd -
+RUN cd /tmp/ && buildozer init && buildozer android adb -- version && cd -
 # fixes source and target JDK version, refs https://github.com/kivy/buildozer/issues/625
 RUN sed s/'name="java.source" value="1.5"'/'name="java.source" value="7"'/ -i ${HOME_DIR}/.buildozer/android/platform/android-sdk-20/tools/ant/build.xml
 RUN sed s/'name="java.target" value="1.5"'/'name="java.target" value="7"'/ -i ${HOME_DIR}/.buildozer/android/platform/android-sdk-20/tools/ant/build.xml
 
-# RUN wget https://www.crystax.net/download/crystax-ndk-10.3.1-linux-x86_64.tar.xz?interactive=true -O ~/.buildozer/crystax.tar.xz \
-#  && cd ~/.buildozer/ \
-#  && tar -xvf crystax.tar.xz && rm ~/.buildozer/crystax.tar.xz 
-
-USER root
-RUN chown user /home/user/ -R
-
-USER ${USER}
-
-COPY buildozer.spec main.py ${WORK_DIR}/
-
-RUN echo buildozer android debug || /bin/true
-
-CMD tail -f /var/log/faillog
-
-#ENTRYPOINT ["buildozer"]
+ENTRYPOINT ["buildozer"]
