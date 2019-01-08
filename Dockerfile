@@ -54,7 +54,7 @@ USER ${USER}
 WORKDIR ${WORK_DIR}
 
 # installs buildozer and dependencies
-RUN pip install --user Cython==0.25.2 $BDOZER_REQ
+RUN pip install --user Cython==0.25.2 sh $BDOZER_REQ
 
 # calling buildozer adb command should trigger SDK/NDK first install and update
 # but it requires a buildozer.spec file
