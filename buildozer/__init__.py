@@ -6,7 +6,7 @@ Generic Python packager for Android / iOS. Desktop later.
 
 '''
 
-__version__ = '0.35dev'
+__version__ = '0.38.dev0'
 
 import os
 import re
@@ -20,9 +20,9 @@ from sys import stdout, stderr, exit
 from re import search
 from os.path import join, exists, dirname, realpath, splitext, expanduser
 from subprocess import Popen, PIPE
-from os import environ, unlink, rename, walk, sep, listdir, makedirs
+from os import environ, unlink, walk, sep, listdir, makedirs
 from copy import copy
-from shutil import copyfile, rmtree, copytree
+from shutil import copyfile, rmtree, copytree, move
 from fnmatch import fnmatch
 try:
     from urllib.request import FancyURLopener
@@ -311,7 +311,7 @@ class Buildozer(object):
                     ret_stdout.append(chunk)
                 if show_output:
                     if IS_PY3:
-                        stdout.write(str(chunk))
+                        stderr.write(chunk.decode('utf-8'))
                     else:
                         stdout.write(chunk)
             if fd_stderr in readx:
@@ -409,7 +409,7 @@ class Buildozer(object):
                 ', required by "version.regex"')
 
         orientation = get('app', 'orientation', 'landscape')
-        if orientation not in ('landscape', 'portrait', 'all'):
+        if orientation not in ('landscape', 'portrait', 'all', 'sensorLandscape'):
             adderror('[app] "orientation" have an invalid value')
 
         if errors:
@@ -613,7 +613,7 @@ class Buildozer(object):
         if not os.path.isdir(os.path.dirname(target)):
             self.error(('Rename {0} to {1} fails because {2} is not a '
                         'directory').format(source, target, target))
-        rename(source, target)
+        move(source, target)
 
     def file_copy(self, source, target, cwd=None):
         if cwd:
@@ -744,7 +744,7 @@ class Buildozer(object):
 
         rmtree(self.app_dir)
 
-        for root, dirs, files in walk(source_dir):
+        for root, dirs, files in walk(source_dir, followlinks=True):
             # avoid hidden directory
             if True in [x.startswith('.') for x in root.split(sep)]:
                 continue
@@ -1177,7 +1177,7 @@ class Buildozer(object):
 
     def _get_config_list(self, section, token, default=None, with_values=False):
         # monkey-patch method for ConfigParser
-        # get a key as a list of string, seperated from the comma
+        # get a key as a list of string, separated from the comma
 
         # check if an env var exists that should replace the file config
         set_config_token_from_env(section, token, self.config)

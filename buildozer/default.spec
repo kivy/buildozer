@@ -35,8 +35,8 @@ version = 0.1
 # version.filename = %(source.dir)s/main.py
 
 # (list) Application requirements
-# comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy
+# comma separated e.g. requirements = sqlite3,kivy
+requirements = python3,kivy
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -51,7 +51,7 @@ requirements = kivy
 # (str) Icon of the application
 #icon.filename = %(source.dir)s/data/icon.png
 
-# (str) Supported orientation (one of landscape, portrait or all)
+# (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait
 
 # (list) List of service to declare
@@ -90,7 +90,7 @@ fullscreen = 0
 # (int) Android API to use
 #android.api = 19
 
-# (int) Minimum API required
+# (int) Minimum API required. You will need to set the android.ndk.api to be as low as this value.
 #android.minapi = 9
 
 # (int) Android SDK version to use
@@ -98,6 +98,9 @@ fullscreen = 0
 
 # (str) Android NDK version to use
 #android.ndk = 9c
+
+# (int) Android NDK API to use (optional). This is the minimum API your app will support. 
+#android.ndk_api = 19
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 #android.private_storage = True
@@ -165,7 +168,7 @@ fullscreen = 0
 # (str) launchMode to set for the main activity
 #android.manifest.launch_mode = standard
 
-# (list) Android additionnal libraries to copy into libs/armeabi
+# (list) Android additional libraries to copy into libs/armeabi
 #android.add_libs_armeabi = libs/android/*.so
 #android.add_libs_armeabi_v7a = libs/android-v7/*.so
 #android.add_libs_x86 = libs/android-x86/*.so

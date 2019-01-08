@@ -11,6 +11,9 @@ import sys
 if sys.platform == 'win32':
     raise NotImplementedError('Windows platform not yet working for Android')
 
+from platform import uname
+WSL = 'Microsoft' in uname()[2]
+
 ANDROID_API = '19'
 ANDROID_MINAPI = '9'
 ANDROID_SDK_VERSION = '20'
@@ -22,6 +25,7 @@ import os
 import io
 import re
 import ast
+import sh
 from pipes import quote
 from sys import platform, executable
 from buildozer import BuildozerException
@@ -281,6 +285,13 @@ class TargetAndroid(Target):
         _version = re.search('(.+?)[a-z]', self.android_ndk_version).group(1)
 
         self.buildozer.info('Android NDK is missing, downloading')
+        # Welcome to the NDK URL hell!
+        # a list of all NDK URLs up to level 14 can be found here:
+        #  https://gist.github.com/roscopecoltran/43861414fbf341adac3b6fa05e7fad08
+        # it seems that from level 11 on the naming schema is consistent
+        # from 10e on the URLs can be looked up at
+        # https://developer.android.com/ndk/downloads/older_releases
+
         if platform in ('win32', 'cygwin'):
             # Checking of 32/64 bits at Windows from: http://stackoverflow.com/a/1405971/798575
             import struct
@@ -288,14 +299,18 @@ class TargetAndroid(Target):
             is_64 = (8 * struct.calcsize("P") == 64)
 
         elif platform in ('darwin', ):
-            if int(_version) > 9:
+            if _version >= '10e':
+                archive = 'android-ndk-r{0}-darwin-{1}.zip'
+            elif _version >= '10c':
                 archive = 'android-ndk-r{0}-darwin-{1}.bin'
             else:
                 archive = 'android-ndk-r{0}-darwin-{1}.tar.bz2'
             is_64 = (os.uname()[4] == 'x86_64')
 
         elif platform.startswith('linux'):
-            if int(_version) > 9:  # if greater than 9, take it as .bin file
+            if _version >= '10e':
+                archive = 'android-ndk-r{0}-linux-{1}.zip'
+            elif _version >= '10c':
                 archive = 'android-ndk-r{0}-linux-{1}.bin'
             else:
                 archive = 'android-ndk-r{0}-linux-{1}.tar.bz2'
@@ -307,7 +322,12 @@ class TargetAndroid(Target):
         unpacked = 'android-ndk-r{0}'
         archive = archive.format(self.android_ndk_version, architecture)
         unpacked = unpacked.format(self.android_ndk_version)
-        url = 'http://dl.google.com/android/ndk/'
+
+        if _version >= '10e':
+            url = 'https://dl.google.com/android/repository/'
+        else:
+            url = 'http://dl.google.com/android/ndk/'
+
         self.buildozer.download(url,
                                 archive,
                                 cwd=self.buildozer.global_platform_dir)
@@ -410,7 +430,38 @@ class TargetAndroid(Target):
                                                     'android.skip_update', False)
         if 'tools' in packages or 'platform-tools' in packages:
             if not skip_upd:
+                if WSL:
+                    # WSL (Windows Subsystem for Linux) allows running
+                    # linux from windows 10, but some windows
+                    # limitations still apply, namely you can't rename a
+                    # directory that a program was started from, which
+                    # is what the tools updates cause, and we end up
+                    # with an empty dir, so we need to run from a
+                    # different place, and the updater is still looking
+                    # for things in tools, and specifically renames the
+                    # tool dir, hence, moving and making a symlink
+                    # works.
+                    sh.mv(
+                        join(self.android_sdk_dir, 'tools'),
+                        join(self.android_sdk_dir, 'tools.save')
+                    )
+                    sh.ln(
+                        '-s',
+                        join(self.android_sdk_dir, 'tools.save'),
+                        join(self.android_sdk_dir, 'tools')
+                    )
+                    old_android_cmd = self.android_cmd
+                    self.android_cmd = join(
+                        self.android_sdk_dir,
+                        'tools.save',
+                        self.android_cmd.split('/')[-1]
+                    )
+
                 self._android_update_sdk('tools,platform-tools')
+
+                if WSL:
+                    self.android_cmd = old_android_cmd
+                    sh.rm('-rf', join(self.android_sdk_dir, 'tools.save'))
             else:
                 self.buildozer.info('Skipping Android SDK update due to spec file setting')
 
@@ -421,7 +472,7 @@ class TargetAndroid(Target):
         ver = self._find_latest_package(packages, 'build-tools-')
         if ver and ver > v_build_tools and not skip_upd:
             self._android_update_sdk(self._build_package_string('build-tools', ver))
-        # 2.bis check aidl can be runned
+        # 2. check aidl can be run
         self._check_aidl(v_build_tools)
 
         # 3. finally, install the android for the current api
@@ -521,19 +572,21 @@ class TargetAndroid(Target):
         try:
             with open(join(self.pa_dir, "setup.py")) as fd:
                 setup = fd.read()
-                deps = re.findall("install_reqs = (\[[^\]]*\])", setup, re.DOTALL | re.MULTILINE)[1]
+                deps = re.findall("^\s*install_reqs = (\[[^\]]*\])", setup, re.DOTALL | re.MULTILINE)[0]
                 deps = ast.literal_eval(deps)
-        except Exception:
-            deps = []
+        except IOError:
+            self.buildozer.error('Failed to read python-for-android setup.py at {}'.format(
+                join(self.pa_dir, 'setup.py')))
+            exit(1)
         pip_deps = []
         for dep in deps:
-            pip_deps.append('"{}"'.format(dep))
+            pip_deps.append("'{}'".format(dep))
 
         # in virtualenv or conda env
         options = "--user"
         if "VIRTUAL_ENV" in os.environ or "CONDA_PREFIX" in os.environ:
             options = ""
-        cmd('pip install -q {} {}'.format(options, " ".join(pip_deps)))
+        cmd('{} -m pip install -q {} {}'.format(executable, options, " ".join(pip_deps)))
 
     def get_available_packages(self):
         available_modules = self.buildozer.cmd('./distribute.sh -l',
@@ -684,6 +737,8 @@ class TargetAndroid(Target):
                                         self.android_api)),
             ("--minsdk", config.getdefault('app', 'android.minapi',
                                            self.android_minapi)),
+            ("--ndk-api", config.getdefault('app', 'android.minapi',
+                                            self.android_minapi)),
         ]
         is_private_storage = config.getbooldefault(
             'app', 'android.private_storage', True)
@@ -724,7 +779,7 @@ class TargetAndroid(Target):
         add_activities = config.getlist('app', 'android.add_activities', [])
         for activity in add_activities:
             build_cmd += [("--add-activity", activity)]
-        
+
         # add presplash
         presplash = config.getdefault('app', 'presplash.filename', '')
         if presplash:
@@ -810,7 +865,7 @@ class TargetAndroid(Target):
             packagename = config.get('app', 'package.name')
             apk = u'{packagename}-{mode}.apk'.format(
                 packagename=packagename, mode=mode)
-            apk_dir = join(dist_dir, "build", "outputs", "apk")
+            apk_dir = join(dist_dir, "build", "outputs", "apk", mode)
             apk_dest = u'{packagename}-{version}-{mode}.apk'.format(
                 packagename=packagename, mode=mode, version=version)
 
