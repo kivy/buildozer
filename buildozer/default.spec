@@ -90,7 +90,7 @@ fullscreen = 0
 # (int) Android API to use
 #android.api = 19
 
-# (int) Minimum API required. You will need to set the android.ndk.api to be as low as this value.
+# (int) Minimum API required. You will need to set the android.ndk_api to be as low as this value.
 #android.minapi = 9
 
 # (int) Android SDK version to use
