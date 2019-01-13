@@ -119,7 +119,7 @@ class Buildozer(object):
         self.config.getrawdefault = self._get_config_raw_default
 
         if exists(filename):
-            self.config.read(filename)
+            self.config.read(filename, "utf-8")
             self.check_configuration_tokens()
 
         # Check all section/tokens for env vars, and replace the
