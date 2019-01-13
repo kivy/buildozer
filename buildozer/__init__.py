@@ -11,7 +11,6 @@ __version__ = '0.38.dev0'
 import os
 import re
 import sys
-import zipfile
 import select
 import codecs
 import textwrap
@@ -24,6 +23,9 @@ from os import environ, unlink, walk, sep, listdir, makedirs
 from copy import copy
 from shutil import copyfile, rmtree, copytree, move
 from fnmatch import fnmatch
+
+from pprint import pformat
+
 try:
     from urllib.request import FancyURLopener
     from configparser import SafeConfigParser
@@ -41,7 +43,7 @@ try:
     colorama.init()
 
     RESET_SEQ = colorama.Fore.RESET + colorama.Style.RESET_ALL
-    COLOR_SEQ = lambda x: x
+    COLOR_SEQ = lambda x: x  # noqa: E731
     BOLD_SEQ = ''
     if sys.platform == 'win32':
         BLACK = colorama.Fore.BLACK + colorama.Style.DIM
@@ -54,7 +56,7 @@ try:
 except ImportError:
     if sys.platform != 'win32':
         RESET_SEQ = "\033[0m"
-        COLOR_SEQ = lambda x: "\033[1;{}m".format(30 + x)
+        COLOR_SEQ = lambda x: "\033[1;{}m".format(30 + x)  # noqa: E731
         BOLD_SEQ = "\033[1m"
         BLACK = 0
         RED = 1
@@ -73,10 +75,12 @@ LOG_LEVELS_T = 'EID'
 SIMPLE_HTTP_SERVER_PORT = 8000
 IS_PY3 = sys.version_info[0] >= 3
 
+
 class ChromeDownloader(FancyURLopener):
     version = (
         'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
         '(KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36')
+
 
 urlretrieve = ChromeDownloader().retrieve
 
@@ -132,7 +136,7 @@ class Buildozer(object):
         try:
             self.log_level = int(self.config.getdefault(
                 'buildozer', 'log_level', '1'))
-        except:
+        except Exception:
             pass
 
         build_dir = self.config.getdefault('buildozer', 'builddir', None)
@@ -158,7 +162,7 @@ class Buildozer(object):
         target = self.translate_target(target)
         self.targetname = target
         m = __import__('buildozer.targets.{0}'.format(target),
-                fromlist=['buildozer'])
+                       fromlist=['buildozer'])
         self.target = m.get_target(self)
         self.check_build_layout()
         self.check_configuration_tokens()
@@ -233,6 +237,12 @@ class Buildozer(object):
     def debug(self, msg):
         self.log(2, msg)
 
+    def debug_env(self, env):
+        """dump env into debug logger in readable format"""
+        self.debug("ENVIRONMENT:")
+        for k, v in env.items():
+            self.debug("    {} = {}".format(k, pformat(v)))
+
     def info(self, msg):
         self.log(1, msg)
 
@@ -282,6 +292,7 @@ class Buildozer(object):
             else:
                 self.debug('Run {0!r} ...'.format(command.split()[0]))
         self.debug('Cwd {}'.format(kwargs.get('cwd')))
+        self.debug_env(kwargs.get("env"))
 
         # open the process
         if sys.platform == 'win32':
@@ -406,10 +417,10 @@ class Buildozer(object):
             adderror('[app] One of "version" or "version.regex" must be set')
         if version and version_regex:
             adderror('[app] Conflict between "version" and "version.regex"'
-                    ', only one can be used.')
+                     ', only one can be used.')
         if version_regex and not get('app', 'version.filename', ''):
             adderror('[app] "version.filename" is missing'
-                ', required by "version.regex"')
+                     ', required by "version.regex"')
 
         orientation = get('app', 'orientation', 'landscape')
         if orientation not in ('landscape', 'portrait', 'all', 'sensorLandscape'):
@@ -482,9 +493,9 @@ class Buildozer(object):
             return
 
         # remove all the requirements that the target can compile
-        onlyname = lambda x: x.split('==')[0]
+        onlyname = lambda x: x.split('==')[0]  # noqa: E731
         requirements = [x for x in requirements if onlyname(x) not in
-                target_available_packages]
+                        target_available_packages]
 
         if requirements and hasattr(sys, 'real_prefix'):
             e = self.error
@@ -496,7 +507,7 @@ class Buildozer(object):
 
         # did we already installed the libs ?
         if exists(self.applibs_dir) and \
-            self.state.get('cache.applibs', '') == requirements:
+           self.state.get('cache.applibs', '') == requirements:
                 self.debug('Application requirements already installed, pass')
                 return
 
