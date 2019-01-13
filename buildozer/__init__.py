@@ -237,11 +237,11 @@ class Buildozer(object):
     def debug(self, msg):
         self.log(2, msg)
 
-    def debug_env(self, env):
+    def log_env(self, level, env):
         """dump env into debug logger in readable format"""
-        self.debug("ENVIRONMENT:")
+        self.log(level, "ENVIRONMENT:")
         for k, v in env.items():
-            self.debug("    {} = {}".format(k, pformat(v)))
+            self.log(level, "    {} = {}".format(k, pformat(v)))
 
     def info(self, msg):
         self.log(1, msg)
@@ -292,7 +292,7 @@ class Buildozer(object):
             else:
                 self.debug('Run {0!r} ...'.format(command.split()[0]))
         self.debug('Cwd {}'.format(kwargs.get('cwd')))
-        self.debug_env(kwargs.get("env"))
+        self.log_env(2, kwargs.get("env"))
 
         # open the process
         if sys.platform == 'win32':
@@ -346,6 +346,7 @@ class Buildozer(object):
         process.communicate()
         if process.returncode != 0 and break_on_error:
             self.error('Command failed: {0}'.format(command))
+            self.log_env(1, kwargs['env'])
             self.error('')
             self.error('Buildozer failed to execute the last command')
             if self.log_level <= 1:
