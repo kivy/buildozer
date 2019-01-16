@@ -1,6 +1,9 @@
 Buildozer
 =========
 
+.. image:: https://travis-ci.com/kivy/buildozer.svg?branch=master
+       :target: https://travis-ci.com/kivy/buildozer
+
 Buildozer is a tool for creating application packages easily.
 
 The goal is to have one "buildozer.spec" file in your app directory, describing
