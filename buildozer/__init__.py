@@ -119,7 +119,10 @@ class Buildozer(object):
         self.config.getrawdefault = self._get_config_raw_default
 
         if exists(filename):
-            self.config.read(filename, "utf-8")
+            try:
+                self.config.read(filename, "utf-8")
+            except TypeError:  # python 2 has no second arg here
+                self.config.read(filename)
             self.check_configuration_tokens()
 
         # Check all section/tokens for env vars, and replace the
