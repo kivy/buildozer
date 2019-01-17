@@ -180,15 +180,19 @@ class TargetIos(Target):
         app_name = self.buildozer.namify(self.buildozer.config.get('app',
             'package.name'))
 
+        ios_frameworks = self.buildozer.config.getlist('app', 'ios.frameworks', '')
+        frameworks_cmd = ''
+        for framework in ios_frameworks:
+            frameworks_cmd += '--add-framework={} '.format(framework)
+
         self.app_project_dir = join(self.ios_dir, '{0}-ios'.format(app_name.lower()))
         if not self.buildozer.file_exists(self.app_project_dir):
-            self.buildozer.cmd('./toolchain.py create {0} {1}'.format(
-                app_name, self.buildozer.app_dir),
-                cwd=self.ios_dir)
+            create_cmd = './toolchain.py create {0}{1} {2}'.format(frameworks_cmd, app_name,
+                                                                   self.buildozer.app_dir)
+            self.buildozer.cmd(create_cmd, cwd=self.ios_dir)
         else:
-            self.buildozer.cmd('./toolchain.py update {0}-ios'.format(
-                app_name),
-                cwd=self.ios_dir)
+            update_cmd = './toolchain.py update {0}{1}-ios'.format(frameworks_cmd, app_name)
+            self.buildozer.cmd(update_cmd, cwd=self.ios_dir)
 
         # fix the plist
         plist_fn = '{}-Info.plist'.format(app_name.lower())
