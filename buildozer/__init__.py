@@ -463,6 +463,7 @@ class Buildozer(object):
         self.mkdir(self.bin_dir)
 
         self.mkdir(self.applibs_dir)
+        self.global_state = JsonStore(join(self.global_buildozer_dir, 'state.db'))
         self.state = JsonStore(join(self.buildozer_dir, 'state.db'))
 
         target = self.targetname

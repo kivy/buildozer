@@ -417,7 +417,7 @@ class TargetAndroid(Target):
             self.android_api, self.android_minapi, self.android_ndk_version,
             self.android_sdk_dir, self.android_ndk_dir
         ]
-        if self.buildozer.state.get(cache_key, None) == cache_value:
+        if self.buildozer.global_state.get(cache_key, None) == cache_value:
             return True
 
         # 3 pass installation.
@@ -485,8 +485,8 @@ class TargetAndroid(Target):
 
         self.buildozer.info('Android packages installation done.')
 
-        self.buildozer.state[cache_key] = cache_value
-        self.buildozer.state.sync()
+        self.buildozer.global_state[cache_key] = cache_value
+        self.buildozer.global_state.sync()
 
     def _check_aidl(self, v_build_tools):
         self.buildozer.debug('Check that aidl can be executed')
