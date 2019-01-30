@@ -29,9 +29,13 @@ class TargetAndroidNew(TargetAndroid):
         color = 'always' if USE_COLOR else 'never'
         self.extra_p4a_args = ' --color={} --storage-dir="{}"'.format(
             color, self._build_dir)
-        ndk_api = self.buildozer.config.getdefault('app', 'android.ndk_api', None)
-        if ndk_api is not None:
-            self.extra_p4a_args += ' --ndk-api={}'.format(ndk_api)
+
+        # minapi should match ndk-api, so can use the same default if
+        # nothing is specified
+        ndk_api = self.buildozer.config.getdefault(
+            'app', 'android.ndk_api', self.android_minapi)
+        self.extra_p4a_args += ' --ndk-api={}'.format(ndk_api)
+
         hook = self.buildozer.config.getdefault("app", "p4a.hook", None)
         if hook is not None:
             self.extra_p4a_args += ' --hook={}'.format(realpath(hook))
@@ -76,10 +80,8 @@ class TargetAndroidNew(TargetAndroid):
         config = self.buildozer.config
         self._p4a(
             ("create --dist_name={} --bootstrap={} --requirements={} "
-             "--ndk-api {} "
              "--arch {} {}").format(
                  dist_name, self._p4a_bootstrap, requirements,
-                 config.getdefault('app', 'android.minapi', self.android_minapi),
                  config.getdefault('app', 'android.arch', "armeabi-v7a"), " ".join(options)),
             get_stdout=True)[0]
 
