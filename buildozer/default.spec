@@ -87,20 +87,20 @@ fullscreen = 0
 # (list) Permissions
 #android.permissions = INTERNET
 
-# (int) Android API to use
-#android.api = 19
+# (int) Target Android API, should be as high as possible.
+#android.api = 27
 
-# (int) Minimum API required. You will need to set the android.ndk_api to be as low as this value.
-#android.minapi = 9
+# (int) Minimum API your APK will support.
+#android.minapi = 21
 
 # (int) Android SDK version to use
 #android.sdk = 20
 
 # (str) Android NDK version to use
-#android.ndk = 9c
+#android.ndk = 17c
 
-# (int) Android NDK API to use (optional). This is the minimum API your app will support. 
-#android.ndk_api = 19
+# (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
+#android.ndk_api = 21
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
 #android.private_storage = True
