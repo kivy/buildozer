@@ -91,30 +91,11 @@ class TargetIos(Target):
         self.buildozer.debug(' -> found {0}'.format(xcode))
 
     def install_platform(self):
-        cmd = self.buildozer.cmd
-        self.ios_dir = ios_dir = join(self.buildozer.platform_dir, 'kivy-ios')
-        custom_kivy_ios = self.buildozer.config.getdefault('app', 'ios.kivy_ios_dir')
-        if custom_kivy_ios:
-            custom_kivy_ios = join(self.buildozer.root_dir, custom_kivy_ios)
-        if not self.buildozer.file_exists(ios_dir):
-            if custom_kivy_ios:
-                cmd('mkdir -p "{}"'.format(ios_dir))
-                cmd('cp -a "{}"/* "{}"/'.format(custom_kivy_ios, ios_dir))
-            else:
-                cmd('git clone https://github.com/kivy/kivy-ios',
-                        cwd=self.buildozer.platform_dir)
-        elif self.platform_update:
-            if custom_kivy_ios:
-                cmd('cp -a "{}"/* "{}"/'.format(custom_kivy_ios, ios_dir))
-            else:
-                cmd('git clean -dxf', cwd=ios_dir)
-                cmd('git pull origin master', cwd=ios_dir)
-
-        self.ios_deploy_dir = ios_deploy_dir = join(self.buildozer.platform_dir,
-                'ios-deploy')
-        if not self.buildozer.file_exists(ios_deploy_dir):
-            cmd('git clone --branch 1.7.0 https://github.com/phonegap/ios-deploy',
-                    cwd=self.buildozer.platform_dir)
+        self.ios_dir = self.install_or_update_repo('kivy-ios', platform='ios')
+        self.ios_deploy_dir = self.install_or_update_repo('ios-deploy',
+                                                          platform='ios',
+                                                          branch='1.7.0',
+                                                          owner='phonegap')
 
     def get_available_packages(self):
         available_modules = self.buildozer.cmd(
