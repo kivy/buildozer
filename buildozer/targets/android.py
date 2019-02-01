@@ -16,7 +16,6 @@ WSL = 'Microsoft' in uname()[2]
 
 ANDROID_API = '27'
 ANDROID_MINAPI = '21'
-ANDROID_SDK_VERSION = '20'
 ANDROID_NDK_VERSION = '17c'
 APACHE_ANT_VERSION = '1.9.4'
 
@@ -39,6 +38,7 @@ from glob import glob
 from buildozer.libs.version import parse
 from distutils.version import LooseVersion
 
+DEPRECATED_TOKENS = (('app', 'android.sdk'), )
 
 class TargetAndroid(Target):
     targetname = 'android'
@@ -72,6 +72,16 @@ class TargetAndroid(Target):
         if port is not None:
             self.extra_p4a_args += ' --port={}'.format(port)
 
+        self.warn_on_deprecated_tokens()
+
+    def warn_on_deprecated_tokens(self):
+        for section, token in DEPRECATED_TOKENS:
+            value = self.buildozer.config.getdefault(section, token, None)
+            if value is not None:
+                error = ('WARNING: Config token {} {} is deprecated and ignored, '
+                         'but you set value {}').format(section, token, value)
+                self.buildozer.error(error)
+
     def _p4a(self, cmd, **kwargs):
         if not hasattr(self, "pa_dir"):
             self.pa_dir = join(self.buildozer.platform_dir, self.p4a_directory)
@@ -104,12 +114,6 @@ class TargetAndroid(Target):
             kwargs['get_stdout'] = kwargs.get('get_stdout', True)
             return self.buildozer.cmd(command, **kwargs)
                                        
-
-    @property
-    def android_sdk_version(self):
-        return self.buildozer.config.getdefault('app', 'android.sdk',
-                                                ANDROID_SDK_VERSION)
-
     @property
     def android_ndk_version(self):
         return self.buildozer.config.getdefault('app', 'android.ndk',
