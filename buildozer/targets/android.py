@@ -90,7 +90,10 @@ class TargetAndroid(Target):
                                        'tools',
                                        'bin',
                                        'sdkmanager')
-        assert os.path.isfile(sdkmanager_path)
+        if not os.path.isfile(sdkmanager_path):
+            raise BuildozerException(
+                ('sdkmanager path "{}" does not exist, sdkmanager is not'
+                 'installed'.format(sdkmanager_path)))
 
         command = sdkmanager_path + ' ' + ' '.join(args)
 
@@ -221,9 +224,11 @@ class TargetAndroid(Target):
         key = 'android:available_permissions'
         key_sdk = 'android:available_permissions_sdk'
 
+        current_platform_tools = self._android_get_installed_platform_tools_version()
+
         refresh_permissions = False
         sdk = self.buildozer.state.get(key_sdk, None)
-        if not sdk or sdk != self.android_sdk_version:
+        if not sdk or sdk != current_platform_tools:
             refresh_permissions = True
         if key not in self.buildozer.state:
             refresh_permissions = True
@@ -243,7 +248,7 @@ class TargetAndroid(Target):
             available_permissions = [x.attrib['name'] for x in fields]
 
             self.buildozer.state[key] = available_permissions
-            self.buildozer.state[key_sdk] = self.android_sdk_version
+            self.buildozer.state[key_sdk] = current_platform_tools
             return available_permissions
         except:
             return None
@@ -311,7 +316,6 @@ class TargetAndroid(Target):
         if not os.path.exists(sdk_dir):
             os.makedirs(sdk_dir)
 
-        archive = archive.format(self.android_sdk_version)
         url = 'http://dl.google.com/android/repository/'
         self.buildozer.download(url,
                                 archive,
@@ -410,6 +414,39 @@ class TargetAndroid(Target):
         
         return build_tools_versions
 
+    def _android_get_installed_platform_tools_version(self):
+        """
+        Crudely parse out the installed platform-tools version
+        """
+
+        platform_tools_dir = os.path.join(
+            self.android_sdk_dir,
+            'platform-tools')
+
+        if not os.path.exists(platform_tools_dir):
+            return None
+
+        data_file = os.path.join(platform_tools_dir, 'source.properties')
+        if not os.path.exists(data_file):
+            return None
+
+        with open(data_file, 'r') as fileh:
+            lines = fileh.readlines()
+
+        for line in lines:
+            if line.startswith('Pkg.Revision='):
+                break
+        else:
+            self.buildozer.error('Read {} but found no Pkg.Revision'.format(data_file))
+            # Don't actually exit, in case the build env is
+            # okay. Something else will fault if it's important.
+            return None
+
+        revision = line.split('=')[1].strip()
+
+        return revision
+                                  
+
     def _android_update_sdk(self, *sdkmanager_commands):
         """Update the tools and package-tools if possible"""
         from pexpect import EOF
@@ -484,8 +521,9 @@ class TargetAndroid(Target):
         skip_upd = self.buildozer.config.getdefault(
             'app', 'android.skip_update', False)
 
-        print('Got this far')
         if not skip_upd:
+            self.buildozer.info('Installing/updating SDK platform tools if necessary')
+
             # just calling sdkmanager with the items will install them if necessary
             self._android_update_sdk('tools', 'platform-tools')
             self._android_update_sdk('--update')
@@ -494,15 +532,13 @@ class TargetAndroid(Target):
             self.buildozer.info('Note: this also prevents installing missing '
                                 'SDK components')
 
-        # print('Exiting')
-        # exit(1)
-
         # 2. install the latest build tool
+        self.buildozer.info('Updating SDK build tools if necessary')
         installed_v_build_tools = self._read_version_subdir(self.android_sdk_dir,
                                                   'build-tools')
         available_v_build_tools = self._android_list_build_tools_versions()
         if not available_v_build_tools:
-            self.buildozer.warning('Did not find any build tools available to download')
+            self.buildozer.error('Did not find any build tools available to download')
 
         latest_v_build_tools = sorted(available_v_build_tools)[-1]
         if latest_v_build_tools > installed_v_build_tools:
@@ -515,12 +551,11 @@ class TargetAndroid(Target):
                     'Skipping update to build tools {} due to spec setting'.format(
                         latest_v_build_tools))
 
-        exit(1)
-
         # 2. check aidl can be run
         self._check_aidl(installed_v_build_tools)
 
         # 3. finally, install the android for the current api
+        self.buildozer.info('Downloading platform api target if necessary')
         android_platform = join(self.android_sdk_dir, 'platforms', 'android-{}'.format(self.android_api))
         if not self.buildozer.file_exists(android_platform):
             if not skip_upd:
@@ -578,7 +613,6 @@ class TargetAndroid(Target):
             'ANDROIDNDK': self.android_ndk_dir,
             'ANDROIDAPI': self.android_api,
             'ANDROIDMINAPI': self.android_minapi,
-            'ANDROIDNDKVER': 'r{}'.format(self.android_ndk_version)
         })
 
     def _install_p4a(self):
