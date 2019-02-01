@@ -38,7 +38,14 @@ from glob import glob
 from buildozer.libs.version import parse
 from distutils.version import LooseVersion
 
+# buildozer.spec tokens that used to exist but are now ignored
 DEPRECATED_TOKENS = (('app', 'android.sdk'), )
+
+# Default SDK tag to download. This is not a configurable option
+# because it doesn't seem to matter much, it is normally correct to
+# download once then update all the components as buildozer already
+# does.
+DEFAULT_SDK_TAG = '4333796'
 
 class TargetAndroid(Target):
     targetname = 'android'
@@ -306,13 +313,13 @@ class TargetAndroid(Target):
 
         self.buildozer.info('Android SDK is missing, downloading')
         if platform in ('win32', 'cygwin'):
-            archive = 'sdk-tools-windows-4333796.zip'
+            archive = 'sdk-tools-windows-{}.zip'.format(DEFAULT_SDK_TAG)
             unpacked = 'android-sdk-windows'
         elif platform in ('darwin', ):
-            archive = 'sdk-tools-darwin-4333796.zip'
+            archive = 'sdk-tools-darwin-{}.zip'.format(DEFAULT_SDK_TAG)
             unpacked = 'android-sdk-macosx'
         elif platform.startswith('linux'):
-            archive = 'sdk-tools-linux-4333796.zip'
+            archive = 'sdk-tools-linux-{}.zip'.format(DEFAULT_SDK_TAG)
             unpacked = 'android-sdk-linux'
         else:
             raise SystemError('Unsupported platform: {0}'.format(platform))
