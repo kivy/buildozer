@@ -134,7 +134,6 @@ Usage
     Available targets:
       android        Android target, based on python-for-android project
       ios            iOS target, based on kivy-ios project
-      android_old    Android target, based on python-for-android project (old toolchain)
 
     Global commands (without target):
       distclean          Clean the whole Buildozer environment.
@@ -152,11 +151,6 @@ Usage
       deploy     Deploy the application on the device
       run        Run the application on the device
       serve      Serve the bin directory via SimpleHTTPServer
-
-    Target "android_old" commands:
-      adb                Run adb from the Android SDK. Args must come after --, or
-                         use --alias to make an alias
-      logcat             Show the log from the device
 
     Target "ios" commands:
       list_identities    List the available identities to use for signing.
