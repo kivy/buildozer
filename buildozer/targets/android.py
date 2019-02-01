@@ -413,22 +413,30 @@ class TargetAndroid(Target):
     def _android_update_sdk(self, *sdkmanager_commands):
         """Update the tools and package-tools if possible"""
         from pexpect import EOF
-        java_tool_options = environ.get('JAVA_TOOL_OPTIONS', '')
-        env = os.environ.copy()
-        env.update({
-            'JAVA_TOOL_OPTIONS': java_tool_options +
-            ' -Dfile.encoding=UTF-8'
-        })
-        child = self._sdkmanager(
-            *sdkmanager_commands,
-            timeout=None,
-            return_child=True,
-            env=env)
-        while True:
-            index = child.expect([EOF, u'\(y/N\): '])
-            if index == 0:
-                break
-            child.sendline('y')
+
+        auto_accept_license = self.buildozer.config.getdefault(
+            'app', 'android.accept_sdk_license', False)
+        
+        if auto_accept_license:
+            java_tool_options = environ.get('JAVA_TOOL_OPTIONS', '')
+            env = os.environ.copy()
+            env.update({
+                'JAVA_TOOL_OPTIONS': java_tool_options +
+                ' -Dfile.encoding=UTF-8'
+            })
+            child = self._sdkmanager(
+                *sdkmanager_commands,
+                timeout=None,
+                return_child=True,
+                env=env)
+            while True:
+                index = child.expect([EOF, u'\(y/N\): '])
+                if index == 0:
+                    break
+                child.sendline('y')
+        else:
+            # the user will be prompted to read and accept the license
+            self._sdkmanager(*sdkmanager_commands)  
 
     def _read_version_subdir(self, *args):
         versions = []
