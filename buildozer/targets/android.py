@@ -78,8 +78,13 @@ class TargetAndroid(Target):
         kwargs.setdefault('cwd', self.pa_dir)
         return self.buildozer.cmd(self._p4a_cmd + cmd + self.extra_p4a_args, **kwargs)
 
-    def _sdkmanager(self, *args):
+    def _sdkmanager(self, *args, **kwargs):
         """Call the sdkmanager in our Android SDK with the given arguments."""
+        # Use the android-sdk dir as cwd by default
+        kwargs['cwd'] = kwargs.get(
+            'cwd', os.path.join(self.buildozer.global_platform_dir,
+                                'android-sdk'))
+
         sdkmanager_path = os.path.join(self.buildozer.global_platform_dir,
                                        'android-sdk',
                                        'tools',
@@ -87,8 +92,14 @@ class TargetAndroid(Target):
                                        'sdkmanager')
         assert os.path.isfile(sdkmanager_path)
 
-        return self.buildozer.cmd(sdkmanager_path + ' ' + ' '.join(args),
-                                  get_stdout=True)
+        command = sdkmanager_path + ' ' + ' '.join(args)
+
+        return_child = kwargs.pop('return_child', False)
+        if return_child:
+            return self.buildozer.cmd_expect(command, **kwargs)
+        else:
+            kwargs['get_stdout'] = kwargs.get('get_stdout', True)
+            return self.buildozer.cmd(command, **kwargs)
                                        
 
     @property
@@ -148,19 +159,15 @@ class TargetAndroid(Target):
                 self._set_win32_java_home()
             except:
                 traceback.print_exc()
-            self.android_cmd = join(self.android_sdk_dir, 'tools',
-                                    'android.bat')
             self.adb_cmd = join(self.android_sdk_dir, 'platform-tools',
                                 'adb.exe')
             self.javac_cmd = self._locate_java('javac.exe')
             self.keytool_cmd = self._locate_java('keytool.exe')
         elif platform in ('darwin', ):
-            self.android_cmd = join(self.android_sdk_dir, 'tools', 'android')
             self.adb_cmd = join(self.android_sdk_dir, 'platform-tools', 'adb')
             self.javac_cmd = self._locate_java('javac')
             self.keytool_cmd = self._locate_java('keytool')
         else:
-            self.android_cmd = join(self.android_sdk_dir, 'tools', 'android')
             self.adb_cmd = join(self.android_sdk_dir, 'platform-tools', 'adb')
             self.javac_cmd = self._locate_java('javac')
             self.keytool_cmd = self._locate_java('keytool')
@@ -403,21 +410,22 @@ class TargetAndroid(Target):
         
         return build_tools_versions
 
-    def _android_update_sdk(self, packages):
+    def _android_update_sdk(self, *sdkmanager_commands):
+        """Update the tools and package-tools if possible"""
         from pexpect import EOF
         java_tool_options = environ.get('JAVA_TOOL_OPTIONS', '')
-        child = self.buildozer.cmd_expect(
-            '{} update sdk -u -a -t {}'.format(
-                self.android_cmd,
-                packages,
-                cwd=self.buildozer.global_platform_dir),
+        env = os.environ.copy()
+        env.update({
+            'JAVA_TOOL_OPTIONS': java_tool_options +
+            ' -Dfile.encoding=UTF-8'
+        })
+        child = self._sdkmanager(
+            *sdkmanager_commands,
             timeout=None,
-            env={
-                'JAVA_TOOL_OPTIONS': java_tool_options +
-                ' -Dfile.encoding=UTF-8'
-            })
+            return_child=True,
+            env=env)
         while True:
-            index = child.expect([EOF, u'[y/n]: '])
+            index = child.expect([EOF, u'\(y/N\): '])
             if index == 0:
                 break
             child.sendline('y')
@@ -468,14 +476,18 @@ class TargetAndroid(Target):
         skip_upd = self.buildozer.config.getdefault(
             'app', 'android.skip_update', False)
 
+        print('Got this far')
         if not skip_upd:
             # just calling sdkmanager with the items will install them if necessary
-            self._sdkmanager('tools', 'platform-tools')
-            self._sdkmanager('--update')
+            self._android_update_sdk('tools', 'platform-tools')
+            self._android_update_sdk('--update')
         else:
             self.buildozer.info('Skipping Android SDK update due to spec file setting')
             self.buildozer.info('Note: this also prevents installing missing '
                                 'SDK components')
+
+        # print('Exiting')
+        # exit(1)
 
         # 2. install the latest build tool
         installed_v_build_tools = self._read_version_subdir(self.android_sdk_dir,
@@ -485,16 +497,30 @@ class TargetAndroid(Target):
             self.buildozer.warning('Did not find any build tools available to download')
 
         latest_v_build_tools = sorted(available_v_build_tools)[-1]
-        if latest_v_build_tools > installed_v_build_tools and not skip_upd:
-            self._sdkmanager('"build-tools;{}"'.format(latest_v_build_tools))
+        if latest_v_build_tools > installed_v_build_tools:
+            if not skip_upd:
+                self._android_update_sdk(
+                    '"build-tools;{}"'.format(latest_v_build_tools))
+                installed_v_build_tools = latest_v_build_tools
+            else:
+                self.buildozer.info(
+                    'Skipping update to build tools {} due to spec setting'.format(
+                        latest_v_build_tools))
+
+        exit(1)
 
         # 2. check aidl can be run
-        self._check_aidl(v_build_tools)
+        self._check_aidl(installed_v_build_tools)
 
         # 3. finally, install the android for the current api
-        android_platform = join(self.android_sdk_dir, 'platforms', 'android-{0}'.format(self.android_api))
-        if not self.buildozer.file_exists(android_platform) and not skip_upd:
-            self._sdkmanager('"platforms;android-{}"'.format(self.android_api))
+        android_platform = join(self.android_sdk_dir, 'platforms', 'android-{}'.format(self.android_api))
+        if not self.buildozer.file_exists(android_platform):
+            if not skip_upd:
+                self._sdkmanager('"platforms;android-{}"'.format(self.android_api))
+            else:
+                self.buildozer.info(
+                    'Skipping install API {} platform tools due to spec setting'.format(
+                        self.android_api))
 
         self.buildozer.info('Android packages installation done.')
 
