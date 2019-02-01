@@ -678,8 +678,6 @@ class TargetAndroid(Target):
         options = "--user"
         if "VIRTUAL_ENV" in os.environ or "CONDA_PREFIX" in os.environ:
             options = ""
-        print('pa dir', self.pa_dir)
-        print('pip_deps', pip_deps)
         cmd('{} -m pip install -q {} {}'.format(executable, options, " ".join(pip_deps)))
 
     def compile_platform(self):
