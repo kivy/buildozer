@@ -98,12 +98,9 @@ class TargetAndroid(Target):
     def _sdkmanager(self, *args, **kwargs):
         """Call the sdkmanager in our Android SDK with the given arguments."""
         # Use the android-sdk dir as cwd by default
-        kwargs['cwd'] = kwargs.get(
-            'cwd', os.path.join(self.buildozer.global_platform_dir,
-                                'android-sdk'))
+        kwargs['cwd'] = kwargs.get('cwd', self.android_sdk_dir)
 
-        sdkmanager_path = os.path.join(self.buildozer.global_platform_dir,
-                                       'android-sdk',
+        sdkmanager_path = os.path.join(self.android_sdk_dir,
                                        'tools',
                                        'bin',
                                        'sdkmanager')
@@ -120,7 +117,7 @@ class TargetAndroid(Target):
         else:
             kwargs['get_stdout'] = kwargs.get('get_stdout', True)
             return self.buildozer.cmd(command, **kwargs)
-                                       
+
     @property
     def android_ndk_version(self):
         return self.buildozer.config.getdefault('app', 'android.ndk',
@@ -422,7 +419,7 @@ class TargetAndroid(Target):
             version = package_name.split(';')[1]
 
             build_tools_versions.append(parse(version))
-        
+
         return build_tools_versions
 
     def _android_get_installed_platform_tools_version(self):
@@ -456,7 +453,7 @@ class TargetAndroid(Target):
         revision = line.split('=')[1].strip()
 
         return revision
-                                  
+
 
     def _android_update_sdk(self, *sdkmanager_commands):
         """Update the tools and package-tools if possible"""
@@ -464,7 +461,7 @@ class TargetAndroid(Target):
 
         auto_accept_license = self.buildozer.config.getdefault(
             'app', 'android.accept_sdk_license', False)
-        
+
         if auto_accept_license:
             java_tool_options = environ.get('JAVA_TOOL_OPTIONS', '')
             env = os.environ.copy()
@@ -484,7 +481,7 @@ class TargetAndroid(Target):
                 child.sendline('y')
         else:
             # the user will be prompted to read and accept the license
-            self._sdkmanager(*sdkmanager_commands)  
+            self._sdkmanager(*sdkmanager_commands)
 
     def _read_version_subdir(self, *args):
         versions = []
