@@ -28,7 +28,7 @@ def find_version(*file_paths):
 
 
 curdir = dirname(__file__)
-with io.open(join(curdir, "README.rst"), encoding="utf-8") as fd:
+with io.open(join(curdir, "README.md"), encoding="utf-8") as fd:
     readme = fd.read()
 with io.open(join(curdir, "CHANGELOG.md"), encoding="utf-8") as fd:
     changelog = fd.read()
@@ -38,6 +38,7 @@ setup(
     version=find_version('buildozer', '__init__.py'),
     description='Generic Python packager for Android / iOS and Desktop',
     long_description=readme + "\n\n" + changelog,
+    long_description_content_type='text/markdown',
     author='Mathieu Virbel',
     author_email='mat@kivy.org',
     url='http://github.com/kivy/buildozer',
