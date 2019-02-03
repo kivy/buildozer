@@ -15,13 +15,12 @@ OSX and/or Linux.
 Buildozer currently supports packaging for Android via the [python-for-android](http://github.com/kivy/python-for-android/)
 project, and for iOS via the kivy-ios project. iOS and OSX are still under work.
 
-For Android: please have a look at [Android-SDK-NDK-Information](https://github.com/kivy/kivy/wiki/Android-SDK-NDK-Information). Please note that
-the default SDK/NDK coded in Buildozer works for target Python 2.
-For target Python 3, use appropriate SDK/NDK as per the documentation, and ensure you
-have `python3` in your requirements.
-You can still use Crystax Python 3, see [Installing Buildozer with target Python 3
-(CrystaX)](#installing-buildozer-with-target-python-3-crystax).
-For host Python, both versions are seamlessly supported.
+For Android, buildozer will automatically download and prepare the
+build dependencies. For more information, see
+[Android-SDK-NDK-Information](https://github.com/kivy/kivy/wiki/Android-SDK-NDK-Information). We
+recommend targeting Python 3 on Android, but you can target both
+Python 3 and Python 2 regardless of which version you use with
+buildozer on the desktop.
 
 We provide a ready-to-use [Virtual Machine for Virtualbox](https://kivy.org/#download).
 
