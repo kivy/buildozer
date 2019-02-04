@@ -1,8 +1,10 @@
 # Change Log
 
-## [Unreleased](https://github.com/kivy/buildozer/tree/HEAD)
+## [0.39](https://github.com/kivy/buildozer/tree/0.39) (2019-02-04)
+[Full Changelog](https://github.com/kivy/buildozer/compare/0.38...0.39)
 
-[Full Changelog](https://github.com/kivy/buildozer/compare/0.36...HEAD)
+## [0.38](https://github.com/kivy/buildozer/tree/0.38) (2019-02-03)
+[Full Changelog](https://github.com/kivy/buildozer/compare/0.36...0.38)
 
 **Fixed bugs:**
 
