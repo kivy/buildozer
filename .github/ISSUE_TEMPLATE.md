@@ -1,7 +1,6 @@
 <!--
 The issue tracker is a tool to address bugs.
-Please use the #kivy IRC channel on freenode or Stack Overflow for
-support questions, more information at https://github.com/kivy/buildozer#support
+For support questions, please use: https://github.com/kivy/buildozer#support
 
 Before opening a new issue, make sure you do the following:
     * check that your issue isn't already filed: https://github.com/kivy/buildozer/issues
@@ -15,8 +14,7 @@ Before opening a new issue, make sure you do the following:
 
 * Python:
 * OS:
-* Kivy:
-* Cython:
+* Buildozer:
 
 ### Description
 
