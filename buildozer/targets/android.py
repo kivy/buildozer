@@ -459,7 +459,7 @@ class TargetAndroid(Target):
         """Update the tools and package-tools if possible"""
         from pexpect import EOF
 
-        auto_accept_license = self.buildozer.config.getdefault(
+        auto_accept_license = self.buildozer.config.getbooldefault(
             'app', 'android.accept_sdk_license', False)
 
         if auto_accept_license:
@@ -526,7 +526,7 @@ class TargetAndroid(Target):
 
         # 1. update the tool and platform-tools if needed
 
-        skip_upd = self.buildozer.config.getdefault(
+        skip_upd = self.buildozer.config.getbooldefault(
             'app', 'android.skip_update', False)
 
         if not skip_upd:
