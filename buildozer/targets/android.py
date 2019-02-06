@@ -765,6 +765,12 @@ class TargetAndroid(Target):
             cmd.append('--add-aar')
             cmd.append(realpath(aar))
 
+        # support for uses-lib
+        uses_library = self.buildozer.config.getlist(
+            'app', 'android.uses_library', '')
+        for lib in uses_library:
+            cmd.append('--uses-library={}'.format(lib))
+
         # support for gradle dependencies
         gradle_dependencies = self.buildozer.config.getlist('app', 'android.gradle_dependencies', [])
         for gradle_dependency in gradle_dependencies:
