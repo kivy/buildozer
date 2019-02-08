@@ -1225,4 +1225,5 @@ class TargetAndroid(Target):
 
 
 def get_target(buildozer):
+    buildozer.targetname = "android"
     return TargetAndroid(buildozer)
