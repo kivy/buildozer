@@ -99,18 +99,7 @@ class TargetAndroid(Target):
         """Call the sdkmanager in our Android SDK with the given arguments."""
         # Use the android-sdk dir as cwd by default
         kwargs['cwd'] = kwargs.get('cwd', self.android_sdk_dir)
-
-        sdkmanager_path = os.path.join(self.android_sdk_dir,
-                                       'tools',
-                                       'bin',
-                                       'sdkmanager')
-        if not os.path.isfile(sdkmanager_path):
-            raise BuildozerException(
-                ('sdkmanager path "{}" does not exist, sdkmanager is not'
-                 'installed'.format(sdkmanager_path)))
-
-        command = sdkmanager_path + ' ' + ' '.join(args)
-
+        command = self.sdkmanager_path + ' ' + ' '.join(args)
         return_child = kwargs.pop('return_child', False)
         if return_child:
             return self.buildozer.cmd_expect(command, **kwargs)
@@ -163,6 +152,16 @@ class TargetAndroid(Target):
                                                    APACHE_ANT_VERSION)
         return join(self.buildozer.global_platform_dir,
                     'apache-ant-{0}'.format(version))
+
+    @property
+    def sdkmanager_path(self):
+        sdkmanager_path = join(
+            self.android_sdk_dir, 'tools', 'bin', 'sdkmanager')
+        if not os.path.isfile(sdkmanager_path):
+            raise BuildozerException(
+                ('sdkmanager path "{}" does not exist, sdkmanager is not'
+                 'installed'.format(sdkmanager_path)))
+        return sdkmanager_path
 
     def check_requirements(self):
         if platform in ('win32', 'cygwin'):
@@ -457,31 +456,18 @@ class TargetAndroid(Target):
 
     def _android_update_sdk(self, *sdkmanager_commands):
         """Update the tools and package-tools if possible"""
-        from pexpect import EOF
-
         auto_accept_license = self.buildozer.config.getbooldefault(
             'app', 'android.accept_sdk_license', False)
 
         if auto_accept_license:
-            java_tool_options = environ.get('JAVA_TOOL_OPTIONS', '')
-            env = os.environ.copy()
-            env.update({
-                'JAVA_TOOL_OPTIONS': java_tool_options +
-                ' -Dfile.encoding=UTF-8'
-            })
-            child = self._sdkmanager(
-                *sdkmanager_commands,
-                timeout=None,
-                return_child=True,
-                env=env)
-            while True:
-                index = child.expect([EOF, u'\(y/N\): '])
-                if index == 0:
-                    break
-                child.sendline('y')
-        else:
-            # the user will be prompted to read and accept the license
-            self._sdkmanager(*sdkmanager_commands)
+            # `SIGPIPE` is not being reported somehow, but `EPIPE` is.
+            # This leads to a stderr "Broken pipe" message which is harmless,
+            # but doesn't look good on terminal, hence redirecting to /dev/null
+            yes_command = 'yes 2>/dev/null'
+            command = '{} | {} --licenses'.format(
+                yes_command, self.sdkmanager_path)
+            self.buildozer.cmd(command, cwd=self.android_sdk_dir)
+        self._sdkmanager(*sdkmanager_commands)
 
     def _read_version_subdir(self, *args):
         versions = []
