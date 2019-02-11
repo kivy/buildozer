@@ -103,6 +103,10 @@ class BuildozerCommandException(BuildozerException):
 
 class Buildozer(object):
 
+    ERROR = 0
+    INFO = 1
+    DEBUG = 2
+
     standard_cmds = ('distclean', 'update', 'debug', 'release',
                      'deploy', 'run', 'serve')
 
@@ -235,7 +239,7 @@ class Buildozer(object):
             print('{} {}'.format(LOG_LEVELS_T[level], msg))
 
     def debug(self, msg):
-        self.log(2, msg)
+        self.log(self.DEBUG, msg)
 
     def log_env(self, level, env):
         """dump env into debug logger in readable format"""
@@ -244,10 +248,10 @@ class Buildozer(object):
             self.log(level, "    {} = {}".format(k, pformat(v)))
 
     def info(self, msg):
-        self.log(1, msg)
+        self.log(self.INFO, msg)
 
     def error(self, msg):
-        self.log(0, msg)
+        self.log(self.ERROR, msg)
 
     #
     # Internal check methods
@@ -292,7 +296,7 @@ class Buildozer(object):
             else:
                 self.debug('Run {0!r} ...'.format(command.split()[0]))
         self.debug('Cwd {}'.format(kwargs.get('cwd')))
-        self.log_env(2, kwargs.get("env"))
+        self.log_env(self.DEBUG, kwargs["env"])
 
         # open the process
         if sys.platform == 'win32':
@@ -346,10 +350,10 @@ class Buildozer(object):
         process.communicate()
         if process.returncode != 0 and break_on_error:
             self.error('Command failed: {0}'.format(command))
-            self.log_env(1, kwargs['env'])
+            self.log_env(self.ERROR, kwargs['env'])
             self.error('')
             self.error('Buildozer failed to execute the last command')
-            if self.log_level <= 1:
+            if self.log_level <= self.INFO:
                 self.error('If the error is not obvious, please raise the log_level to 2')
                 self.error('and retry the latest command.')
             else:
