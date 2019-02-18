@@ -957,21 +957,6 @@ class TargetAndroid(Target):
         if icon:
             build_cmd += [("--icon", join(self.buildozer.root_dir, icon))]
 
-        # OUYA Console support
-        ouya_category = config.getdefault('app', 'android.ouya.category',
-                                          '').upper()
-        if ouya_category:
-            if ouya_category not in ('GAME', 'APP'):
-                raise SystemError(
-                    'Invalid android.ouya.category: "{}" must be one of GAME or APP'.format(
-                        ouya_category))
-            # add icon
-            ouya_icon = config.getdefault('app', 'android.ouya.icon.filename',
-                                          '')
-            build_cmd += [("--ouya-category", ouya_category)]
-            build_cmd += [("--ouya-icon", join(self.buildozer.root_dir,
-                                               ouya_icon))]
-
         # add orientation
         orientation = config.getdefault('app', 'orientation', 'landscape')
         if orientation == 'all':

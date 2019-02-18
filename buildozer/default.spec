@@ -140,7 +140,7 @@ fullscreen = 0
 # (list) List of Java .jar files to add to the libs so that pyjnius can access
 # their classes. Don't add jars that you do not need, since extra jars can slow
 # down the build process. Allows wildcards matching, for example:
-# OUYA-ODK/libs/*.jar
+# ./libs/*.jar
 #android.add_jars = foo.jar,bar.jar,path/to/more/*.jar
 
 # (list) List of Java files to add to the android project (can be java or a
@@ -160,13 +160,6 @@ fullscreen = 0
 
 # (str) python-for-android branch to use, defaults to master
 #p4a.branch = master
-
-# (str) OUYA Console category. Should be one of GAME or APP
-# If you leave this blank, OUYA support will not be enabled
-#android.ouya.category = GAME
-
-# (str) Filename of OUYA Console icon. It must be a 732x412 png image.
-#android.ouya.icon.filename = %(source.dir)s/data/ouya_icon.png
 
 # (str) XML file to include as an intent filters in <activity> tag
 #android.manifest.intent_filters =
