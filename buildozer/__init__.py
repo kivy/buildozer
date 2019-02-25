@@ -661,7 +661,7 @@ class Buildozer(object):
             return
 
         if archive.endswith('.zip'):
-            self.cmd('unzip {}'.format(join(cwd, archive)), cwd=cwd)
+            self.cmd('unzip -q {}'.format(join(cwd, archive)), cwd=cwd)
             return
 
         raise Exception('Unhandled extraction for type {0}'.format(archive))
