@@ -561,7 +561,7 @@ class TargetAndroid(Target):
         android_platform = join(self.android_sdk_dir, 'platforms', 'android-{}'.format(self.android_api))
         if not self.buildozer.file_exists(android_platform):
             if not skip_upd:
-                self._sdkmanager('"platforms;android-{}"'.format(self.android_api))
+                self._android_update_sdk('"platforms;android-{}"'.format(self.android_api))
             else:
                 self.buildozer.info(
                     'Skipping install API {} platform tools due to spec setting'.format(
