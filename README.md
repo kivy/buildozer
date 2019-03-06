@@ -22,8 +22,6 @@ recommend targeting Python 3 on Android, but you can target both
 Python 3 and Python 2 regardless of which version you use with
 buildozer on the desktop.
 
-We provide a ready-to-use [Virtual Machine for Virtualbox](https://kivy.org/#download).
-
 Note that this tool has nothing to do with the eponymous online build service
 [buildozer.io](http://buildozer.io).
 
@@ -174,41 +172,6 @@ config, along with the environment variables that would override them.
 - ``title`` -> ``$APP_TITLE``
 - ``package.name`` -> ``$APP_PACKAGE_NAME``
 - ``p4a.source_dir`` -> ``$APP_P4A_SOURCE_DIR``
-
-
-## Buildozer Virtual Machine
-
-The current virtual machine (available via https://kivy.org/downloads/) allow
-you to have a ready to use vm for building android application.
-
-### Using shared folders
-
-If the Virtualbox Guest tools are outdated, install the latest one:
-
-- in the Virtualbox: `Devices` -> `Install Guest Additions CD images`
-- in the guest/linux: Go to the cdrom and run the installer
-- reboot the vm
-
-VirtualBox filesystem doesn't support symlink anymore (don't
-try the setextradata solution, it doesn't work.). So you must
-do the build outside the shared folder. One solution:
-
-- `sudo mkdir /build`
-- `sudo chown kivy /build`
-- In your buildozer.spec, section `[buildozer]`, set `build_dir = /build/buildozer-myapp`
-
-
-### Using your devices via the VM
-
-There is a little icon on the bottom left that represent an USB plug.
-Select it, and select your android device on it. Then you can check:
-
-    buildozer android adb -- devices
-
-If it doesn't, use Google. They are so many differents way / issues
-depending your phone that Google will be your only source of
-information, not us :)
-
 
 ## Support
 
