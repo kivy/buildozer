@@ -22,8 +22,6 @@ recommend targeting Python 3 on Android, but you can target both
 Python 3 and Python 2 regardless of which version you use with
 buildozer on the desktop.
 
-We provide a ready-to-use [Virtual Machine for Virtualbox](https://kivy.org/#download).
-
 Note that this tool has nothing to do with the eponymous online build service
 [buildozer.io](http://buildozer.io).
 
