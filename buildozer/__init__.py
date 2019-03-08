@@ -510,10 +510,12 @@ class Buildozer(object):
             exit(1)
 
         # did we already installed the libs ?
-        if exists(self.applibs_dir) and \
-           self.state.get('cache.applibs', '') == requirements:
-                self.debug('Application requirements already installed, pass')
-                return
+        if (
+            exists(self.applibs_dir) and
+            self.state.get('cache.applibs', '') == requirements
+        ):
+            self.debug('Application requirements already installed, pass')
+            return
 
         # recreate applibs
         self.rmdir(self.applibs_dir)
