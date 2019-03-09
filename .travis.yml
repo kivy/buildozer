@@ -1,11 +1,23 @@
-sudo: false
+sudo: required
 
-language: python
+language: generic
 
-python:
-  - "2.7"
-  - "3.6"
+services:
+  - docker
 
-install: pip install tox-travis
+before_install:
+  - travis_retry sudo apt update -qq
+  - travis_retry sudo apt install -qq --no-install-recommends python2.7 python3
+  - sudo pip install tox>=2.0
+  # https://github.com/travis-ci/travis-ci/issues/6069#issuecomment-266546552
+  - git remote set-branches --add origin master
+  - git fetch
 
-script: tox
+before_script:
+  # we want to fail fast on tox errors without having to `docker build` first
+  - tox
+
+script:
+  # simply makes sure the Docker image builds and run
+  - docker build --tag=buildozer .
+  - docker run buildozer --version
