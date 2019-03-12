@@ -112,7 +112,7 @@ class Buildozer(object):
 
     def __init__(self, filename='buildozer.spec', target=None):
         super(Buildozer, self).__init__()
-        self.log_level = 1
+        self.log_level = 2
         self.environ = {}
         self.specfilename = filename
         self.state = None
@@ -139,7 +139,7 @@ class Buildozer(object):
 
         try:
             self.log_level = int(self.config.getdefault(
-                'buildozer', 'log_level', '1'))
+                'buildozer', 'log_level', '2'))
         except Exception:
             pass
 
