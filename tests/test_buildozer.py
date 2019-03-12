@@ -86,11 +86,11 @@ class TestBuildozer(unittest.TestCase):
         """
         # the default log level value is known
         buildozer = Buildozer('does_not_exist.spec')
-        assert buildozer.log_level == 1
-        # sets log level to 2 on the spec file
-        self.set_specfile_log_level(self.specfile.name, 2)
-        buildozer = Buildozer(self.specfile.name)
         assert buildozer.log_level == 2
+        # sets log level to 1 on the spec file
+        self.set_specfile_log_level(self.specfile.name, 1)
+        buildozer = Buildozer(self.specfile.name)
+        assert buildozer.log_level == 1
 
     def test_log_print(self):
         """
