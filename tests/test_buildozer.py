@@ -59,16 +59,16 @@ class TestBuildozer(unittest.TestCase):
         Basic test making sure the Buildozer object can be instanciated.
         """
         buildozer = Buildozer()
-        self.assertEqual(buildozer.specfilename, 'buildozer.spec')
+        assert buildozer.specfilename == 'buildozer.spec'
         # spec file doesn't have to exist
-        self.assertFalse(os.path.exists(buildozer.specfilename))
+        assert os.path.exists(buildozer.specfilename) is False
 
     def test_buildozer_read_spec(self):
         """
         Initializes Buildozer object from existing spec file.
         """
         buildozer = Buildozer(filename=self.default_specfile_path())
-        self.assertTrue(os.path.exists(buildozer.specfilename))
+        assert os.path.exists(buildozer.specfilename) is True
 
     def test_buildozer_help(self):
         """
@@ -78,7 +78,7 @@ class TestBuildozer(unittest.TestCase):
         buildozer = Buildozer()
         with mock.patch('sys.stdout', new_callable=StringIO) as mock_stdout:
             buildozer.usage()
-        self.assertIn('Usage:', mock_stdout.getvalue())
+        assert 'Usage:' in mock_stdout.getvalue()
 
     def test_log_get_set(self):
         """
@@ -121,3 +121,16 @@ class TestBuildozer(unittest.TestCase):
         assert 'debug message' in mock_stdout.getvalue()
         assert 'info message' in mock_stdout.getvalue()
         assert 'error message' in mock_stdout.getvalue()
+
+    def test_run_command_unknown(self):
+        """
+        Makes sure the unknown command/target is handled gracefully, refs:
+        https://github.com/kivy/buildozer/issues/812
+        """
+        buildozer = Buildozer()
+        command = 'foobar'
+        args = [command, 'debug']
+        with mock.patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+            with self.assertRaises(SystemExit):
+                buildozer.run_command(args)
+        assert mock_stdout.getvalue() == 'Unknown command/target {}\n'.format(command)

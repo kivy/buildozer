@@ -1056,7 +1056,7 @@ class Buildozer(object):
         # maybe it's a target?
         targets = [x[0] for x in self.targets()]
         if command not in targets:
-            print('Unknown command/target {}'.format(self.translate_target(command, inverse=True)))
+            print('Unknown command/target {}'.format(command))
             exit(1)
 
         self.set_target(command)
