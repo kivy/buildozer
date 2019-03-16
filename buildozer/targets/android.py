@@ -290,14 +290,17 @@ class TargetAndroid(Target):
             self.buildozer.info('Apache ANT found at {0}'.format(ant_dir))
             return ant_dir
 
+        if not os.path.exists(ant_dir):
+            os.makedirs(ant_dir)
+
         self.buildozer.info('Android ANT is missing, downloading')
         archive = 'apache-ant-{0}-bin.tar.gz'.format(APACHE_ANT_VERSION)
         url = 'http://archive.apache.org/dist/ant/binaries/'
         self.buildozer.download(url,
                                 archive,
-                                cwd=self.buildozer.global_platform_dir)
+                                cwd=ant_dir)
         self.buildozer.file_extract(archive,
-                                    cwd=self.buildozer.global_platform_dir)
+                                    cwd=ant_dir)
         self.buildozer.info('Apache ANT installation done.')
         return ant_dir
 
