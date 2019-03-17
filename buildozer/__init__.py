@@ -295,7 +295,6 @@ class Buildozer(object):
             else:
                 self.debug('Run {0!r} ...'.format(command.split()[0]))
         self.debug('Cwd {}'.format(kwargs.get('cwd')))
-        self.log_env(self.DEBUG, kwargs["env"])
 
         # open the process
         if sys.platform == 'win32':
