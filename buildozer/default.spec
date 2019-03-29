@@ -191,6 +191,9 @@ fullscreen = 0
 # project.properties automatically.)
 #android.library_references =
 
+# (list) Android shared libraries which will be added to AndroidManifest.xml using <uses-library> tag
+#android.uses_library =
+
 # (str) Android logcat filters to use
 #android.logcat_filters = *:S python:D
 
