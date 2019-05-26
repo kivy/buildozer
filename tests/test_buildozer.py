@@ -8,6 +8,8 @@ from buildozer import Buildozer
 from six import StringIO
 import tempfile
 
+from buildozer.targets.android import TargetAndroid
+
 
 class TestBuildozer(unittest.TestCase):
 
@@ -134,3 +136,25 @@ class TestBuildozer(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 buildozer.run_command(args)
         assert mock_stdout.getvalue() == 'Unknown command/target {}\n'.format(command)
+
+    def test_android_ant_path(self):
+        """
+        Verify that the selected ANT path is being used from the spec file
+        """
+        my_ant_path = '/my/ant/path'
+
+        buildozer = Buildozer(filename=self.default_specfile_path(), target='android')
+        buildozer.config.set('app', 'android.ant_path', my_ant_path)  # Set ANT path
+        target = TargetAndroid(buildozer=buildozer)
+
+        # Mock first run
+        with mock.patch('buildozer.Buildozer.download') as download, \
+                mock.patch('buildozer.Buildozer.file_extract') as extract_file, \
+                mock.patch('os.makedirs'):
+            ant_path = target._install_apache_ant()
+            assert ant_path == my_ant_path
+
+        # Mock ant already installed
+        with mock.patch.object(Buildozer, 'file_exists', return_value=True):
+            ant_path = target._install_apache_ant()
+            assert ant_path == my_ant_path
