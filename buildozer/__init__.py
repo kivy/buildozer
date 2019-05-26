@@ -342,8 +342,8 @@ class Buildozer(object):
                     else:
                         stderr.write(chunk)
 
-        stdout.flush()
-        stderr.flush()
+            stdout.flush()
+            stderr.flush()
 
         process.communicate()
         if process.returncode != 0 and break_on_error:
