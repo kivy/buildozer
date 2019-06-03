@@ -981,16 +981,17 @@ class TargetAndroid(Target):
             build_cmd += [("--ouya-icon", join(self.buildozer.root_dir,
                                                ouya_icon))]
 
-        # add orientation
-        orientation = config.getdefault('app', 'orientation', 'landscape')
-        if orientation == 'all':
-            orientation = 'sensor'
-        build_cmd += [("--orientation", orientation)]
+        if config.getdefault('app','p4a.bootstrap','sdl2') != 'service_only':
+            # add orientation
+            orientation = config.getdefault('app', 'orientation', 'landscape')
+            if orientation == 'all':
+                orientation = 'sensor'
+            build_cmd += [("--orientation", orientation)]
 
-        # fullscreen ?
-        fullscreen = config.getbooldefault('app', 'fullscreen', True)
-        if not fullscreen:
-            build_cmd += [("--window", )]
+            # fullscreen ?
+            fullscreen = config.getbooldefault('app', 'fullscreen', True)
+            if not fullscreen:
+                build_cmd += [("--window", )]
 
         # wakelock ?
         wakelock = config.getbooldefault('app', 'android.wakelock', False)
