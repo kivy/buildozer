@@ -46,3 +46,23 @@ Buildozer didn't install a necessary package
     ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager --install "build-tools;29.0.0"
 
 Then press "y" then enter to accept the license.
+
+
+Targeting IOS
+~~~~~~~~~~~~~
+
+Install XCode and command line tools (through the AppStore)
+
+
+Install homebrew (https://brew.sh)
+
+::
+
+    brew install pkg-config sdl2 sdl2_image sdl2_ttf sdl2_mixer gstreamer autoconf automake
+
+
+Install pip and virtualenv
+
+::
+
+    python -m pip install --user --upgrade pip virtualenv kivy-ios
