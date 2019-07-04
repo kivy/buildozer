@@ -13,10 +13,10 @@ First, install the buildozer project with::
 Targeting Android
 -----------------
 
-Android on Ubuntu (64bit)
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Android on Ubuntu 18.04 (64bit)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-(tested on 18.04, 18.10, 19.04)
+(expected to work as well in later version, but only regularly tested in the latest LTS)
 
 ::
 
