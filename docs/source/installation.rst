@@ -13,26 +13,56 @@ First, install the buildozer project with::
 Targeting Android
 -----------------
 
-If you target Android, you must install at least Cython, few build libs, and a
-Java SDK. Some binaries of the Android SDK are still in 32 bits, so you need
-few 32bits libraries available:
-
 Android on Ubuntu 18.04 (64bit)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+(expected to work as well in later version, but only regularly tested in the latest LTS)
+
 ::
 
-    sudo pip install --upgrade cython==0.28.6
-    sudo dpkg --add-architecture i386
     sudo apt update
-    sudo apt install build-essential ccache git libncurses5:i386 libstdc++6:i386 libgtk2.0-0:i386 libpangox-1.0-0:i386 libpangoxft-1.0-0:i386 libidn11:i386 python2.7 python2.7-dev openjdk-8-jdk unzip zlib1g-dev zlib1g:i386
+    sudo apt install -y git zip unzip openjdk-8-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5
+    pip3 install --user --upgrade cython virtualenv  # the --user should be removed if you do this in a venv
 
-Android on Ubuntu 16.04 (64bit)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # add the following line at the end of your ~/.bashrc file
+    export PATH=$PATH:~/.local/bin/
+
+
+TroubleShooting
+~~~~~~~~~~~~~~~
+
+Buildozer stuck on "Installing/updating SDK platform tools if necessary"
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Press "y" then enter to continue, the license acceptance system is silently waiting for your input
+
+
+Aidl not found, please install it.
+""""""""""""""""""""""""""""""""""
+
+Buildozer didn't install a necessary package
+
+::
+    ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager --install "build-tools;29.0.0"
+
+Then press "y" then enter to accept the license.
+
+
+Targeting IOS
+~~~~~~~~~~~~~
+
+Install XCode and command line tools (through the AppStore)
+
+
+Install homebrew (https://brew.sh)
 
 ::
 
-    sudo pip install --upgrade cython==0.21
-    sudo dpkg --add-architecture i386
-    sudo apt-get update
-    sudo apt-get install build-essential ccache git libncurses5:i386 libstdc++6:i386 libgtk2.0-0:i386 libpangox-1.0-0:i386 libpangoxft-1.0-0:i386 libidn11:i386 python2.7 python2.7-dev openjdk-8-jdk unzip zlib1g-dev zlib1g:i386 
+    brew install pkg-config sdl2 sdl2_image sdl2_ttf sdl2_mixer gstreamer autoconf automake
+
+
+Install pip and virtualenv
+
+::
+
+    python -m pip install --user --upgrade pip virtualenv kivy-ios
