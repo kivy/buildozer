@@ -190,6 +190,8 @@ config, along with the environment variables that would override them.
 - ``package.name`` -> ``$APP_PACKAGE_NAME``
 - ``p4a.source_dir`` -> ``$APP_P4A_SOURCE_DIR``
 
+Note: config tokens must first be defined in `buildozer.spec` before they can be overridden.
+
 Buildozer Virtual Machine
 -------------------------
 
