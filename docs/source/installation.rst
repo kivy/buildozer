@@ -43,7 +43,7 @@ Aidl not found, please install it.
 Buildozer didn't install a necessary package
 
 ::
-    ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager --install "build-tools;29.0.0"
+    ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager "build-tools;29.0.0"
 
 Then press "y" then enter to accept the license.
 
