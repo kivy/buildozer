@@ -32,7 +32,7 @@ from buildozer.target import Target
 from os import environ
 from os.path import exists, join, realpath, expanduser, basename, relpath
 from platform import architecture
-from shutil import copyfile
+from shutil import copyfile, rmtree
 from glob import glob
 
 from buildozer.libs.version import parse
@@ -634,6 +634,24 @@ class TargetAndroid(Target):
                 self.buildozer.error('')
                 raise BuildozerException()
         else:
+            # check that fork/branch has not been changed
+            if self.buildozer.file_exists(pa_dir):
+                cur_fork = cmd(
+                    'git config --get remote.origin.url',
+                    get_stdout=True,
+                    cwd=pa_dir,
+                )[0].split('/')[3]
+                cur_branch = cmd(
+                    'git branch -vv', get_stdout=True, cwd=pa_dir
+                )[0].split()[1]
+                if any([cur_fork != p4a_fork, cur_branch != p4a_branch]):
+                    self.buildozer.info(
+                        "Detected old fork/branch ({}/{}), deleting...".format(
+                            cur_fork, cur_branch
+                        )
+                    )
+                    rmtree(pa_dir)
+
             if not self.buildozer.file_exists(pa_dir):
                 cmd(
                     (
