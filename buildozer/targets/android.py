@@ -47,6 +47,7 @@ DEPRECATED_TOKENS = (('app', 'android.sdk'), )
 # does.
 DEFAULT_SDK_TAG = '4333796'
 
+
 class TargetAndroid(Target):
     targetname = 'android'
     p4a_directory = "python-for-android"
