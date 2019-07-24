@@ -205,6 +205,9 @@ android.arch = armeabi-v7a
 # Python for android (p4a) specific
 #
 
+# (str) python-for-android fork to use, defaults to upstream (kivy)
+#p4a.fork = kivy
+
 # (str) python-for-android branch to use, defaults to master
 #p4a.branch = master
 

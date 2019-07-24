@@ -50,6 +50,7 @@ DEFAULT_SDK_TAG = '4333796'
 class TargetAndroid(Target):
     targetname = 'android'
     p4a_directory = "python-for-android"
+    p4a_fork = 'kivy'
     p4a_branch = 'master'
     p4a_apk_cmd = "apk --debug --bootstrap="
     extra_p4a_args = ''
@@ -614,8 +615,12 @@ class TargetAndroid(Target):
 
     def _install_p4a(self):
         cmd = self.buildozer.cmd
-        source = self.buildozer.config.getdefault('app', 'p4a.branch',
-                                                  self.p4a_branch)
+        p4a_fork = self.buildozer.config.getdefault(
+            'app', 'p4a.fork', self.p4a_fork
+        )
+        p4a_branch = self.buildozer.config.getdefault(
+            'app', 'p4a.branch', self.p4a_branch
+        )
         self.pa_dir = pa_dir = join(self.buildozer.platform_dir,
                                     self.p4a_directory)
         system_p4a_dir = self.buildozer.config.getdefault('app',
@@ -630,20 +635,27 @@ class TargetAndroid(Target):
         else:
             if not self.buildozer.file_exists(pa_dir):
                 cmd(
-                    ('git clone -b {} --single-branch '
-                     'https://github.com/kivy/python-for-android.git '
-                     '{}').format(source, self.p4a_directory),
-                    cwd=self.buildozer.platform_dir)
+                    (
+                        'git clone -b {p4a_branch} --single-branch '
+                        'https://github.com/{p4a_fork}/python-for-android.git '
+                        '{p4a_dir}'
+                    ).format(
+                        p4a_branch=p4a_branch,
+                        p4a_fork=p4a_fork,
+                        p4a_dir=self.p4a_directory,
+                    ),
+                    cwd=self.buildozer.platform_dir,
+                )
             elif self.platform_update:
                 cmd('git clean -dxf', cwd=pa_dir)
                 current_branch = cmd('git rev-parse --abbrev-ref HEAD',
                                      get_stdout=True, cwd=pa_dir)[0].strip()
-                if current_branch == source:
+                if current_branch == p4a_branch:
                     cmd('git pull', cwd=pa_dir)
                 else:
-                    cmd('git fetch --tags origin {0}:{0}'.format(source),
+                    cmd('git fetch --tags origin {0}:{0}'.format(p4a_branch),
                         cwd=pa_dir)
-                    cmd('git checkout {}'.format(source), cwd=pa_dir)
+                    cmd('git checkout {}'.format(p4a_branch), cwd=pa_dir)
 
         # also install dependencies (currently, only setup.py knows about it)
         # let's extract them.
