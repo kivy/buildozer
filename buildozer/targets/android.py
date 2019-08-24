@@ -47,6 +47,12 @@ DEPRECATED_TOKENS = (('app', 'android.sdk'), )
 # does.
 DEFAULT_SDK_TAG = '4333796'
 
+MSG_P4A_RECOMMENDED_NDK_ERROR = (
+    "WARNING: Unable to find recommended android's NDK for current "
+    "installation of p4...so returning the recommended buildozer's one, which "
+    "is android's NDK r{android_ndk}".format(android_ndk=ANDROID_NDK_VERSION)
+)
+
 
 class TargetAndroid(Target):
     targetname = 'android'
@@ -54,6 +60,7 @@ class TargetAndroid(Target):
     p4a_fork = 'kivy'
     p4a_branch = 'master'
     p4a_apk_cmd = "apk --debug --bootstrap="
+    p4a_best_ndk_version = None
     extra_p4a_args = ''
 
     def __init__(self, *args, **kwargs):
@@ -97,6 +104,47 @@ class TargetAndroid(Target):
         kwargs.setdefault('cwd', self.pa_dir)
         return self.buildozer.cmd(self._p4a_cmd + cmd + self.extra_p4a_args, **kwargs)
 
+    @property
+    def p4a_best_android_ndk(self):
+        """
+        Return the p4a's recommended android's NDK version, depending on the
+        p4a version used for our buildozer build. In case that we don't find
+        it, we will return the buildozer's recommended one, defined by global
+        variable `ANDROID_NDK_VERSION`.
+        """
+        if self.p4a_best_ndk_version is not None:
+            # make sure to read p4a version only the first time
+            return self.p4a_best_ndk_version
+
+        if not hasattr(self, "pa_dir"):
+            pa_dir = join(self.buildozer.platform_dir, self.p4a_directory)
+        else:
+            pa_dir = self.pa_dir
+
+        # check p4a's recommendation file, and in case that exists find the
+        # recommended android's NDK version, otherwise return buildozer's one
+        ndk_version = ANDROID_NDK_VERSION
+        rec_file = join(pa_dir, "pythonforandroid", "recommendations.py")
+        if not os.path.isfile(rec_file):
+            self.buildozer.error(MSG_P4A_RECOMMENDED_NDK_ERROR)
+            return ndk_version
+
+        for line in open(rec_file, "r"):
+            if line.startswith("RECOMMENDED_NDK_VERSION ="):
+                ndk_version = line.replace(
+                    "RECOMMENDED_NDK_VERSION =", "")
+                # clean version of unwanted characters
+                for i in {"'", '"', "\n", " "}:
+                    ndk_version = ndk_version.replace(i, "")
+                self.buildozer.info(
+                    "Recommended android's NDK version by p4a is: {}".format(
+                        ndk_version
+                    )
+                )
+                self.p4a_best_ndk_version = ndk_version
+                break
+        return ndk_version
+
     def _sdkmanager(self, *args, **kwargs):
         """Call the sdkmanager in our Android SDK with the given arguments."""
         # Use the android-sdk dir as cwd by default
@@ -112,7 +160,7 @@ class TargetAndroid(Target):
     @property
     def android_ndk_version(self):
         return self.buildozer.config.getdefault('app', 'android.ndk',
-                                                ANDROID_NDK_VERSION)
+                                                self.p4a_best_android_ndk)
 
     @property
     def android_api(self):
