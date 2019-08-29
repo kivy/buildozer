@@ -773,7 +773,7 @@ class Buildozer(object):
                 for exclude_dir in exclude_dirs:
                     if exclude_dir[-1] != '/':
                         exclude_dir += '/'
-                    if filtered_root.startswith(exclude_dir):
+                    if filtered_root.startswith(exclude_dir.lower()):
                         is_excluded = True
                         break
 
