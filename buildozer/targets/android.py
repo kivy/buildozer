@@ -65,7 +65,10 @@ class TargetAndroid(Target):
 
     def __init__(self, *args, **kwargs):
         super(TargetAndroid, self).__init__(*args, **kwargs)
-        self._build_dir = join(self.buildozer.platform_dir, 'build')
+        self._arch = self.buildozer.config.getdefault(
+            'app', 'android.arch', "armeabi-v7a")
+        self._build_dir = join(
+            self.buildozer.platform_dir, 'build-{}'.format(self._arch))
         executable = sys.executable or 'python'
         self._p4a_cmd = '{} -m pythonforandroid.toolchain '.format(executable)
         self._p4a_bootstrap = self.buildozer.config.getdefault(
@@ -775,7 +778,7 @@ class TargetAndroid(Target):
             ("create --dist_name={} --bootstrap={} --requirements={} "
              "--arch {} {}").format(
                  dist_name, self._p4a_bootstrap, requirements,
-                 config.getdefault('app', 'android.arch', "armeabi-v7a"), " ".join(options)),
+                 self._arch, " ".join(options)),
             get_stdout=True)[0]
 
     def get_available_packages(self):
@@ -860,7 +863,7 @@ class TargetAndroid(Target):
             cmd.append(gradle_dependency)
 
         cmd.append('--arch')
-        cmd.append(self.buildozer.config.getdefault('app', 'android.arch', "armeabi-v7a"))
+        cmd.append(self._arch)
 
         cmd = " ".join(cmd)
         self._p4a(cmd)
