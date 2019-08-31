@@ -1,11 +1,6 @@
 '''
-Android target, based on python-for-android project (old toolchain)
+Android target, based on python-for-android project
 '''
-#
-# Android target
-# Thanks for Renpy (again) for its install_sdk.py and plat.py in the PGS4A
-# project!
-#
 
 import sys
 if sys.platform == 'win32':
@@ -48,15 +43,15 @@ DEPRECATED_TOKENS = (('app', 'android.sdk'), )
 DEFAULT_SDK_TAG = '4333796'
 
 MSG_P4A_RECOMMENDED_NDK_ERROR = (
-    "WARNING: Unable to find recommended android's NDK for current "
-    "installation of p4...so returning the recommended buildozer's one, which "
-    "is android's NDK r{android_ndk}".format(android_ndk=ANDROID_NDK_VERSION)
+    "WARNING: Unable to find recommended Android NDK for current "
+    "installation of python-for-android, defaulting to the default "
+    "version r{android_ndk}".format(android_ndk=ANDROID_NDK_VERSION)
 )
 
 
 class TargetAndroid(Target):
     targetname = 'android'
-    p4a_directory = "python-for-android"
+    p4a_directory_name = "python-for-android"
     p4a_fork = 'kivy'
     p4a_branch = 'master'
     p4a_apk_cmd = "apk --debug --bootstrap="
@@ -102,10 +97,22 @@ class TargetAndroid(Target):
                 self.buildozer.error(error)
 
     def _p4a(self, cmd, **kwargs):
-        if not hasattr(self, "pa_dir"):
-            self.pa_dir = join(self.buildozer.platform_dir, self.p4a_directory)
-        kwargs.setdefault('cwd', self.pa_dir)
+        kwargs.setdefault('cwd', self.p4a_dir)
         return self.buildozer.cmd(self._p4a_cmd + cmd + self.extra_p4a_args, **kwargs)
+
+    @property
+    def p4a_dir(self):
+        """The directory where python-for-android is/will be installed."""
+
+        # Default p4a dir
+        p4a_dir = join(self.buildozer.platform_dir, self.p4a_directory_name)
+
+        # Possibly overriden by user setting
+        system_p4a_dir = self.buildozer.config.getdefault('app', 'p4a.source_dir')
+        if system_p4a_dir:
+            p4a_dir = expanduser(system_p4a_dir)
+
+        return p4a_dir
 
     @property
     def p4a_best_android_ndk(self):
@@ -119,15 +126,10 @@ class TargetAndroid(Target):
             # make sure to read p4a version only the first time
             return self.p4a_best_ndk_version
 
-        if not hasattr(self, "pa_dir"):
-            pa_dir = join(self.buildozer.platform_dir, self.p4a_directory)
-        else:
-            pa_dir = self.pa_dir
-
         # check p4a's recommendation file, and in case that exists find the
         # recommended android's NDK version, otherwise return buildozer's one
         ndk_version = ANDROID_NDK_VERSION
-        rec_file = join(pa_dir, "pythonforandroid", "recommendations.py")
+        rec_file = join(self.p4a_dir, "pythonforandroid", "recommendations.py")
         if not os.path.isfile(rec_file):
             self.buildozer.error(MSG_P4A_RECOMMENDED_NDK_ERROR)
             return ndk_version
@@ -433,7 +435,7 @@ class TargetAndroid(Target):
                 archive = 'android-ndk-r{0}-linux-{1}.tar.bz2'
             is_64 = (os.uname()[4] == 'x86_64')
         else:
-            raise SystemError('Unsupported platform: {0}'.format(platform))
+            raise SystemError('Unsupported platform: {}'.format(platform))
 
         architecture = 'x86_64' if is_64 else 'x86'
         unpacked = 'android-ndk-r{0}'
@@ -677,27 +679,27 @@ class TargetAndroid(Target):
         p4a_branch = self.buildozer.config.getdefault(
             'app', 'p4a.branch', self.p4a_branch
         )
-        self.pa_dir = pa_dir = join(self.buildozer.platform_dir,
-                                    self.p4a_directory)
+
+        p4a_dir = self.p4a_dir
         system_p4a_dir = self.buildozer.config.getdefault('app',
                                                           'p4a.source_dir')
         if system_p4a_dir:
-            self.pa_dir = pa_dir = expanduser(system_p4a_dir)
-            if not self.buildozer.file_exists(pa_dir):
+            # Don't install anything, just check that the dir does exist
+            if not self.buildozer.file_exists(p4a_dir):
                 self.buildozer.error(
                     'Path for p4a.source_dir does not exist')
                 self.buildozer.error('')
                 raise BuildozerException()
         else:
             # check that fork/branch has not been changed
-            if self.buildozer.file_exists(pa_dir):
+            if self.buildozer.file_exists(p4a_dir):
                 cur_fork = cmd(
                     'git config --get remote.origin.url',
                     get_stdout=True,
-                    cwd=pa_dir,
+                    cwd=p4a_dir,
                 )[0].split('/')[3]
                 cur_branch = cmd(
-                    'git branch -vv', get_stdout=True, cwd=pa_dir
+                    'git branch -vv', get_stdout=True, cwd=p4a_dir
                 )[0].split()[1]
                 if any([cur_fork != p4a_fork, cur_branch != p4a_branch]):
                     self.buildozer.info(
@@ -705,9 +707,9 @@ class TargetAndroid(Target):
                             cur_fork, cur_branch
                         )
                     )
-                    rmtree(pa_dir)
+                    rmtree(p4a_dir)
 
-            if not self.buildozer.file_exists(pa_dir):
+            if not self.buildozer.file_exists(p4a_dir):
                 cmd(
                     (
                         'git clone -b {p4a_branch} --single-branch '
@@ -716,31 +718,31 @@ class TargetAndroid(Target):
                     ).format(
                         p4a_branch=p4a_branch,
                         p4a_fork=p4a_fork,
-                        p4a_dir=self.p4a_directory,
+                        p4a_dir=self.p4a_directory_name,
                     ),
                     cwd=self.buildozer.platform_dir,
                 )
             elif self.platform_update:
-                cmd('git clean -dxf', cwd=pa_dir)
+                cmd('git clean -dxf', cwd=p4a_dir)
                 current_branch = cmd('git rev-parse --abbrev-ref HEAD',
-                                     get_stdout=True, cwd=pa_dir)[0].strip()
+                                     get_stdout=True, cwd=p4a_dir)[0].strip()
                 if current_branch == p4a_branch:
-                    cmd('git pull', cwd=pa_dir)
+                    cmd('git pull', cwd=p4a_dir)
                 else:
                     cmd('git fetch --tags origin {0}:{0}'.format(p4a_branch),
-                        cwd=pa_dir)
-                    cmd('git checkout {}'.format(p4a_branch), cwd=pa_dir)
+                        cwd=p4a_dir)
+                    cmd('git checkout {}'.format(p4a_branch), cwd=p4a_dir)
 
         # also install dependencies (currently, only setup.py knows about it)
         # let's extract them.
         try:
-            with open(join(self.pa_dir, "setup.py")) as fd:
+            with open(join(self.p4a_dir, "setup.py")) as fd:
                 setup = fd.read()
                 deps = re.findall("^\s*install_reqs = (\[[^\]]*\])", setup, re.DOTALL | re.MULTILINE)[0]
                 deps = ast.literal_eval(deps)
         except IOError:
             self.buildozer.error('Failed to read python-for-android setup.py at {}'.format(
-                join(self.pa_dir, 'setup.py')))
+                join(self.p4a_dir, 'setup.py')))
             exit(1)
         pip_deps = []
         for dep in deps:
@@ -928,7 +930,7 @@ class TargetAndroid(Target):
             print('To set up p4a in this shell session, execute:')
             print('    alias p4a=$(buildozer {} p4a --alias 2>&1 >/dev/null)'
                   .format(self.targetname))
-            sys.stderr.write('PYTHONPATH={} {}\n'.format(self.pa_dir, self._p4a_cmd))
+            sys.stderr.write('PYTHONPATH={} {}\n'.format(self.p4a_dir, self._p4a_cmd))
         else:
             self._p4a(' '.join(args) if args else '')
 
