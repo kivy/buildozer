@@ -11,8 +11,13 @@ WSL = 'Microsoft' in uname()[2]
 
 ANDROID_API = '27'
 ANDROID_MINAPI = '21'
-ANDROID_NDK_VERSION = '17c'
 APACHE_ANT_VERSION = '1.9.4'
+
+# This constant should *not* be updated, it is used only in the case
+# that python-for-android cannot provide a recommendation, which in
+# turn only happens if the python-for-android is old and probably
+# doesn't support any newer NDK.
+DEFAULT_ANDROID_NDK_VERSION = '17c'
 
 import traceback
 import os
@@ -45,7 +50,7 @@ DEFAULT_SDK_TAG = '4333796'
 MSG_P4A_RECOMMENDED_NDK_ERROR = (
     "WARNING: Unable to find recommended Android NDK for current "
     "installation of python-for-android, defaulting to the default "
-    "version r{android_ndk}".format(android_ndk=ANDROID_NDK_VERSION)
+    "version r{android_ndk}".format(android_ndk=DEFAULT_ANDROID_NDK_VERSION)
 )
 
 
@@ -55,7 +60,7 @@ class TargetAndroid(Target):
     p4a_fork = 'kivy'
     p4a_branch = 'master'
     p4a_apk_cmd = "apk --debug --bootstrap="
-    p4a_best_ndk_version = None
+    p4a_recommended_ndk_version = None
     extra_p4a_args = ''
 
     def __init__(self, *args, **kwargs):
@@ -115,20 +120,20 @@ class TargetAndroid(Target):
         return p4a_dir
 
     @property
-    def p4a_best_android_ndk(self):
+    def p4a_recommended_android_ndk(self):
         """
         Return the p4a's recommended android's NDK version, depending on the
         p4a version used for our buildozer build. In case that we don't find
         it, we will return the buildozer's recommended one, defined by global
-        variable `ANDROID_NDK_VERSION`.
+        variable `DEFAULT_ANDROID_NDK_VERSION`.
         """
-        if self.p4a_best_ndk_version is not None:
-            # make sure to read p4a version only the first time
-            return self.p4a_best_ndk_version
+        # make sure to read p4a version only the first time
+        if self.p4a_recommended_ndk_version is not None:
+            return self.p4a_recommended_ndk_version
 
         # check p4a's recommendation file, and in case that exists find the
         # recommended android's NDK version, otherwise return buildozer's one
-        ndk_version = ANDROID_NDK_VERSION
+        ndk_version = DEFAULT_ANDROID_NDK_VERSION
         rec_file = join(self.p4a_dir, "pythonforandroid", "recommendations.py")
         if not os.path.isfile(rec_file):
             self.buildozer.error(MSG_P4A_RECOMMENDED_NDK_ERROR)
@@ -146,7 +151,7 @@ class TargetAndroid(Target):
                         ndk_version
                     )
                 )
-                self.p4a_best_ndk_version = ndk_version
+                self.p4a_recommended_ndk_version = ndk_version
                 break
         return ndk_version
 
@@ -165,7 +170,7 @@ class TargetAndroid(Target):
     @property
     def android_ndk_version(self):
         return self.buildozer.config.getdefault('app', 'android.ndk',
-                                                self.p4a_best_android_ndk)
+                                                self.p4a_recommended_android_ndk)
 
     @property
     def android_api(self):

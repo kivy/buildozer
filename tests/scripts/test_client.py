@@ -1,9 +1,12 @@
 import sys
-import mock
 import unittest
 from buildozer import BuildozerCommandException
 from buildozer.scripts import client
 
+try:
+    from unittest import mock  # Python 3
+except ImportError:
+    import mock  # Python 2
 
 class TestClient(unittest.TestCase):
 
