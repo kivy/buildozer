@@ -143,14 +143,6 @@ class Buildozer(object):
         except Exception:
             pass
 
-        build_dir = self.config.getdefault('buildozer', 'builddir', None)
-        if build_dir:
-            # for backwards compatibility, append .buildozer to builddir
-            build_dir = join(build_dir, '.buildozer')
-        self.build_dir = self.config.getdefault('buildozer', 'build_dir', build_dir)
-
-        if self.build_dir:
-            self.build_dir = realpath(join(self.root_dir, self.build_dir))
         self.user_bin_dir = self.config.getdefault('buildozer', 'bin_dir', None)
         if self.user_bin_dir:
             self.user_bin_dir = realpath(join(self.root_dir, self.user_bin_dir))
@@ -159,6 +151,22 @@ class Buildozer(object):
         self.target = None
         if target:
             self.set_target(target)
+
+    @property
+    def user_build_dir(self):
+        '''The user-provided build dir.'''
+        # Check for a user-provided build dir
+        # Check the (deprecated) builddir token, for backwards compatibility
+        build_dir = self.config.getdefault('buildozer', 'builddir', None)
+        if build_dir:
+            # for backwards compatibility, append .buildozer to builddir
+            build_dir = join(build_dir, '.buildozer')
+        build_dir = self.config.getdefault('buildozer', 'build_dir', build_dir)
+
+        if build_dir is not None:
+            build_dir = realpath(join(self.root_dir, build_dir))
+
+        return build_dir
 
     def set_target(self, target):
         '''Set the target to use (one of buildozer.targets, such as "android")
@@ -881,8 +889,9 @@ class Buildozer(object):
 
     @property
     def buildozer_dir(self):
-        if self.build_dir:
-            return self.build_dir
+        '''The directory in which to run the app build.'''
+        if self.user_build_dir is not None:
+            return self.user_build_dir
         return join(self.root_dir, '.buildozer')
 
     @property
@@ -1106,6 +1115,23 @@ class Buildozer(object):
             if not exists(self.global_buildozer_dir):
                 return
             rmtree(self.global_buildozer_dir)
+
+    def cmd_appclean(self, *args):
+        '''Clean the .buildozer folder in the app directory.
+
+        This command specifically refuses to delete files in a
+        user-specified build directory, to avoid accidentally deleting
+        more than the user intends.
+        '''
+        if self.user_build_dir is not None:
+            self.error(
+                ('Build dir is specified as {}. `appclean` will not attempt to delete files '
+                 'in a user-specified build directory.').format(self.user_build_dir))
+        elif exists(self.buildozer_dir):
+            self.info('Deleting {}'.format(self.buildozer_dir))
+            rmtree(self.buildozer_dir)
+        else:
+            self.error('{} already deleted, skipping.'.format(app_build_dir))
 
     def cmd_help(self, *args):
         '''Show the Buildozer help.
