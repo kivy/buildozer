@@ -1127,8 +1127,10 @@ class TargetAndroid(Target):
             apk = u'{packagename}-{mode}.apk'.format(
                 packagename=packagename, mode=mode)
             apk_dir = join(dist_dir, "build", "outputs", "apk", mode_sign)
-            apk_dest = u'{packagename}-{version}-{mode}.apk'.format(
-                packagename=packagename, mode=mode, version=version)
+
+            apk_dest = u'{packagename}-{version}-{arch}-{mode}.apk'.format(
+                packagename=packagename, mode=mode, version=version,
+                arch=self._arch)
 
         else:
             # on ant, the apk use the title, and have version
@@ -1143,6 +1145,11 @@ class TargetAndroid(Target):
                 mode=mode)
             apk_dir = join(dist_dir, "bin")
             apk_dest = apk
+
+            packagename = config.get('app', 'package.name')
+            apk_dest = u'{packagename}-{version}-{arch}-{mode}.apk'.format(
+                packagename=packagename, mode=mode, version=version,
+                arch=self._arch)
 
         # copy to our place
         copyfile(join(apk_dir, apk), join(self.buildozer.bin_dir, apk_dest))
