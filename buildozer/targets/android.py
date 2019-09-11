@@ -1120,10 +1120,10 @@ class TargetAndroid(Target):
         gradle_files = ["build.gradle", "gradle", "gradlew"]
         is_gradle_build = build_tools_version >= "25.0" and any(
             (exists(join(dist_dir, x)) for x in gradle_files))
+        packagename = config.get('app', 'package.name')
 
         if is_gradle_build:
             # on gradle build, the apk use the package name, and have no version
-            packagename = config.get('app', 'package.name')
             apk = u'{packagename}-{mode}.apk'.format(
                 packagename=packagename, mode=mode)
             apk_dir = join(dist_dir, "build", "outputs", "apk", mode_sign)
@@ -1139,7 +1139,6 @@ class TargetAndroid(Target):
                 version=version,
                 mode=mode)
             apk_dir = join(dist_dir, "bin")
-            packagename = config.get('app', 'package.name')
 
         apk_dest = u'{packagename}-{version}-{arch}-{mode}.apk'.format(
             packagename=packagename, mode=mode, version=version,
