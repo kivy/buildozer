@@ -152,6 +152,10 @@ class TargetAndroid(Target):
         """Call the sdkmanager in our Android SDK with the given arguments."""
         # Use the android-sdk dir as cwd by default
         kwargs['cwd'] = kwargs.get('cwd', self.android_sdk_dir)
+        if "CI" in environ and ">/dev/null" not in args:
+            args = list(args)
+            args.insert(len(args), ' | grep -v "^\\["')
+            args = tuple(args)
         command = self.sdkmanager_path + ' ' + ' '.join(args)
         return_child = kwargs.pop('return_child', False)
         if return_child:
@@ -523,6 +527,10 @@ class TargetAndroid(Target):
             command = '{} | {} --licenses'.format(
                 yes_command, self.sdkmanager_path)
             self.buildozer.cmd(command, cwd=self.android_sdk_dir)
+        if "CI" in environ:
+            sdkmanager_commands = list(sdkmanager_commands)
+            sdkmanager_commands.insert(len(sdkmanager_commands), '>/dev/null')  # mute stdout, important stuff goes to stderr anyways
+            sdkmanager_commands = tuple(sdkmanager_commands)
         self._sdkmanager(*sdkmanager_commands)
 
     def _read_version_subdir(self, *args):
@@ -609,7 +617,7 @@ class TargetAndroid(Target):
         android_platform = join(self.android_sdk_dir, 'platforms', 'android-{}'.format(self.android_api))
         if not self.buildozer.file_exists(android_platform):
             if not skip_upd:
-                self._sdkmanager('"platforms;android-{}"'.format(self.android_api))
+                self._android_update_sdk('"platforms;android-{}"'.format(self.android_api))
             else:
                 self.buildozer.info(
                     'Skipping install API {} platform tools due to spec setting'.format(
