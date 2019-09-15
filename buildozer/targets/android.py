@@ -515,6 +515,7 @@ class TargetAndroid(Target):
         auto_accept_license = self.buildozer.config.getbooldefault(
             'app', 'android.accept_sdk_license', False)
 
+        kwargs = {}
         if auto_accept_license:
             # `SIGPIPE` is not being reported somehow, but `EPIPE` is.
             # This leads to a stderr "Broken pipe" message which is harmless,
@@ -523,7 +524,10 @@ class TargetAndroid(Target):
             command = '{} | {} --licenses'.format(
                 yes_command, self.sdkmanager_path)
             self.buildozer.cmd(command, cwd=self.android_sdk_dir)
-        self._sdkmanager(*sdkmanager_commands)
+        else:
+            kwargs['show_output'] = True
+
+        self._sdkmanager(*sdkmanager_commands, **kwargs)
 
     def _read_version_subdir(self, *args):
         versions = []
