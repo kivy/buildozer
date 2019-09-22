@@ -873,11 +873,11 @@ class Buildozer(object):
 
     @property
     def user_build_dir(self):
-        '''The user-provided build dir, if any.'''
+        """The user-provided build dir, if any."""
         # Check for a user-provided build dir
         # Check the (deprecated) builddir token, for backwards compatibility
         build_dir = self.config.getdefault('buildozer', 'builddir', None)
-        if build_dir:
+        if build_dir is not None:
             # for backwards compatibility, append .buildozer to builddir
             build_dir = join(build_dir, '.buildozer')
         build_dir = self.config.getdefault('buildozer', 'build_dir', build_dir)
