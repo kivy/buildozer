@@ -224,7 +224,7 @@ class TestBuildozer(unittest.TestCase):
 
     @mock.patch('buildozer.targets.android.os.path.isfile')
     @mock.patch('buildozer.targets.android.os.path.exists')
-    @mock.patch('buildozer.targets.android.open')
+    @mock.patch('buildozer.targets.android.open', create=True)
     def test_p4a_recommended_android_ndk_found(
             self, mock_open, mock_exists, mock_isfile
     ):
