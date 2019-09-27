@@ -1,14 +1,14 @@
 Installation
 ============
 
-Buildozer itself doesn't depend on any library, and works on Python 2.7 and >=
-3.3. Depending the platform you want to target, you might need more tools
-installed. Buildozer tries to give you hints or tries to install few things for
+Buildozer itself doesn't depend on any library Python >= 3.3.
+Depending the platform you want to target, you might need more tools installed.
+Buildozer tries to give you hints or tries to install few things for
 you, but it doesn't cover every situation.
 
 First, install the buildozer project with::
 
-    pip install --upgrade buildozer
+    pip3 install --user --upgrade buildozer
 
 Targeting Android
 -----------------
@@ -43,9 +43,16 @@ Aidl not found, please install it.
 Buildozer didn't install a necessary package
 
 ::
+
     ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager "build-tools;29.0.0"
 
 Then press "y" then enter to accept the license.
+
+
+python-for-android related errors
+"""""""""""""""""""""""""""""""""
+See the dedicated `p4a troubleshooting documentation
+<https://python-for-android.readthedocs.io/en/latest/troubleshooting/>`_.
 
 
 Targeting IOS
