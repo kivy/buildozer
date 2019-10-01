@@ -47,6 +47,8 @@ DEPRECATED_TOKENS = (('app', 'android.sdk'), )
 # does.
 DEFAULT_SDK_TAG = '4333796'
 
+DEFAULT_ARCH = 'armeabi-v7a'
+
 MSG_P4A_RECOMMENDED_NDK_ERROR = (
     "WARNING: Unable to find recommended Android NDK for current "
     "installation of python-for-android, defaulting to the default "
@@ -66,7 +68,7 @@ class TargetAndroid(Target):
     def __init__(self, *args, **kwargs):
         super(TargetAndroid, self).__init__(*args, **kwargs)
         self._arch = self.buildozer.config.getdefault(
-            'app', 'android.arch', "armeabi-v7a")
+            'app', 'android.arch', DEFAULT_ARCH)
         self._build_dir = join(
             self.buildozer.platform_dir, 'build-{}'.format(self._arch))
         executable = sys.executable or 'python'
@@ -795,8 +797,27 @@ class TargetAndroid(Target):
     def get_available_packages(self):
         return True
 
-    def get_dist_dir(self, dist_name):
-        return join(self._build_dir, 'dists', "{}__{}".format(dist_name, self._arch))
+    def get_dist_dir(self, dist_name, arch):
+        """
+        Find the dist dir with the given name and target arch.
+        """
+        expected_dist_name = generate_dist_folder_name(dist_name, arch_names=[arch])
+
+        # If the expected dist name does exist, simply use that
+        expected_dist_dir = join(self._build_dir, 'dists', expected_dist_name)
+        if exists(expected_dist_dir):
+            return expected_dist_dir
+
+        # For backwards compatibility, check if a directory without
+        # the arch exists. If so, this is probably the target dist.
+        old_dist_dir = join(self._build_dir, 'dists', dist_name)
+        if exists(old_dist_dir):
+            return old_dist_dir
+        matching_dirs = glob.glob(join(self._build_dir, 'dist', '{}*'.format(dist_name)))
+
+        # If no directory has been found yet, our dist probably
+        # doesn't exist yet, so use the expected name
+        return expected_dist_dir
 
     def get_local_recipes_dir(self):
         local_recipes = self.buildozer.config.getdefault('app', 'p4a.local_recipes')
@@ -964,7 +985,8 @@ class TargetAndroid(Target):
 
     def build_package(self):
         dist_name = self.buildozer.config.get('app', 'package.name')
-        dist_dir = self.get_dist_dir(dist_name)
+        arch = self.buildozer.config.getdefault('app', 'android.arch', DEFAULT_ARCH)
+        dist_dir = self.get_dist_dir(dist_name, arch)
         config = self.buildozer.config
         package = self._get_package()
         version = self.buildozer.get_version()
@@ -1002,8 +1024,6 @@ class TargetAndroid(Target):
             ("--name", quote(config.get('app', 'title'))),
             ("--version", version),
             ("--package", package),
-            ("--sdk", config.getdefault('app', 'android.api',
-                                        self.android_api)),
             ("--minsdk", config.getdefault('app', 'android.minapi',
                                            self.android_minapi)),
             ("--ndk-api", config.getdefault('app', 'android.minapi',
@@ -1135,8 +1155,9 @@ class TargetAndroid(Target):
 
         if is_gradle_build:
             # on gradle build, the apk use the package name, and have no version
-            apk = u'{packagename}__{arch}-{mode}.apk'.format(
-                packagename=packagename, arch=self._arch, mode=mode)
+            packagename = basename(dist_dir)  # gradle specifically uses the folder name
+            apk = u'{packagename}-{mode}.apk'.format(
+                packagename=packagename, mode=mode)
             apk_dir = join(dist_dir, "build", "outputs", "apk", mode_sign)
         else:
             # on ant, the apk use the title, and have version
@@ -1319,3 +1340,27 @@ class TargetAndroid(Target):
 def get_target(buildozer):
     buildozer.targetname = "android"
     return TargetAndroid(buildozer)
+
+def generate_dist_folder_name(base_dist_name, arch_names=None):
+    """Generate the distribution folder name to use, based on a
+    combination of the input arguments.
+
+    WARNING: This function is copied from python-for-android. It would
+    be preferable to have a proper interface, either importing the p4a
+    code or having a p4a dist dir query option.
+
+    Parameters
+    ----------
+    base_dist_name : str
+        The core distribution identifier string
+    arch_names : list of str
+        The architecture compile targets
+
+    """
+    if arch_names is None:
+        arch_names = ["no_arch_specified"]
+
+    return '{}__{}'.format(
+        base_dist_name,
+        '_'.join(arch_names)
+    )
