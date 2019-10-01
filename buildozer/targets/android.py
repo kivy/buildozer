@@ -789,7 +789,7 @@ class TargetAndroid(Target):
         return True
 
     def get_dist_dir(self, dist_name):
-        return join(self._build_dir, 'dists', dist_name)
+        return join(self._build_dir, 'dists', "{}__{}".format(dist_name, self._arch))
 
     def get_local_recipes_dir(self):
         local_recipes = self.buildozer.config.getdefault('app', 'p4a.local_recipes')
@@ -1128,8 +1128,8 @@ class TargetAndroid(Target):
 
         if is_gradle_build:
             # on gradle build, the apk use the package name, and have no version
-            apk = u'{packagename}-{mode}.apk'.format(
-                packagename=packagename, mode=mode)
+            apk = u'{packagename}__{arch}-{mode}.apk'.format(
+                packagename=packagename, arch=self._arch, mode=mode)
             apk_dir = join(dist_dir, "build", "outputs", "apk", mode_sign)
         else:
             # on ant, the apk use the title, and have version
