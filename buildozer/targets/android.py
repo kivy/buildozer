@@ -798,8 +798,8 @@ class TargetAndroid(Target):
         return True
 
     def get_dist_dir(self, dist_name, arch):
-        """
-        Find the dist dir with the given name and target arch.
+        """Find the dist dir with the given name and target arch, if one
+        already exists, otherwise return a new dist_dir name.
         """
         expected_dist_name = generate_dist_folder_name(dist_name, arch_names=[arch])
 

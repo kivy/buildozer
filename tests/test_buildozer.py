@@ -7,10 +7,13 @@ from buildozer import Buildozer, IS_PY3
 from six import StringIO
 import tempfile
 
-try:
-    from unittest import mock  # Python 3
-except ImportError:
-    import mock  # Python 2
+# try:
+#     from unittest import mock  # Python 3
+#     print('Got mock from unittest')
+# except ImportError:
+#     import mock  # Python 2
+#     print('Got mock from pip')
+import mock
 
 from buildozer.targets.android import (
     TargetAndroid, DEFAULT_ANDROID_NDK_VERSION, MSG_P4A_RECOMMENDED_NDK_ERROR
@@ -244,6 +247,10 @@ class TestBuildozer(unittest.TestCase):
         mock_open.assert_called_once_with(
             os.path.join(p4a_dir, "pythonforandroid", "recommendations.py"), 'r'
         )
+        print('Found "{}" vs expected "{}"'.format(ndk_version, expected_ndk))
+        print('Values are equal: {}'.format(ndk_version == expected_ndk))
+        print('Types {} {}'.format(type(ndk_version), type(expected_ndk)))
+        print('Lengths {} {}'.format(len(ndk_version), len(expected_ndk)))
         assert ndk_version == expected_ndk
 
         # now test that we only read one time p4a file, so we call again to
