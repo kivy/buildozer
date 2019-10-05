@@ -7,7 +7,10 @@ from buildozer import Buildozer, IS_PY3
 from six import StringIO
 import tempfile
 
-import mock
+try:
+    from unittest import mock  # Python 3
+except ImportError:
+    import mock  # Python 2
 
 from buildozer.targets.android import (
     TargetAndroid, DEFAULT_ANDROID_NDK_VERSION, MSG_P4A_RECOMMENDED_NDK_ERROR
@@ -227,14 +230,10 @@ class TestBuildozer(unittest.TestCase):
     ):
         self.set_specfile_log_level(self.specfile.name, 1)
         buildozer = Buildozer(self.specfile.name, 'android')
-
         expected_ndk = '19b'
-        mock_open.side_effect = [
-            mock.mock_open(
-                read_data='RECOMMENDED_NDK_VERSION = {expected_ndk}\n'.format(
-                    expected_ndk=expected_ndk)
-            ).return_value
-        ]
+        recommended_line = 'RECOMMENDED_NDK_VERSION = {expected_ndk}\n'.format(
+            expected_ndk=expected_ndk)
+        mock_open.return_value = StringIO(recommended_line)
         ndk_version = buildozer.target.p4a_recommended_android_ndk
         p4a_dir = os.path.join(
             buildozer.platform_dir, buildozer.target.p4a_directory_name)
