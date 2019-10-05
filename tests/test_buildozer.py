@@ -1,15 +1,16 @@
 import re
 import os
 import codecs
-import mock
 import unittest
 import buildozer as buildozer_module
 from buildozer import Buildozer, IS_PY3
 from six import StringIO
 import tempfile
 
+import mock
+
 from buildozer.targets.android import (
-    TargetAndroid, ANDROID_NDK_VERSION, MSG_P4A_RECOMMENDED_NDK_ERROR
+    TargetAndroid, DEFAULT_ANDROID_NDK_VERSION, MSG_P4A_RECOMMENDED_NDK_ERROR
 )
 
 
@@ -203,25 +204,25 @@ class TestBuildozer(unittest.TestCase):
                 mock.call(command_output)
             ]
 
-    def test_p4a_best_ndk_version_default_value(self):
+    def test_p4a_recommended_ndk_version_default_value(self):
         self.set_specfile_log_level(self.specfile.name, 1)
         buildozer = Buildozer(self.specfile.name, 'android')
-        assert buildozer.target.p4a_best_ndk_version is None
+        assert buildozer.target.p4a_recommended_ndk_version is None
 
-    def test_p4a_best_android_ndk_error(self):
+    def test_p4a_recommended_android_ndk_error(self):
         self.set_specfile_log_level(self.specfile.name, 1)
         buildozer = Buildozer(self.specfile.name, 'android')
 
         with mock.patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            ndk_version = buildozer.target.p4a_best_android_ndk
+            ndk_version = buildozer.target.p4a_recommended_android_ndk
         assert MSG_P4A_RECOMMENDED_NDK_ERROR in mock_stdout.getvalue()
         # and we should get the default android's ndk version of buildozer
-        assert ndk_version == ANDROID_NDK_VERSION
+        assert ndk_version == DEFAULT_ANDROID_NDK_VERSION
 
     @mock.patch('buildozer.targets.android.os.path.isfile')
     @mock.patch('buildozer.targets.android.os.path.exists')
-    @mock.patch('buildozer.targets.android.open')
-    def test_p4a_best_android_ndk_found(
+    @mock.patch('buildozer.targets.android.open', create=True)
+    def test_p4a_recommended_android_ndk_found(
             self, mock_open, mock_exists, mock_isfile
     ):
         self.set_specfile_log_level(self.specfile.name, 1)
@@ -234,16 +235,16 @@ class TestBuildozer(unittest.TestCase):
                     expected_ndk=expected_ndk)
             ).return_value
         ]
-        ndk_version = buildozer.target.p4a_best_android_ndk
-        pa_dir = os.path.join(
-            buildozer.platform_dir, buildozer.target.p4a_directory)
+        ndk_version = buildozer.target.p4a_recommended_android_ndk
+        p4a_dir = os.path.join(
+            buildozer.platform_dir, buildozer.target.p4a_directory_name)
         mock_open.assert_called_once_with(
-            os.path.join(pa_dir, "pythonforandroid", "recommendations.py"), 'r'
+            os.path.join(p4a_dir, "pythonforandroid", "recommendations.py"), 'r'
         )
         assert ndk_version == expected_ndk
 
         # now test that we only read one time p4a file, so we call again to
-        # `p4a_best_android_ndk` and we should still have one call to `open`
+        # `p4a_recommended_android_ndk` and we should still have one call to `open`
         # file, the performed above
-        ndk_version = buildozer.target.p4a_best_android_ndk
+        ndk_version = buildozer.target.p4a_recommended_android_ndk
         mock_open.assert_called_once()
