@@ -1003,6 +1003,8 @@ class TargetAndroid(Target):
             patterns = config.getlist('app', config_key, [])
             if not patterns:
                 continue
+            if self._arch != lib_dir:
+                continue
 
             self.buildozer.debug('Search and copy libs for {}'.format(lib_dir))
             for fn in self.buildozer.file_matches(patterns):
