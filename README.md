@@ -61,26 +61,6 @@ Note that this tool has nothing to do with the eponymous online build service
       buildozer android debug deploy run
 
 
-## Installing Buildozer with target Python 3 (CrystaX, deprecated):
-
-After following the steps above to install buildozer and generate the default spec file,
-you need to setup Crystax NDK as described below.
-
-- Download and extract the Crystax NDK somewhere (`~/.buildozer/crystax-ndk` is one option): https://www.crystax.net/en/download
-
-- Make sure the following lines are in your buildozer.spec file.:
-
-      # Require python3crystax:
-      requirements = python3crystax,kivy
-
-      # Point to the directory where you extracted the crystax-ndk:
-      android.ndk_path = <Your install path here.  Use ~ for home DIR>
-
-- Finally, build, deploy and run the app on your phone::
-
-      buildozer android debug deploy run
-
-
 ## Buildozer Docker image
 
 A Dockerfile is available to use buildozer through a Docker environment.
