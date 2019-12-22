@@ -1,7 +1,7 @@
 Buildozer
 =========
 
-[![travis](https://travis-ci.com/kivy/buildozer.svg?branch=master)](https://travis-ci.com/kivy/buildozer)
+[![Build](https://github.com/kivy/buildozer/workflows/Continuous%20Integration/badge.svg)](https://github.com/kivy/buildozer/actions?query=workflow%3A%22Continuous+Integration%22)
 [![Backers on Open Collective](https://opencollective.com/kivy/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/kivy/sponsors/badge.svg)](#sponsors)
 
