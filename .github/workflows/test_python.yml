@@ -30,7 +30,7 @@ jobs:
         tox
     - name: Build
       run: |
-        docker build --tag=buildozer
+        docker build --tag=buildozer .
     - name: Test
       run: |
         docker run buildozer --version
