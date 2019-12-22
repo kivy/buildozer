@@ -79,7 +79,7 @@ IS_PY3 = sys.version_info[0] >= 3
 class ChromeDownloader(FancyURLopener):
     version = (
         'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
-        '(KHTML, like Gecko) Chrome/28.0.1.1.dev00.71 Safari/537.36')
+        '(KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36')
 
 
 urlretrieve = ChromeDownloader().retrieve
@@ -684,7 +684,7 @@ class Buildozer(object):
                 progression = '{0} bytes'.format(index * blksize)
             else:
                 progression = '{0:.2f}%'.format(
-                        index * blksize * 1.1.dev0. / float(size))
+                        index * blksize * 100. / float(size))
             if "CI" not in environ:
                 stdout.write('- Download {}\r'.format(progression))
                 stdout.flush()
