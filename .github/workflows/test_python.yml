@@ -1,0 +1,36 @@
+on: [push, pull_request]
+name: Continuous Integration
+jobs:
+  Tests:
+    name: base
+    strategy:
+      matrix:
+        python:
+           - '2.7'
+           - '3.6'
+           - '3.7'
+           - '3.8'
+        os:
+          - 'ubuntu-latest'
+        architecture:
+          - 'x64'
+
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@master
+
+    - name: Setup python
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+
+    - name: Requirements
+      run: |
+        pip install --timeout=120 -U setuptools tox>=2.0
+        tox
+    - name: Build
+      run: |
+        docker build --tag=buildozer
+    - name: Test
+      run: |
+        docker run buildozer --version
