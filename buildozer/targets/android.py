@@ -1181,9 +1181,9 @@ class TargetAndroid(Target):
 
         if is_gradle_build:
             # on gradle build, the apk use the package name, and have no version
-            packagename = basename(dist_dir)  # gradle specifically uses the folder name
+            packagename_src = basename(dist_dir)  # gradle specifically uses the folder name
             apk = u'{packagename}-{mode}.apk'.format(
-                packagename=packagename, mode=mode)
+                packagename=packagename_src, mode=mode)
             apk_dir = join(dist_dir, "build", "outputs", "apk", mode_sign)
         else:
             # on ant, the apk use the title, and have version
