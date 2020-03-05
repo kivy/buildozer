@@ -72,7 +72,7 @@ RUN echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 USER ${USER}
 WORKDIR ${WORK_DIR}
-COPY --chown=user:user . ${SRC_DIR}
+COPY --chown=${USER}:user . ${SRC_DIR}
 
 # installs buildozer and dependencies
 RUN pip3 install --user Cython==0.28.6 ${SRC_DIR}
