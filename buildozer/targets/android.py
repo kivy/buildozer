@@ -1057,12 +1057,13 @@ class TargetAndroid(Target):
             build_cmd += [("--feature", feature)]
 
         # android.entrypoint
-        entrypoint = config.getdefault('app', 'android.entrypoint', 'org.kivy.android.PythonActivity')
-        build_cmd += [('--android-entrypoint', entrypoint)]
+        if config.getdefault('app', 'p4a.bootstrap', 'sdl2') != 'library':
+            entrypoint = config.getdefault('app', 'android.entrypoint', 'org.kivy.android.PythonActivity')
+            build_cmd += [('--android-entrypoint', entrypoint)]
 
-        # android.apptheme
-        apptheme = config.getdefault('app', 'android.apptheme', '@android:style/Theme.NoTitleBar')
-        build_cmd += [('--android-apptheme', apptheme)]
+            # android.apptheme
+            apptheme = config.getdefault('app', 'android.apptheme', '@android:style/Theme.NoTitleBar')
+            build_cmd += [('--android-apptheme', apptheme)]
 
         # android.compile_options
         compile_options = config.getlist('app', 'android.add_compile_options', [])
