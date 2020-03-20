@@ -1233,7 +1233,18 @@ class TargetAndroid(Target):
             arch=self._arch)
 
         # copy to our place
-        copyfile(join(apk_dir, apk), join(self.buildozer.bin_dir, apk_dest))
+        bootstrap = self._p4a_bootstrap
+        if bootstrap == 'library':
+            # XXX: this has to be moved to a seperate command 'aar'
+            aar_dir = join(dist_dir, "build", "outputs", "aar")
+            aar = u'{packagename}-{mode}.aar'.format(
+                packagename=packagename_src, mode=mode)
+            aar_dest = u'{packagename}-{version}-{arch}-{mode}.aar'.format(
+                packagename=packagename, mode=mode, version=version,
+                arch=self._arch)
+            copyfile(join(aar_dir, aar), join(self.buildozer.bin_dir, aar_dest))
+        else:
+            copyfile(join(apk_dir, apk), join(self.buildozer.bin_dir, apk_dest))
 
         self.buildozer.info('Android packaging done!')
         self.buildozer.info(
