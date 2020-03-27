@@ -60,7 +60,7 @@ class TargetAndroid(Target):
     p4a_directory_name = "python-for-android"
     p4a_fork = 'kivy'
     p4a_branch = 'master'
-    p4a_apk_cmd = "apk --debug --bootstrap="
+    p4a_build_cmd = "%s --debug --bootstrap="
     p4a_recommended_ndk_version = None
     extra_p4a_args = ''
 
@@ -74,7 +74,7 @@ class TargetAndroid(Target):
         self._p4a_cmd = '{} -m pythonforandroid.toolchain '.format(executable)
         self._p4a_bootstrap = self.buildozer.config.getdefault(
             'app', 'p4a.bootstrap', 'sdl2')
-        self.p4a_apk_cmd += self._p4a_bootstrap
+        self.p4a_build_cmd += self._p4a_bootstrap
         color = 'always' if USE_COLOR else 'never'
         self.extra_p4a_args = ' --color={} --storage-dir="{}"'.format(
             color, self._build_dir)
@@ -830,7 +830,8 @@ class TargetAndroid(Target):
         # wrapper from previous old_toolchain to new toolchain
         dist_name = self.buildozer.config.get('app', 'package.name')
         local_recipes = self.get_local_recipes_dir()
-        cmd = [self.p4a_apk_cmd, "--dist_name", dist_name]
+        self.p4a_build_cmd = self.p4a_build_cmd % self.buildozer.config.getdefault('app', 'p4a.command', 'apk')
+        cmd = [self.p4a_build_cmd, "--dist_name", dist_name]
         for args in build_cmd:
             option, values = args[0], args[1:]
             if option == "debug":
