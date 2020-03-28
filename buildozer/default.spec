@@ -255,7 +255,7 @@ android.allow_backup = True
 #p4a.hook =
 
 # (str) p4a command: apk (default) or aar (can be used as library from e.g. an android native project)
-# p4a.command = apk
+#p4a.command = apk
 
 # (str) Bootstrap to use for android builds
 # p4a.bootstrap = sdl2
