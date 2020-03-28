@@ -1235,7 +1235,7 @@ class TargetAndroid(Target):
 
         # copy to our place
         bootstrap = self._p4a_bootstrap
-        if bootstrap == 'library':
+        if bootstrap == 'service_library':
             # XXX: this has to be moved to a seperate command 'aar'
             aar_dir = join(dist_dir, "build", "outputs", "aar")
             aar = u'{packagename}-{mode}.aar'.format(
