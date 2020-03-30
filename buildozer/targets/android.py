@@ -811,7 +811,7 @@ class TargetAndroid(Target):
         old_dist_dir = join(self._build_dir, 'dists', dist_name)
         if exists(old_dist_dir):
             return old_dist_dir
-        matching_dirs = glob.glob(join(self._build_dir, 'dist', '{}*'.format(dist_name)))
+        matching_dirs = glob(join(self._build_dir, 'dist', '{}*'.format(dist_name)))
 
         # If no directory has been found yet, our dist probably
         # doesn't exist yet, so use the expected name
