@@ -77,6 +77,7 @@ COPY --chown=user:user . ${SRC_DIR}
 # installs buildozer and dependencies
 RUN pip3 install --user wheel Cython==0.28.6 ${SRC_DIR}
 
-RUN python3 -m pip install -U pip virtualenv
+# Upgrade virtualenv and pip
+RUN pip3 install -U pip virtualenv
 
 ENTRYPOINT ["buildozer"]
