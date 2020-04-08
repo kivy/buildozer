@@ -2,7 +2,7 @@
 #
 # Build with:
 # docker build --tag=kivy/buildozer .
-# 
+#
 # In order to give the container access to your current working directory
 # it must be mounted using the --volume option.
 # Run with (e.g. `buildozer --version`):
@@ -57,6 +57,8 @@ RUN apt install -qq --yes --no-install-recommends \
     patch \
     pkg-config \
     python2.7 \
+    python-pip \
+    python-setuptools \
     python3-pip \
     python3-setuptools \
     sudo \
@@ -76,5 +78,7 @@ COPY --chown=user:user . ${SRC_DIR}
 
 # installs buildozer and dependencies
 RUN pip3 install --user Cython==0.28.6 ${SRC_DIR}
+
+RUN python2.7 -m pip install -U pip virtualenv
 
 ENTRYPOINT ["buildozer"]
