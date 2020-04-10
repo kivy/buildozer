@@ -34,6 +34,7 @@ jobs:
       run: |
         docker run buildozer --version
     - name: coveralls
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       run: coveralls
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
