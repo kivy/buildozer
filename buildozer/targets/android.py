@@ -159,6 +159,8 @@ class TargetAndroid(Target):
 
     def _sdkmanager(self, *args, **kwargs):
         """Call the sdkmanager in our Android SDK with the given arguments."""
+        # Add --sdk_root to account for Android command line tools bug
+        args += (f"--sdk_root={self.android_sdk_dir}",)
         # Use the android-sdk dir as cwd by default
         kwargs['cwd'] = kwargs.get('cwd', self.android_sdk_dir)
         command = self.sdkmanager_path + ' ' + ' '.join(args)
@@ -530,8 +532,9 @@ class TargetAndroid(Target):
             # This leads to a stderr "Broken pipe" message which is harmless,
             # but doesn't look good on terminal, hence redirecting to /dev/null
             yes_command = 'yes 2>/dev/null'
-            command = '{} | {} --licenses'.format(
-                yes_command, self.sdkmanager_path)
+            command = "{} | {} --licenses --sdk_root={}".format(
+                yes_command, self.sdkmanager_path, self.android_sdk_dir
+            )
             self.buildozer.cmd(command, cwd=self.android_sdk_dir)
         else:
             kwargs['show_output'] = True
