@@ -25,7 +25,7 @@ jobs:
 
     - name: Requirements
       run: |
-        pip install --timeout=120 -U setuptools tox>=2.0
+        pip install -U coveralls setuptools tox>=2.0
         tox
     - name: Build
       run: |
@@ -33,3 +33,7 @@ jobs:
     - name: Test
       run: |
         docker run buildozer --version
+    - name: coveralls
+      run: coveralls
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
