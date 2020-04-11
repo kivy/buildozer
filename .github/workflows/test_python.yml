@@ -28,14 +28,17 @@ jobs:
         pip install -U coveralls setuptools tox>=2.0
     - name: Tox
       run: tox
-    - name: Docker build
-      run: |
-        docker build --tag=buildozer .
-    - name: Docker run
-      run: |
-        docker run buildozer --version
     - name: Coveralls
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_SERVICE_NAME: github
       run: coveralls
+
+  Docker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Docker build
+      run: docker build --tag=kivy/buildozer .
+    - name: Docker run
+      run: docker run kivy/buildozer --version
