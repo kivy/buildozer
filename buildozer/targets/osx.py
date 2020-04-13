@@ -114,7 +114,6 @@ class TargetOSX(Target):
 
         bc = self.buildozer.config
         bcg = bc.get
-        bcgl = bc.getlist
         package_name = bcg('app', 'package.name')
         domain = bcg('app', 'package.domain')
         title = bcg('app', 'title')

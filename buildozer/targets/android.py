@@ -374,13 +374,10 @@ class TargetAndroid(Target):
         self.buildozer.info('Android SDK is missing, downloading')
         if platform in ('win32', 'cygwin'):
             archive = 'sdk-tools-windows-{}.zip'.format(DEFAULT_SDK_TAG)
-            unpacked = 'android-sdk-windows'
         elif platform in ('darwin', ):
             archive = 'sdk-tools-darwin-{}.zip'.format(DEFAULT_SDK_TAG)
-            unpacked = 'android-sdk-macosx'
         elif platform.startswith('linux'):
             archive = 'sdk-tools-linux-{}.zip'.format(DEFAULT_SDK_TAG)
-            unpacked = 'android-sdk-linux'
         else:
             raise SystemError('Unsupported platform: {0}'.format(platform))
 
@@ -784,7 +781,6 @@ class TargetAndroid(Target):
         if local_recipes:
             options.append('--local-recipes')
             options.append(local_recipes)
-        config = self.buildozer.config
         self._p4a(
             ("create --dist_name={} --bootstrap={} --requirements={} "
              "--arch {} {}").format(
@@ -811,7 +807,6 @@ class TargetAndroid(Target):
         old_dist_dir = join(self._build_dir, 'dists', dist_name)
         if exists(old_dist_dir):
             return old_dist_dir
-        matching_dirs = glob.glob(join(self._build_dir, 'dist', '{}*'.format(dist_name)))
 
         # If no directory has been found yet, our dist probably
         # doesn't exist yet, so use the expected name
