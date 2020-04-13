@@ -53,4 +53,3 @@ class JsonStore(object):
         else:
             with io.open(self.filename, 'w', encoding='utf-8') as fd:
                 fd.write(unicode(dumps(self.data, ensure_ascii=False)))
-
