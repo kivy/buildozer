@@ -88,7 +88,7 @@ class TestTargetAndroid:
     def test_init_positional_buildozer(self):
         """Positional `buildozer` argument is required."""
         with pytest.raises(TypeError) as ex_info:
-            target_android = TargetAndroid()
+            TargetAndroid()
         assert ex_info.value.args == (
             "__init__() missing 1 required positional argument: 'buildozer'",
         )

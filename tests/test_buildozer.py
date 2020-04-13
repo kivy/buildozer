@@ -48,8 +48,8 @@ class TestBuildozer(unittest.TestCase):
         """
         with open(filepath) as f:
             file_content = f.read()
+        file_content = re.sub(pattern, replace, file_content)
         with open(filepath, 'w') as f:
-            file_content = re.sub(pattern, replace, file_content)
             f.write(file_content)
 
     @classmethod
@@ -61,6 +61,7 @@ class TestBuildozer(unittest.TestCase):
         replace = 'log_level = {}'.format(log_level)
         cls.file_re_sub(specfilename, pattern, replace)
         buildozer = Buildozer(specfilename)
+        assert buildozer.log_level == log_level
 
     def test_buildozer_base(self):
         """
@@ -155,15 +156,17 @@ class TestBuildozer(unittest.TestCase):
 
         # Mock first run
         with mock.patch('buildozer.Buildozer.download') as download, \
-                mock.patch('buildozer.Buildozer.file_extract') as extract_file, \
+                mock.patch('buildozer.Buildozer.file_extract') as m_file_extract, \
                 mock.patch('os.makedirs'):
             ant_path = target._install_apache_ant()
-            assert ant_path == my_ant_path
-
+        assert m_file_extract.call_args_list == [mock.call(mock.ANY, cwd='/my/ant/path')]
+        assert ant_path == my_ant_path
+        assert download.call_args_list == [
+            mock.call("http://archive.apache.org/dist/ant/binaries/", mock.ANY, cwd=my_ant_path)]
         # Mock ant already installed
         with mock.patch.object(Buildozer, 'file_exists', return_value=True):
             ant_path = target._install_apache_ant()
-            assert ant_path == my_ant_path
+        assert ant_path == my_ant_path
 
     def test_cmd_unicode_decode(self):
         """
