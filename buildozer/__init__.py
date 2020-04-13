@@ -940,7 +940,6 @@ class Buildozer(object):
             return package_name
         return '{}.{}'.format(package_domain, package_name)
 
-
     #
     # command line invocation
     #
@@ -1197,8 +1196,6 @@ class Buildozer(object):
                 print('merged ({}, {}) into {} (profile is {})'.format(name,
                         value, section_base, profile))
                 self.config.set(section_base, name, value)
-
-
 
     def _get_config_list_values(self, *args, **kwargs):
         kwargs['with_values'] = True
