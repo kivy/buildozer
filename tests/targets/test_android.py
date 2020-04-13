@@ -45,6 +45,12 @@ def patch_buildozer_checkbin():
     return patch_buildozer("checkbin")
 
 
+def patch_target_android(method):
+    return mock.patch(
+        "buildozer.targets.android.TargetAndroid.{method}".format(method=method)
+    )
+
+
 class TestTargetAndroid:
     @staticmethod
     def default_specfile_path():
@@ -167,3 +173,50 @@ class TestTargetAndroid:
             mock.call("sdk-tools-linux-4333796.zip", cwd=mock.ANY)
         ]
         assert sdk_dir.endswith(".buildozer/android/platform/android-sdk")
+
+    def test_build_package(self):
+        """Basic tests for the build_package() method."""
+        expected_dist_dir = "/tmp/.buildozer/android/platform/build-armeabi-v7a/dists/myapp__armeabi-v7a"
+        with patch_target_android(
+            "_update_libraries_references"
+        ) as m_update_libraries_references, patch_target_android(
+            "_generate_whitelist"
+        ) as m_generate_whitelist, mock.patch(
+            "buildozer.targets.android.TargetAndroid.execute_build_package"
+        ) as m_execute_build_package, mock.patch(
+            "buildozer.targets.android.copyfile"
+        ) as m_copyfile, mock.patch(
+            "buildozer.targets.android.os.listdir"
+        ) as m_listdir:
+            m_listdir.return_value = ["30.0.0-rc2"]
+            self.target_android.build_package()
+        assert m_listdir.call_count == 1
+        assert m_update_libraries_references.call_args_list == [
+            mock.call(expected_dist_dir)
+        ]
+        assert m_generate_whitelist.call_args_list == [mock.call(expected_dist_dir)]
+        assert m_execute_build_package.call_args_list == [
+            mock.call(
+                [
+                    ("--name", "'My Application'"),
+                    ("--version", "0.1"),
+                    ("--package", "org.test.myapp"),
+                    ("--minsdk", "21"),
+                    ("--ndk-api", "21"),
+                    ("--private", "/tmp/.buildozer/android/app"),
+                    ("--android-entrypoint", "org.kivy.android.PythonActivity"),
+                    ("--android-apptheme", "@android:style/Theme.NoTitleBar"),
+                    ("--orientation", "portrait"),
+                    ("--window",),
+                    ("debug",),
+                ]
+            )
+        ]
+        assert m_copyfile.call_args_list == [
+            mock.call(
+                "{expected_dist_dir}/bin/MyApplication-0.1-debug.apk".format(
+                    expected_dist_dir=expected_dist_dir
+                ),
+                "/tmp/bin/myapp-0.1-armeabi-v7a-debug.apk",
+            )
+        ]
