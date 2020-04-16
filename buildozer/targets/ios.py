@@ -411,7 +411,7 @@ class TargetIos(Target):
 
         if save:
             with open(password_file, 'wb') as fd:
-                fd.write(password)
+                fd.write(password.encode())
 
 def get_target(buildozer):
     return TargetIos(buildozer)
