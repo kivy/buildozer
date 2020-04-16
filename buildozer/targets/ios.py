@@ -7,10 +7,11 @@ if sys.platform != 'darwin':
     raise NotImplementedError('Windows platform not yet working for Android')
 
 import plistlib
-from buildozer import BuildozerCommandException
+from buildozer import BuildozerCommandException, IS_PY3
 from buildozer.target import Target, no_config
 from os.path import join, basename, expanduser, realpath
 from getpass import getpass
+
 
 PHP_TEMPLATE = '''
 <?php
@@ -395,7 +396,12 @@ class TargetIos(Target):
 
         save = None
         while save is None:
-            q = raw_input('Do you want to save the password (Y/n): ')
+            if IS_PY3:
+                input_func = input
+            else:
+                input_func = raw_input
+
+            q = input_func('Do you want to save the password (Y/n): ')
             if q in ('', 'Y'):
                 save = True
             elif q == 'n':
