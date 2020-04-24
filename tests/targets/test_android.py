@@ -51,6 +51,10 @@ def patch_target_android(method):
     )
 
 
+def patch_platform(platform):
+    return mock.patch("buildozer.targets.android.platform", platform)
+
+
 class TestTargetAndroid:
     @staticmethod
     def default_specfile_path():
@@ -82,8 +86,11 @@ class TestTargetAndroid:
         assert self.target_android.build_mode == "debug"
         assert self.target_android.buildozer == self.buildozer
         assert (
-            self.target_android.extra_p4a_args
-            == ' --color=always --storage-dir="/tmp/.buildozer/android/platform/build-armeabi-v7a" --ndk-api=21'
+            self.target_android.extra_p4a_args == (
+                ' --color=always'
+                ' --storage-dir="{buildozer_dir}/android/platform/build-armeabi-v7a" --ndk-api=21'.format(
+                buildozer_dir=self.buildozer.buildozer_dir)
+            )
         )
         assert self.target_android.p4a_apk_cmd == "apk --debug --bootstrap=sdl2"
         assert self.target_android.platform_update is False
@@ -146,7 +153,8 @@ class TestTargetAndroid:
             self.target_android.check_configuration_tokens()
         assert m_check_configuration_tokens.call_args_list == [mock.call([])]
 
-    def test_install_android_sdk(self):
+    @pytest.mark.parametrize("platform", ["linux", "darwin"])
+    def test_install_android_sdk(self, platform):
         """Basic tests for the _install_android_sdk() method."""
         with patch_buildozer_file_exists() as m_file_exists, patch_buildozer_download() as m_download:
             m_file_exists.return_value = True
@@ -156,27 +164,32 @@ class TestTargetAndroid:
         ]
         assert m_download.call_args_list == []
         assert sdk_dir.endswith(".buildozer/android/platform/android-sdk")
-        with patch_buildozer_file_exists() as m_file_exists, patch_buildozer_download() as m_download, patch_buildozer_file_extract() as m_file_extract:
+        with patch_buildozer_file_exists() as m_file_exists, \
+                patch_buildozer_download() as m_download, \
+                patch_buildozer_file_extract() as m_file_extract, \
+                patch_platform(platform):
             m_file_exists.return_value = False
             sdk_dir = self.target_android._install_android_sdk()
         assert m_file_exists.call_args_list == [
             mock.call(self.target_android.android_sdk_dir)
         ]
+        archive = "sdk-tools-{platform}-4333796.zip".format(platform=platform)
         assert m_download.call_args_list == [
             mock.call(
                 "http://dl.google.com/android/repository/",
-                "sdk-tools-linux-4333796.zip",
+                archive,
                 cwd=mock.ANY,
             )
         ]
-        assert m_file_extract.call_args_list == [
-            mock.call("sdk-tools-linux-4333796.zip", cwd=mock.ANY)
-        ]
+        assert m_file_extract.call_args_list == [mock.call(archive, cwd=mock.ANY)]
         assert sdk_dir.endswith(".buildozer/android/platform/android-sdk")
 
     def test_build_package(self):
         """Basic tests for the build_package() method."""
-        expected_dist_dir = "/tmp/.buildozer/android/platform/build-armeabi-v7a/dists/myapp__armeabi-v7a"
+        expected_dist_dir = (
+            "{buildozer_dir}/android/platform/build-armeabi-v7a/dists/myapp__armeabi-v7a".format(
+            buildozer_dir=self.buildozer.buildozer_dir)
+        )
         with patch_target_android(
             "_update_libraries_references"
         ) as m_update_libraries_references, patch_target_android(
@@ -203,7 +216,7 @@ class TestTargetAndroid:
                     ("--package", "org.test.myapp"),
                     ("--minsdk", "21"),
                     ("--ndk-api", "21"),
-                    ("--private", "/tmp/.buildozer/android/app"),
+                    ("--private", "{buildozer_dir}/android/app".format(buildozer_dir=self.buildozer.buildozer_dir)),
                     ("--android-entrypoint", "org.kivy.android.PythonActivity"),
                     ("--android-apptheme", "@android:style/Theme.NoTitleBar"),
                     ("--orientation", "portrait"),
@@ -217,6 +230,6 @@ class TestTargetAndroid:
                 "{expected_dist_dir}/bin/MyApplication-0.1-debug.apk".format(
                     expected_dist_dir=expected_dist_dir
                 ),
-                "/tmp/bin/myapp-0.1-armeabi-v7a-debug.apk",
+                "{bin_dir}/myapp-0.1-armeabi-v7a-debug.apk".format(bin_dir=self.buildozer.bin_dir),
             )
         ]
