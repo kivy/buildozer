@@ -1025,6 +1025,9 @@ class TargetAndroid(Target):
             ("--ndk-api", config.getdefault('app', 'android.minapi',
                                             self.android_minapi)),
         ]
+        apk_version_code = environ.get('APK_VERSION_CODE', None)
+        if apk_version_code is not None:
+            build_cmd += [("--numeric-version", apk_version_code)]
         is_private_storage = config.getbooldefault(
             'app', 'android.private_storage', True)
         if is_private_storage:
