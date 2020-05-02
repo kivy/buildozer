@@ -17,10 +17,10 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v2
 
     - name: Setup python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python }}
 
@@ -38,8 +38,23 @@ jobs:
   Docker:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v2
     - name: Docker build
       run: docker build --tag=kivy/buildozer .
     - name: Docker run
       run: docker run kivy/buildozer --version
+
+  Integration:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - uses: actions/checkout@v2
+    - name: Setup environment
+      run: |
+        pip install -e .
+        pip install Cython==0.28.6
+    - run: buildozer --help
+    - run: buildozer init
