@@ -58,3 +58,18 @@ jobs:
         pip install Cython==0.28.6
     - run: buildozer --help
     - run: buildozer init
+
+  Python2:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 2.7
+    - uses: actions/checkout@v2
+    - name: Try Python 2 install
+      run: |
+        # we don't want to build to fail with the exit 1 so we catch with "||"
+        python2 -m pip install -e . 2> error.log || echo Failing as expected
+        cat error.log
+        grep "Unsupported Python version" error.log
