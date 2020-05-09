@@ -42,6 +42,8 @@
 - Fix Dockerfile dependencies [\#1053](https://github.com/kivy/buildozer/pull/1053) ([Sirfanas](https://github.com/Sirfanas))
 - Setup coverage testing [\#1060](https://github.com/kivy/buildozer/pull/1060) ([AndreMiras](https://github.com/AndreMiras))
 - Starts unit testing buildozer/targets/android.py [\#1061](https://github.com/kivy/buildozer/pull/1061) ([AndreMiras](https://github.com/AndreMiras))
+- Coveralls TOKEN is only available on branch master [\#1062](https://github.com/kivy/buildozer/pull/1062) ([AndreMiras](https://github.com/AndreMiras))
+- Fixes coveralls.io on pull requests [\#1063](https://github.com/kivy/buildozer/pull/1063) ([AndreMiras](https://github.com/AndreMiras))
 - PEP8 organisation and fixes [\#1065](https://github.com/kivy/buildozer/pull/1065) ([AndreMiras](https://github.com/AndreMiras))
 - F841: local variable is assigned to but never used [\#1066](https://github.com/kivy/buildozer/pull/1066) ([AndreMiras](https://github.com/AndreMiras))
 - Dedicated Docker build/run job [\#1068](https://github.com/kivy/buildozer/pull/1068) ([AndreMiras](https://github.com/AndreMiras))
