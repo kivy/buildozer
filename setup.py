@@ -2,6 +2,7 @@
 Buildozer
 '''
 
+import sys
 from setuptools import setup
 from os.path import dirname, join
 import codecs
@@ -10,6 +11,21 @@ import re
 import io
 
 here = os.path.abspath(os.path.dirname(__file__))
+
+CURRENT_PYTHON = sys.version_info[:2]
+REQUIRED_PYTHON = (3, 6)
+
+# This check and everything above must remain compatible with Python 2.7.
+if CURRENT_PYTHON < REQUIRED_PYTHON:
+    sys.stderr.write("""
+==========================
+Unsupported Python version
+==========================
+This version of buildozer requires Python {}.{}, but you're trying to
+install it on Python {}.{}.
+""".format(*(REQUIRED_PYTHON + CURRENT_PYTHON)))
+    sys.exit(1)
+
 
 
 def find_version(*file_paths):
@@ -52,14 +68,10 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta', 'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.1',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5'
+        'Programming Language :: Python :: 3.6'
+        'Programming Language :: Python :: 3.7'
+        'Programming Language :: Python :: 3.8'
     ],
     entry_points={
         'console_scripts': [
