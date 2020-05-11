@@ -52,11 +52,11 @@ RUN apt install -qq --yes --no-install-recommends \
     git \
     libffi-dev \
     libltdl-dev \
+    libssl-dev \
     libtool \
     openjdk-8-jdk \
     patch \
     pkg-config \
-    python2.7 \
     python3-pip \
     python3-setuptools \
     sudo \
