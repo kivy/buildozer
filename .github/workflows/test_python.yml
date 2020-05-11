@@ -62,6 +62,10 @@ jobs:
       run: |
         sed "s/# android.accept_sdk_license = False/android.accept_sdk_license = True/" -i buildozer.spec
         buildozer android p4a -- --help
+    - name: buildozer android debug
+      run: |
+        touch main.py
+        buildozer android debug
 
   Python2:
     runs-on: ubuntu-latest
