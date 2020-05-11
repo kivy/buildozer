@@ -1,5 +1,56 @@
 # Change Log
 
+## [Unreleased](https://github.com/kivy/buildozer/tree/master)
+[Full Changelog](https://github.com/kivy/buildozer/compare/1.0...master)
+
+**Fixed bugs:**
+
+- NameError: name 'raw\_input' is not defined [\#1070](https://github.com/kivy/buildozer/issues/1070)
+- Setup coverage testing [\#1058](https://github.com/kivy/buildozer/issues/1058)
+- AttributeError: 'function' object has no attribute 'glob' [\#1044](https://github.com/kivy/buildozer/issues/1044)
+
+**Closed issues:**
+
+- buildozer is choosing odd venv, and using a different python? [\#1080](https://github.com/kivy/buildozer/issues/1080)
+- Buildozer just wont compile my app [\#1074](https://github.com/kivy/buildozer/issues/1074)
+- Autoreconf not found? [\#1072](https://github.com/kivy/buildozer/issues/1072)
+- error while buildozer android debug deploy run [\#1064](https://github.com/kivy/buildozer/issues/1064)
+- Syntax error in Kivy and KivyMD dependencies file when using Buildozer to compile KivyMD app [\#1051](https://github.com/kivy/buildozer/issues/1051)
+- Adding CFFI as a Buildozer requirement breaks the Android build [\#1050](https://github.com/kivy/buildozer/issues/1050)
+- Is buildozer compatible with Python 3.7 [\#1048](https://github.com/kivy/buildozer/issues/1048)
+- Could not resolve org.jetbrains.kotlin:kotlin-stdlib-jre8:1.2.0 [\#1042](https://github.com/kivy/buildozer/issues/1042)
+- Error while running buildozer android debug deploy [\#1038](https://github.com/kivy/buildozer/issues/1038)
+- cant able to build apk on linux with python3 [\#1033](https://github.com/kivy/buildozer/issues/1033)
+- Keystore was tampered with, or password was incorrect [\#1028](https://github.com/kivy/buildozer/issues/1028)
+- Windows support to build Android APK [\#1022](https://github.com/kivy/buildozer/issues/1022)
+- How to make third party site-packages 'requests' run on Android [\#1021](https://github.com/kivy/buildozer/issues/1021)
+- Crash on buildozer android debug command. Command failed: /usr/bin/python -m pythonforandroid.toolchain [\#1017](https://github.com/kivy/buildozer/issues/1017)
+- Build failed: Couldn't find executable for CC [\#1014](https://github.com/kivy/buildozer/issues/1014)
+- Cloning Error of python-for-android [\#1008](https://github.com/kivy/buildozer/issues/1008)
+- checking whether the C compiler works... no [\#1007](https://github.com/kivy/buildozer/issues/1007)
+- Kivy :How to ask for storage permission when app starts [\#1004](https://github.com/kivy/buildozer/issues/1004)
+- Buildozer :No module named 'numpy.core.\_multiarray\_umath' [\#1002](https://github.com/kivy/buildozer/issues/1002)
+- Kivy app Crashes while import openpyxl [\#1001](https://github.com/kivy/buildozer/issues/1001)
+- Warning when i run "buildozer -v android debug" [\#982](https://github.com/kivy/buildozer/issues/982)
+- sdkmanager is notinstalled [\#927](https://github.com/kivy/buildozer/issues/927)
+
+**Merged pull requests:**
+
+- Android gradle build: fix apk name [\#1025](https://github.com/kivy/buildozer/pull/1025) ([SomberNight](https://github.com/SomberNight))
+- Fix config typo in default.spec [\#1026](https://github.com/kivy/buildozer/pull/1026) ([touilleMan](https://github.com/touilleMan))
+- Updates default buildozer.spec NDK from 17c to 19b [\#1041](https://github.com/kivy/buildozer/pull/1041) ([AndreMiras](https://github.com/AndreMiras))
+- Fix Dockerfile dependencies [\#1053](https://github.com/kivy/buildozer/pull/1053) ([Sirfanas](https://github.com/Sirfanas))
+- Setup coverage testing [\#1060](https://github.com/kivy/buildozer/pull/1060) ([AndreMiras](https://github.com/AndreMiras))
+- Starts unit testing buildozer/targets/android.py [\#1061](https://github.com/kivy/buildozer/pull/1061) ([AndreMiras](https://github.com/AndreMiras))
+- Coveralls TOKEN is only available on branch master [\#1062](https://github.com/kivy/buildozer/pull/1062) ([AndreMiras](https://github.com/AndreMiras))
+- Fixes coveralls.io on pull requests [\#1063](https://github.com/kivy/buildozer/pull/1063) ([AndreMiras](https://github.com/AndreMiras))
+- PEP8 organisation and fixes [\#1065](https://github.com/kivy/buildozer/pull/1065) ([AndreMiras](https://github.com/AndreMiras))
+- F841: local variable is assigned to but never used [\#1066](https://github.com/kivy/buildozer/pull/1066) ([AndreMiras](https://github.com/AndreMiras))
+- Dedicated Docker build/run job [\#1068](https://github.com/kivy/buildozer/pull/1068) ([AndreMiras](https://github.com/AndreMiras))
+- Unit tests TargetAndroid.build\_package() [\#1069](https://github.com/kivy/buildozer/pull/1069) ([AndreMiras](https://github.com/AndreMiras))
+- Fix NameError with Python 3 and iOS target [\#1071](https://github.com/kivy/buildozer/pull/1071) ([lerela](https://github.com/lerela))
+- Also tests against macOS platform [\#1078](https://github.com/kivy/buildozer/pull/1078) ([AndreMiras](https://github.com/AndreMiras))
+
 ## [1.0](https://github.com/kivy/buildozer/tree/1.0) (2019-12-22)
 [Full Changelog](https://github.com/kivy/buildozer/compare/0.39...1.0)
 
