@@ -105,9 +105,9 @@ Available targets:
     ios            iOS target, based on kivy-ios project
 
 Global commands (without target):
-    distclean          Clean the whole Buildozer environment.
-    help               Show the Buildozer help.
-    init               Create a initial buildozer.spec in the current directory
+    distclean          Clean the whole Buildozer environment
+    help               Show the Buildozer help
+    init               Create an initial buildozer.spec in the current directory
     serve              Serve the bin directory via SimpleHTTPServer
     setdefault         Set the default command to run when no arguments are given
     version            Show the Buildozer version
