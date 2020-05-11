@@ -58,6 +58,10 @@ jobs:
         pip install Cython==0.28.6
     - run: buildozer --help
     - run: buildozer init
+    - name: SDK, NDK and p4a download
+      run: |
+        sed "s/# android.accept_sdk_license = False/android.accept_sdk_license = True/" -i buildozer.spec
+        buildozer android p4a -- --help
 
   Python2:
     runs-on: ubuntu-latest
