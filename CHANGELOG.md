@@ -5,6 +5,7 @@
 
 **Fixed bugs:**
 
+- [Docker image] SSLError("Can't connect to HTTPS URL because the SSL module is not available.") [\#1096](https://github.com/kivy/buildozer/issues/1096)
 - NameError: name 'raw\_input' is not defined [\#1070](https://github.com/kivy/buildozer/issues/1070)
 - Setup coverage testing [\#1058](https://github.com/kivy/buildozer/issues/1058)
 - AttributeError: 'function' object has no attribute 'glob' [\#1044](https://github.com/kivy/buildozer/issues/1044)
@@ -36,20 +37,24 @@
 
 **Merged pull requests:**
 
-- Android gradle build: fix apk name [\#1025](https://github.com/kivy/buildozer/pull/1025) ([SomberNight](https://github.com/SomberNight))
-- Fix config typo in default.spec [\#1026](https://github.com/kivy/buildozer/pull/1026) ([touilleMan](https://github.com/touilleMan))
-- Updates default buildozer.spec NDK from 17c to 19b [\#1041](https://github.com/kivy/buildozer/pull/1041) ([AndreMiras](https://github.com/AndreMiras))
-- Fix Dockerfile dependencies [\#1053](https://github.com/kivy/buildozer/pull/1053) ([Sirfanas](https://github.com/Sirfanas))
-- Setup coverage testing [\#1060](https://github.com/kivy/buildozer/pull/1060) ([AndreMiras](https://github.com/AndreMiras))
-- Starts unit testing buildozer/targets/android.py [\#1061](https://github.com/kivy/buildozer/pull/1061) ([AndreMiras](https://github.com/AndreMiras))
-- Coveralls TOKEN is only available on branch master [\#1062](https://github.com/kivy/buildozer/pull/1062) ([AndreMiras](https://github.com/AndreMiras))
-- Fixes coveralls.io on pull requests [\#1063](https://github.com/kivy/buildozer/pull/1063) ([AndreMiras](https://github.com/AndreMiras))
-- PEP8 organisation and fixes [\#1065](https://github.com/kivy/buildozer/pull/1065) ([AndreMiras](https://github.com/AndreMiras))
-- F841: local variable is assigned to but never used [\#1066](https://github.com/kivy/buildozer/pull/1066) ([AndreMiras](https://github.com/AndreMiras))
-- Dedicated Docker build/run job [\#1068](https://github.com/kivy/buildozer/pull/1068) ([AndreMiras](https://github.com/AndreMiras))
-- Unit tests TargetAndroid.build\_package() [\#1069](https://github.com/kivy/buildozer/pull/1069) ([AndreMiras](https://github.com/AndreMiras))
-- Fix NameError with Python 3 and iOS target [\#1071](https://github.com/kivy/buildozer/pull/1071) ([lerela](https://github.com/lerela))
+- Fixes missing libssl-dev dependency [\#1099](https://github.com/kivy/buildozer/pull/1099) ([AndreMiras](https://github.com/AndreMiras))
+- Drops Python 2 support [\#1094](https://github.com/kivy/buildozer/pull/1094) ([AndreMiras](https://github.com/AndreMiras))
+- Checks SDK, NDK and p4a get downloaded on first run [\#1093](https://github.com/kivy/buildozer/pull/1093) ([AndreMiras](https://github.com/AndreMiras))
+- Integration testing [\#1083](https://github.com/kivy/buildozer/pull/1083) ([AndreMiras](https://github.com/AndreMiras))
 - Also tests against macOS platform [\#1078](https://github.com/kivy/buildozer/pull/1078) ([AndreMiras](https://github.com/AndreMiras))
+- Fix NameError with Python 3 and iOS target [\#1071](https://github.com/kivy/buildozer/pull/1071) ([lerela](https://github.com/lerela))
+- Unit tests TargetAndroid.build\_package() [\#1069](https://github.com/kivy/buildozer/pull/1069) ([AndreMiras](https://github.com/AndreMiras))
+- Dedicated Docker build/run job [\#1068](https://github.com/kivy/buildozer/pull/1068) ([AndreMiras](https://github.com/AndreMiras))
+- F841: local variable is assigned to but never used [\#1066](https://github.com/kivy/buildozer/pull/1066) ([AndreMiras](https://github.com/AndreMiras))
+- PEP8 organisation and fixes [\#1065](https://github.com/kivy/buildozer/pull/1065) ([AndreMiras](https://github.com/AndreMiras))
+- Fixes coveralls.io on pull requests [\#1063](https://github.com/kivy/buildozer/pull/1063) ([AndreMiras](https://github.com/AndreMiras))
+- Coveralls TOKEN is only available on branch master [\#1062](https://github.com/kivy/buildozer/pull/1062) ([AndreMiras](https://github.com/AndreMiras))
+- Starts unit testing buildozer/targets/android.py [\#1061](https://github.com/kivy/buildozer/pull/1061) ([AndreMiras](https://github.com/AndreMiras))
+- Setup coverage testing [\#1060](https://github.com/kivy/buildozer/pull/1060) ([AndreMiras](https://github.com/AndreMiras))
+- Fix Dockerfile dependencies [\#1053](https://github.com/kivy/buildozer/pull/1053) ([Sirfanas](https://github.com/Sirfanas))
+- Updates default buildozer.spec NDK from 17c to 19b [\#1041](https://github.com/kivy/buildozer/pull/1041) ([AndreMiras](https://github.com/AndreMiras))
+- Fix config typo in default.spec [\#1026](https://github.com/kivy/buildozer/pull/1026) ([touilleMan](https://github.com/touilleMan))
+- Android gradle build: fix apk name [\#1025](https://github.com/kivy/buildozer/pull/1025) ([SomberNight](https://github.com/SomberNight))
 
 ## [1.0](https://github.com/kivy/buildozer/tree/1.0) (2019-12-22)
 [Full Changelog](https://github.com/kivy/buildozer/compare/0.39...1.0)
