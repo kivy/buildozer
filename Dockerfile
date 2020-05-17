@@ -42,7 +42,8 @@ ENV LANG="en_US.UTF-8" \
     LC_ALL="en_US.UTF-8"
 
 # system requirements to build most of the recipes
-RUN apt install -qq --yes --no-install-recommends \
+RUN apt update -qq > /dev/null && \
+    apt install -qq --yes --no-install-recommends \
     autoconf \
     automake \
     build-essential \
