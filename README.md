@@ -31,16 +31,26 @@ Note that this tool has nothing to do with the eponymous online build service
 - Install buildozer:
 
       # via pip (latest stable, recommended)
-      sudo pip install buildozer
+      # if you use a virtualenv, don't use the `--user` option
+      pip install --user buildozer
 
       # latest dev version
-      sudo pip install   https://github.com/kivy/buildozer/archive/master.zip
+      # if you use a virtualenv, don't use the `--user` option
+      pip install --user https://github.com/kivy/buildozer/archive/master.zip
 
       # git clone, for working on buildozer
       git clone https://github.com/kivy/buildozer
       cd buildozer
       python setup.py build
-      sudo pip install -e .
+      pip install -e .
+
+- Check buildozer is in your path
+
+      `which buildozer`
+      # if there is no result, and you installed with --user, add this line at the end of your `~/.bashrc` file.
+      export PATH=~/.local/bin/:$PATH
+      # and then run
+      . ~/.bashrc
 
 - Go into your application directory and run:
 
