@@ -27,7 +27,6 @@ except ImportError:
     from ConfigParser import SafeConfigParser
 try:
     import termios
-    import tty
     has_termios = True
 except ImportError:
     has_termios = False
@@ -131,7 +130,7 @@ class BuildozerRemote(Buildozer):
                 self.package_full_name)
         self.debug('Remote build directory: {}'.format(self.remote_build_dir))
         self._ssh_mkdir(self.remote_build_dir)
-        self._ssh_sync(__path__[0])
+        self._ssh_sync(__path__[0])  # noqa: F821 undefined name
 
     def _sync_application_sources(self):
         self.info('Synchronize application sources')
@@ -159,7 +158,7 @@ class BuildozerRemote(Buildozer):
             self.remote_build_dir,
             '--verbose' if self.log_level == 2 else '',
             ' '.join(args),
-            )
+        )
         self._ssh_command(cmd)
 
     def _ssh_mkdir(self, *args):
@@ -180,7 +179,7 @@ class BuildozerRemote(Buildozer):
         directory = realpath(directory)
         base_strip = directory.rfind('/')
         if mode == 'get':
-            local_dir = join(directory,'bin')
+            local_dir = join(directory, 'bin')
             remote_dir = join(self.remote_build_dir, 'bin')
             if not exists(local_dir):
                 makedirs(local_dir)
@@ -200,9 +199,6 @@ class BuildozerRemote(Buildozer):
 
     def _ssh_command(self, command):
         self.debug('Execute remote command {}'.format(command))
-        #shell = self._ssh_client.invoke_shell()
-        #shell.sendall(command)
-        #shell.sendall('\nexit\n')
         transport = self._ssh_client.get_transport()
         channel = transport.open_session()
         try:
@@ -220,8 +216,6 @@ class BuildozerRemote(Buildozer):
     def _posix_shell(self, chan):
         oldtty = termios.tcgetattr(stdin)
         try:
-            #tty.setraw(stdin.fileno())
-            #tty.setcbreak(stdin.fileno())
             chan.settimeout(0.0)
 
             while True:
@@ -234,7 +228,6 @@ class BuildozerRemote(Buildozer):
                             break
                         stdout.write(x)
                         stdout.flush()
-                        #print len(x), repr(x)
                     except socket.timeout:
                         pass
                 if stdin in r:
@@ -246,7 +239,7 @@ class BuildozerRemote(Buildozer):
             termios.tcsetattr(stdin, termios.TCSADRAIN, oldtty)
 
     # thanks to Mike Looijmans for this code
-    def _windows_shell(self,chan):
+    def _windows_shell(self, chan):
         import threading
 
         stdout.write("Line-buffered terminal emulation. Press F6 or ^Z to send EOF.\r\n\r\n")
@@ -274,6 +267,7 @@ class BuildozerRemote(Buildozer):
             # user hit ^Z or F6
             pass
 
+
 def main():
     try:
         BuildozerRemote().run_command(sys.argv[1:])
@@ -281,6 +275,7 @@ def main():
         pass
     except BuildozerException as error:
         Buildozer().error('%s' % error)
+
 
 if __name__ == '__main__':
     main()
