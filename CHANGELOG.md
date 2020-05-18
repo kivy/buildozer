@@ -1,7 +1,7 @@
 # Change Log
 
-## [Unreleased](https://github.com/kivy/buildozer/tree/master)
-[Full Changelog](https://github.com/kivy/buildozer/compare/1.0...master)
+## [1.1.0](https://github.com/kivy/buildozer/tree/1.1.0) (2020-05-18)
+[Full Changelog](https://github.com/kivy/buildozer/compare/1.0...1.1.0)
 
 **Fixed bugs:**
 
