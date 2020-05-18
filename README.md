@@ -58,19 +58,6 @@ Note that this tool has nothing to do with the eponymous online build service
       # edit the buildozer.spec, then
       buildozer android debug deploy run
 
-## Installing Buildozer with target Python 2
-
-- Follow the same installation and buildozer init as Python 3
-
-- Make sure the following lines are in your buildozer.spec file.:
-
-      # Changes python3 to python2
-      requirements = python2,kivy
-
-- Finally, build, deploy and run the app on your phone::
-
-      buildozer android debug deploy run
-
 
 ## Buildozer Docker image
 

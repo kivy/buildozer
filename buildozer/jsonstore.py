@@ -1,6 +1,6 @@
 """
 Replacement for shelve, using json.
-This is currently needed to correctly support db between Python 2 and 3.
+This was needed to correctly support db between Python 2 and 3.
 """
 
 __all__ = ["JsonStore"]
@@ -10,12 +10,10 @@ import sys
 from json import load, dump, dumps
 from os.path import exists
 
-IS_PY3 = sys.version_info[0] >= 3
-
-class JsonStore(object):
+class JsonStore:
 
     def __init__(self, filename):
-        super(JsonStore, self).__init__()
+        super().__init__()
         self.filename = filename
         self.data = {}
         if exists(filename):
@@ -46,10 +44,5 @@ class JsonStore(object):
         return self.data.keys()
 
     def sync(self):
-        # http://stackoverflow.com/questions/12309269/write-json-data-to-file-in-python/14870531#14870531
-        if IS_PY3:
-            with open(self.filename, 'w') as fd:
-                dump(self.data, fd, ensure_ascii=False)
-        else:
-            with io.open(self.filename, 'w', encoding='utf-8') as fd:
-                fd.write(unicode(dumps(self.data, ensure_ascii=False)))
+        with open(self.filename, 'w') as fd:
+            dump(self.data, fd, ensure_ascii=False)
