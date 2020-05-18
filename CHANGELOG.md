@@ -12,7 +12,17 @@
 
 **Closed issues:**
 
+- Pygallary [\#1109](https://github.com/kivy/buildozer/issues/1109)
+- Buildozer compilation ERROR: No matching distribution found for hostpython2 (from -r requirements.txt (line 2)) [\#1104](https://github.com/kivy/buildozer/issues/1104)
+- Circular errors with Java version and Android SDK [\#1103](https://github.com/kivy/buildozer/issues/1103)
+- APK not running on Android 10? [\#1102](https://github.com/kivy/buildozer/issues/1102)
+- Buildozer command fails: Could not fetch URL https://pypi.org/simple/pip/: There was a problem confirming the ssl certificate [\#1095](https://github.com/kivy/buildozer/issues/1095)
+- Command Failed Error [\#1092](https://github.com/kivy/buildozer/issues/1092)
+- APK Can't be install (package can't be install in android) [\#1091](https://github.com/kivy/buildozer/issues/1091)
+- buildozer Install python 3.8.1 [\#1090](https://github.com/kivy/buildozer/issues/1090)
+- i have weak reference error while using python 3.8 [\#1089](https://github.com/kivy/buildozer/issues/1089)
 - buildozer is choosing odd venv, and using a different python? [\#1080](https://github.com/kivy/buildozer/issues/1080)
+- Fatal Python error: init\_fs\_encoding: failed to get the Python codec of the filesystem encoding [\#1076](https://github.com/kivy/buildozer/issues/1076)
 - Buildozer just wont compile my app [\#1074](https://github.com/kivy/buildozer/issues/1074)
 - Autoreconf not found? [\#1072](https://github.com/kivy/buildozer/issues/1072)
 - error while buildozer android debug deploy run [\#1064](https://github.com/kivy/buildozer/issues/1064)
@@ -37,6 +47,12 @@
 
 **Merged pull requests:**
 
+- Update README.md [\#1111](https://github.com/kivy/buildozer/pull/1111) ([tshirtman](https://github.com/tshirtman))
+- Fixes Docker apt cache missed [\#1107](https://github.com/kivy/buildozer/pull/1107) ([AndreMiras](https://github.com/AndreMiras))
+- Adds libssl-dev to the install dependencies [\#1106](https://github.com/kivy/buildozer/pull/1106) ([AndreMiras](https://github.com/AndreMiras))
+- Automatically publish to PyPI upon tagging [\#1105](https://github.com/kivy/buildozer/pull/1105) ([AndreMiras](https://github.com/AndreMiras))
+- Fix punctuation and typo in README.md [\#1101](https://github.com/kivy/buildozer/pull/1101) ([hematogender](https://github.com/hematogender))
+- Build integration test [\#1100](https://github.com/kivy/buildozer/pull/1100) ([AndreMiras](https://github.com/AndreMiras))
 - Fixes missing libssl-dev dependency [\#1099](https://github.com/kivy/buildozer/pull/1099) ([AndreMiras](https://github.com/AndreMiras))
 - Drops Python 2 support [\#1094](https://github.com/kivy/buildozer/pull/1094) ([AndreMiras](https://github.com/AndreMiras))
 - Checks SDK, NDK and p4a get downloaded on first run [\#1093](https://github.com/kivy/buildozer/pull/1093) ([AndreMiras](https://github.com/AndreMiras))
