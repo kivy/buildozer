@@ -3,14 +3,10 @@ import os
 import codecs
 import unittest
 import buildozer as buildozer_module
-from buildozer import Buildozer, IS_PY3
+from buildozer import Buildozer
 from six import StringIO
 import tempfile
-
-try:
-    from unittest import mock  # Python 3
-except ImportError:
-    import mock  # Python 2
+from unittest import mock
 
 from buildozer.targets.android import (
     TargetAndroid, DEFAULT_ANDROID_NDK_VERSION, MSG_P4A_RECOMMENDED_NDK_ERROR
@@ -201,14 +197,9 @@ class TestBuildozer(unittest.TestCase):
         assert stderr is None
         assert returncode == 0
         # Python2 and Python3 have different approaches for decoding the output
-        if IS_PY3:
-            assert m_stdout.write.call_args_list == [
-                mock.call(command_output.decode('utf-8', 'replace'))
-            ]
-        else:
-            assert m_stdout.write.call_args_list == [
-                mock.call(command_output)
-            ]
+        assert m_stdout.write.call_args_list == [
+            mock.call(command_output.decode('utf-8', 'replace'))
+        ]
 
     def test_p4a_recommended_ndk_version_default_value(self):
         self.set_specfile_log_level(self.specfile.name, 1)

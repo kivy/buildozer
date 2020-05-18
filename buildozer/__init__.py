@@ -6,7 +6,7 @@ Generic Python packager for Android / iOS. Desktop later.
 
 '''
 
-__version__ = '1.1.0'
+__version__ = '1.1.1.dev0'
 
 import os
 import re
@@ -26,12 +26,8 @@ from fnmatch import fnmatch
 
 from pprint import pformat
 
-try:  # Python 3
-    from urllib.request import FancyURLopener
-    from configparser import SafeConfigParser
-except ImportError:  # Python 2
-    from urllib import FancyURLopener
-    from ConfigParser import SafeConfigParser
+from urllib.request import FancyURLopener
+from configparser import SafeConfigParser
 try:
     import fcntl
 except ImportError:
@@ -73,7 +69,6 @@ except ImportError:
 LOG_LEVELS_C = (RED, BLUE, BLACK)
 LOG_LEVELS_T = 'EID'
 SIMPLE_HTTP_SERVER_PORT = 8000
-IS_PY3 = sys.version_info[0] >= 3
 
 
 class ChromeDownloader(FancyURLopener):
@@ -101,7 +96,7 @@ class BuildozerCommandException(BuildozerException):
     pass
 
 
-class Buildozer(object):
+class Buildozer:
 
     ERROR = 0
     INFO = 1
@@ -111,7 +106,6 @@ class Buildozer(object):
                      'deploy', 'run', 'serve')
 
     def __init__(self, filename='buildozer.spec', target=None):
-        super(Buildozer, self).__init__()
         self.log_level = 2
         self.environ = {}
         self.specfilename = filename
@@ -127,10 +121,7 @@ class Buildozer(object):
         self.config.getrawdefault = self._get_config_raw_default
 
         if exists(filename):
-            try:
-                self.config.read(filename, "utf-8")
-            except TypeError:  # python 2 has no second arg here
-                self.config.read(filename)
+            self.config.read(filename, "utf-8")
             self.check_configuration_tokens()
 
         # Check all section/tokens for env vars, and replace the
@@ -318,10 +309,7 @@ class Buildozer(object):
                 if get_stdout:
                     ret_stdout.append(chunk)
                 if show_output:
-                    if IS_PY3:
-                        stdout.write(chunk.decode('utf-8', 'replace'))
-                    else:
-                        stdout.write(chunk)
+                    stdout.write(chunk.decode('utf-8', 'replace'))
             if fd_stderr in readx:
                 chunk = process.stderr.read()
                 if not chunk:
@@ -329,10 +317,7 @@ class Buildozer(object):
                 if get_stderr:
                     ret_stderr.append(chunk)
                 if show_output:
-                    if IS_PY3:
-                        stderr.write(chunk.decode('utf-8', 'replace'))
-                    else:
-                        stderr.write(chunk)
+                    stderr.write(chunk.decode('utf-8', 'replace'))
 
             stdout.flush()
             stderr.flush()
@@ -374,10 +359,7 @@ class Buildozer(object):
         show_output = kwargs.pop('show_output')
 
         if show_output:
-            if IS_PY3:
-                kwargs['logfile'] = codecs.getwriter('utf8')(stdout.buffer)
-            else:
-                kwargs['logfile'] = codecs.getwriter('utf8')(stdout)
+            kwargs['logfile'] = codecs.getwriter('utf8')(stdout.buffer)
 
         if not sensible:
             self.debug('Run (expect) {0!r}'.format(command))
@@ -571,7 +553,7 @@ class Buildozer(object):
             return
         self.venv = join(self.buildozer_dir, 'venv')
         if not self.file_exists(self.venv):
-            self.cmd('virtualenv --python=python2.7 ./venv',
+            self.cmd('python3 -m venv ./venv',
                     cwd=self.buildozer_dir)
 
         # read virtualenv output and parse it
@@ -1073,11 +1055,6 @@ class Buildozer(object):
         '''If effective user id is 0, display a warning and require
         user input to continue (or to cancel)'''
 
-        if IS_PY3:
-            input_func = input
-        else:
-            input_func = raw_input
-
         warn_on_root = self.config.getdefault('buildozer', 'warn_on_root', '1')
         try:
             euid = os.geteuid() == 0
@@ -1090,7 +1067,7 @@ class Buildozer(object):
             print('\033[91mThis is \033[1mnot\033[0m \033[91mrecommended, and may lead to problems later.\033[0m')
             cont = None
             while cont not in ('y', 'n'):
-                cont = input_func('Are you sure you want to continue [y/n]? ')
+                cont = input('Are you sure you want to continue [y/n]? ')
 
             if cont == 'n':
                 sys.exit()

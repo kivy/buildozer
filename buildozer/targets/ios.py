@@ -7,7 +7,7 @@ if sys.platform != 'darwin':
     raise NotImplementedError('Windows platform not yet working for Android')
 
 import plistlib
-from buildozer import BuildozerCommandException, IS_PY3
+from buildozer import BuildozerCommandException
 from buildozer.target import Target, no_config
 from os.path import join, basename, expanduser, realpath
 from getpass import getpass
@@ -252,14 +252,12 @@ class TargetIos(Target):
         self.buildozer.state['ios:latestipa'] = ipa
         self.buildozer.state['ios:latestmode'] = self.build_mode
 
-        self._create_index()
-
     def cmd_deploy(self, *args):
-        super(TargetIos, self).cmd_deploy(*args)
+        super().cmd_deploy(*args)
         self._run_ios_deploy(lldb=False)
 
     def cmd_run(self, *args):
-        super(TargetIos, self).cmd_run(*args)
+        super().cmd_run(*args)
         self._run_ios_deploy(lldb=True)
 
     def cmd_xcode(self, *args):
@@ -306,10 +304,6 @@ class TargetIos(Target):
             self.app_project_dir, icon_fn),
             cwd=self.ios_dir)
 
-    def _create_index(self):
-        # TODO
-        pass
-
     def check_configuration_tokens(self):
         errors = []
         config = self.buildozer.config
@@ -331,8 +325,7 @@ class TargetIos(Target):
         elif identity_release not in available_identities:
             errors.append('[app] identity "{}" not found. '
                     'Check with list_identities'.format(identity_release))
-
-        super(TargetIos, self).check_configuration_tokens(errors)
+        super().check_configuration_tokens(errors)
 
     @no_config
     def cmd_list_identities(self, *args):
@@ -396,12 +389,7 @@ class TargetIos(Target):
 
         save = None
         while save is None:
-            if IS_PY3:
-                input_func = input
-            else:
-                input_func = raw_input
-
-            q = input_func('Do you want to save the password (Y/n): ')
+            q = input('Do you want to save the password (Y/n): ')
             if q in ('', 'Y'):
                 save = True
             elif q == 'n':

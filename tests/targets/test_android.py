@@ -6,11 +6,7 @@ import tempfile
 import buildozer as buildozer_module
 from buildozer import Buildozer
 from buildozer.targets.android import TargetAndroid
-
-try:
-    from unittest import mock  # Python 3
-except ImportError:
-    import mock  # Python 2
+from unittest import mock
 
 
 def patch_buildozer(method):
@@ -95,9 +91,6 @@ class TestTargetAndroid:
         assert self.target_android.p4a_apk_cmd == "apk --debug --bootstrap=sdl2"
         assert self.target_android.platform_update is False
 
-    @pytest.mark.skipif(
-        sys.version_info < (3, 0), reason="Python 2 ex_info.value.args is different"
-    )
     def test_init_positional_buildozer(self):
         """Positional `buildozer` argument is required."""
         with pytest.raises(TypeError) as ex_info:

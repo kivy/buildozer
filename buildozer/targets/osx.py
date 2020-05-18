@@ -15,7 +15,6 @@ import io
 from pipes import quote
 from sys import platform, executable
 from buildozer import BuildozerException
-from buildozer import IS_PY3
 from buildozer.target import Target
 from os import environ
 from os.path import (exists, join, realpath, expanduser,
