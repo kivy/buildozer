@@ -1145,6 +1145,13 @@ class TargetAndroid(Target):
             build_cmd += [('--content-providers', join(self.buildozer.root_dir,
                                                        content_providers))]
 
+        # extra xml resources
+        add_xml_resources = config.getlist(
+            'app', 'android.manifest.add_xml_resources', [])
+        for xml_resource in add_xml_resources:
+            build_cmd += [('--add-xml-resource', join(self.buildozer.root_dir,
+                                                      xml_resource))]
+
         # activity launch mode
         launch_mode = config.getdefault(
             'app', 'android.manifest.launch_mode', '')

@@ -194,6 +194,10 @@ fullscreen = 0
 # (str) launchMode to set for the main activity
 #android.manifest.launch_mode = standard
 
+# (list) XML files to add to the src/main/res/xml subdirectory of the build
+# such files are usually referenced in the manifest, e.g. to specifiy file paths for a content provider
+#android.add_xml_resources =
+
 # (list) Android additional libraries to copy into libs/armeabi
 #android.add_libs_armeabi = libs/android/*.so
 #android.add_libs_armeabi_v7a = libs/android-v7/*.so
