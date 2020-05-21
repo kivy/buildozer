@@ -188,6 +188,9 @@ fullscreen = 0
 # (str) XML file to include as an intent filters in <activity> tag
 #android.manifest.intent_filters =
 
+# (str) XML file to include at the end of the <application> tag
+#android.manifest.content_providers =
+
 # (str) launchMode to set for the main activity
 #android.manifest.launch_mode = standard
 

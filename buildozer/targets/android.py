@@ -1138,6 +1138,13 @@ class TargetAndroid(Target):
             build_cmd += [("--intent-filters", join(self.buildozer.root_dir,
                                                     intent_filters))]
 
+        # content providers
+        content_providers = config.getdefault(
+            'app', 'android.manifest.content_providers', '')
+        if content_providers:
+            build_cmd += [('--content-providers', join(self.buildozer.root_dir,
+                                                       content_providers))]
+
         # activity launch mode
         launch_mode = config.getdefault(
             'app', 'android.manifest.launch_mode', '')
