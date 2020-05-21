@@ -1147,7 +1147,7 @@ class TargetAndroid(Target):
 
         # extra xml resources
         add_xml_resources = config.getlist(
-            'app', 'android.manifest.add_xml_resources', [])
+            'app', 'android.add_xml_resources', [])
         for xml_resource in add_xml_resources:
             build_cmd += [('--add-xml-resource', join(self.buildozer.root_dir,
                                                       xml_resource))]
