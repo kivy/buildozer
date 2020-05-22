@@ -1,12 +1,12 @@
 import os
-import sys
-import pytest
-import codecs
 import tempfile
+from unittest import mock
+
+import pytest
+
 import buildozer as buildozer_module
 from buildozer import Buildozer
 from buildozer.targets.android import TargetAndroid
-from unittest import mock
 
 
 def patch_buildozer(method):
@@ -52,25 +52,63 @@ def patch_platform(platform):
 
 
 class TestTargetAndroid:
+
     @staticmethod
     def default_specfile_path():
         return os.path.join(os.path.dirname(buildozer_module.__file__), "default.spec")
 
     def setup_method(self):
-        """Creates a temporary spec file containing the content of the default.spec."""
-        self.specfile = tempfile.NamedTemporaryFile(suffix=".spec", delete=False)
-        default_spec = codecs.open(self.default_specfile_path(), encoding="utf-8")
-        self.specfile.write(default_spec.read().encode("utf-8"))
-        self.specfile.close()
-        self.buildozer = Buildozer(filename=self.specfile.name, target="android")
-        self.target_android = TargetAndroid(self.buildozer)
+        """
+        Create a temporary directory that will contain the spec file and will
+        serve as the root_dir.
+        """
+        self.temp_dir = tempfile.TemporaryDirectory()
 
     def tear_method(self):
-        """Deletes the temporary spec file."""
-        os.unlink(self.specfile.name)
+        """
+        Remove the temporary directory created in self.setup_method.
+        """
+        self.temp_dir.cleanup()
+
+    def init_target(self, options={}):
+        """
+        Create a buildozer.spec file in the temporary directory and init the
+        Buildozer and TargetAndroid instances.
+
+        The optional argument can be used to overwrite the config options in
+        the buildozer.spec file, e.g.:
+
+            self.init_target({'title': 'Test App'})
+
+        will replace line 4 of the default spec file.
+        """
+        spec_path = os.path.join(self.temp_dir.name, 'buildozer.spec')
+
+        with open(TestTargetAndroid.default_specfile_path()) as f:
+            default_spec = f.readlines()
+
+        spec = []
+        for line in default_spec:
+            if line.strip():
+                key = line.split()[0]
+
+                if key.startswith('#'):
+                    key = key[1:]
+
+                if key in options:
+                    line = '{} = {}\n'.format(key, options[key])
+
+            spec.append(line)
+
+        with open(spec_path, 'w') as f:
+            f.writelines(spec)
+
+        self.buildozer = Buildozer(filename=spec_path, target='android')
+        self.target_android = TargetAndroid(self.buildozer)
 
     def test_init(self):
         """Tests init defaults."""
+        self.init_target()
         assert self.target_android._arch == "armeabi-v7a"
         assert self.target_android._build_dir.endswith(
             ".buildozer/android/platform/build-armeabi-v7a"
@@ -101,6 +139,7 @@ class TestTargetAndroid:
 
     def test_sdkmanager(self):
         """Tests the _sdkmanager() method."""
+        self.init_target()
         kwargs = {}
         with patch_buildozer_cmd() as m_cmd, patch_buildozer_cmd_expect() as m_cmd_expect, patch_os_isfile() as m_isfile:
             m_isfile.return_value = True
@@ -120,6 +159,7 @@ class TestTargetAndroid:
 
     def test_check_requirements(self):
         """Basic tests for the check_requirements() method."""
+        self.init_target()
         assert not hasattr(self.target_android, "adb_cmd")
         assert not hasattr(self.target_android, "javac_cmd")
         assert "PATH" not in self.buildozer.environ
@@ -140,6 +180,7 @@ class TestTargetAndroid:
 
     def test_check_configuration_tokens(self):
         """Basic tests for the check_configuration_tokens() method."""
+        self.init_target()
         with mock.patch(
             "buildozer.targets.android.Target.check_configuration_tokens"
         ) as m_check_configuration_tokens:
@@ -149,6 +190,7 @@ class TestTargetAndroid:
     @pytest.mark.parametrize("platform", ["linux", "darwin"])
     def test_install_android_sdk(self, platform):
         """Basic tests for the _install_android_sdk() method."""
+        self.init_target()
         with patch_buildozer_file_exists() as m_file_exists, patch_buildozer_download() as m_download:
             m_file_exists.return_value = True
             sdk_dir = self.target_android._install_android_sdk()
@@ -179,6 +221,7 @@ class TestTargetAndroid:
 
     def test_build_package(self):
         """Basic tests for the build_package() method."""
+        self.init_target()
         expected_dist_dir = (
             "{buildozer_dir}/android/platform/build-armeabi-v7a/dists/myapp__armeabi-v7a".format(
             buildozer_dir=self.buildozer.buildozer_dir)
@@ -224,5 +267,142 @@ class TestTargetAndroid:
                     expected_dist_dir=expected_dist_dir
                 ),
                 "{bin_dir}/myapp-0.1-armeabi-v7a-debug.apk".format(bin_dir=self.buildozer.bin_dir),
+            )
+        ]
+
+    def test_build_package_intent_filters(self):
+        """
+        The build_package method should honour the manifest.intent_filters
+        config option.
+        """
+        filters_path = os.path.join(self.temp_dir.name, 'filters.xml')
+
+        with open(filters_path, 'w') as f:
+            f.write('<?xml version="1.0" encoding="utf-8"?>')
+
+        self.init_target({
+            'android.manifest.intent_filters': 'filters.xml'})
+
+        with patch_target_android(
+            '_update_libraries_references'
+        ), patch_target_android(
+            '_generate_whitelist'
+        ), mock.patch(
+            'buildozer.targets.android.TargetAndroid.execute_build_package'
+        ) as m_execute_build_package, mock.patch(
+            'buildozer.targets.android.copyfile'
+        ), mock.patch(
+            'buildozer.targets.android.os.listdir'
+        ) as m_listdir:
+            m_listdir.return_value = ['30.0.0-rc2']
+            self.target_android.build_package()
+
+        assert m_execute_build_package.call_args_list == [
+            mock.call(
+                [
+                    ('--name', "'My Application'"),
+                    ('--version', '0.1'),
+                    ('--package', 'org.test.myapp'),
+                    ('--minsdk', '21'),
+                    ('--ndk-api', '21'),
+                    ('--private', '{buildozer_dir}/android/app'.format(buildozer_dir=self.buildozer.buildozer_dir)),
+                    ('--android-entrypoint', 'org.kivy.android.PythonActivity'),
+                    ('--android-apptheme', '@android:style/Theme.NoTitleBar'),
+                    ('--orientation', 'portrait'),
+                    ('--window',),
+                    ('--intent-filters', filters_path),
+                    ('debug',),
+                ]
+            )
+        ]
+
+    def test_build_package_content_providers(self):
+        """
+        The build_package method should honour the manifest.content_providers
+        config option.
+        """
+        providers_path = os.path.join(self.temp_dir.name, 'providers.xml')
+
+        with open(providers_path, 'w') as f:
+            f.write('<?xml version="1.0" encoding="utf-8"?>')
+
+        self.init_target({
+            'android.manifest.content_providers': 'providers.xml'})
+
+        with patch_target_android(
+            '_update_libraries_references'
+        ), patch_target_android(
+            '_generate_whitelist'
+        ), mock.patch(
+            'buildozer.targets.android.TargetAndroid.execute_build_package'
+        ) as m_execute_build_package, mock.patch(
+            'buildozer.targets.android.copyfile'
+        ), mock.patch(
+            'buildozer.targets.android.os.listdir'
+        ) as m_listdir:
+            m_listdir.return_value = ['30.0.0-rc2']
+            self.target_android.build_package()
+
+        assert m_execute_build_package.call_args_list == [
+            mock.call(
+                [
+                    ('--name', "'My Application'"),
+                    ('--version', '0.1'),
+                    ('--package', 'org.test.myapp'),
+                    ('--minsdk', '21'),
+                    ('--ndk-api', '21'),
+                    ('--private', '{buildozer_dir}/android/app'.format(buildozer_dir=self.buildozer.buildozer_dir)),
+                    ('--android-entrypoint', 'org.kivy.android.PythonActivity'),
+                    ('--android-apptheme', '@android:style/Theme.NoTitleBar'),
+                    ('--orientation', 'portrait'),
+                    ('--window',),
+                    ('--content-providers', providers_path),
+                    ('debug',),
+                ]
+            )
+        ]
+
+    def test_build_package_add_xml_resources(self):
+        """
+        The build_package method should honour the add_xml_resources config
+        option.
+        """
+        xml_file_path = os.path.join(self.temp_dir.name, 'file_paths.xml')
+
+        with open(xml_file_path, 'w') as f:
+            f.write('<?xml version="1.0" encoding="utf-8"?>')
+
+        self.init_target({'android.add_xml_resources': 'file_paths.xml'})
+
+        with patch_target_android(
+            '_update_libraries_references'
+        ), patch_target_android(
+            '_generate_whitelist'
+        ), mock.patch(
+            'buildozer.targets.android.TargetAndroid.execute_build_package'
+        ) as m_execute_build_package, mock.patch(
+            'buildozer.targets.android.copyfile'
+        ), mock.patch(
+            'buildozer.targets.android.os.listdir'
+        ) as m_listdir:
+            m_listdir.return_value = ['30.0.0-rc2']
+            self.target_android.build_package()
+
+        assert m_execute_build_package.call_args_list == [
+            mock.call(
+                [
+                    ('--name', "'My Application'"),
+                    ('--version', '0.1'),
+                    ('--package', 'org.test.myapp'),
+                    ('--minsdk', '21'),
+                    ('--ndk-api', '21'),
+                    ('--private', '{buildozer_dir}/android/app'.format(buildozer_dir=self.buildozer.buildozer_dir)),
+                    ('--android-entrypoint', 'org.kivy.android.PythonActivity'),
+                    ('--android-apptheme', '@android:style/Theme.NoTitleBar'),
+                    ('--orientation', 'portrait'),
+                    ('--window',),
+                    ('--add-xml-resource', xml_file_path),
+                    ('debug',),
+                ]
             )
         ]
