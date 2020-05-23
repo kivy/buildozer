@@ -106,6 +106,50 @@ class TestTargetAndroid:
         self.buildozer = Buildozer(filename=spec_path, target='android')
         self.target_android = TargetAndroid(self.buildozer)
 
+    def call_build_package(self):
+        """
+        Call the build_package() method of the tested TargetAndroid instance,
+        patching the functions that would otherwise produce side-effects.
+
+        Return the mocked execute_build_package() method of the TargetAndroid
+        instance so that tests can easily check which command-line arguments
+        would be passed on to python-for-android's toolchain.
+        """
+        expected_dist_dir = (
+            '{buildozer_dir}/android/platform/build-armeabi-v7a/dists/myapp__armeabi-v7a'.format(
+            buildozer_dir=self.buildozer.buildozer_dir)
+        )
+
+        with patch_target_android(
+            '_update_libraries_references'
+        ) as m_update_libraries_references, patch_target_android(
+            '_generate_whitelist'
+        ) as m_generate_whitelist, mock.patch(
+            'buildozer.targets.android.TargetAndroid.execute_build_package'
+        ) as m_execute_build_package, mock.patch(
+            'buildozer.targets.android.copyfile'
+        ) as m_copyfile, mock.patch(
+            'buildozer.targets.android.os.listdir'
+        ) as m_listdir:
+            m_listdir.return_value = ['30.0.0-rc2']
+            self.target_android.build_package()
+
+        assert m_listdir.call_count == 1
+        assert m_update_libraries_references.call_args_list == [
+            mock.call(expected_dist_dir)
+        ]
+        assert m_generate_whitelist.call_args_list == [mock.call(expected_dist_dir)]
+        assert m_copyfile.call_args_list == [
+            mock.call(
+                '{expected_dist_dir}/bin/MyApplication-0.1-debug.apk'.format(
+                    expected_dist_dir=expected_dist_dir
+                ),
+                '{bin_dir}/myapp-0.1-armeabi-v7a-debug.apk'.format(bin_dir=self.buildozer.bin_dir),
+            )
+        ]
+
+        return m_execute_build_package
+
     def test_init(self):
         """Tests init defaults."""
         self.init_target()
@@ -222,28 +266,7 @@ class TestTargetAndroid:
     def test_build_package(self):
         """Basic tests for the build_package() method."""
         self.init_target()
-        expected_dist_dir = (
-            "{buildozer_dir}/android/platform/build-armeabi-v7a/dists/myapp__armeabi-v7a".format(
-            buildozer_dir=self.buildozer.buildozer_dir)
-        )
-        with patch_target_android(
-            "_update_libraries_references"
-        ) as m_update_libraries_references, patch_target_android(
-            "_generate_whitelist"
-        ) as m_generate_whitelist, mock.patch(
-            "buildozer.targets.android.TargetAndroid.execute_build_package"
-        ) as m_execute_build_package, mock.patch(
-            "buildozer.targets.android.copyfile"
-        ) as m_copyfile, mock.patch(
-            "buildozer.targets.android.os.listdir"
-        ) as m_listdir:
-            m_listdir.return_value = ["30.0.0-rc2"]
-            self.target_android.build_package()
-        assert m_listdir.call_count == 1
-        assert m_update_libraries_references.call_args_list == [
-            mock.call(expected_dist_dir)
-        ]
-        assert m_generate_whitelist.call_args_list == [mock.call(expected_dist_dir)]
+        m_execute_build_package = self.call_build_package()
         assert m_execute_build_package.call_args_list == [
             mock.call(
                 [
@@ -261,18 +284,10 @@ class TestTargetAndroid:
                 ]
             )
         ]
-        assert m_copyfile.call_args_list == [
-            mock.call(
-                "{expected_dist_dir}/bin/MyApplication-0.1-debug.apk".format(
-                    expected_dist_dir=expected_dist_dir
-                ),
-                "{bin_dir}/myapp-0.1-armeabi-v7a-debug.apk".format(bin_dir=self.buildozer.bin_dir),
-            )
-        ]
 
     def test_build_package_intent_filters(self):
         """
-        The build_package method should honour the manifest.intent_filters
+        The build_package() method should honour the manifest.intent_filters
         config option.
         """
         filters_path = os.path.join(self.temp_dir.name, 'filters.xml')
@@ -281,21 +296,10 @@ class TestTargetAndroid:
             f.write('<?xml version="1.0" encoding="utf-8"?>')
 
         self.init_target({
-            'android.manifest.intent_filters': 'filters.xml'})
+            'android.manifest.intent_filters': 'filters.xml'
+        })
 
-        with patch_target_android(
-            '_update_libraries_references'
-        ), patch_target_android(
-            '_generate_whitelist'
-        ), mock.patch(
-            'buildozer.targets.android.TargetAndroid.execute_build_package'
-        ) as m_execute_build_package, mock.patch(
-            'buildozer.targets.android.copyfile'
-        ), mock.patch(
-            'buildozer.targets.android.os.listdir'
-        ) as m_listdir:
-            m_listdir.return_value = ['30.0.0-rc2']
-            self.target_android.build_package()
+        m_execute_build_package = self.call_build_package()
 
         assert m_execute_build_package.call_args_list == [
             mock.call(
@@ -318,7 +322,7 @@ class TestTargetAndroid:
 
     def test_build_package_content_providers(self):
         """
-        The build_package method should honour the manifest.content_providers
+        The build_package() method should honour the manifest.content_providers
         config option.
         """
         providers_path = os.path.join(self.temp_dir.name, 'providers.xml')
@@ -327,21 +331,10 @@ class TestTargetAndroid:
             f.write('<?xml version="1.0" encoding="utf-8"?>')
 
         self.init_target({
-            'android.manifest.content_providers': 'providers.xml'})
+            'android.manifest.content_providers': 'providers.xml'
+        })
 
-        with patch_target_android(
-            '_update_libraries_references'
-        ), patch_target_android(
-            '_generate_whitelist'
-        ), mock.patch(
-            'buildozer.targets.android.TargetAndroid.execute_build_package'
-        ) as m_execute_build_package, mock.patch(
-            'buildozer.targets.android.copyfile'
-        ), mock.patch(
-            'buildozer.targets.android.os.listdir'
-        ) as m_listdir:
-            m_listdir.return_value = ['30.0.0-rc2']
-            self.target_android.build_package()
+        m_execute_build_package = self.call_build_package()
 
         assert m_execute_build_package.call_args_list == [
             mock.call(
@@ -364,7 +357,7 @@ class TestTargetAndroid:
 
     def test_build_package_add_xml_resources(self):
         """
-        The build_package method should honour the add_xml_resources config
+        The build_package() method should honour the add_xml_resources config
         option.
         """
         xml_file_path = os.path.join(self.temp_dir.name, 'file_paths.xml')
@@ -374,19 +367,7 @@ class TestTargetAndroid:
 
         self.init_target({'android.add_xml_resources': 'file_paths.xml'})
 
-        with patch_target_android(
-            '_update_libraries_references'
-        ), patch_target_android(
-            '_generate_whitelist'
-        ), mock.patch(
-            'buildozer.targets.android.TargetAndroid.execute_build_package'
-        ) as m_execute_build_package, mock.patch(
-            'buildozer.targets.android.copyfile'
-        ), mock.patch(
-            'buildozer.targets.android.os.listdir'
-        ) as m_listdir:
-            m_listdir.return_value = ['30.0.0-rc2']
-            self.target_android.build_package()
+        m_execute_build_package = self.call_build_package()
 
         assert m_execute_build_package.call_args_list == [
             mock.call(
