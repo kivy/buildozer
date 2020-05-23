@@ -314,7 +314,7 @@ class TestTargetAndroid:
                     ('--android-apptheme', '@android:style/Theme.NoTitleBar'),
                     ('--orientation', 'portrait'),
                     ('--window',),
-                    ('--intent-filters', filters_path),
+                    ('--intent-filters', os.path.realpath(filters_path)),
                     ('debug',),
                 ]
             )
@@ -349,7 +349,7 @@ class TestTargetAndroid:
                     ('--android-apptheme', '@android:style/Theme.NoTitleBar'),
                     ('--orientation', 'portrait'),
                     ('--window',),
-                    ('--content-providers', providers_path),
+                    ('--content-providers', os.path.realpath(providers_path)),
                     ('debug',),
                 ]
             )
@@ -382,7 +382,7 @@ class TestTargetAndroid:
                     ('--android-apptheme', '@android:style/Theme.NoTitleBar'),
                     ('--orientation', 'portrait'),
                     ('--window',),
-                    ('--add-xml-resource', xml_file_path),
+                    ('--add-xml-resource', os.path.realpath(xml_file_path)),
                     ('debug',),
                 ]
             )
