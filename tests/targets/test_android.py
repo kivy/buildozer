@@ -70,7 +70,7 @@ class TestTargetAndroid:
         """
         self.temp_dir.cleanup()
 
-    def init_target(self, options={}):
+    def init_target(self, options=None):
         """
         Create a buildozer.spec file in the temporary directory and init the
         Buildozer and TargetAndroid instances.
@@ -82,6 +82,9 @@ class TestTargetAndroid:
 
         will replace line 4 of the default spec file.
         """
+        if options is None:
+            options = {}
+
         spec_path = os.path.join(self.temp_dir.name, 'buildozer.spec')
 
         with open(TestTargetAndroid.default_specfile_path()) as f:
