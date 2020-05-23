@@ -188,8 +188,15 @@ fullscreen = 0
 # (str) XML file to include as an intent filters in <activity> tag
 #android.manifest.intent_filters =
 
+# (str) XML file to include at the end of the <application> tag
+#android.manifest.content_providers =
+
 # (str) launchMode to set for the main activity
 #android.manifest.launch_mode = standard
+
+# (list) XML files to add to the src/main/res/xml subdirectory of the build
+# such files are usually referenced in the manifest, e.g. to specifiy file paths for a content provider
+#android.add_xml_resources =
 
 # (list) Android additional libraries to copy into libs/armeabi
 #android.add_libs_armeabi = libs/android/*.so
