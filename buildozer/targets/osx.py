@@ -6,24 +6,9 @@ import sys
 if sys.platform != 'darwin':
     raise NotImplementedError('This will only work on osx')
 
-#Global variables
-
-#Global imports
-import traceback
-import os
-import io
-from pipes import quote
-from sys import platform, executable
-from buildozer import BuildozerException
 from buildozer.target import Target
-from os import environ
-from os.path import (exists, join, realpath, expanduser,
-    basename, relpath, abspath, dirname)
-from shutil import copyfile
-from glob import glob
+from os.path import exists, join, abspath, dirname
 from subprocess import check_call, check_output
-
-from buildozer.libs.version import parse
 
 
 class TargetOSX(Target):
@@ -32,7 +17,7 @@ class TargetOSX(Target):
     def ensure_sdk(self):
         self.buildozer.info('Check if kivy-sdk-packager exists')
         if exists(
-            join(self.buildozer.platform_dir, 'kivy-sdk-packager-master')):
+                join(self.buildozer.platform_dir, 'kivy-sdk-packager-master')):
             self.buildozer.info(
                     'kivy-sdk-packager found at '
                 '{}'.format(self.buildozer.platform_dir))
@@ -122,7 +107,7 @@ class TargetOSX(Target):
         author = bc.getdefault('app', 'author', '')
 
         self.buildozer.info('Create {}.app'.format(package_name))
-        cwd = join(self.buildozer.platform_dir,'kivy-sdk-packager-master', 'osx')
+        cwd = join(self.buildozer.platform_dir, 'kivy-sdk-packager-master', 'osx')
         # remove kivy from app_deps
         app_deps = [a for a in app_deps.split('\n') if not a.startswith('#') and a not in ['kivy', '']]
 
@@ -139,7 +124,6 @@ class TargetOSX(Target):
              '--bundlename={}'.format(title),
              '--bundleid={}'.format(domain),
              '--bundleversion={}'.format(version),
-             #'--deps={}'.format(','.join(app_deps)),
              '--displayname={}'.format(title)
              ]
         if icon:
@@ -174,7 +158,7 @@ class TargetOSX(Target):
         #
         self.buildozer.environ.update({
             'PACKAGES_PATH': self.buildozer.global_packages_dir,
-            })
+        })
 
     def get_custom_commands(self):
         result = []

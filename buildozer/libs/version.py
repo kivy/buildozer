@@ -162,6 +162,7 @@ def _legacy_cmpkey(version):
 
     return epoch, parts
 
+
 # Deliberately not anchored to the start and end of the string, to make it
 # easier for 3rd party code to reuse
 VERSION_PATTERN = r"""

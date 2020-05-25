@@ -617,10 +617,6 @@ class Buildozer:
 
     def file_extract(self, archive, cwd=None):
         if archive.endswith('.tgz') or archive.endswith('.tar.gz'):
-            # XXX tarfile doesn't work for NDK-r8c :(
-            #tf = tarfile.open(archive, 'r:*')
-            #tf.extractall(path=cwd)
-            #tf.close()
             self.cmd('tar xzf {0}'.format(archive), cwd=cwd)
             return
 
@@ -631,8 +627,8 @@ class Buildozer:
 
         if archive.endswith('.bin'):
             # To process the bin files for linux and darwin systems
-            self.cmd('chmod a+x {0}'.format(archive),cwd=cwd)
-            self.cmd('./{0}'.format(archive),cwd=cwd)
+            self.cmd('chmod a+x {0}'.format(archive), cwd=cwd)
+            self.cmd('./{0}'.format(archive), cwd=cwd)
             return
 
         if archive.endswith('.zip'):
@@ -830,7 +826,6 @@ class Buildozer:
 
         main_py = join(self.app_dir, 'service', 'main.py')
         if not self.file_exists(main_py):
-            #self.error('Unable to patch main_py to add applibs directory.')
             return
 
         header = (b'import sys, os; '
@@ -847,7 +842,7 @@ class Buildozer:
         '''Return a "valid" name from a name with lot of invalid chars
         (allowed characters: a-z, A-Z, 0-9, -, _)
         '''
-        return re.sub('[^a-zA-Z0-9_\-]', '_', name)
+        return re.sub(r'[^a-zA-Z0-9_\-]', '_', name)
 
     @property
     def root_dir(self):
@@ -1248,6 +1243,7 @@ def set_config_from_envs(config):
     for section in config.sections():
         for token in config.options(section):
             set_config_token_from_env(section, token, config)
+
 
 def set_config_token_from_env(section, token, config):
     '''Given a config section and token, checks for an appropriate

@@ -18,10 +18,8 @@ project, and for iOS via the kivy-ios project. iOS and OSX are still under work.
 
 For Android, buildozer will automatically download and prepare the
 build dependencies. For more information, see
-[Android-SDK-NDK-Information](https://github.com/kivy/kivy/wiki/Android-SDK-NDK-Information). We
-recommend targeting Python 3 on Android, but you can target both
-Python 3 and Python 2 regardless of which version you use with
-buildozer on the desktop.
+[Android-SDK-NDK-Information](https://github.com/kivy/kivy/wiki/Android-SDK-NDK-Information).
+Note that only Python 3 is supported.
 
 Note that this tool has nothing to do with the eponymous online build service
 [buildozer.io](http://buildozer.io).

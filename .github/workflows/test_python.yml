@@ -77,7 +77,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Try Python 2 install
       run: |
-        # we don't want to build to fail with the exit 1 so we catch with "||"
+        # we don't want the build to fail with the exit 1 so we catch with "||"
         python2 -m pip install -e . 2> error.log || echo Failing as expected
         cat error.log
         grep "Unsupported Python version" error.log

@@ -41,6 +41,7 @@ class Infinity:
     def __neg__(self):
         return NegativeInfinity
 
+
 Infinity = Infinity()
 
 
@@ -72,5 +73,6 @@ class NegativeInfinity:
 
     def __neg__(self):
         return Infinity
+
 
 NegativeInfinity = NegativeInfinity()
