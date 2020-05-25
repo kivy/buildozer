@@ -59,6 +59,32 @@ without any arguments::
 To save the logcat output into a file named `my_log.txt` (the file will appear in your current directory)::
 
     buildozer -v android debug deploy run logcat > my_log.txt
+    
+To see your running application's print() messages and python's error messages, use:
+
+::
+
+    buildozer -v android deploy run logcat | grep python
+
+
+Run my application on Windows 10
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Plug your Android device on a USB port
+
+- Open Windows PowerShell, go into the folder where you installed the Windows version of ADB, and activate the adb daemon:
+
+::
+
+    cd C:\platform-tools\
+    .\adb.exe devices
+
+- Open the Linux distribution you installed on Windows Subsystem for Linux (WSL) and proceed with the deploy commands:
+
+::
+
+    buildozer -v android deploy run
+    
 
 Install on non-connected devices
 --------------------------------
