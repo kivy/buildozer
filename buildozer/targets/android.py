@@ -1143,6 +1143,11 @@ class TargetAndroid(Target):
         if launch_mode:
             build_cmd += [("--activity-launch-mode", launch_mode)]
 
+        # numeric version
+        numeric_version = config.getdefault('app', 'android.numeric_version')
+        if numeric_version:
+            build_cmd += [("--numeric-version", numeric_version)]
+
         # build only in debug right now.
         if self.build_mode == 'debug':
             build_cmd += [("debug", )]
