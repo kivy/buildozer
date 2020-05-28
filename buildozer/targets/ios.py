@@ -59,6 +59,7 @@ li { padding: 1em; }
 </html>
 '''
 
+
 class TargetIos(Target):
     targetname = "ios"
 
@@ -113,7 +114,7 @@ class TargetIos(Target):
 
         # we need to extract the requirements that kivy-ios knows about
         available_modules = self.get_available_packages()
-        onlyname = lambda x: x.split('==')[0]
+        onlyname = lambda x: x.split('==')[0]  # noqa: E731 do not assign a lambda expression, use a def
         ios_requirements = [x for x in app_requirements if onlyname(x) in
                             available_modules]
 
@@ -400,6 +401,7 @@ class TargetIos(Target):
         if save:
             with open(password_file, 'wb') as fd:
                 fd.write(password.encode())
+
 
 def get_target(buildozer):
     return TargetIos(buildozer)

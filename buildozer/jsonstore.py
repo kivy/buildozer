@@ -6,14 +6,13 @@ This was needed to correctly support db between Python 2 and 3.
 __all__ = ["JsonStore"]
 
 import io
-import sys
-from json import load, dump, dumps
+from json import load, dump
 from os.path import exists
+
 
 class JsonStore:
 
     def __init__(self, filename):
-        super().__init__()
         self.filename = filename
         self.data = {}
         if exists(filename):

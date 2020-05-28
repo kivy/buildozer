@@ -24,7 +24,6 @@ import os
 import io
 import re
 import ast
-import sh
 from pipes import quote
 from sys import platform, executable
 from buildozer import BuildozerException, USE_COLOR
@@ -249,7 +248,7 @@ class TargetAndroid(Target):
                                                        break_on_error=False)
             is_debian_like = (returncode_dpkg == 0)
             if is_debian_like and \
-                not self.buildozer.file_exists('/usr/include/zlib.h'):
+                    not self.buildozer.file_exists('/usr/include/zlib.h'):
                 raise BuildozerException(
                     'zlib headers must be installed, '
                     'run: sudo apt-get install zlib1g-dev')
@@ -740,7 +739,7 @@ class TargetAndroid(Target):
         try:
             with open(join(self.p4a_dir, "setup.py")) as fd:
                 setup = fd.read()
-                deps = re.findall("^\s*install_reqs = (\[[^\]]*\])", setup, re.DOTALL | re.MULTILINE)[0]
+                deps = re.findall(r"^\s*install_reqs = (\[[^\]]*\])", setup, re.DOTALL | re.MULTILINE)[0]
                 deps = ast.literal_eval(deps)
         except IOError:
             self.buildozer.error('Failed to read python-for-android setup.py at {}'.format(
@@ -768,7 +767,7 @@ class TargetAndroid(Target):
             'P4A_{}_DIR'.format(name[20:]): realpath(expanduser(value))
             for name, value in self.buildozer.config.items('app')
             if name.startswith('requirements.source.')
-            }
+        }
         if source_dirs:
             self.buildozer.environ.update(source_dirs)
             self.buildozer.info('Using custom source dirs:\n    {}'.format(
@@ -1055,12 +1054,12 @@ class TargetAndroid(Target):
             build_cmd += [('--add-compile-option', option)]
 
         # android.add_gradle_repositories
-        repos = config.getlist('app','android.add_gradle_repositories', [])
+        repos = config.getlist('app', 'android.add_gradle_repositories', [])
         for repo in repos:
             build_cmd += [('--add-gradle-repository', repo)]
 
         # android packaging options
-        pkgoptions = config.getlist('app','android.add_packaging_options', [])
+        pkgoptions = config.getlist('app', 'android.add_packaging_options', [])
         for pkgoption in pkgoptions:
             build_cmd += [('--add-packaging-option', pkgoption)]
 
@@ -1114,7 +1113,7 @@ class TargetAndroid(Target):
             build_cmd += [("--ouya-icon", join(self.buildozer.root_dir,
                                                ouya_icon))]
 
-        if config.getdefault('app','p4a.bootstrap','sdl2') != 'service_only':
+        if config.getdefault('app', 'p4a.bootstrap', 'sdl2') != 'service_only':
             # add orientation
             orientation = config.getdefault('app', 'orientation', 'landscape')
             if orientation == 'all':
@@ -1143,6 +1142,11 @@ class TargetAndroid(Target):
             'app', 'android.manifest.launch_mode', '')
         if launch_mode:
             build_cmd += [("--activity-launch-mode", launch_mode)]
+
+        # numeric version
+        numeric_version = config.getdefault('app', 'android.numeric_version')
+        if numeric_version:
+            build_cmd += [("--numeric-version", numeric_version)]
 
         # build only in debug right now.
         if self.build_mode == 'debug':
@@ -1359,6 +1363,7 @@ class TargetAndroid(Target):
 def get_target(buildozer):
     buildozer.targetname = "android"
     return TargetAndroid(buildozer)
+
 
 def generate_dist_folder_name(base_dist_name, arch_names=None):
     """Generate the distribution folder name to use, based on a

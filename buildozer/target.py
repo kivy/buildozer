@@ -2,6 +2,7 @@ from sys import exit
 import os
 from os.path import join
 
+
 def no_config(f):
     f.__no_config = True
     return f
@@ -9,7 +10,6 @@ def no_config(f):
 
 class Target:
     def __init__(self, buildozer):
-        super().__init__()
         self.buildozer = buildozer
         self.build_mode = 'debug'
         self.platform_update = False
