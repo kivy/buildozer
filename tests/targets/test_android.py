@@ -1,4 +1,5 @@
 import os
+import re
 import tempfile
 from unittest import mock
 
@@ -93,11 +94,8 @@ class TestTargetAndroid:
         spec = []
         for line in default_spec:
             if line.strip():
-                key = line.split()[0]
-
-                if key.startswith('#'):
-                    key = key[1:]
-
+                match = re.search(r'[#\s]?([a-z_\.]+)', line)
+                key = match and match.group(1)
                 if key in options:
                     line = '{} = {}\n'.format(key, options[key])
 
@@ -283,6 +281,31 @@ class TestTargetAndroid:
                     ("--android-apptheme", "@android:style/Theme.NoTitleBar"),
                     ("--orientation", "portrait"),
                     ("--window",),
+                    ("debug",),
+                ]
+            )
+        ]
+
+    def test_numeric_version(self):
+        """The `android.numeric_version` config should be passed to `build_package()`."""
+        self.init_target({
+            "android.numeric_version": "1234"
+        })
+        m_execute_build_package = self.call_build_package()
+        assert m_execute_build_package.call_args_list == [
+            mock.call(
+                [
+                    ("--name", "'My Application'"),
+                    ("--version", "0.1"),
+                    ("--package", "org.test.myapp"),
+                    ("--minsdk", "21"),
+                    ("--ndk-api", "21"),
+                    ("--private", "{buildozer_dir}/android/app".format(buildozer_dir=self.buildozer.buildozer_dir)),
+                    ("--android-entrypoint", "org.kivy.android.PythonActivity"),
+                    ("--android-apptheme", "@android:style/Theme.NoTitleBar"),
+                    ("--orientation", "portrait"),
+                    ("--window",),
+                    ("--numeric-version", "1234"),
                     ("debug",),
                 ]
             )
