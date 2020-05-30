@@ -45,7 +45,12 @@ jobs:
       run: docker run kivy/buildozer --version
 
   Integration:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+          - 'ubuntu-latest'
+          - 'macOs-latest'
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Setup python
       uses: actions/setup-python@v2
@@ -60,8 +65,17 @@ jobs:
     - run: buildozer init
     - name: SDK, NDK and p4a download
       run: |
-        sed "s/# android.accept_sdk_license = False/android.accept_sdk_license = True/" -i buildozer.spec
+        sed -i.bak "s/# android.accept_sdk_license = False/android.accept_sdk_license = True/" buildozer.spec
         buildozer android p4a -- --help
+    # Install OS specific dependencies
+    - name: Install Linux dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: sudo apt -y install automake
+    - name: Install macOS dependencies
+      if: matrix.os == 'macOS-latest'
+      run: |
+        brew install automake
+        sudo ln -sfn /usr/local/opt/openssl /usr/local/ssl
     - name: buildozer android debug
       run: |
         touch main.py
