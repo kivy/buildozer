@@ -13,7 +13,7 @@ First, install the buildozer project with::
 Targeting Android
 -----------------
 
-Android on Ubuntu 18.04 (64bit)
+Android on Ubuntu 20.04 (64bit)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 (expected to work as well in later version, but only regularly tested in the latest LTS)
@@ -26,6 +26,20 @@ Android on Ubuntu 18.04 (64bit)
 
     # add the following line at the end of your ~/.bashrc file
     export PATH=$PATH:~/.local/bin/
+
+
+Android on macOS
+~~~~~~~~~~~~~~~~
+
+::
+
+    brew install openssl
+    sudo ln -sfn /usr/local/opt/openssl /usr/local/ssl
+    brew install pkg-config autoconf automake
+    python3 -m pip install --user --upgrade Cython==0.29.19 virtualenv  # the --user should be removed if you do this in a venv
+
+    # add the following line at the end of your `~/.bashrc` file
+    export PATH=$PATH:~/Library/Python/3.7/bin
 
 
 TroubleShooting
@@ -72,4 +86,4 @@ Install pip and virtualenv
 
 ::
 
-    python -m pip install --user --upgrade pip virtualenv kivy-ios
+    python3 -m pip install --user --upgrade pip virtualenv kivy-ios
