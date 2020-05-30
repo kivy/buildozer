@@ -403,7 +403,7 @@ class TargetAndroid(Target):
             return ndk_dir
 
         import re
-        _version = re.search('(.+?)[a-z]', self.android_ndk_version).group(1)
+        _version = re.search('(.+?)[a-z]?', self.android_ndk_version).group(1)
 
         self.buildozer.info('Android NDK is missing, downloading')
         # Welcome to the NDK URL hell!
