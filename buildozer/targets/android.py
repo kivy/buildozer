@@ -44,7 +44,7 @@ DEPRECATED_TOKENS = (('app', 'android.sdk'), )
 # because it doesn't seem to matter much, it is normally correct to
 # download once then update all the components as buildozer already
 # does.
-DEFAULT_SDK_TAG = '4333796'
+DEFAULT_SDK_TAG = '6514223'
 
 DEFAULT_ARCH = 'armeabi-v7a'
 
@@ -159,8 +159,11 @@ class TargetAndroid(Target):
     def _sdkmanager(self, *args, **kwargs):
         """Call the sdkmanager in our Android SDK with the given arguments."""
         # Use the android-sdk dir as cwd by default
-        kwargs['cwd'] = kwargs.get('cwd', self.android_sdk_dir)
-        command = self.sdkmanager_path + ' ' + ' '.join(args)
+        android_sdk_dir = self.android_sdk_dir
+        kwargs['cwd'] = kwargs.get('cwd', android_sdk_dir)
+        sdkmanager_path = self.sdkmanager_path
+        sdk_root = f"--sdk_root={android_sdk_dir}"
+        command = f"{sdkmanager_path} {sdk_root} " + ' '.join(args)
         return_child = kwargs.pop('return_child', False)
         if return_child:
             return self.buildozer.cmd_expect(command, **kwargs)
@@ -372,18 +375,18 @@ class TargetAndroid(Target):
 
         self.buildozer.info('Android SDK is missing, downloading')
         if platform in ('win32', 'cygwin'):
-            archive = 'sdk-tools-windows-{}.zip'.format(DEFAULT_SDK_TAG)
+            archive = 'commandlinetools-win-{}_latest.zip'.format(DEFAULT_SDK_TAG)
         elif platform in ('darwin', ):
-            archive = 'sdk-tools-darwin-{}.zip'.format(DEFAULT_SDK_TAG)
+            archive = 'commandlinetools-mac-{}_latest.zip'.format(DEFAULT_SDK_TAG)
         elif platform.startswith('linux'):
-            archive = 'sdk-tools-linux-{}.zip'.format(DEFAULT_SDK_TAG)
+            archive = 'commandlinetools-linux-{}_latest.zip'.format(DEFAULT_SDK_TAG)
         else:
             raise SystemError('Unsupported platform: {0}'.format(platform))
 
         if not os.path.exists(sdk_dir):
             os.makedirs(sdk_dir)
 
-        url = 'http://dl.google.com/android/repository/'
+        url = 'https://dl.google.com/android/repository/'
         self.buildozer.download(url,
                                 archive,
                                 cwd=sdk_dir)
@@ -524,8 +527,10 @@ class TargetAndroid(Target):
             # This leads to a stderr "Broken pipe" message which is harmless,
             # but doesn't look good on terminal, hence redirecting to /dev/null
             yes_command = 'yes 2>/dev/null'
-            command = '{} | {} --licenses'.format(
-                yes_command, self.sdkmanager_path)
+            android_sdk_dir = self.android_sdk_dir
+            sdkmanager_path = self.sdkmanager_path
+            sdk_root = f"--sdk_root={android_sdk_dir}"
+            command = f"{yes_command} | {sdkmanager_path} {sdk_root} --licenses"
             self.buildozer.cmd(command, cwd=self.android_sdk_dir)
         else:
             kwargs['show_output'] = True
@@ -573,7 +578,7 @@ class TargetAndroid(Target):
         if self.buildozer.state.get(cache_key, None) == cache_value:
             return True
 
-        # 1. update the tool and platform-tools if needed
+        # 1. update the platform-tools package if needed
 
         skip_upd = self.buildozer.config.getbooldefault(
             'app', 'android.skip_update', False)
@@ -582,7 +587,7 @@ class TargetAndroid(Target):
             self.buildozer.info('Installing/updating SDK platform tools if necessary')
 
             # just calling sdkmanager with the items will install them if necessary
-            self._android_update_sdk('tools', 'platform-tools')
+            self._android_update_sdk('platform-tools')
             self._android_update_sdk('--update')
         else:
             self.buildozer.info('Skipping Android SDK update due to spec file setting')

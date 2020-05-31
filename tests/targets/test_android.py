@@ -253,10 +253,12 @@ class TestTargetAndroid:
         assert m_file_exists.call_args_list == [
             mock.call(self.target_android.android_sdk_dir)
         ]
-        archive = "sdk-tools-{platform}-4333796.zip".format(platform=platform)
+        platform_map = {"linux": "linux", "darwin": "mac"}
+        platform = platform_map[platform]
+        archive = "commandlinetools-{platform}-6514223_latest.zip".format(platform=platform)
         assert m_download.call_args_list == [
             mock.call(
-                "http://dl.google.com/android/repository/",
+                "https://dl.google.com/android/repository/",
                 archive,
                 cwd=mock.ANY,
             )
