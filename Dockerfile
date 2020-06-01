@@ -24,7 +24,7 @@
 # Or simply recreate the directory from the host with:
 # rm -rf ~/.buildozer && mkdir ~/.buildozer
 
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ENV USER="user"
 ENV HOME_DIR="/home/${USER}"
@@ -33,8 +33,8 @@ ENV WORK_DIR="${HOME_DIR}/hostcwd" \
     PATH="${HOME_DIR}/.local/bin:${PATH}"
 
 # configures locale
-RUN apt update -qq > /dev/null && \
-    apt install -qq --yes --no-install-recommends \
+RUN apt update -qq > /dev/null \
+    && DEBIAN_FRONTEND=noninteractive apt install -qq --yes --no-install-recommends \
     locales && \
     locale-gen en_US.UTF-8
 ENV LANG="en_US.UTF-8" \
@@ -42,8 +42,8 @@ ENV LANG="en_US.UTF-8" \
     LC_ALL="en_US.UTF-8"
 
 # system requirements to build most of the recipes
-RUN apt update -qq > /dev/null && \
-    apt install -qq --yes --no-install-recommends \
+RUN apt update -qq > /dev/null \
+    && DEBIAN_FRONTEND=noninteractive apt install -qq --yes --no-install-recommends \
     autoconf \
     automake \
     build-essential \
@@ -55,7 +55,7 @@ RUN apt update -qq > /dev/null && \
     libltdl-dev \
     libssl-dev \
     libtool \
-    openjdk-8-jdk \
+    openjdk-13-jdk \
     patch \
     pkg-config \
     python3-pip \
