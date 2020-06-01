@@ -1,5 +1,19 @@
 # Change Log
 
+
+## [1.2.0](https://github.com/kivy/buildozer/tree/1.2.0) (2020-05-30)
+[Full Changelog](https://github.com/kivy/buildozer/compare/1.1.0...1.2.0)
+
+**Merged pull requests:**
+
+- Bumps to latest Cython version [\#1132](https://github.com/kivy/buildozer/pull/1132) ([AndreMiras](https://github.com/AndreMiras))
+- Also integration test on macOS [\#1131](https://github.com/kivy/buildozer/pull/1131) ([AndreMiras](https://github.com/AndreMiras))
+- Tests android.numeric\_version config [\#1129](https://github.com/kivy/buildozer/pull/1129) ([AndreMiras](https://github.com/AndreMiras))
+- Refactored the TargetAndroid tests [\#1127](https://github.com/kivy/buildozer/pull/1127) ([pavelsof](https://github.com/pavelsof))
+- Adds p4a --numeric-version support [\#1126](https://github.com/kivy/buildozer/pull/1126) ([AndreMiras](https://github.com/AndreMiras))
+- Linter fixes and README.md update [\#1118](https://github.com/kivy/buildozer/pull/1118) ([AndreMiras](https://github.com/AndreMiras))
+- Removes Python 2 constructions [\#1114](https://github.com/kivy/buildozer/pull/1114) ([AndreMiras](https://github.com/AndreMiras))
+
 ## [1.1.0](https://github.com/kivy/buildozer/tree/1.1.0) (2020-05-18)
 [Full Changelog](https://github.com/kivy/buildozer/compare/1.0...1.1.0)
 
