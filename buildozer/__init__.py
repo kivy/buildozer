@@ -14,6 +14,7 @@ import sys
 import select
 import codecs
 import textwrap
+import warnings
 from buildozer.jsonstore import JsonStore
 from sys import stdout, stderr, exit
 from re import search
@@ -171,7 +172,6 @@ class Buildozer:
         self.info('Check application requirements')
         self.check_application_requirements()
 
-        self.info('Check garden requirements')
         self.check_garden_requirements()
 
         self.info('Compile platform')
@@ -509,44 +509,10 @@ class Buildozer:
                  cwd=self.buildozer_dir)
 
     def check_garden_requirements(self):
-        '''Ensure required garden packages are available to be included.
-        '''
         garden_requirements = self.config.getlist('app',
-                'garden_requirements', '')
-
-        # have we installed the garden packages?
-        if exists(self.gardenlibs_dir) and \
-                self.state.get('cache.gardenlibs', '') == garden_requirements:
-            self.debug('Garden requirements already installed, pass')
-            return
-
-        # we're going to reinstall all the garden libs.
-        self.rmdir(self.gardenlibs_dir)
-
-        # but if we don't have requirements, or if the user removed everything,
-        # don't do anything.
-        if not garden_requirements:
-            self.state['cache.gardenlibs'] = garden_requirements
-            return
-
-        self._ensure_virtualenv()
-        self.cmd('pip install Kivy-Garden==0.1.1', env=self.env_venv)
-
-        # recreate gardenlibs
-        self.mkdir(self.gardenlibs_dir)
-
-        for requirement in garden_requirements:
-            self._install_garden_package(requirement)
-
-        # save gardenlibs state
-        self.state['cache.gardenlibs'] = garden_requirements
-
-    def _install_garden_package(self, package):
-        self._ensure_virtualenv()
-        self.debug('Install garden package {} in buildozer_dir'.format(package))
-        self.cmd('garden install --app {}'.format(package),
-                env=self.env_venv,
-                cwd=self.buildozer_dir)
+            'garden_requirements', '')
+        if garden_requirements:
+            warnings.warn("`garden_requirements` settings is deprecated, use `requirements` instead", DeprecationWarning)
 
     def _ensure_virtualenv(self):
         if hasattr(self, 'venv'):
@@ -715,7 +681,6 @@ class Buildozer:
     def build_application(self):
         self._copy_application_sources()
         self._copy_application_libs()
-        self._copy_garden_libs()
         self._add_sitecustomize()
 
     def _copy_application_sources(self):
@@ -816,10 +781,6 @@ class Buildozer:
         # copy also the libs
         copytree(self.applibs_dir, join(self.app_dir, '_applibs'))
 
-    def _copy_garden_libs(self):
-        if exists(self.gardenlibs_dir):
-            copytree(self.gardenlibs_dir, join(self.app_dir, 'libs'))
-
     def _add_sitecustomize(self):
         copyfile(join(dirname(__file__), 'sitecustomize.py'),
                 join(self.app_dir, 'sitecustomize.py'))
@@ -888,10 +849,6 @@ class Buildozer:
     @property
     def applibs_dir(self):
         return join(self.buildozer_dir, 'applibs')
-
-    @property
-    def gardenlibs_dir(self):
-        return join(self.buildozer_dir, 'libs')
 
     @property
     def global_buildozer_dir(self):

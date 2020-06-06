@@ -98,16 +98,6 @@ Section [app]
   the compilation here. If you want to make it work, contribute to the
   Python-for-android project by creating a recipe. See :doc:`contribute`.
 
-- `garden_requirements`: List, Garden packages to include.
-
-  Add here the list of Kivy's garden packages to include. For example::
-
-    garden_requirements = graph
-
-  Please note that if it doesn't work, it might be because of the garden
-  package itself. Refer to the author of the package if he already tested
-  it on your target platform, not us.
-
 - `presplash.filename`: String, loading screen of your application.
 
   Presplash is the image shown on the device during application loading.
