@@ -66,13 +66,12 @@ To see your running application's print() messages and python's error messages, 
 
     buildozer -v android deploy run logcat | grep python
 
+Run my application from Windows 10
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Run my application on Windows 10
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Plug your Android device on a USB port.
 
-- Plug your Android device on a USB port
-
-- Open Windows PowerShell, go into the folder where you installed the Windows version of ADB, and activate the adb daemon:
+- Open Windows PowerShell, go into the folder where you installed the Windows version of ADB, and activate the ADB daemon. When the daemon is started you must see a number besides the word "device" meaning your device was correctly detected. In case of trouble, try another USB port or USB cable.
 
 ::
 
@@ -85,6 +84,15 @@ Run my application on Windows 10
 
     buildozer -v android deploy run
     
+It is important to notice that Windows ADB and Buildozer installed ADB must be the same version. To check the versions, open PowerShell and type:
+
+::
+
+    cd C:\platform-tools\
+    .\adb.exe version
+    wsl
+    cd ~/.buildozer/android/platform/android-sdk/platform-tools/
+    ./adb version
 
 Install on non-connected devices
 --------------------------------
