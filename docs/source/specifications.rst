@@ -105,7 +105,7 @@ Section [app]
     garden_requirements = graph
 
   Please note that if it doesn't work, it might be because of the garden
-  package itself. Refer to the author of the package if they already tested
+  package itself. Refer to the author(s) of the package if they already tested
   it on your target platform, not us.
 
 - `presplash.filename`: String, loading screen of your application.
@@ -135,4 +135,3 @@ Section [app]
   Defaults to true, your application will run in fullscreen. Means the status
   bar will be hidden. If you want to let the user access the status bar,
   hour, notifications, use 0 as a value.
-
