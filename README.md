@@ -9,7 +9,7 @@ Buildozer
 Buildozer is a tool for creating application packages easily.
 
 The goal is to have one "buildozer.spec" file in your app directory that describes
-your application requirements and settings - for example, title, icon and  included modules.
+your application requirements and settings - for example, title, icon and included modules.
 Buildozer will use that spec to create a package for Android, iOS, Windows, OSX and/or Linux.
 
 Buildozer currently supports packaging for Android via the [python-for-android](http://github.com/kivy/python-for-android/)
