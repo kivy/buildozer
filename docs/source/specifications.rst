@@ -105,7 +105,7 @@ Section [app]
     garden_requirements = graph
 
   Please note that if it doesn't work, it might be because of the garden
-  package itself. Refer to the author of the package if he already tested
+  package itself. Refer to the author of the package if they already tested
   it on your target platform, not us.
 
 - `presplash.filename`: String, loading screen of your application.
