@@ -66,7 +66,8 @@ setup(
     include_package_data=True,
     install_requires=['pexpect', 'virtualenv', 'sh'],
     classifiers=[
-        'Development Status :: 4 - Beta', 'Intended Audience :: Developers',
+        'Development Status :: 5 - Production/Stable', 
+        'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
