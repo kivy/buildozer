@@ -25,7 +25,7 @@ from fnmatch import fnmatch
 from pprint import pformat
 
 from urllib.request import FancyURLopener
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 try:
     import fcntl
 except ImportError:
@@ -110,7 +110,7 @@ class Buildozer:
         self.state = None
         self.build_id = None
         self.config_profile = ''
-        self.config = SafeConfigParser(allow_no_value=True)
+        self.config = ConfigParser(allow_no_value=True)
         self.config.optionxform = lambda value: value
         self.config.getlist = self._get_config_list
         self.config.getlistvalues = self._get_config_list_values
