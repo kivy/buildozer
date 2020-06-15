@@ -1,6 +1,6 @@
-'''
+"""
 Android target, based on python-for-android project
-'''
+"""
 
 import sys
 if sys.platform == 'win32':
@@ -339,9 +339,9 @@ class TargetAndroid(Target):
             self.buildozer.environ['JAVA_HOME'] = java_home
 
     def _locate_java(self, s):
-        '''If JAVA_HOME is in the environ, return $JAVA_HOME/bin/s. Otherwise,
+        """If JAVA_HOME is in the environ, return $JAVA_HOME/bin/s. Otherwise,
         return s.
-        '''
+        """
         if 'JAVA_HOME' in self.buildozer.environ:
             return join(self.buildozer.environ['JAVA_HOME'], 'bin', s)
         else:
@@ -943,10 +943,10 @@ class TargetAndroid(Target):
         self.buildozer.info('Application started.')
 
     def cmd_p4a(self, *args):
-        '''
+        """
         Run p4a commands. Args must come after --, or
         use --alias to make an alias
-        '''
+        """
         self.check_requirements()
         self.install_platform()
         args = args[0]
@@ -959,9 +959,9 @@ class TargetAndroid(Target):
             self._p4a(' '.join(args) if args else '')
 
     def cmd_clean(self, *args):
-        '''
+        """
         Clean the build and distribution
-        '''
+        """
         self._p4a("clean_builds")
         self._p4a("clean_dists")
 
@@ -1304,11 +1304,11 @@ class TargetAndroid(Target):
         return serials
 
     def cmd_adb(self, *args):
-        '''
+        """
         Run adb from the Android SDK.
         Args must come after --, or use
         --alias to make an alias
-        '''
+        """
         self.check_requirements()
         self.install_platform()
         args = args[0]
@@ -1348,8 +1348,8 @@ class TargetAndroid(Target):
         self.buildozer.info('Application pushed.')
 
     def cmd_logcat(self, *args):
-        '''Show the log from the device
-        '''
+        """Show the log from the device
+        """
         self.check_requirements()
         serial = self.serials[0:]
         if not serial:

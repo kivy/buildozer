@@ -1,10 +1,10 @@
-'''
+"""
 Buildozer
 =========
 
 Generic Python packager for Android / iOS. Desktop later.
 
-'''
+"""
 
 __version__ = '1.2.0.dev0'
 
@@ -82,18 +82,18 @@ urlretrieve = ChromeDownloader().retrieve
 
 
 class BuildozerException(Exception):
-    '''
+    """
     Exception raised for general situations buildozer cannot process.
-    '''
+    """
     pass
 
 
 class BuildozerCommandException(BuildozerException):
-    '''
+    """
     Exception raised when an external command failed.
 
     See: `Buildozer.cmd()`.
-    '''
+    """
     pass
 
 
@@ -145,8 +145,8 @@ class Buildozer:
             self.set_target(target)
 
     def set_target(self, target):
-        '''Set the target to use (one of buildozer.targets, such as "android")
-        '''
+        """Set the target to use (one of buildozer.targets, such as "android")
+        """
         self.targetname = target
         m = __import__('buildozer.targets.{0}'.format(target),
                        fromlist=['buildozer'])
@@ -155,8 +155,8 @@ class Buildozer:
         self.check_configuration_tokens()
 
     def prepare_for_build(self):
-        '''Prepare the build.
-        '''
+        """Prepare the build.
+        """
         assert(self.target is not None)
         if hasattr(self.target, '_build_prepared'):
             return
@@ -181,13 +181,13 @@ class Buildozer:
         self.target._build_prepared = True
 
     def build(self):
-        '''Do the build.
+        """Do the build.
 
         The target can set build_mode to 'release' or 'debug' before calling
         this method.
 
         (:meth:`prepare_for_build` must have been call before.)
-        '''
+        """
         assert(self.target is not None)
         assert(hasattr(self.target, '_build_prepared'))
 
@@ -370,8 +370,8 @@ class Buildozer:
         return spawnu(command, **kwargs)
 
     def check_configuration_tokens(self):
-        '''Ensure the spec file is 'correct'.
-        '''
+        """Ensure the spec file is 'correct'.
+        """
         self.info('Check configuration tokens')
         self.migrate_configuration_tokens()
         get = self.config.getdefault
@@ -431,9 +431,9 @@ class Buildozer:
                     entry_old, entry_new))
 
     def check_build_layout(self):
-        '''Ensure the build (local and global) directory layout and files are
+        """Ensure the build (local and global) directory layout and files are
         ready.
-        '''
+        """
         self.info('Ensure build layout')
 
         if not exists(self.specfilename):
@@ -460,9 +460,9 @@ class Buildozer:
             self.mkdir(join(self.buildozer_dir, target, 'app'))
 
     def check_application_requirements(self):
-        '''Ensure the application requirements are all available and ready to be
+        """Ensure the application requirements are all available and ready to be
         packaged as well.
-        '''
+        """
         requirements = self.config.getlist('app', 'requirements', '')
         target_available_packages = self.target.get_available_packages()
         if target_available_packages is True:
@@ -800,9 +800,9 @@ class Buildozer:
         self.info('Patched service/main.py to include applibs')
 
     def namify(self, name):
-        '''Return a "valid" name from a name with lot of invalid chars
+        """Return a "valid" name from a name with lot of invalid chars
         (allowed characters: a-z, A-Z, 0-9, -, _)
-        '''
+        """
         return re.sub(r'[^a-zA-Z0-9_\-]', '_', name)
 
     @property
@@ -827,7 +827,7 @@ class Buildozer:
 
     @property
     def buildozer_dir(self):
-        '''The directory in which to run the app build.'''
+        """The directory in which to run the app build."""
         if self.user_build_dir is not None:
             return self.user_build_dir
         return join(self.root_dir, '.buildozer')
@@ -1004,8 +1004,8 @@ class Buildozer:
         self.target.run_commands(args)
 
     def check_root(self):
-        '''If effective user id is 0, display a warning and require
-        user input to continue (or to cancel)'''
+        """If effective user id is 0, display a warning and require
+        user input to continue (or to cancel)"""
 
         warn_on_root = self.config.getdefault('buildozer', 'warn_on_root', '1')
         try:
@@ -1025,8 +1025,8 @@ class Buildozer:
                 sys.exit()
 
     def cmd_init(self, *args):
-        '''Create a initial buildozer.spec in the current directory
-        '''
+        """Create a initial buildozer.spec in the current directory
+        """
         if exists('buildozer.spec'):
             print('ERROR: You already have a buildozer.spec file.')
             exit(1)
@@ -1034,8 +1034,8 @@ class Buildozer:
         print('File buildozer.spec created, ready to customize!')
 
     def cmd_distclean(self, *args):
-        '''Clean the whole Buildozer environment.
-        '''
+        """Clean the whole Buildozer environment.
+        """
         print("Warning: Your ndk, sdk and all other cached packages will be"
               " removed. Continue? (y/n)")
         if sys.stdin.readline().lower()[0] == 'y':
@@ -1045,12 +1045,12 @@ class Buildozer:
             rmtree(self.global_buildozer_dir)
 
     def cmd_appclean(self, *args):
-        '''Clean the .buildozer folder in the app directory.
+        """Clean the .buildozer folder in the app directory.
 
         This command specifically refuses to delete files in a
         user-specified build directory, to avoid accidentally deleting
         more than the user intends.
-        '''
+        """
         if self.user_build_dir is not None:
             self.error(
                 ('Failed: build_dir is specified as {} in the buildozer config. `appclean` will '
@@ -1062,24 +1062,24 @@ class Buildozer:
             self.error('{} already deleted, skipping.'.format(self.buildozer_dir))
 
     def cmd_help(self, *args):
-        '''Show the Buildozer help.
-        '''
+        """Show the Buildozer help.
+        """
         self.usage()
 
     def cmd_setdefault(self, *args):
-        '''Set the default command to run when no arguments are given
-        '''
+        """Set the default command to run when no arguments are given
+        """
         self.check_build_layout()
         self.state['buildozer:defaultcommand'] = args
 
     def cmd_version(self, *args):
-        '''Show the Buildozer version
-        '''
+        """Show the Buildozer version
+        """
         print('Buildozer {0}'.format(__version__))
 
     def cmd_serve(self, *args):
-        '''Serve the bin directory via SimpleHTTPServer
-        '''
+        """Serve the bin directory via SimpleHTTPServer
+        """
         try:
             from http.server import SimpleHTTPRequestHandler
             from socketserver import TCPServer
@@ -1192,18 +1192,18 @@ class Buildozer:
 
 
 def set_config_from_envs(config):
-    '''Takes a ConfigParser, and checks every section/token for an
+    """Takes a ConfigParser, and checks every section/token for an
     environment variable of the form SECTION_TOKEN, with any dots
     replaced by underscores. If the variable exists, sets the config
     variable to the env value.
-    '''
+    """
     for section in config.sections():
         for token in config.options(section):
             set_config_token_from_env(section, token, config)
 
 
 def set_config_token_from_env(section, token, config):
-    '''Given a config section and token, checks for an appropriate
+    """Given a config section and token, checks for an appropriate
     environment variable. If the variable exists, sets the config entry to
     its value.
 
@@ -1213,7 +1213,7 @@ def set_config_token_from_env(section, token, config):
     Returns True if the environment variable exists and was used, or
     False otherwise.
 
-    '''
+    """
     env_var_name = ''.join([section.upper(), '_',
                             token.upper().replace('.', '_')])
     env_var = os.environ.get(env_var_name)

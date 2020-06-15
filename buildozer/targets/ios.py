@@ -1,6 +1,6 @@
-'''
+"""
 iOS target, based on kivy-ios project
-'''
+"""
 
 import sys
 if sys.platform != 'darwin':
@@ -262,8 +262,8 @@ class TargetIos(Target):
         self._run_ios_deploy(lldb=True)
 
     def cmd_xcode(self, *args):
-        '''Open the xcode project.
-        '''
+        """Open the xcode project.
+        """
         app_name = self.buildozer.namify(self.buildozer.config.get('app',
             'package.name'))
         app_name = app_name.lower()
@@ -330,8 +330,8 @@ class TargetIos(Target):
 
     @no_config
     def cmd_list_identities(self, *args):
-        '''List the available identities to use for signing.
-        '''
+        """List the available identities to use for signing.
+        """
         identities = self._get_available_identities()
         print('Available identities:')
         for x in identities:

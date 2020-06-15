@@ -1,4 +1,4 @@
-'''
+"""
 Buildozer remote
 ================
 
@@ -9,7 +9,7 @@ Buildozer remote
 Pack and send the source code to a remote SSH server, bundle buildozer with it,
 and start the build on the remote.
 You need paramiko to make it work.
-'''
+"""
 
 __all__ = ["BuildozerRemote"]
 
