@@ -1,10 +1,10 @@
+import io
 import re
 import os
 import codecs
 import unittest
 import buildozer as buildozer_module
 from buildozer import Buildozer
-from six import StringIO
 import tempfile
 from unittest import mock
 
@@ -81,7 +81,7 @@ class TestBuildozer(unittest.TestCase):
         https://github.com/kivy/buildozer/issues/813
         """
         buildozer = Buildozer()
-        with mock.patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+        with mock.patch('sys.stdout', new_callable=io.StringIO) as mock_stdout:
             buildozer.usage()
         assert 'Usage:' in mock_stdout.getvalue()
 
@@ -106,7 +106,7 @@ class TestBuildozer(unittest.TestCase):
         buildozer = Buildozer(self.specfile.name)
         assert buildozer.log_level == 1
         # at this level, debug messages shouldn't not be printed
-        with mock.patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+        with mock.patch('sys.stdout', new_callable=io.StringIO) as mock_stdout:
             buildozer.debug('debug message')
             buildozer.info('info message')
             buildozer.error('error message')
@@ -119,7 +119,7 @@ class TestBuildozer(unittest.TestCase):
         buildozer = Buildozer(self.specfile.name)
         assert buildozer.log_level == 2
         # at this level all message types should be printed
-        with mock.patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+        with mock.patch('sys.stdout', new_callable=io.StringIO) as mock_stdout:
             buildozer.debug('debug message')
             buildozer.info('info message')
             buildozer.error('error message')
@@ -135,7 +135,7 @@ class TestBuildozer(unittest.TestCase):
         buildozer = Buildozer()
         command = 'foobar'
         args = [command, 'debug']
-        with mock.patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+        with mock.patch('sys.stdout', new_callable=io.StringIO) as mock_stdout:
             with self.assertRaises(SystemExit):
                 buildozer.run_command(args)
         assert mock_stdout.getvalue() == 'Unknown command/target {}\n'.format(command)
@@ -210,7 +210,7 @@ class TestBuildozer(unittest.TestCase):
         self.set_specfile_log_level(self.specfile.name, 1)
         buildozer = Buildozer(self.specfile.name, 'android')
 
-        with mock.patch('sys.stdout', new_callable=StringIO) as mock_stdout:
+        with mock.patch('sys.stdout', new_callable=io.StringIO) as mock_stdout:
             ndk_version = buildozer.target.p4a_recommended_android_ndk
         assert MSG_P4A_RECOMMENDED_NDK_ERROR in mock_stdout.getvalue()
         # and we should get the default android's ndk version of buildozer
@@ -227,7 +227,7 @@ class TestBuildozer(unittest.TestCase):
         expected_ndk = '19b'
         recommended_line = 'RECOMMENDED_NDK_VERSION = {expected_ndk}\n'.format(
             expected_ndk=expected_ndk)
-        mock_open.return_value = StringIO(recommended_line)
+        mock_open.return_value = io.StringIO(recommended_line)
         ndk_version = buildozer.target.p4a_recommended_android_ndk
         p4a_dir = os.path.join(
             buildozer.platform_dir, buildozer.target.p4a_directory_name)

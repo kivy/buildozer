@@ -1,6 +1,6 @@
-'''
+"""
 OSX target, based on kivy-sdk-packager
-'''
+"""
 
 import sys
 if sys.platform != 'darwin':

@@ -42,9 +42,6 @@ requirements = python3,kivy
 # Sets custom source for any requirements with recipes
 # requirements.source.kivy = ../../kivy
 
-# (list) Garden requirements
-#garden_requirements =
-
 # (str) Presplash of the application
 #presplash.filename = %(source.dir)s/data/presplash.png
 
