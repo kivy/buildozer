@@ -8,15 +8,15 @@ Buildozer
 
 Buildozer is a tool for creating application packages easily.
 
-The goal is to have one "buildozer.spec" file in your app directory, describing
-your application requirements and settings such as title, icon, included modules
-etc. Buildozer will use that spec to create a package for Android, iOS, Windows,
-OSX and/or Linux.
+The goal is to have one "buildozer.spec" file in your app directory that describes
+your application requirements and settings - for example, title, icon and included modules.
+Buildozer will use that spec to create a package for Android, iOS, Windows, OSX and/or Linux.
 
 Buildozer currently supports packaging for Android via the [python-for-android](http://github.com/kivy/python-for-android/)
-project, and for iOS via the kivy-ios project. iOS and OSX are still under work.
+project, and for iOS via the [kivy-ios](https://github.com/kivy/kivy-ios) project.
+iOS and OSX are still under development.
 
-For Android, buildozer will automatically download and prepare the
+For Android, Buildozer will automatically download and prepare the
 build dependencies. For more information, see
 [Android-SDK-NDK-Information](https://github.com/kivy/kivy/wiki/Android-SDK-NDK-Information).
 Note that only Python 3 is supported.
@@ -131,7 +131,8 @@ Target "android" commands:
 
 ## `buildozer.spec`
 
-See [buildozer/default.spec](https://raw.github.com/kivy/buildozer/master/buildozer/default.spec) for an up-to-date spec file.
+See [buildozer/default.spec](https://raw.github.com/kivy/buildozer/master/buildozer/default.spec) for an 
+up-to-date spec file template.
 
 
 ## Default config
@@ -184,7 +185,7 @@ We also have a Discord channel:
 ## License
 
 Buildozer is released under the terms of the MIT License. Please refer to the
-LICENSE file.
+[LICENSE](LICENSE) file.
 
 
 ## Backers

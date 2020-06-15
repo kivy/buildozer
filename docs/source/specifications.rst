@@ -125,4 +125,3 @@ Section [app]
   Defaults to true, your application will run in fullscreen. Means the status
   bar will be hidden. If you want to let the user access the status bar,
   hour, notifications, use 0 as a value.
-
