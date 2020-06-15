@@ -21,10 +21,7 @@ from sys import stdout, stdin, exit
 from select import select
 from os.path import join, expanduser, realpath, exists, splitext
 from os import makedirs, walk, getcwd
-try:
-    from configparser import SafeConfigParser
-except ImportError:
-    from ConfigParser import SafeConfigParser
+from configparser import ConfigParser
 try:
     import termios
     has_termios = True
@@ -138,7 +135,7 @@ class BuildozerRemote(Buildozer):
 
         # create custom buildozer.spec
         self.info('Create custom buildozer.spec')
-        config = SafeConfigParser()
+        config = ConfigParser()
         config.read('buildozer.spec')
         config.set('app', 'source.dir', 'app')
 
