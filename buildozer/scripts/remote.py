@@ -13,27 +13,25 @@ You need paramiko to make it work.
 
 __all__ = ["BuildozerRemote"]
 
-import socket
-import sys
-from buildozer import (
-    Buildozer, BuildozerCommandException, BuildozerException, __version__)
-from sys import stdout, stdin, exit
-from select import select
-from os.path import join, expanduser, realpath, exists, splitext
+from configparser import ConfigParser
 from os import makedirs, walk, getcwd
+from os.path import join, expanduser, realpath, exists, splitext
+from select import select
+import socket
+from sys import argv, stdout, stdin, exit
+
 try:
-    from configparser import SafeConfigParser
+    import paramiko
 except ImportError:
-    from ConfigParser import SafeConfigParser
+    print('Paramiko missing: pip install paramiko')
 try:
     import termios
     has_termios = True
 except ImportError:
     has_termios = False
-try:
-    import paramiko
-except ImportError:
-    print('Paramiko missing: pip install paramiko')
+
+from buildozer import (
+    Buildozer, BuildozerCommandException, BuildozerException, __version__)
 
 
 class BuildozerRemote(Buildozer):
@@ -138,7 +136,7 @@ class BuildozerRemote(Buildozer):
 
         # create custom buildozer.spec
         self.info('Create custom buildozer.spec')
-        config = SafeConfigParser()
+        config = ConfigParser()
         config.read('buildozer.spec')
         config.set('app', 'source.dir', 'app')
 
@@ -270,7 +268,7 @@ class BuildozerRemote(Buildozer):
 
 def main():
     try:
-        BuildozerRemote().run_command(sys.argv[1:])
+        BuildozerRemote().run_command(argv[1:])
     except BuildozerCommandException:
         pass
     except BuildozerException as error:
