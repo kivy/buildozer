@@ -1,8 +1,9 @@
 import sys
 import unittest
+from unittest import mock
+
 from buildozer import BuildozerCommandException
 from buildozer.scripts import client
-from unittest import mock
 
 
 class TestClient(unittest.TestCase):

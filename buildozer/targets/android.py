@@ -6,7 +6,24 @@ import sys
 if sys.platform == 'win32':
     raise NotImplementedError('Windows platform not yet working for Android')
 
-from platform import uname
+import ast
+from distutils.version import LooseVersion
+import io
+from glob import glob
+from pipes import quote
+import os
+from os import environ
+from os.path import exists, join, realpath, expanduser, basename, relpath
+from platform import architecture, uname
+import re
+from shutil import copyfile, rmtree
+from sys import platform, executable
+import traceback
+
+from buildozer import BuildozerException, USE_COLOR
+from buildozer.target import Target
+from buildozer.libs.version import parse
+
 WSL = 'Microsoft' in uname()[2]
 
 ANDROID_API = '27'
@@ -18,24 +35,6 @@ APACHE_ANT_VERSION = '1.9.4'
 # turn only happens if the python-for-android is old and probably
 # doesn't support any newer NDK.
 DEFAULT_ANDROID_NDK_VERSION = '17c'
-
-import traceback
-import os
-import io
-import re
-import ast
-from pipes import quote
-from sys import platform, executable
-from buildozer import BuildozerException, USE_COLOR
-from buildozer.target import Target
-from os import environ
-from os.path import exists, join, realpath, expanduser, basename, relpath
-from platform import architecture
-from shutil import copyfile, rmtree
-from glob import glob
-
-from buildozer.libs.version import parse
-from distutils.version import LooseVersion
 
 # buildozer.spec tokens that used to exist but are now ignored
 DEPRECATED_TOKENS = (('app', 'android.sdk'), )
@@ -70,8 +69,8 @@ class TargetAndroid(Target):
             'app', 'android.arch', DEFAULT_ARCH)
         self._build_dir = join(
             self.buildozer.platform_dir, 'build-{}'.format(self._arch))
-        executable = sys.executable or 'python'
-        self._p4a_cmd = '{} -m pythonforandroid.toolchain '.format(executable)
+        _executable = executable or 'python'
+        self._p4a_cmd = '{} -m pythonforandroid.toolchain '.format(_executable)
         self._p4a_bootstrap = self.buildozer.config.getdefault(
             'app', 'p4a.bootstrap', 'sdl2')
         self.p4a_apk_cmd += self._p4a_bootstrap
@@ -262,7 +261,7 @@ class TargetAndroid(Target):
         if 'PATH' in self.buildozer.environ:
             path.append(self.buildozer.environ['PATH'])
         else:
-            path.append(os.environ['PATH'])
+            path.append(environ['PATH'])
         self.buildozer.environ['PATH'] = ':'.join(path)
         checkbin = self.buildozer.checkbin
         checkbin('Git (git)', 'git')
@@ -353,7 +352,7 @@ class TargetAndroid(Target):
             self.buildozer.info('Apache ANT found at {0}'.format(ant_dir))
             return ant_dir
 
-        if not os.path.exists(ant_dir):
+        if not exists(ant_dir):
             os.makedirs(ant_dir)
 
         self.buildozer.info('Android ANT is missing, downloading')
@@ -383,7 +382,7 @@ class TargetAndroid(Target):
         else:
             raise SystemError('Unsupported platform: {0}'.format(platform))
 
-        if not os.path.exists(sdk_dir):
+        if not exists(sdk_dir):
             os.makedirs(sdk_dir)
 
         url = 'https://dl.google.com/android/repository/'
@@ -489,15 +488,15 @@ class TargetAndroid(Target):
         Crudely parse out the installed platform-tools version
         """
 
-        platform_tools_dir = os.path.join(
+        platform_tools_dir = join(
             self.android_sdk_dir,
             'platform-tools')
 
-        if not os.path.exists(platform_tools_dir):
+        if not exists(platform_tools_dir):
             return None
 
-        data_file = os.path.join(platform_tools_dir, 'source.properties')
-        if not os.path.exists(data_file):
+        data_file = join(platform_tools_dir, 'source.properties')
+        if not exists(data_file):
             return None
 
         with open(data_file, 'r') as fileh:
@@ -539,7 +538,7 @@ class TargetAndroid(Target):
 
     def _read_version_subdir(self, *args):
         versions = []
-        if not os.path.exists(join(*args)):
+        if not exists(join(*args)):
             self.buildozer.debug('build-tools folder not found {}'.format(join(
                 *args)))
             return parse("0")
