@@ -17,7 +17,7 @@ jobs:
     - name: Setup environment
       run: |
         pip install -e .
-        pip install Cython==0.29.19
+        pip install Cython
     - run: buildozer --help
     - run: buildozer init
     - name: SDK, NDK and p4a download
