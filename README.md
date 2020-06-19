@@ -1,7 +1,8 @@
 Buildozer
 =========
 
-[![Build](https://github.com/kivy/buildozer/workflows/Continuous%20Integration/badge.svg)](https://github.com/kivy/buildozer/actions?query=workflow%3A%22Continuous+Integration%22)
+[![Build](https://github.com/kivy/buildozer/workflows/Tests/badge.svg)](https://github.com/kivy/buildozer/actions?query=workflow%3ATests)
+[![Build](https://github.com/kivy/buildozer/workflows/Android/badge.svg)](https://github.com/kivy/buildozer/actions?query=workflow%3AAndroid)
 [![Coverage Status](https://coveralls.io/repos/github/kivy/buildozer/badge.svg)](https://coveralls.io/github/kivy/buildozer)
 [![Backers on Open Collective](https://opencollective.com/kivy/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/kivy/sponsors/badge.svg)](#sponsors)
