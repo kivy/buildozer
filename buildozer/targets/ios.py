@@ -66,6 +66,9 @@ class TargetIos(Target):
     def check_requirements(self):
         checkbin = self.buildozer.checkbin
         cmd = self.buildozer.cmd
+        executable = sys.executable or 'python'
+        self._toolchain_cmd = f"{executable} toolchain.py "
+        self._xcodebuild_cmd = "xcodebuild "
 
         checkbin('Xcode xcodebuild', 'xcodebuild')
         checkbin('Xcode xcode-select', 'xcode-select')
@@ -99,10 +102,21 @@ class TargetIos(Target):
                                                           branch='1.7.0',
                                                           owner='phonegap')
 
+    def toolchain(self, cmd, **kwargs):
+        kwargs.setdefault('cwd', self.ios_dir)
+        return self.buildozer.cmd(self._toolchain_cmd + cmd, **kwargs)
+
+    def xcodebuild(self, cmd='', **kwargs):
+        return self.buildozer.cmd(self._xcodebuild_cmd + cmd, **kwargs)
+
+    @property
+    def code_signing_allowed(self):
+        allowed = self.buildozer.config.getboolean("app", "ios.codesign.allowed")
+        allowed = "YES" if allowed else "NO"
+        return f"CODE_SIGNING_ALLOWED={allowed}"
+
     def get_available_packages(self):
-        available_modules = self.buildozer.cmd(
-                './toolchain.py recipes --compact',
-                cwd=self.ios_dir, get_stdout=True)[0]
+        available_modules = self.toolchain("recipes --compact", get_stdout=True)[0]
         return available_modules.splitlines()[0].split()
 
     def compile_platform(self):
@@ -139,11 +153,10 @@ class TargetIos(Target):
             return
 
         modules_str = ' '.join(ios_requirements)
-        self.buildozer.cmd('./toolchain.py build {}'.format(modules_str),
-                           cwd=self.ios_dir)
+        self.toolchain(f"build {modules_str}")
 
         if not self.buildozer.file_exists(self.ios_deploy_dir, 'ios-deploy'):
-            self.buildozer.cmd('make ios-deploy', cwd=self.ios_deploy_dir)
+            self.xcodebuild(cwd=self.ios_deploy_dir)
 
         self.buildozer.state['ios.requirements'] = ios_requirements
         self.buildozer.state.sync()
@@ -170,12 +183,10 @@ class TargetIos(Target):
 
         self.app_project_dir = join(self.ios_dir, '{0}-ios'.format(app_name.lower()))
         if not self.buildozer.file_exists(self.app_project_dir):
-            create_cmd = './toolchain.py create {0}{1} {2}'.format(frameworks_cmd, app_name,
-                                                                   self.buildozer.app_dir)
-            self.buildozer.cmd(create_cmd, cwd=self.ios_dir)
+            cmd = f"create {frameworks_cmd}{app_name} {self.buildozer.app_dir}"
         else:
-            update_cmd = './toolchain.py update {0}{1}-ios'.format(frameworks_cmd, app_name)
-            self.buildozer.cmd(update_cmd, cwd=self.ios_dir)
+            cmd = f"update {frameworks_cmd}{app_name}-ios"
+        self.toolchain(cmd)
 
         # fix the plist
         plist_fn = '{}-Info.plist'.format(app_name.lower())
@@ -194,9 +205,10 @@ class TargetIos(Target):
         # ok, write the modified plist.
         plistlib.writePlist(plist, plist_rfn)
 
-        mode = 'Debug' if self.build_mode == 'debug' else 'Release'
-        self.buildozer.cmd('xcodebuild -configuration {} ENABLE_BITCODE=NO clean build'.format(mode),
-                cwd=self.app_project_dir)
+        mode = self.build_mode.capitalize()
+        self.xcodebuild(
+            f"-configuration {mode} ENABLE_BITCODE=NO {self.code_signing_allowed} clean build",
+            cwd=self.app_project_dir)
         ios_app_dir = '{app_lower}-ios/build/{mode}-iphoneos/{app_lower}.app'.format(
                 app_lower=app_name.lower(), mode=mode)
         self.buildozer.state['ios:latestappdir'] = ios_app_dir
@@ -221,8 +233,7 @@ class TargetIos(Target):
         self.buildozer.rmdir(intermediate_dir)
 
         self.buildozer.info('Creating archive...')
-        self.buildozer.cmd((
-                '/usr/bin/xcodebuild'
+        self.xcodebuild((
                 ' -alltargets'
                 ' -configuration {mode}'
                 ' -scheme {scheme}'
@@ -233,8 +244,7 @@ class TargetIos(Target):
             cwd=build_dir)
 
         self.buildozer.info('Creating IPA...')
-        self.buildozer.cmd((
-                '/usr/bin/xcodebuild'
+        self.xcodebuild((
                 ' -exportArchive'
                 ' -exportFormat IPA'
                 ' -archivePath "{xcarchive}"'
@@ -301,13 +311,13 @@ class TargetIos(Target):
             self.buildozer.error('Icon {} does not exists'.format(icon_fn))
             return
 
-        self.buildozer.cmd('./toolchain.py icon {} {}'.format(
-            self.app_project_dir, icon_fn),
-            cwd=self.ios_dir)
+        self.toolchain(f"icon {self.app_project_dir} {icon_fn}")
 
     def check_configuration_tokens(self):
         errors = []
         config = self.buildozer.config
+        if not config.getboolean('app', 'ios.codesign.allowed'):
+            return
         identity_debug = config.getdefault('app', 'ios.codesign.debug', '')
         identity_release = config.getdefault('app', 'ios.codesign.release',
                 identity_debug)
