@@ -2,13 +2,14 @@
 OSX target, based on kivy-sdk-packager
 '''
 
-import sys
-if sys.platform != 'darwin':
-    raise NotImplementedError('This will only work on osx')
-
-from buildozer.target import Target
 from os.path import exists, join, abspath, dirname
 from subprocess import check_call, check_output
+import sys
+
+from buildozer.target import Target
+
+if sys.platform != 'darwin':
+    raise NotImplementedError('This will only work on osx')
 
 
 class TargetOSX(Target):

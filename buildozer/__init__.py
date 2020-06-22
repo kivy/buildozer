@@ -8,32 +8,33 @@ Generic Python packager for Android / iOS. Desktop later.
 
 __version__ = '1.2.0.dev0'
 
-import os
-import re
-import sys
-import select
 import codecs
-import textwrap
-import warnings
-from buildozer.jsonstore import JsonStore
-from sys import stdout, stderr, exit
-from re import search
-from os.path import join, exists, dirname, realpath, splitext, expanduser
-from subprocess import Popen, PIPE
-from os import environ, unlink, walk, sep, listdir, makedirs
-from copy import copy
-from shutil import copyfile, rmtree, copytree, move
-from fnmatch import fnmatch
-
-from pprint import pformat
-
-from urllib.request import FancyURLopener
 from configparser import ConfigParser
+from copy import copy
+from fnmatch import fnmatch
+import os
+from os import environ, unlink, walk, sep, listdir, makedirs, chdir
+from os.path import join, exists, dirname, realpath, splitext, expanduser, isdir
+from pprint import pformat
+import re
+from re import search
+import select
+import sys
+from sys import stdout, stderr, exit
+from subprocess import Popen, PIPE
+from shutil import copyfile, rmtree, copytree, move
+import textwrap
+from urllib.request import FancyURLopener
+import warnings
+
+from buildozer.jsonstore import JsonStore
+
 try:
     import fcntl
 except ImportError:
     # on windows, no fcntl
     fcntl = None
+
 try:
     # if installed, it can give color to windows as well
     import colorama
@@ -569,7 +570,7 @@ class Buildozer:
             source = join(cwd, source)
             target = join(cwd, target)
         self.debug('Rename {0} to {1}'.format(source, target))
-        if not os.path.isdir(os.path.dirname(target)):
+        if not isdir(dirname(target)):
             self.error(('Rename {0} to {1} fails because {2} is not a '
                         'directory').format(source, target, target))
         move(source, target)
@@ -605,14 +606,14 @@ class Buildozer:
 
     def file_copytree(self, src, dest):
         print('copy {} to {}'.format(src, dest))
-        if os.path.isdir(src):
-            if not os.path.isdir(dest):
-                os.makedirs(dest)
-            files = os.listdir(src)
+        if isdir(src):
+            if not isdir(dest):
+                makedirs(dest)
+            files = listdir(src)
             for f in files:
                 self.file_copytree(
-                    os.path.join(src, f),
-                    os.path.join(dest, f))
+                    join(src, f),
+                    join(dest, f))
         else:
             copyfile(src, dest)
 
@@ -1087,7 +1088,7 @@ class Buildozer:
             from SimpleHTTPServer import SimpleHTTPRequestHandler
             from SocketServer import TCPServer
 
-        os.chdir(self.bin_dir)
+        chdir(self.bin_dir)
         handler = SimpleHTTPRequestHandler
         httpd = TCPServer(("", SIMPLE_HTTP_SERVER_PORT), handler)
         print("Serving via HTTP at port {}".format(SIMPLE_HTTP_SERVER_PORT))
@@ -1216,7 +1217,7 @@ def set_config_token_from_env(section, token, config):
     '''
     env_var_name = ''.join([section.upper(), '_',
                             token.upper().replace('.', '_')])
-    env_var = os.environ.get(env_var_name)
+    env_var = environ.get(env_var_name)
     if env_var is None:
         return False
     config.set(section, token, env_var)

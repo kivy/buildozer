@@ -1,9 +1,9 @@
-import re
-import os
 import codecs
 import unittest
 import buildozer as buildozer_module
 from buildozer import Buildozer
+import re
+import os
 from six import StringIO
 import tempfile
 from unittest import mock
