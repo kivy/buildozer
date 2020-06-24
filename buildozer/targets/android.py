@@ -902,6 +902,30 @@ class TargetAndroid(Target):
         for lib in uses_library:
             cmd.append('--uses-library={}'.format(lib))
 
+        # support for activity-class-name
+        activity_class_name = self.buildozer.config.getdefault(
+            'app', 'android.activity_class_name', 'org.kivy.android.PythonActivity')
+        if activity_class_name != 'org.kivy.android.PythonActivity':
+            cmd.append('--activity-class-name={}'.format(activity_class_name))
+
+        # support for service-class-name
+        service_class_name = self.buildozer.config.getdefault(
+            'app', 'android.service_class_name', 'org.kivy.android.PythonService')
+        if service_class_name != 'org.kivy.android.PythonService':
+            cmd.append('--service-class-name={}'.format(service_class_name))
+
+        # support for network-security-config
+        network_security_config = self.buildozer.config.getdefault(
+            'app', 'android.manifest.network_security_config', None)
+        if network_security_config is not None:
+            cmd.append("--network-security-config={}".format(network_security_config))
+
+        # support for uses-cleartext-traffic
+        uses_cleartext_traffic = self.buildozer.config.getdefault(
+            'app', 'android.manifest.uses_cleartext_traffic', None)
+        if uses_cleartext_traffic is not None:
+            cmd.append("--uses-cleartext-traffic={}".format('true' if uses_cleartext_traffic else 'false'))
+
         # support for gradle dependencies
         gradle_dependencies = self.buildozer.config.getlist('app', 'android.gradle_dependencies', [])
         for gradle_dependency in gradle_dependencies:
