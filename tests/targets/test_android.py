@@ -9,19 +9,13 @@ from tests.targets.utils import (
     init_buildozer,
     patch_buildozer,
     patch_buildozer_checkbin,
+    patch_buildozer_cmd,
+    patch_buildozer_file_exists,
 )
-
-
-def patch_buildozer_cmd():
-    return patch_buildozer("cmd")
 
 
 def patch_buildozer_cmd_expect():
     return patch_buildozer("cmd_expect")
-
-
-def patch_buildozer_file_exists():
-    return patch_buildozer("file_exists")
 
 
 def patch_buildozer_download():
