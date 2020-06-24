@@ -173,7 +173,7 @@ class BuildozerRemote(Buildozer):
 
     def _ssh_sync(self, directory, mode='put'):
         self.debug('Syncing {} directory'.format(directory))
-        directory = realpath(directory)
+        directory = realpath(expanduser(directory))
         base_strip = directory.rfind('/')
         if mode == 'get':
             local_dir = join(directory, 'bin')

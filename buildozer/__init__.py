@@ -685,7 +685,7 @@ class Buildozer:
 
     def _copy_application_sources(self):
         # XXX clean the inclusion/exclusion algo.
-        source_dir = realpath(self.config.getdefault('app', 'source.dir', '.'))
+        source_dir = realpath(expanduser(self.config.getdefault('app', 'source.dir', '.')))
         include_exts = self.config.getlist('app', 'source.include_exts', '')
         exclude_exts = self.config.getlist('app', 'source.exclude_exts', '')
         exclude_dirs = self.config.getlist('app', 'source.exclude_dirs', '')
@@ -807,7 +807,7 @@ class Buildozer:
 
     @property
     def root_dir(self):
-        return realpath(dirname(self.specfilename))
+        return realpath(expanduser(dirname(self.specfilename)))
 
     @property
     def user_build_dir(self):
@@ -821,7 +821,7 @@ class Buildozer:
         build_dir = self.config.getdefault('buildozer', 'build_dir', build_dir)
 
         if build_dir is not None:
-            build_dir = realpath(join(self.root_dir, build_dir))
+            build_dir = realpath(join(self.root_dir, expanduser(build_dir)))
 
         return build_dir
 
