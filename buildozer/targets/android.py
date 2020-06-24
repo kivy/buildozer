@@ -98,6 +98,11 @@ class TargetAndroid(Target):
         else:
             self.extra_p4a_args += ' --ignore-setup-py'
 
+        activity_class_name = self.buildozer.config.getdefault(
+            'app', 'android.activity_class_name', 'org.kivy.android.PythonActivity')
+        if activity_class_name != 'org.kivy.android.PythonActivity':
+            self.extra_p4a_args += ' --activity-class-name={}'.format(activity_class_name)
+
         self.warn_on_deprecated_tokens()
 
     def warn_on_deprecated_tokens(self):
