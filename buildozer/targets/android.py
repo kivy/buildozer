@@ -87,7 +87,7 @@ class TargetAndroid(Target):
 
         hook = self.buildozer.config.getdefault("app", "p4a.hook", None)
         if hook is not None:
-            self.extra_p4a_args += ' --hook={}'.format(realpath(hook))
+            self.extra_p4a_args += ' --hook={}'.format(realpath(expanduser(hook)))
         port = self.buildozer.config.getdefault('app', 'p4a.port', None)
         if port is not None:
             self.extra_p4a_args += ' --port={}'.format(port)
@@ -868,16 +868,16 @@ class TargetAndroid(Target):
         blacklist_src = self.buildozer.config.getdefault('app', 'android.blacklist_src', None)
         if whitelist_src:
             cmd.append('--whitelist')
-            cmd.append(realpath(whitelist_src))
+            cmd.append(realpath(expanduser(whitelist_src)))
         if blacklist_src:
             cmd.append('--blacklist')
-            cmd.append(realpath(blacklist_src))
+            cmd.append(realpath(expanduser(blacklist_src)))
 
         # support for aars
         aars = self.buildozer.config.getlist('app', 'android.add_aars', [])
         for aar in aars:
             cmd.append('--add-aar')
-            cmd.append(realpath(aar))
+            cmd.append(realpath(expanduser(aar)))
 
         # support for uses-lib
         uses_library = self.buildozer.config.getlist(
@@ -1235,8 +1235,8 @@ class TargetAndroid(Target):
         # convert our references to relative path
         app_references = self.buildozer.config.getlist(
             'app', 'android.library_references', [])
-        source_dir = realpath(self.buildozer.config.getdefault(
-            'app', 'source.dir', '.'))
+        source_dir = realpath(expanduser(self.buildozer.config.getdefault(
+            'app', 'source.dir', '.')))
         for cref in app_references:
             # get the full path of the current reference
             ref = realpath(join(source_dir, cref))
@@ -1246,7 +1246,7 @@ class TargetAndroid(Target):
                         cref))
                 exit(1)
             # get a relative path from the project file
-            ref = relpath(ref, realpath(dist_dir))
+            ref = relpath(ref, realpath(expanduser(dist_dir)))
             # ensure the reference exists
             references.append(ref)
 
