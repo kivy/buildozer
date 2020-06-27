@@ -3,9 +3,6 @@ iOS target, based on kivy-ios project
 '''
 
 import sys
-if sys.platform != 'darwin':
-    raise NotImplementedError('Windows platform not yet working for Android')
-
 import plistlib
 from buildozer import BuildozerCommandException
 from buildozer.target import Target, no_config
@@ -64,6 +61,8 @@ class TargetIos(Target):
     targetname = "ios"
 
     def check_requirements(self):
+        if sys.platform != "darwin":
+            raise NotImplementedError("Only macOS is supported for iOS target")
         checkbin = self.buildozer.checkbin
         cmd = self.buildozer.cmd
         executable = sys.executable or 'python'
