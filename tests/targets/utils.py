@@ -10,8 +10,20 @@ def patch_buildozer(method):
     return mock.patch("buildozer.Buildozer.{method}".format(method=method))
 
 
+def patch_buildozer_cmd():
+    return patch_buildozer("cmd")
+
+
 def patch_buildozer_checkbin():
     return patch_buildozer("checkbin")
+
+
+def patch_buildozer_file_exists():
+    return patch_buildozer("file_exists")
+
+
+def patch_buildozer_error():
+    return patch_buildozer("error")
 
 
 def default_specfile_path():

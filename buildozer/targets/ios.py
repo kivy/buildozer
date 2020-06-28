@@ -60,14 +60,20 @@ li { padding: 1em; }
 class TargetIos(Target):
     targetname = "ios"
 
+    def __init__(self, buildozer):
+        super().__init__(buildozer)
+        executable = sys.executable or 'python'
+        self._toolchain_cmd = f"{executable} toolchain.py "
+        self._xcodebuild_cmd = "xcodebuild "
+        # set via install_platform()
+        self.ios_dir = None
+        self.ios_deploy_dir = None
+
     def check_requirements(self):
         if sys.platform != "darwin":
             raise NotImplementedError("Only macOS is supported for iOS target")
         checkbin = self.buildozer.checkbin
         cmd = self.buildozer.cmd
-        executable = sys.executable or 'python'
-        self._toolchain_cmd = f"{executable} toolchain.py "
-        self._xcodebuild_cmd = "xcodebuild "
 
         checkbin('Xcode xcodebuild', 'xcodebuild')
         checkbin('Xcode xcode-select', 'xcode-select')
@@ -95,6 +101,10 @@ class TargetIos(Target):
         self.buildozer.debug(' -> found {0}'.format(xcode))
 
     def install_platform(self):
+        """
+        Clones `kivy/kivy-ios` and `phonegap/ios-deploy` then sets `ios_dir`
+        and `ios_deploy_dir` accordingly.
+        """
         self.ios_dir = self.install_or_update_repo('kivy-ios', platform='ios')
         self.ios_deploy_dir = self.install_or_update_repo('ios-deploy',
                                                           platform='ios',
@@ -385,10 +395,10 @@ class TargetIos(Target):
             if not error:
                 correct = True
                 break
-            self.error('Invalid keychain password')
+            self.buildozer.error('Invalid keychain password')
 
         if not correct:
-            self.error('Unable to unlock the keychain, exiting.')
+            self.buildozer.error('Unable to unlock the keychain, exiting.')
             raise BuildozerCommandException()
 
         # maybe user want to save it for further reuse?
