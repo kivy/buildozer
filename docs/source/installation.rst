@@ -70,7 +70,7 @@ See the dedicated `p4a troubleshooting documentation
 
 
 Targeting IOS
-~~~~~~~~~~~~~
+-------------
 
 Install XCode and command line tools (through the AppStore)
 
