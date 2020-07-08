@@ -92,10 +92,10 @@ class TargetAndroid(Target):
         if port is not None:
             self.extra_p4a_args += ' --port={}'.format(port)
 
-        activity_class_name = self.buildozer.config.getdefault(
-            'app', 'android.activity_class_name', 'org.kivy.android.PythonActivity')
-        if activity_class_name != 'org.kivy.android.PythonActivity':
-            self.extra_p4a_args += ' --activity-class-name={}'.format(activity_class_name)
+#         activity_class_name = self.buildozer.config.getdefault(
+#             'app', 'android.activity_class_name', 'org.kivy.android.PythonActivity')
+#         if activity_class_name != 'org.kivy.android.PythonActivity':
+#             self.extra_p4a_args += ' --activity-class-name={}'.format(activity_class_name)
 
         self.warn_on_deprecated_tokens()
 
@@ -790,6 +790,14 @@ class TargetAndroid(Target):
         if local_recipes:
             options.append('--local-recipes')
             options.append(local_recipes)
+        # add network security configuration file
+        network_security_config = self.buildozer.config.getdefault('app', 'android.manifest.network_security_config', None)
+        if network_security_config is not None:
+            options.append("--network-security-config={}".format(network_security_config))
+        # indicate that app intends to use cleartext network traffic
+        uses_cleartext_traffic = self.buildozer.config.getdefault('app', 'android.manifest.uses_cleartext_traffic', None)
+        if uses_cleartext_traffic is not None:
+            options.append("--uses-cleartext-traffic={}".format(uses_cleartext_traffic))
         self._p4a(
             ("create --dist_name={} --bootstrap={} --requirements={} "
              "--arch {} {}").format(
@@ -889,6 +897,24 @@ class TargetAndroid(Target):
             'app', 'android.uses_library', '')
         for lib in uses_library:
             cmd.append('--uses-library={}'.format(lib))
+
+        # support for activity-class-name
+        activity_class_name = self.buildozer.config.getdefault(
+            'app', 'android.activity_class_name', 'org.kivy.android.PythonActivity')
+        if activity_class_name != 'org.kivy.android.PythonActivity':
+            cmd.append('--activity-class-name={}'.format(activity_class_name))
+
+        # support for network-security-config
+        network_security_config = self.buildozer.config.getdefault(
+            'app', 'android.manifest.network_security_config', None)
+        if network_security_config is not None:
+            cmd.append("--network-security-config={}".format(network_security_config))
+
+        # support for uses-cleartext-traffic
+        uses_cleartext_traffic = self.buildozer.config.getdefault(
+            'app', 'android.manifest.uses_cleartext_traffic', None)
+        if uses_cleartext_traffic is not None:
+            cmd.append("--uses-cleartext-traffic={}".format(uses_cleartext_traffic))
 
         # support for gradle dependencies
         gradle_dependencies = self.buildozer.config.getlist('app', 'android.gradle_dependencies', [])
@@ -1152,6 +1178,17 @@ class TargetAndroid(Target):
             'app', 'android.manifest.launch_mode', '')
         if launch_mode:
             build_cmd += [("--activity-launch-mode", launch_mode)]
+
+#         # add network security configuration file
+#         network_security_config = config.getdefault(
+#             'app', 'android.manifest.network_security_config', None)
+#         if network_security_config is not None:
+#             build_cmd += [("--network-security-config", network_security_config)]
+#         # indicate that app intends to use cleartext network traffic
+#         uses_cleartext_traffic = config.getdefault(
+#             'app', 'android.manifest.uses_cleartext_traffic', None)
+#         if uses_cleartext_traffic is not None:
+#             build_cmd += [("--uses-cleartext-traffic", 'true' if uses_cleartext_traffic else 'false')]
 
         # numeric version
         numeric_version = config.getdefault('app', 'android.numeric_version')

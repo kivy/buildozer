@@ -192,6 +192,14 @@ fullscreen = 0
 # (str) launchMode to set for the main activity
 #android.manifest.launch_mode = standard
 
+# (str) Add a Network Security Configuration file path to AndroidManifest.xml
+# File with network configs must already exist in:
+# ./pythonforandroid/bootstraps/sdl2/build/src/main/res/xml/network_security_config.xml
+#android.manifest.network_security_config = "@xml/network_security_config"
+
+# (str) Indicate that app intends to use cleartext network traffic in AndroidManifest.xml
+#android.manifest.uses_cleartext_traffic = False
+
 # (list) Android additional libraries to copy into libs/armeabi
 #android.add_libs_armeabi = libs/android/*.so
 #android.add_libs_armeabi_v7a = libs/android-v7/*.so
