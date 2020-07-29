@@ -72,6 +72,13 @@ A Dockerfile is available to use buildozer through a Docker environment.
       docker run --volume "$(pwd)":/home/user/hostcwd buildozer --version
 
 
+## Buildozer GitHub action
+
+Use [ArtemSBulgakov/buildozer-action@v1](https://github.com/ArtemSBulgakov/buildozer-action)
+to build your packages automatically on push or pull request.
+See [full workflow example](https://github.com/ArtemSBulgakov/buildozer-action#full-workflow).
+
+
 ## Examples of Buildozer commands
 
 ```
