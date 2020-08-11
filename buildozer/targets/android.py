@@ -1154,8 +1154,9 @@ class TargetAndroid(Target):
             build_cmd += [("--numeric-version", numeric_version)]
 
         # android.allow_backup
-        allow_backup = config.getdefault('app', 'android.allow_backup', 'true')
-        build_cmd += [('--allow-backup', allow_backup)]
+        allow_backup = config.getbooldefault('app', 'android.allow_backup', True)
+        if not allow_backup:
+            build_cmd += [('--allow-backup', 'false')]
 
         # build only in debug right now.
         if self.build_mode == 'debug':
