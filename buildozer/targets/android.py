@@ -1092,11 +1092,16 @@ class TargetAndroid(Target):
         for activity in add_activities:
             build_cmd += [("--add-activity", activity)]
 
-        # add presplash
-        presplash = config.getdefault('app', 'presplash.filename', '')
+        # add presplash, lottie animation or static
+        presplash = config.getdefault('app', 'android.presplash_lottie', '')
         if presplash:
-            build_cmd += [("--presplash", join(self.buildozer.root_dir,
-                                               presplash))]
+            build_cmd += [("--presplash-lottie", join(self.buildozer.root_dir,
+                                                      presplash))]
+        else:
+            presplash = config.getdefault('app', 'presplash.filename', '')
+            if presplash:
+                build_cmd += [("--presplash", join(self.buildozer.root_dir,
+                                                   presplash))]
 
         # add icon
         icon = config.getdefault('app', 'icon.filename', '')
