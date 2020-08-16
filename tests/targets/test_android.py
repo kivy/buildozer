@@ -324,3 +324,29 @@ class TestTargetAndroid:
                 ]
             )
         ]
+
+    def test_backup_rules(self):
+        """The `android.backup_rules` config should be passed to `build_package()`."""
+        target_android = init_target(self.temp_dir, {
+            "android.backup_rules": "backup_rules.xml"
+        })
+        buildozer = target_android.buildozer
+        m_execute_build_package = call_build_package(target_android)
+        assert m_execute_build_package.call_args_list == [
+            mock.call(
+                [
+                    ("--name", "'My Application'"),
+                    ("--version", "0.1"),
+                    ("--package", "org.test.myapp"),
+                    ("--minsdk", "21"),
+                    ("--ndk-api", "21"),
+                    ("--private", "{buildozer_dir}/android/app".format(buildozer_dir=buildozer.buildozer_dir)),
+                    ("--android-entrypoint", "org.kivy.android.PythonActivity"),
+                    ("--android-apptheme", "@android:style/Theme.NoTitleBar"),
+                    ("--orientation", "portrait"),
+                    ("--window",),
+                    ("--backup-rules", "{root_dir}/backup_rules.xml".format(root_dir=buildozer.root_dir)),
+                    ("debug",),
+                ]
+            )
+        ]

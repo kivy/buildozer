@@ -1169,6 +1169,12 @@ class TargetAndroid(Target):
         if not allow_backup:
             build_cmd += [('--allow-backup', 'false')]
 
+        # android.backup_rules
+        backup_rules = config.getdefault('app', 'android.backup_rules', '')
+        if backup_rules:
+            build_cmd += [("--backup-rules", join(self.buildozer.root_dir,
+                                                  backup_rules))]
+
         # build only in debug right now.
         if self.build_mode == 'debug':
             build_cmd += [("debug", )]
