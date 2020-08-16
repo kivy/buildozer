@@ -231,6 +231,9 @@ android.arch = armeabi-v7a
 # (bool) enables Android auto backup feature (Android API >=23)
 android.allow_backup = True
 
+# (str) XML file for custom backup rules (see official auto backup documentation)
+# android.backup_rules =
+
 #
 # Python for android (p4a) specific
 #
