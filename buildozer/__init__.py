@@ -695,6 +695,12 @@ class Buildozer:
                                                '')
         app_dir = self.app_dir
 
+        include_exts = [ext.lower() for ext in include_exts]
+        exclude_exts = [ext.lower() for ext in exclude_exts]
+        exclude_dirs = [dir.lower() for dir in exclude_dirs]
+        exclude_patterns = [pat.lower() for pat in exclude_patterns]
+        include_patterns = [pat.lower() for pat in include_patterns]
+
         self.debug('Copy application source from {}'.format(source_dir))
 
         rmtree(self.app_dir)
@@ -716,7 +722,7 @@ class Buildozer:
                 for exclude_dir in exclude_dirs:
                     if exclude_dir[-1] != '/':
                         exclude_dir += '/'
-                    if filtered_root.startswith(exclude_dir.lower()):
+                    if filtered_root.startswith(exclude_dir):
                         is_excluded = True
                         break
 
@@ -760,7 +766,7 @@ class Buildozer:
                 # TODO more filters
                 basename, ext = splitext(fn)
                 if ext:
-                    ext = ext[1:]
+                    ext = ext[1:].lower()
                     if include_exts and ext not in include_exts:
                         continue
                     if exclude_exts and ext in exclude_exts:
