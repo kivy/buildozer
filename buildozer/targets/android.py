@@ -7,7 +7,7 @@ if sys.platform == 'win32':
     raise NotImplementedError('Windows platform not yet working for Android')
 
 from platform import uname
-WSL = 'Microsoft' in uname()[2]
+WSL = 'microsoft' in uname()[2].lower()
 
 ANDROID_API = '27'
 ANDROID_MINAPI = '21'
