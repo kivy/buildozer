@@ -92,6 +92,12 @@ class TargetAndroid(Target):
         if port is not None:
             self.extra_p4a_args += ' --port={}'.format(port)
 
+        setup_py = self.buildozer.config.getdefault('app', 'p4a.setup_py', False)
+        if setup_py:
+            self.extra_p4a_args += ' --use-setup-py'
+        else:
+            self.extra_p4a_args += ' --ignore-setup-py'
+
         self.warn_on_deprecated_tokens()
 
     def warn_on_deprecated_tokens(self):
