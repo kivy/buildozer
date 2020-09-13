@@ -115,7 +115,7 @@ class TestTargetAndroid:
         assert (
             target_android.extra_p4a_args == (
                 ' --color=always'
-                ' --storage-dir="{buildozer_dir}/android/platform/build-armeabi-v7a" --ndk-api=21'.format(
+                ' --storage-dir="{buildozer_dir}/android/platform/build-armeabi-v7a" --ndk-api=21 --ignore-setup-py'.format(
                 buildozer_dir=buildozer.buildozer_dir)
             )
         )
