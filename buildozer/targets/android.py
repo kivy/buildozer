@@ -1051,6 +1051,11 @@ class TargetAndroid(Target):
             permission = '.'.join(permission)
             build_cmd += [("--permission", permission)]
 
+        # add features
+        features = config.getlist('app', 'android.features', [])
+        for feature in features:
+            build_cmd += [("--feature", feature)]
+
         # android.entrypoint
         entrypoint = config.getdefault('app', 'android.entrypoint', 'org.kivy.android.PythonActivity')
         build_cmd += [('--android-entrypoint', entrypoint)]
