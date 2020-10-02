@@ -1056,6 +1056,11 @@ class TargetAndroid(Target):
         for feature in features:
             build_cmd += [("--feature", feature)]
 
+        # add res_xml
+        xmlfiles = config.getlist('app', 'android.res_xml', [])
+        for xmlfile in xmlfiles:
+            build_cmd += [("--res_xml", xmlfile)]
+
         # android.entrypoint
         entrypoint = config.getdefault('app', 'android.entrypoint', 'org.kivy.android.PythonActivity')
         build_cmd += [('--android-entrypoint', entrypoint)]
