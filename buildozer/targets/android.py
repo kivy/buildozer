@@ -1059,7 +1059,8 @@ class TargetAndroid(Target):
         # add res_xml
         xmlfiles = config.getlist('app', 'android.res_xml', [])
         for xmlfile in xmlfiles:
-            build_cmd += [("--res_xml", xmlfile)]
+            build_cmd += [("--res_xml", join(self.buildozer.root_dir,
+                                                    xmlfile))]
 
         # android.entrypoint
         entrypoint = config.getdefault('app', 'android.entrypoint', 'org.kivy.android.PythonActivity')
