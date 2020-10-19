@@ -109,7 +109,7 @@ class TestTargetAndroid:
         )
         assert target_android._p4a_bootstrap == "sdl2"
         assert target_android._p4a_cmd.endswith(
-            "python -m pythonforandroid.toolchain "
+            "-m pythonforandroid.toolchain "
         )
         assert target_android.build_mode == "debug"
         assert (
@@ -119,7 +119,7 @@ class TestTargetAndroid:
                 buildozer_dir=buildozer.buildozer_dir)
             )
         )
-        assert target_android.p4a_apk_cmd == "apk --debug --bootstrap=sdl2"
+        assert target_android.p4a_build_cmd == "%s --debug --bootstrap=sdl2"
         assert target_android.platform_update is False
 
     def test_init_positional_buildozer(self):
