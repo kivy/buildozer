@@ -98,6 +98,9 @@ class TargetAndroid(Target):
         else:
             self.extra_p4a_args += ' --ignore-setup-py'
 
+        if self.buildozer.log_level >= 2:
+            self.extra_p4a_args += ' --debug'
+
         self.warn_on_deprecated_tokens()
 
     def warn_on_deprecated_tokens(self):
