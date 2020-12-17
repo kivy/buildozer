@@ -898,7 +898,7 @@ class TargetAndroid(Target):
             cmd.append(gradle_dependency)
 
         # support for manifestPlaceholders
-        manifest_placeholders = self.buildozer.config.getdefault('app', 'android.manifest_placeholders', '[:]')
+        manifest_placeholders = self.buildozer.config.getdefault('app', 'android.manifest_placeholders', None)
         if manifest_placeholders:
             cmd.append('--manifest-placeholders')
             cmd.append("{}".format(manifest_placeholders))
