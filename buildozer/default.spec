@@ -162,6 +162,11 @@ fullscreen = 0
 # (list) Gradle dependencies to add
 #android.gradle_dependencies =
 
+# (bool) Enable the AndroidX support library when True, the default is False.
+# When enabled, add a specific AndroidX package using android.gradle_dependencies
+# AndroidX packages require android.api = 28 or greater 
+#android.enable_androidx = False
+
 # (list) add java compile options
 # this can for example be necessary when importing certain java libraries using the 'android.gradle_dependencies' option
 # see https://developer.android.com/studio/write/java8-support for further information
