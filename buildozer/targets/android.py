@@ -60,6 +60,7 @@ class TargetAndroid(Target):
     p4a_directory_name = "python-for-android"
     p4a_fork = 'kivy'
     p4a_branch = 'master'
+    p4a_commit = 'HEAD'
     p4a_apk_cmd = "apk --debug --bootstrap="
     p4a_recommended_ndk_version = None
     extra_p4a_args = ''
@@ -691,6 +692,9 @@ class TargetAndroid(Target):
         p4a_branch = self.buildozer.config.getdefault(
             'app', 'p4a.branch', self.p4a_branch
         )
+        p4a_commit = self.buildozer.config.getdefault(
+            'app', 'p4a.commit', self.p4a_commit
+        )
 
         p4a_dir = self.p4a_dir
         system_p4a_dir = self.buildozer.config.getdefault('app',
@@ -744,6 +748,8 @@ class TargetAndroid(Target):
                     cmd('git fetch --tags origin {0}:{0}'.format(p4a_branch),
                         cwd=p4a_dir)
                     cmd('git checkout {}'.format(p4a_branch), cwd=p4a_dir)
+            if p4a_commit != 'HEAD':
+                cmd('git reset --hard {}'.format(p4a_commit), cwd=p4a_dir)
 
         # also install dependencies (currently, only setup.py knows about it)
         # let's extract them.

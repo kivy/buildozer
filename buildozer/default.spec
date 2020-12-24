@@ -245,6 +245,9 @@ android.allow_backup = True
 # (str) python-for-android branch to use, defaults to master
 #p4a.branch = master
 
+# (str) python-for-android specific commit to use, defaults to HEAD, must be within p4a.branch
+#p4a.commit = HEAD
+
 # (str) python-for-android git clone directory (if empty, it will be automatically cloned from github)
 #p4a.source_dir =
 
