@@ -262,6 +262,12 @@ class TargetAndroid(Target):
                     'zlib headers must be installed, '
                     'run: sudo apt-get install zlib1g-dev')
 
+        # Adb arguments:
+        adb_args = self.buildozer.config.getdefault(
+            "app", "android.adb_args", None)
+        if adb_args is not None:
+            self.adb_cmd += ' ' + adb_args
+
         # Need to add internally installed ant to path for external tools
         # like adb to use
         path = [join(self.apache_ant_dir, 'bin')]
