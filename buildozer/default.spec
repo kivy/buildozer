@@ -222,6 +222,9 @@ fullscreen = 0
 # (bool) Android logcat only display log for activity's pid
 #android.logcat_pid_only = False
 
+# (str) Android additional adb arguments
+#android.adb_args = -H host.docker.internal
+
 # (bool) Copy library instead of making a libpymodules.so
 #android.copy_libs = 1
 
