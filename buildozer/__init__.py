@@ -309,11 +309,7 @@ class Buildozer:
                 if get_stdout:
                     ret_stdout.append(chunk)
                 if show_output:
-                    try:
-                        stdout.write(chunk.decode('utf-8', 'replace'))
-                    except UnicodeEncodeError:
-                        # attempt to solve encoding errors when output from external process is not "printable"
-                        stdout.write(chunk.decode('utf-8', 'ignore'))
+                    stdout.write(chunk.decode('utf-8', 'replace'))
             if fd_stderr in readx:
                 chunk = process.stderr.read()
                 if not chunk:
@@ -321,11 +317,7 @@ class Buildozer:
                 if get_stderr:
                     ret_stderr.append(chunk)
                 if show_output:
-                    try:
-                        stderr.write(chunk.decode('utf-8', 'replace'))
-                    except UnicodeEncodeError:
-                        # attempt to solve encoding errors when output from external process is not "printable"
-                        stderr.write(chunk.decode('utf-8', 'ignore'))
+                    stderr.write(chunk.decode('utf-8', 'replace'))
 
             stdout.flush()
             stderr.flush()

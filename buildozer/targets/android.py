@@ -914,17 +914,18 @@ class TargetAndroid(Target):
         if service_class_name != 'org.kivy.android.PythonService':
             cmd.append('--service-class-name={}'.format(service_class_name))
 
-        # support for network-security-config
-        network_security_config = self.buildozer.config.getdefault(
-            'app', 'android.manifest.network_security_config', None)
-        if network_security_config is not None:
-            cmd.append("--network-security-config={}".format(network_security_config))
+        # support for extra-manifest-xml
+        extra_manifest_xml = self.buildozer.config.getdefault(
+            'app', 'android.extra_manifest_xml', '')
+        if extra_manifest_xml:
+            cmd.append('--extra-manifest-xml="{}"'.format(open(extra_manifest_xml, 'rt').read()))
 
-        # support for uses-cleartext-traffic
-        uses_cleartext_traffic = self.buildozer.config.getdefault(
-            'app', 'android.manifest.uses_cleartext_traffic', None)
-        if uses_cleartext_traffic is not None:
-            cmd.append("--uses-cleartext-traffic={}".format('true' if uses_cleartext_traffic else 'false'))
+        # support for extra-manifest-application-arguments
+        extra_manifest_application_arguments = self.buildozer.config.getdefault(
+            'app', 'android.extra_manifest_application_arguments', '')
+        if extra_manifest_application_arguments:
+            args_body = open(extra_manifest_application_arguments, 'rt').read().replace('"', '\\"').replace('\n', ' ').replace('\t', ' ')
+            cmd.append('--extra-manifest-application-arguments="{}"'.format(args_body))
 
         # support for gradle dependencies
         gradle_dependencies = self.buildozer.config.getlist('app', 'android.gradle_dependencies', [])
