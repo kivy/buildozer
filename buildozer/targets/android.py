@@ -243,10 +243,7 @@ class TargetAndroid(Target):
                                 'adb.exe')
             self.javac_cmd = self._locate_java('javac.exe')
             self.keytool_cmd = self._locate_java('keytool.exe')
-        elif platform in ('darwin', ):
-            self.adb_cmd = join(self.android_sdk_dir, 'platform-tools', 'adb')
-            self.javac_cmd = self._locate_java('javac')
-            self.keytool_cmd = self._locate_java('keytool')
+        # darwin, linux
         else:
             self.adb_cmd = join(self.android_sdk_dir, 'platform-tools', 'adb')
             self.javac_cmd = self._locate_java('javac')
