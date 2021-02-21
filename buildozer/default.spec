@@ -219,6 +219,9 @@ fullscreen = 0
 # (str) Android logcat filters to use
 #android.logcat_filters = *:S python:D
 
+# (bool) Android logcat only display log for activity's pid
+#android.logcat_pid_only = False
+
 # (str) Android additional adb arguments
 #android.adb_args = -H host.docker.internal
 

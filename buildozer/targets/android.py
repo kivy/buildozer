@@ -33,6 +33,7 @@ from os.path import exists, join, realpath, expanduser, basename, relpath
 from platform import architecture
 from shutil import copyfile, rmtree
 from glob import glob
+from time import sleep
 
 from buildozer.libs.version import parse
 from distutils.version import LooseVersion
@@ -955,6 +956,12 @@ class TargetAndroid(Target):
                 cwd=self.buildozer.global_platform_dir)
         self.buildozer.environ.pop('ANDROID_SERIAL', None)
 
+        while True:
+            if self._get_pid():
+                break
+            sleep(.1)
+            self.buildozer.info('Waiting for application to start.')
+
         self.buildozer.info('Application started.')
 
     def cmd_p4a(self, *args):
@@ -1383,6 +1390,18 @@ class TargetAndroid(Target):
 
         self.buildozer.info('Application pushed.')
 
+    def _get_pid(self):
+        pid, *_ = self.buildozer.cmd(
+            f'{self.adb_cmd} shell pidof {self._get_package()}',
+            get_stdout=True,
+            show_output=False,
+            break_on_error=False,
+            quiet=True,
+        )
+        if pid:
+            return pid.strip()
+        return False
+
     def cmd_logcat(self, *args):
         '''Show the log from the device
         '''
@@ -1394,10 +1413,23 @@ class TargetAndroid(Target):
             "app", "android.logcat_filters", "", section_sep=":", split_char=" ")
         filters = " ".join(filters)
         self.buildozer.environ['ANDROID_SERIAL'] = serial[0]
-        self.buildozer.cmd('{adb} logcat {filters}'.format(adb=self.adb_cmd,
-                                                           filters=filters),
-                           cwd=self.buildozer.global_platform_dir,
-                           show_output=True)
+        extra_args = []
+        pid = None
+        if self.buildozer.config.getdefault('app', 'android.logcat_pid_only'):
+            pid = self._get_pid()
+            if pid:
+                extra_args.extend(('--pid', pid))
+
+        self.buildozer.cmd(
+            f"{self.adb_cmd} logcat {filters} {' '.join(extra_args)}",
+            cwd=self.buildozer.global_platform_dir,
+            show_output=True,
+            run_condition=self._get_pid if pid else None,
+            break_on_error=False,
+        )
+
+        self.buildozer.info(f"{self._get_package()} terminated")
+
         self.buildozer.environ.pop('ANDROID_SERIAL', None)
 
 
