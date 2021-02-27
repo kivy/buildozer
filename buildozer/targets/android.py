@@ -759,7 +759,7 @@ class TargetAndroid(Target):
         except IOError:
             self.buildozer.error('Failed to read python-for-android setup.py at {}'.format(
                 join(self.p4a_dir, 'setup.py')))
-            exit(1)
+            sys.exit(1)
         pip_deps = []
         for dep in deps:
             pip_deps.append("'{}'".format(dep))
@@ -1287,7 +1287,7 @@ class TargetAndroid(Target):
                 self.buildozer.error(
                     'Invalid library reference (path not found): {}'.format(
                         cref))
-                exit(1)
+                sys.exit(1)
             # get a relative path from the project file
             ref = relpath(ref, realpath(expanduser(dist_dir)))
             # ensure the reference exists
