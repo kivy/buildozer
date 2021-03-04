@@ -253,7 +253,7 @@ class Buildozer:
 
     def cmd(self, command, **kwargs):
         # prepare the environ, based on the system + our own env
-        env = copy(environ)
+        env = environ.copy()
         env.update(self.environ)
 
         # prepare the process
@@ -360,7 +360,7 @@ class Buildozer:
         from pexpect import spawnu
 
         # prepare the environ, based on the system + our own env
-        env = copy(environ)
+        env = environ.copy()
         env.update(self.environ)
 
         # prepare the process
@@ -935,8 +935,7 @@ class Buildozer:
 
             if not meth.__doc__:
                 continue
-            doc = [x for x in
-                    meth.__doc__.strip().splitlines()][0].strip()
+            doc = list(meth.__doc__.strip().splitlines())[0].strip()
             print('  {0:<18} {1}'.format(name, doc))
 
         print('')
