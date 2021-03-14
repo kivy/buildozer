@@ -692,6 +692,9 @@ class TargetAndroid(Target):
         p4a_fork = self.buildozer.config.getdefault(
             'app', 'p4a.fork', self.p4a_fork
         )
+        p4a_url = self.buildozer.config.getdefault(
+            'app', 'p4a.url', f'https://github.com/{p4a_fork}/python-for-android.git'
+        )
         p4a_branch = self.buildozer.config.getdefault(
             'app', 'p4a.branch', self.p4a_branch
         )
@@ -707,21 +710,19 @@ class TargetAndroid(Target):
                 self.buildozer.error('')
                 raise BuildozerException()
         else:
-            # check that fork/branch has not been changed
+            # check that url/branch has not been changed
             if self.buildozer.file_exists(p4a_dir):
-                cur_fork = cmd(
+                cur_url = cmd(
                     'git config --get remote.origin.url',
                     get_stdout=True,
                     cwd=p4a_dir,
-                )[0].split('/')[3]
+                )[0].strip()
                 cur_branch = cmd(
                     'git branch -vv', get_stdout=True, cwd=p4a_dir
                 )[0].split()[1]
-                if any([cur_fork != p4a_fork, cur_branch != p4a_branch]):
+                if any([cur_url != p4a_url, cur_branch != p4a_branch]):
                     self.buildozer.info(
-                        "Detected old fork/branch ({}/{}), deleting...".format(
-                            cur_fork, cur_branch
-                        )
+                        f"Detected old url/branch ({cur_url}/{cur_branch}), deleting..."
                     )
                     rmtree(p4a_dir)
 
@@ -729,11 +730,10 @@ class TargetAndroid(Target):
                 cmd(
                     (
                         'git clone -b {p4a_branch} --single-branch '
-                        'https://github.com/{p4a_fork}/python-for-android.git '
-                        '{p4a_dir}'
+                        '{p4a_url} {p4a_dir}'
                     ).format(
                         p4a_branch=p4a_branch,
-                        p4a_fork=p4a_fork,
+                        p4a_url=p4a_url,
                         p4a_dir=self.p4a_directory_name,
                     ),
                     cwd=self.buildozer.platform_dir,

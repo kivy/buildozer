@@ -53,7 +53,7 @@ def init_buildozer(temp_dir, target, options=None):
     spec = []
     for line in default_spec:
         if line.strip():
-            match = re.search(r"[#\s]?([a-z_\.]+)", line)
+            match = re.search(r"[#\s]?([0-9a-z_.]+)", line)
             key = match and match.group(1)
             if key in options:
                 line = "{} = {}\n".format(key, options[key])
