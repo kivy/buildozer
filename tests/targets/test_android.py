@@ -1,5 +1,6 @@
 import os
 import tempfile
+from six import StringIO
 from unittest import mock
 
 import pytest
@@ -350,3 +351,44 @@ class TestTargetAndroid:
                 ]
             )
         ]
+
+    def test_install_platform_p4a_clone_url(self):
+        """The `p4a.url` config should be used for cloning p4a before the `p4a.fork` option."""
+        target_android = init_target(self.temp_dir, {
+            'p4a.url': 'https://custom-p4a-url/p4a.git',
+            'p4a.fork': 'myfork',
+        })
+
+        with patch_buildozer_cmd() as m_cmd, mock.patch('buildozer.targets.android.open') as m_open:
+            m_open.return_value = StringIO('install_reqs = []')  # to stub setup.py parsing
+            target_android._install_p4a()
+
+        assert mock.call(
+            'git clone -b master --single-branch https://custom-p4a-url/p4a.git python-for-android',
+            cwd=mock.ANY) in m_cmd.call_args_list
+
+    def test_install_platform_p4a_clone_fork(self):
+        """The `p4a.fork` config should be used for cloning p4a."""
+        target_android = init_target(self.temp_dir, {
+            'p4a.fork': 'fork'
+        })
+
+        with patch_buildozer_cmd() as m_cmd, mock.patch('buildozer.targets.android.open') as m_open:
+            m_open.return_value = StringIO('install_reqs = []')  # to stub setup.py parsing
+            target_android._install_p4a()
+
+        assert mock.call(
+            'git clone -b master --single-branch https://github.com/fork/python-for-android.git python-for-android',
+            cwd=mock.ANY) in m_cmd.call_args_list
+
+    def test_install_platform_p4a_clone_default(self):
+        """The default URL should be used for cloning p4a if no config options `p4a.url` and `p4a.fork` are set."""
+        target_android = init_target(self.temp_dir)
+
+        with patch_buildozer_cmd() as m_cmd, mock.patch('buildozer.targets.android.open') as m_open:
+            m_open.return_value = StringIO('install_reqs = []')  # to stub setup.py parsing
+            target_android._install_p4a()
+
+        assert mock.call(
+            'git clone -b master --single-branch https://github.com/kivy/python-for-android.git python-for-android',
+            cwd=mock.ANY) in m_cmd.call_args_list
