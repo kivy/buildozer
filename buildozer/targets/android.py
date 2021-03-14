@@ -693,7 +693,7 @@ class TargetAndroid(Target):
             'app', 'p4a.fork', self.p4a_fork
         )
         p4a_url = self.buildozer.config.getdefault(
-            'app', 'p4a.url', 'https://github.com/{}/python-for-android.git'.format(p4a_fork)
+            'app', 'p4a.url', f'https://github.com/{p4a_fork}/python-for-android.git'
         )
         p4a_branch = self.buildozer.config.getdefault(
             'app', 'p4a.branch', self.p4a_branch
@@ -722,9 +722,7 @@ class TargetAndroid(Target):
                 )[0].split()[1]
                 if any([cur_url != p4a_url, cur_branch != p4a_branch]):
                     self.buildozer.info(
-                        "Detected old url/branch ({}/{}), deleting...".format(
-                            cur_url, cur_branch
-                        )
+                        f"Detected old url/branch ({cur_url}/{cur_branch}), deleting..."
                     )
                     rmtree(p4a_dir)
 
