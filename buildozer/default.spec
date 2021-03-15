@@ -301,15 +301,39 @@ ios.ios_deploy_url = https://github.com/phonegap/ios-deploy
 ios.ios_deploy_branch = 1.10.0
 
 # (bool) Whether or not to sign the code
+# Sets `CODE_SIGNING_ALLOWED` xcodebuild option.
 ios.codesign.allowed = false
 
 # (str) Name of the certificate to use for signing the debug version
 # Get a list of available identities: buildozer ios list_identities
 #ios.codesign.debug = "iPhone Developer: <lastname> <firstname> (<hexstring>)"
 
+# (str) The code signing style for the debug version: Automatic or Manual.
+# Sets `CODE_SIGN_STYLE` xcodebuild option. Omitted if not specified.
+#ios.codesign.style.debug =
+
+# (str) Name of the development team to use for signing the debug version
+# Sets `DEVELOPMENT_TEAM` xcodebuild option. Omitted if not specified.
+#ios.codesign.development_team.debug =
+
+# (str) Name of the provisioning profile to use for manual signing of the debug version
+# Sets `PROVISIONING_PROFILE_SPECIFIER` xcodebuild option. Omitted if not specified.
+#ios.codesign.provisioning_profile.debug =
+
 # (str) Name of the certificate to use for signing the release version
 #ios.codesign.release = %(ios.codesign.debug)s
 
+# (str) The code signing style for the release version: Automatic or Manual
+# Sets `CODE_SIGN_STYLE` xcodebuild option. Omitted if not specified.
+#ios.codesign.style.release =
+
+# (str) Name of the development team to use for signing the release version
+# Sets `DEVELOPMENT_TEAM` xcodebuild option. Omitted if not specified.
+#ios.codesign.development_team.release =
+
+# (str) Name of the provisioning profile to use for manual signing of the release version
+# Sets `PROVISIONING_PROFILE_SPECIFIER` xcodebuild option. Omitted if not specified.
+#ios.codesign.provisioning_profile.release =
 
 [buildozer]
 

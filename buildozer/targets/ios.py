@@ -115,14 +115,29 @@ class TargetIos(Target):
         kwargs.setdefault('cwd', self.ios_dir)
         return self.buildozer.cmd(self._toolchain_cmd + cmd, **kwargs)
 
-    def xcodebuild(self, cmd='', **kwargs):
-        return self.buildozer.cmd(self._xcodebuild_cmd + cmd, **kwargs)
+    def xcodebuild(self, *args, **kwargs):
+        return self.buildozer.cmd(self._xcodebuild_cmd + ' '.join(arg for arg in args if arg is not None), **kwargs)
 
     @property
     def code_signing_allowed(self):
         allowed = self.buildozer.config.getboolean("app", "ios.codesign.allowed")
         allowed = "YES" if allowed else "NO"
         return f"CODE_SIGNING_ALLOWED={allowed}"
+
+    @property
+    def code_sign_style(self):
+        value = self.buildozer.config.getdefault("app", f"ios.codesign.style.{self.build_mode}", None)
+        return f"CODE_SIGN_STYLE={value}" if value else None
+
+    @property
+    def development_team(self):
+        value = self.buildozer.config.getdefault("app", f"ios.codesign.development_team.{self.build_mode}", None)
+        return f"DEVELOPMENT_TEAM={value}" if value else None
+
+    @property
+    def provisioning_profile_specifier(self):
+        value = self.buildozer.config.getdefault("app", f"ios.codesign.provisioning_profile.{self.build_mode}", None)
+        return f"PROVISIONING_PROFILE_SPECIFIER={value}" if value else None
 
     def get_available_packages(self):
         available_modules = self.toolchain("recipes --compact", get_stdout=True)[0]
@@ -216,7 +231,13 @@ class TargetIos(Target):
 
         mode = self.build_mode.capitalize()
         self.xcodebuild(
-            f"-configuration {mode} ENABLE_BITCODE=NO {self.code_signing_allowed} clean build",
+            f"-configuration {mode}",
+            "ENABLE_BITCODE=NO",
+            self.code_signing_allowed,
+            self.code_sign_style,
+            self.development_team,
+            self.provisioning_profile_specifier,
+            "clean build",
             cwd=self.app_project_dir)
         ios_app_dir = '{app_lower}-ios/build/{mode}-iphoneos/{app_lower}.app'.format(
                 app_lower=app_name.lower(), mode=mode)
@@ -242,14 +263,14 @@ class TargetIos(Target):
         self.buildozer.rmdir(intermediate_dir)
 
         self.buildozer.info('Creating archive...')
-        self.xcodebuild((
-                ' -alltargets'
-                ' -configuration {mode}'
-                ' -scheme {scheme}'
-                ' -archivePath "{xcarchive}"'
-                ' archive'
-                ' ENABLE_BITCODE=NO'
-            ).format(mode=mode, xcarchive=xcarchive, scheme=app_name.lower()),
+        self.xcodebuild(
+            '-alltargets',
+            f'-configuration {mode}',
+            f'-scheme {app_name.lower()}',
+            f'-archivePath "{xcarchive}"',
+            'archive',
+            'ENABLE_BITCODE=NO',
+            self.development_team,
             cwd=build_dir)
 
         self.buildozer.info('Creating IPA...')
