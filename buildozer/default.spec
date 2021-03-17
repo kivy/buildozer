@@ -307,8 +307,14 @@ ios.codesign.allowed = false
 # Get a list of available identities: buildozer ios list_identities
 #ios.codesign.debug = "iPhone Developer: <lastname> <firstname> (<hexstring>)"
 
+# (str) The development team to use for signing the debug version
+#ios.codesign.development_team.debug = <hexstring>
+
 # (str) Name of the certificate to use for signing the release version
 #ios.codesign.release = %(ios.codesign.debug)s
+
+# (str) The development team to use for signing the release version
+#ios.codesign.development_team.release = <hexstring>
 
 
 [buildozer]
