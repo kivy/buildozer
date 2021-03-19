@@ -182,7 +182,6 @@ class TestTargetIos:
         # fmt: off
         with patch_target_ios("_unlock_keychain") as m_unlock_keychain, \
              patch_buildozer_error() as m_error, \
-             patch_target_ios("xcodebuild") as m_xcodebuild, \
              mock.patch("buildozer.targets.ios.plistlib.readPlist") as m_readplist, \
              mock.patch("buildozer.targets.ios.plistlib.writePlist") as m_writeplist, \
              patch_buildozer_cmd() as m_cmd:
@@ -194,13 +193,6 @@ class TestTargetIos:
             mock.call(
                 "Cannot create the IPA package without signature. "
                 'You must fill the "ios.codesign.debug" token.'
-            )
-        ]
-        assert m_xcodebuild.call_args_list == [
-            mock.call(
-                "-configuration Debug ENABLE_BITCODE=NO "
-                "CODE_SIGNING_ALLOWED=NO clean build",
-                cwd="/ios/dir/myapp-ios",
             )
         ]
         assert m_readplist.call_args_list == [
@@ -216,4 +208,8 @@ class TestTargetIos:
                 "/ios/dir/myapp-ios/myapp-Info.plist",
             )
         ]
-        assert m_cmd.call_args_list == [mock.call(mock.ANY, cwd=target.ios_dir)]
+        assert m_cmd.call_args_list == [mock.call(mock.ANY, cwd=target.ios_dir), mock.call(
+            "xcodebuild -configuration Debug -allowProvisioningUpdates ENABLE_BITCODE=NO "
+            "CODE_SIGNING_ALLOWED=NO clean build",
+            cwd="/ios/dir/myapp-ios",
+        )]

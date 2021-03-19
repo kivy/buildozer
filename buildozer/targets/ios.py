@@ -115,14 +115,19 @@ class TargetIos(Target):
         kwargs.setdefault('cwd', self.ios_dir)
         return self.buildozer.cmd(self._toolchain_cmd + cmd, **kwargs)
 
-    def xcodebuild(self, cmd='', **kwargs):
-        return self.buildozer.cmd(self._xcodebuild_cmd + cmd, **kwargs)
+    def xcodebuild(self, *args, **kwargs):
+        return self.buildozer.cmd(self._xcodebuild_cmd + ' '.join(arg for arg in args if arg is not None), **kwargs)
 
     @property
     def code_signing_allowed(self):
         allowed = self.buildozer.config.getboolean("app", "ios.codesign.allowed")
         allowed = "YES" if allowed else "NO"
         return f"CODE_SIGNING_ALLOWED={allowed}"
+
+    @property
+    def code_signing_development_team(self):
+        team = self.buildozer.config.getdefault("app", f"ios.codesign.development_team.{self.build_mode}", None)
+        return f"DEVELOPMENT_TEAM={team}" if team else None
 
     def get_available_packages(self):
         available_modules = self.toolchain("recipes --compact", get_stdout=True)[0]
@@ -216,7 +221,12 @@ class TargetIos(Target):
 
         mode = self.build_mode.capitalize()
         self.xcodebuild(
-            f"-configuration {mode} ENABLE_BITCODE=NO {self.code_signing_allowed} clean build",
+            f'-configuration {mode}',
+            '-allowProvisioningUpdates',
+            'ENABLE_BITCODE=NO',
+            self.code_signing_allowed,
+            self.code_signing_development_team,
+            'clean build',
             cwd=self.app_project_dir)
         ios_app_dir = '{app_lower}-ios/build/{mode}-iphoneos/{app_lower}.app'.format(
                 app_lower=app_name.lower(), mode=mode)
@@ -242,25 +252,24 @@ class TargetIos(Target):
         self.buildozer.rmdir(intermediate_dir)
 
         self.buildozer.info('Creating archive...')
-        self.xcodebuild((
-                ' -alltargets'
-                ' -configuration {mode}'
-                ' -scheme {scheme}'
-                ' -archivePath "{xcarchive}"'
-                ' archive'
-                ' ENABLE_BITCODE=NO'
-            ).format(mode=mode, xcarchive=xcarchive, scheme=app_name.lower()),
+        self.xcodebuild(
+            '-alltargets',
+            f'-configuration {mode}',
+            f'-scheme {app_name.lower()}',
+            f'-archivePath "{xcarchive}"',
+            'archive',
+            'ENABLE_BITCODE=NO',
+            self.code_signing_development_team,
             cwd=build_dir)
 
         self.buildozer.info('Creating IPA...')
-        self.xcodebuild((
-                ' -exportArchive'
-                ' -exportFormat IPA'
-                ' -archivePath "{xcarchive}"'
-                ' -exportPath "{ipa}"'
-                ' CODE_SIGN_IDENTITY={ioscodesign}'
-                ' ENABLE_BITCODE=NO'
-            ).format(xcarchive=xcarchive, ipa=ipa_tmp, ioscodesign=ioscodesign),
+        self.xcodebuild(
+            '-exportArchive',
+            f'-archivePath "{xcarchive}"',
+            f'-exportOptionsPlist "{plist_rfn}"',
+            f'-exportPath "{ipa_tmp}"',
+            f'CODE_SIGN_IDENTITY={ioscodesign}',
+            'ENABLE_BITCODE=NO',
             cwd=build_dir)
 
         self.buildozer.info('Moving IPA to bin...')
