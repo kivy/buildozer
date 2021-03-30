@@ -164,7 +164,7 @@ fullscreen = 0
 
 # (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
 # contains an 'androidx' package, or any package from Kotlin source.
-# android.enable_androidx requires android.api >= 28 
+# android.enable_androidx requires android.api >= 28
 #android.enable_androidx = False
 
 # (list) add java compile options

@@ -1172,7 +1172,7 @@ class TargetAndroid(Target):
                                                 'android.enable_androidx',
                                                 False)
         if enable_androidx:
-            build_cmd += [("--enable-androidx", )]            
+            build_cmd += [("--enable-androidx", )]
 
         # intent filters
         intent_filters = config.getdefault(
