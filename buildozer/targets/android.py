@@ -1167,6 +1167,13 @@ class TargetAndroid(Target):
         if wakelock:
             build_cmd += [("--wakelock", )]
 
+        # AndroidX ?
+        enable_androidx = config.getbooldefault('app',
+                                                'android.enable_androidx',
+                                                False)
+        if enable_androidx:
+            build_cmd += [("--enable-androidx", )]
+
         # intent filters
         intent_filters = config.getdefault(
             'app', 'android.manifest.intent_filters', '')
