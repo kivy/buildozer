@@ -15,7 +15,7 @@ your application requirements and settings such as title, icon, included modules
 etc. Buildozer will use that spec to create a package for Android, iOS, Windows,
 OSX and/or Linux.
 
-Buildozer currently supports packaging for Android via the [python-for-android](http://github.com/kivy/python-for-android/)
+Buildozer currently supports packaging for Android via the [python-for-android](https://github.com/kivy/python-for-android/)
 project, and for iOS via the kivy-ios project. iOS and OSX are still under work.
 
 For Android, buildozer will automatically download and prepare the
@@ -24,7 +24,7 @@ build dependencies. For more information, see
 Note that only Python 3 is supported.
 
 Note that this tool has nothing to do with the eponymous online build service
-[buildozer.io](http://buildozer.io).
+[buildozer.io](https://buildozer.io).
 
 ## Installing Buildozer with target Python 3 (default):
 
@@ -176,7 +176,7 @@ For [debugging on Android](https://python-for-android.readthedocs.io/en/stable/t
 ## Contributing
 
 We love pull requests and discussing novel ideas. Check out our
-[contribution guide](http://kivy.org/docs/contribute.html) and
+[contribution guide](https://kivy.org/docs/contribute.html) and
 feel free to improve buildozer.
 
 The following mailing list and IRC channel are used exclusively for

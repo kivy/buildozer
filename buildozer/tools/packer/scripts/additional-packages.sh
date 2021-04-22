@@ -3,7 +3,7 @@
 # an error when using the android sdk:
 # "Can't read cryptographic policy directory: unlimited"
 
-wget http://bootstrap.pypa.io/get-pip.py
+wget https://bootstrap.pypa.io/get-pip.py
 python get-pip.py
 rm get-pip.py
 
