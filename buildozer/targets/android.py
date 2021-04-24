@@ -368,7 +368,7 @@ class TargetAndroid(Target):
 
         self.buildozer.info('Android ANT is missing, downloading')
         archive = 'apache-ant-{0}-bin.tar.gz'.format(APACHE_ANT_VERSION)
-        url = 'http://archive.apache.org/dist/ant/binaries/'
+        url = 'https://archive.apache.org/dist/ant/binaries/'
         self.buildozer.download(url,
                                 archive,
                                 cwd=ant_dir)
@@ -427,7 +427,7 @@ class TargetAndroid(Target):
         # https://developer.android.com/ndk/downloads/older_releases
 
         if platform in ('win32', 'cygwin'):
-            # Checking of 32/64 bits at Windows from: http://stackoverflow.com/a/1405971/798575
+            # Checking of 32/64 bits at Windows from: https://stackoverflow.com/a/1405971/798575
             import struct
             archive = 'android-ndk-r{0}-windows-{1}.zip'
             is_64 = (8 * struct.calcsize("P") == 64)
@@ -460,7 +460,7 @@ class TargetAndroid(Target):
         if _version >= '10e':
             url = 'https://dl.google.com/android/repository/'
         else:
-            url = 'http://dl.google.com/android/ndk/'
+            url = 'https://dl.google.com/android/ndk/'
 
         self.buildozer.download(url,
                                 archive,
@@ -659,7 +659,7 @@ class TargetAndroid(Target):
                 self.buildozer.error(
                     'You might have missed to install 32bits libs')
                 self.buildozer.error(
-                    'Check http://buildozer.readthedocs.org/en/latest/installation.html')
+                    'Check https://buildozer.readthedocs.org/en/latest/installation.html')
                 self.buildozer.error('')
             else:
                 self.buildozer.error('')
