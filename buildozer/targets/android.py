@@ -422,7 +422,7 @@ class TargetAndroid(Target):
         # from 10e on the URLs can be looked up at
         # https://developer.android.com/ndk/downloads/older_releases
 
-        is_darwin = platform in ('darwin', )
+        is_darwin = platform == 'darwin'
         is_linux = platform.startswith('linux')
 
         if platform in ('win32', 'cygwin'):
