@@ -216,6 +216,24 @@ class TargetIos(Target):
         # add icons
         self._create_icons()
 
+        # Generate OTA distribution manifest if `app_url`, `display_image_url` and `full_size_image_url` are defined.
+        app_url = self.buildozer.config.getdefault("app", "ios.manifest.app_url", None)
+        display_image_url = self.buildozer.config.getdefault("app", "ios.manifest.display_image_url", None)
+        full_size_image_url = self.buildozer.config.getdefault("app", "ios.manifest.full_size_image_url", None)
+
+        if any((app_url, display_image_url, full_size_image_url)):
+
+            if not all((app_url, display_image_url, full_size_image_url)):
+                self.buildozer.error("Options ios.manifest.app_url, ios.manifest.display_image_url"
+                                     " and ios.manifest.full_size_image_url should be defined all together")
+                return
+
+            plist['manifest'] = {
+                'appURL': app_url,
+                'displayImageURL': display_image_url,
+                'fullSizeImageURL': full_size_image_url,
+            }
+
         # ok, write the modified plist.
         plistlib.writePlist(plist, plist_rfn)
 
