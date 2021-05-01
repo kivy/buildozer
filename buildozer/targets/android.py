@@ -416,7 +416,7 @@ class TargetAndroid(Target):
             return ndk_dir
 
         import re
-        _version = re.search('(.+?)[a-z]', self.android_ndk_version).group(1)
+        _version = int(re.search(r'(\d+)', self.android_ndk_version).group(1))
 
         self.buildozer.info('Android NDK is missing, downloading')
         # Welcome to the NDK URL hell!
@@ -426,28 +426,23 @@ class TargetAndroid(Target):
         # from 10e on the URLs can be looked up at
         # https://developer.android.com/ndk/downloads/older_releases
 
+        is_darwin = platform == 'darwin'
+        is_linux = platform.startswith('linux')
+
         if platform in ('win32', 'cygwin'):
             # Checking of 32/64 bits at Windows from: https://stackoverflow.com/a/1405971/798575
             import struct
             archive = 'android-ndk-r{0}-windows-{1}.zip'
             is_64 = (8 * struct.calcsize("P") == 64)
-
-        elif platform in ('darwin', ):
-            if _version >= '10e':
-                archive = 'android-ndk-r{0}-darwin-{1}.zip'
-            elif _version >= '10c':
-                archive = 'android-ndk-r{0}-darwin-{1}.bin'
+        elif is_darwin or is_linux:
+            _platform = 'linux' if is_linux else 'darwin'
+            if self.android_ndk_version in ['10c', '10d', '10e']:
+                ext = 'bin'
+            elif _version <= 10:
+                ext = 'tar.bz2'
             else:
-                archive = 'android-ndk-r{0}-darwin-{1}.tar.bz2'
-            is_64 = (os.uname()[4] == 'x86_64')
-
-        elif platform.startswith('linux'):
-            if _version >= '10e':
-                archive = 'android-ndk-r{0}-linux-{1}.zip'
-            elif _version >= '10c':
-                archive = 'android-ndk-r{0}-linux-{1}.bin'
-            else:
-                archive = 'android-ndk-r{0}-linux-{1}.tar.bz2'
+                ext = 'zip'
+            archive = 'android-ndk-r{0}-' + _platform + '-{1}.' + ext
             is_64 = (os.uname()[4] == 'x86_64')
         else:
             raise SystemError('Unsupported platform: {}'.format(platform))
@@ -457,7 +452,7 @@ class TargetAndroid(Target):
         archive = archive.format(self.android_ndk_version, architecture)
         unpacked = unpacked.format(self.android_ndk_version)
 
-        if _version >= '10e':
+        if _version >= 11:
             url = 'https://dl.google.com/android/repository/'
         else:
             url = 'https://dl.google.com/android/ndk/'
