@@ -1129,6 +1129,11 @@ class TargetAndroid(Target):
         icon = config.getdefault('app', 'icon.filename', '')
         if icon:
             build_cmd += [("--icon", join(self.buildozer.root_dir, icon))]
+        icon_fg = config.getdefault('app', 'icon.adaptive_foreground.filename', '')
+        icon_bg = config.getdefault('app', 'icon.adaptive_background.filename', '')
+        if icon_fg and icon_bg:
+            build_cmd += [("--icon-fg", join(self.buildozer.root_dir, icon_fg))]
+            build_cmd += [("--icon-bg", join(self.buildozer.root_dir, icon_bg))]
 
         # OUYA Console support
         ouya_category = config.getdefault('app', 'android.ouya.category',
