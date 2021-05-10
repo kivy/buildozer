@@ -256,6 +256,9 @@ android.allow_backup = True
 # Usage example : android.manifest_placeholders = [myCustomUrl:\"org.kivy.customurl\"]
 # android.manifest_placeholders = [:]
 
+# (bool) disables the compilation of py to pyc/pyo files when packaging
+# android.no-compile-pyo = True
+
 #
 # Python for android (p4a) specific
 #
