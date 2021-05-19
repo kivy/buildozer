@@ -120,7 +120,7 @@ class TargetAndroid(Target):
         # Default p4a dir
         p4a_dir = join(self.buildozer.platform_dir, self.p4a_directory_name)
 
-        # Possibly overriden by user setting
+        # Possibly overridden by user setting
         system_p4a_dir = self.buildozer.config.getdefault('app', 'p4a.source_dir')
         if system_p4a_dir:
             p4a_dir = expanduser(system_p4a_dir)

@@ -61,7 +61,7 @@ class TestBuildozer(unittest.TestCase):
 
     def test_buildozer_base(self):
         """
-        Basic test making sure the Buildozer object can be instanciated.
+        Basic test making sure the Buildozer object can be instantiated.
         """
         buildozer = Buildozer()
         assert buildozer.specfilename == 'buildozer.spec'
