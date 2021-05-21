@@ -191,6 +191,9 @@ fullscreen = 0
 # (list) Java classes to add as activities to the manifest.
 #android.add_activities = com.example.ExampleActivity
 
+# (list) List of native services to declare
+#android.native_services = org.kivy.example.MyNativeService
+
 # (str) OUYA Console category. Should be one of GAME or APP
 # If you leave this blank, OUYA support will not be enabled
 #android.ouya.category = GAME
