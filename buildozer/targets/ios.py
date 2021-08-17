@@ -207,7 +207,8 @@ class TargetIos(Target):
         plist_rfn = join(self.app_project_dir, plist_fn)
         version = self.buildozer.get_version()
         self.buildozer.info('Update Plist {}'.format(plist_fn))
-        plist = plistlib.readPlist(plist_rfn)
+        with open(plist_rfn, 'rb') as f:
+            plist = plistlib.load(f)
         plist['CFBundleIdentifier'] = self._get_package()
         plist['CFBundleShortVersionString'] = version
         plist['CFBundleVersion'] = '{}.{}'.format(version,
@@ -235,7 +236,8 @@ class TargetIos(Target):
             }
 
         # ok, write the modified plist.
-        plistlib.writePlist(plist, plist_rfn)
+        with open(plist_rfn, 'wb') as f:
+            plistlib.dump(plist, f)
 
         mode = self.build_mode.capitalize()
         self.xcodebuild(
