@@ -234,7 +234,7 @@ class Target:
 
         This will clone the contents of a git repository to
         `buildozer.platform_dir`. The location of this repo can be
-        speficied via URL and branch name, or via a custom (local)
+        specified via URL and branch name, or via a custom (local)
         directory name.
 
         :Parameters:

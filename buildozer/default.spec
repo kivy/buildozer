@@ -87,6 +87,10 @@ fullscreen = 0
 # Lottie files can be created using various tools, like Adobe After Effect or Synfig.
 #android.presplash_lottie = "path/to/lottie/file.json"
 
+# (str) Adaptive icon of the application (used if Android API level is 26+ at runtime)
+#icon.adaptive_foreground.filename = %(source.dir)s/data/icon_fg.png
+#icon.adaptive_background.filename = %(source.dir)s/data/icon_bg.png
+
 # (list) Permissions
 #android.permissions = INTERNET
 
@@ -178,6 +182,11 @@ fullscreen = 0
 # (list) Gradle dependencies to add
 #android.gradle_dependencies =
 
+# (bool) Enable AndroidX support. Enable when 'android.gradle_dependencies'
+# contains an 'androidx' package, or any package from Kotlin source.
+# android.enable_androidx requires android.api >= 28
+#android.enable_androidx = False
+
 # (list) add java compile options
 # this can for example be necessary when importing certain java libraries using the 'android.gradle_dependencies' option
 # see https://developer.android.com/studio/write/java8-support for further information
@@ -235,6 +244,9 @@ fullscreen = 0
 # (str) Android logcat filters to use
 #android.logcat_filters = *:S python:D
 
+# (bool) Android logcat only display log for activity's pid
+#android.logcat_pid_only = False
+
 # (str) Android additional adb arguments
 #android.adb_args = -H host.docker.internal
 
@@ -260,15 +272,24 @@ android.allow_backup = True
 # Usage example : android.manifest_placeholders = [myCustomUrl:\"org.kivy.customurl\"]
 # android.manifest_placeholders = [:]
 
+# (bool) disables the compilation of py to pyc/pyo files when packaging
+# android.no-compile-pyo = True
+
 #
 # Python for android (p4a) specific
 #
 
-# (str) python-for-android fork to use, defaults to upstream (kivy)
+# (str) python-for-android URL to use for checkout
+#p4a.url =
+
+# (str) python-for-android fork to use in case if p4a.url is not specified, defaults to upstream (kivy)
 #p4a.fork = kivy
 
 # (str) python-for-android branch to use, defaults to master
 #p4a.branch = master
+
+# (str) python-for-android specific commit to use, defaults to HEAD, must be within p4a.branch
+#p4a.commit = HEAD
 
 # (str) python-for-android git clone directory (if empty, it will be automatically cloned from github)
 #p4a.source_dir =
@@ -317,8 +338,26 @@ ios.codesign.allowed = false
 # Get a list of available identities: buildozer ios list_identities
 #ios.codesign.debug = "iPhone Developer: <lastname> <firstname> (<hexstring>)"
 
+# (str) The development team to use for signing the debug version
+#ios.codesign.development_team.debug = <hexstring>
+
 # (str) Name of the certificate to use for signing the release version
 #ios.codesign.release = %(ios.codesign.debug)s
+
+# (str) The development team to use for signing the release version
+#ios.codesign.development_team.release = <hexstring>
+
+# (str) URL pointing to .ipa file to be installed
+# This option should be defined along with `display_image_url` and `full_size_image_url` options.
+#ios.manifest.app_url =
+
+# (str) URL pointing to an icon (57x57px) to be displayed during download
+# This option should be defined along with `app_url` and `full_size_image_url` options.
+#ios.manifest.display_image_url =
+
+# (str) URL pointing to a large icon (512x512px) to be used by iTunes
+# This option should be defined along with `app_url` and `display_image_url` options.
+#ios.manifest.full_size_image_url =
 
 
 [buildozer]

@@ -15,10 +15,10 @@ limitation.
 
 To test your own recipe via Buildozer, you need to:
 
-#. Fork `Python for Android <http://github.com/kivy/python-for-android>`_, and
+#. Fork `Python for Android <https://github.com/kivy/python-for-android>`_, and
    clone your own version (this will allow easy contribution later)::
 
-     git clone http://github.com/YOURNAME/python-for-android
+     git clone https://github.com/YOURNAME/python-for-android
 
 #. Change your `buildozer.spec` to reference your version::
 
@@ -44,6 +44,6 @@ include it in the python-for-android project, by issuing a Pull Request:
 
      git push origin master
 
-#. Go to `http://github.com/YOURNAME/python-for-android`, and you should see
+#. Go to `https://github.com/YOURNAME/python-for-android`, and you should see
    your new branch and a button "Pull Request" on it. Use it, write a
    description about what you did, and Send!

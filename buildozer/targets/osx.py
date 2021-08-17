@@ -46,16 +46,16 @@ class TargetOSX(Target):
                 self.buildozer.info('Downloading kivy...')
                 status_code = check_output(
                     ('curl', '-L', '--write-out', '%{http_code}', '-o', 'Kivy{}.dmg'.format(py_branch),
-                    'http://kivy.org/downloads/{}/Kivy-{}-osx-python{}.dmg'
+                    'https://kivy.org/downloads/{}/Kivy-{}-osx-python{}.dmg'
                     .format(current_kivy_vers, current_kivy_vers, py_branch)),
                     cwd=cwd)
 
                 if status_code == "404":
                     self.buildozer.error(
                         "Unable to download the Kivy App. Check osx.kivy_version in your buildozer.spec, and verify "
-                        "Kivy servers are accessible. http://kivy.org/downloads/")
+                        "Kivy servers are accessible. https://kivy.org/downloads/")
                     check_call(("rm", "Kivy{}.dmg".format(py_branch)), cwd=cwd)
-                    exit(1)
+                    sys.exit(1)
 
             self.buildozer.info('Extracting and installing Kivy...')
             check_call(('hdiutil', 'attach', cwd + '/Kivy{}.dmg'.format(py_branch)))
@@ -76,8 +76,6 @@ class TargetOSX(Target):
         else:
             self.download_kivy(kivy_app_dir, py_branch)
 
-        return
-
     def check_requirements(self):
         self.ensure_sdk()
         self.ensure_kivyapp()
@@ -90,7 +88,7 @@ class TargetOSX(Target):
                 len(errors)))
             for error in errors:
                 print(error)
-            exit(1)
+            sys.exit(1)
         # check
 
     def build_package(self):
@@ -177,7 +175,7 @@ class TargetOSX(Target):
         if not args:
             self.buildozer.error('Missing target command')
             self.buildozer.usage()
-            exit(1)
+            sys.exit(1)
 
         result = []
         last_command = []
@@ -191,7 +189,7 @@ class TargetOSX(Target):
                 if not last_command:
                     self.buildozer.error('Argument passed without a command')
                     self.buildozer.usage()
-                    exit(1)
+                    sys.exit(1)
                 last_command.append(arg)
         if last_command:
             result.append(last_command)
@@ -202,7 +200,7 @@ class TargetOSX(Target):
             command, args = item[0], item[1:]
             if not hasattr(self, 'cmd_{0}'.format(command)):
                 self.buildozer.error('Unknown command {0}'.format(command))
-                exit(1)
+                sys.exit(1)
 
             func = getattr(self, 'cmd_{0}'.format(command))
 

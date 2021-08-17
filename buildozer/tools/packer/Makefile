@@ -25,7 +25,7 @@ torrent:
 	mktorrent \
 		-a ${TORRENT_ANNOUNCE} \
 		-o output-kivy-buildozer-vm/kivy-buildozer-vm.torrent \
-		-w http://txzone.net/files/torrents/${PACKAGE_FILENAME} \
+		-w https://txzone.net/files/torrents/${PACKAGE_FILENAME} \
 		-v output-kivy-buildozer-vm/${PACKAGE_FILENAME}
 
 upload:

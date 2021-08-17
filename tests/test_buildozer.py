@@ -61,7 +61,7 @@ class TestBuildozer(unittest.TestCase):
 
     def test_buildozer_base(self):
         """
-        Basic test making sure the Buildozer object can be instanciated.
+        Basic test making sure the Buildozer object can be instantiated.
         """
         buildozer = Buildozer()
         assert buildozer.specfilename == 'buildozer.spec'
@@ -158,7 +158,7 @@ class TestBuildozer(unittest.TestCase):
         assert m_file_extract.call_args_list == [mock.call(mock.ANY, cwd='/my/ant/path')]
         assert ant_path == my_ant_path
         assert download.call_args_list == [
-            mock.call("http://archive.apache.org/dist/ant/binaries/", mock.ANY, cwd=my_ant_path)]
+            mock.call("https://archive.apache.org/dist/ant/binaries/", mock.ANY, cwd=my_ant_path)]
         # Mock ant already installed
         with mock.patch.object(Buildozer, 'file_exists', return_value=True):
             ant_path = target._install_apache_ant()

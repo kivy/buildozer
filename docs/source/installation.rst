@@ -1,3 +1,4 @@
+
 Installation
 ============
 
@@ -27,6 +28,48 @@ Android on Ubuntu 20.04 (64bit)
     # add the following line at the end of your ~/.bashrc file
     export PATH=$PATH:~/.local/bin/
 
+Android on Windows 10
+~~~~~~~~~~~~~~~~~~~~~
+
+To use buildozer in Windows 10 you need first to enable Windows Subsystem for Linux (WSL) and install a Linux distribution: https://docs.microsoft.com/en-us/windows/wsl/install-win10.
+
+These instructions were tested with WSL 1 and Ubuntu 18.04 LTS. 
+
+After installing WSL and Ubuntu in your Windows 10 machine, open Ubuntu and do this:
+
+1) Run the commands listed on the previous section (Android in Ubuntu 18.04 (64-bit).
+2) Run the following commands:
+
+::
+
+    # Use here the python version you need
+    sudo apt install -y python3.7-venv
+    # Create a folder for buildozer. For example: C:\buildozer
+    mkdir /mnt/c/buildozer
+    cd /mnt/c/buildozer
+    python3.7 -m venv venv-buildozer
+    source venv/bin/activate
+    python -m pip install --upgrade pip
+    python -m pip install --upgrade wheel
+    python -m pip install --upgrade cython 
+    python -m pip install --upgrade virtualenv 
+    python -m pip install --upgrade buildozer
+    # Restart your WSL terminal to enable the path change
+
+Windows Subsystem for Linux does not have direct access to USB. Due to this, you need to install the Windows version of ADB (Android Debug Bridge):
+
+- Go to https://developer.android.com/studio/releases/platform-tools and click on "Download SDK Platform-Tools for Windows".
+
+- Unzip the downloaded file to a new folder. For example, "C:\\platform-tools".
+
+Before Using Buildozer
+~~~~~~~~~~~~~~~~~~~~~~
+
+If you wish, clone your code to a new folder, where the build process will run.
+
+You don't need to create a virtualenv for your code requirements. But just add these requirements to a configuration file called buildozer.spec as you will see in the following sections.
+
+Before running buildozer in your code folder, remember to go into the buildozer folder and activate the buildozer virtualenv.
 
 Android on macOS
 ~~~~~~~~~~~~~~~~

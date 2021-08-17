@@ -57,7 +57,7 @@ setup(
     long_description_content_type='text/markdown',
     author='Mathieu Virbel',
     author_email='mat@kivy.org',
-    url='http://github.com/kivy/buildozer',
+    url='https://github.com/kivy/buildozer',
     license='MIT',
     packages=[
         'buildozer', 'buildozer.targets', 'buildozer.libs', 'buildozer.scripts'

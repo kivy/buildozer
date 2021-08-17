@@ -33,6 +33,7 @@ from os.path import exists, join, realpath, expanduser, basename, relpath
 from platform import architecture
 from shutil import copyfile, rmtree
 from glob import glob
+from time import sleep
 
 from buildozer.libs.version import parse
 from distutils.version import LooseVersion
@@ -60,6 +61,7 @@ class TargetAndroid(Target):
     p4a_directory_name = "python-for-android"
     p4a_fork = 'kivy'
     p4a_branch = 'master'
+    p4a_commit = 'HEAD'
     p4a_apk_cmd = "apk --debug --bootstrap="
     p4a_recommended_ndk_version = None
     extra_p4a_args = ''
@@ -98,10 +100,14 @@ class TargetAndroid(Target):
         else:
             self.extra_p4a_args += ' --ignore-setup-py'
 
+
         activity_class_name = self.buildozer.config.getdefault(
             'app', 'android.activity_class_name', 'org.kivy.android.PythonActivity')
         if activity_class_name != 'org.kivy.android.PythonActivity':
             self.extra_p4a_args += ' --activity-class-name={}'.format(activity_class_name)
+
+        if self.buildozer.log_level >= 2:
+            self.extra_p4a_args += ' --debug'
 
         self.warn_on_deprecated_tokens()
 
@@ -124,7 +130,7 @@ class TargetAndroid(Target):
         # Default p4a dir
         p4a_dir = join(self.buildozer.platform_dir, self.p4a_directory_name)
 
-        # Possibly overriden by user setting
+        # Possibly overridden by user setting
         system_p4a_dir = self.buildozer.config.getdefault('app', 'p4a.source_dir')
         if system_p4a_dir:
             p4a_dir = expanduser(system_p4a_dir)
@@ -248,10 +254,7 @@ class TargetAndroid(Target):
                                 'adb.exe')
             self.javac_cmd = self._locate_java('javac.exe')
             self.keytool_cmd = self._locate_java('keytool.exe')
-        elif platform in ('darwin', ):
-            self.adb_cmd = join(self.android_sdk_dir, 'platform-tools', 'adb')
-            self.javac_cmd = self._locate_java('javac')
-            self.keytool_cmd = self._locate_java('keytool')
+        # darwin, linux
         else:
             self.adb_cmd = join(self.android_sdk_dir, 'platform-tools', 'adb')
             self.javac_cmd = self._locate_java('javac')
@@ -375,7 +378,7 @@ class TargetAndroid(Target):
 
         self.buildozer.info('Android ANT is missing, downloading')
         archive = 'apache-ant-{0}-bin.tar.gz'.format(APACHE_ANT_VERSION)
-        url = 'http://archive.apache.org/dist/ant/binaries/'
+        url = 'https://archive.apache.org/dist/ant/binaries/'
         self.buildozer.download(url,
                                 archive,
                                 cwd=ant_dir)
@@ -423,7 +426,7 @@ class TargetAndroid(Target):
             return ndk_dir
 
         import re
-        _version = re.search('(.+?)[a-z]', self.android_ndk_version).group(1)
+        _version = int(re.search(r'(\d+)', self.android_ndk_version).group(1))
 
         self.buildozer.info('Android NDK is missing, downloading')
         # Welcome to the NDK URL hell!
@@ -433,28 +436,23 @@ class TargetAndroid(Target):
         # from 10e on the URLs can be looked up at
         # https://developer.android.com/ndk/downloads/older_releases
 
+        is_darwin = platform == 'darwin'
+        is_linux = platform.startswith('linux')
+
         if platform in ('win32', 'cygwin'):
-            # Checking of 32/64 bits at Windows from: http://stackoverflow.com/a/1405971/798575
+            # Checking of 32/64 bits at Windows from: https://stackoverflow.com/a/1405971/798575
             import struct
             archive = 'android-ndk-r{0}-windows-{1}.zip'
             is_64 = (8 * struct.calcsize("P") == 64)
-
-        elif platform in ('darwin', ):
-            if _version >= '10e':
-                archive = 'android-ndk-r{0}-darwin-{1}.zip'
-            elif _version >= '10c':
-                archive = 'android-ndk-r{0}-darwin-{1}.bin'
+        elif is_darwin or is_linux:
+            _platform = 'linux' if is_linux else 'darwin'
+            if self.android_ndk_version in ['10c', '10d', '10e']:
+                ext = 'bin'
+            elif _version <= 10:
+                ext = 'tar.bz2'
             else:
-                archive = 'android-ndk-r{0}-darwin-{1}.tar.bz2'
-            is_64 = (os.uname()[4] == 'x86_64')
-
-        elif platform.startswith('linux'):
-            if _version >= '10e':
-                archive = 'android-ndk-r{0}-linux-{1}.zip'
-            elif _version >= '10c':
-                archive = 'android-ndk-r{0}-linux-{1}.bin'
-            else:
-                archive = 'android-ndk-r{0}-linux-{1}.tar.bz2'
+                ext = 'zip'
+            archive = 'android-ndk-r{0}-' + _platform + '-{1}.' + ext
             is_64 = (os.uname()[4] == 'x86_64')
         else:
             raise SystemError('Unsupported platform: {}'.format(platform))
@@ -464,10 +462,10 @@ class TargetAndroid(Target):
         archive = archive.format(self.android_ndk_version, architecture)
         unpacked = unpacked.format(self.android_ndk_version)
 
-        if _version >= '10e':
+        if _version >= 11:
             url = 'https://dl.google.com/android/repository/'
         else:
-            url = 'http://dl.google.com/android/ndk/'
+            url = 'https://dl.google.com/android/ndk/'
 
         self.buildozer.download(url,
                                 archive,
@@ -666,7 +664,7 @@ class TargetAndroid(Target):
                 self.buildozer.error(
                     'You might have missed to install 32bits libs')
                 self.buildozer.error(
-                    'Check http://buildozer.readthedocs.org/en/latest/installation.html')
+                    'Check https://buildozer.readthedocs.org/en/latest/installation.html')
                 self.buildozer.error('')
             else:
                 self.buildozer.error('')
@@ -699,8 +697,14 @@ class TargetAndroid(Target):
         p4a_fork = self.buildozer.config.getdefault(
             'app', 'p4a.fork', self.p4a_fork
         )
+        p4a_url = self.buildozer.config.getdefault(
+            'app', 'p4a.url', f'https://github.com/{p4a_fork}/python-for-android.git'
+        )
         p4a_branch = self.buildozer.config.getdefault(
             'app', 'p4a.branch', self.p4a_branch
+        )
+        p4a_commit = self.buildozer.config.getdefault(
+            'app', 'p4a.commit', self.p4a_commit
         )
 
         p4a_dir = self.p4a_dir
@@ -714,21 +718,19 @@ class TargetAndroid(Target):
                 self.buildozer.error('')
                 raise BuildozerException()
         else:
-            # check that fork/branch has not been changed
+            # check that url/branch has not been changed
             if self.buildozer.file_exists(p4a_dir):
-                cur_fork = cmd(
+                cur_url = cmd(
                     'git config --get remote.origin.url',
                     get_stdout=True,
                     cwd=p4a_dir,
-                )[0].split('/')[3]
+                )[0].strip()
                 cur_branch = cmd(
                     'git branch -vv', get_stdout=True, cwd=p4a_dir
                 )[0].split()[1]
-                if any([cur_fork != p4a_fork, cur_branch != p4a_branch]):
+                if any([cur_url != p4a_url, cur_branch != p4a_branch]):
                     self.buildozer.info(
-                        "Detected old fork/branch ({}/{}), deleting...".format(
-                            cur_fork, cur_branch
-                        )
+                        f"Detected old url/branch ({cur_url}/{cur_branch}), deleting..."
                     )
                     rmtree(p4a_dir)
 
@@ -736,11 +738,10 @@ class TargetAndroid(Target):
                 cmd(
                     (
                         'git clone -b {p4a_branch} --single-branch '
-                        'https://github.com/{p4a_fork}/python-for-android.git '
-                        '{p4a_dir}'
+                        '{p4a_url} {p4a_dir}'
                     ).format(
                         p4a_branch=p4a_branch,
-                        p4a_fork=p4a_fork,
+                        p4a_url=p4a_url,
                         p4a_dir=self.p4a_directory_name,
                     ),
                     cwd=self.buildozer.platform_dir,
@@ -755,6 +756,8 @@ class TargetAndroid(Target):
                     cmd('git fetch --tags origin {0}:{0}'.format(p4a_branch),
                         cwd=p4a_dir)
                     cmd('git checkout {}'.format(p4a_branch), cwd=p4a_dir)
+            if p4a_commit != 'HEAD':
+                cmd('git reset --hard {}'.format(p4a_commit), cwd=p4a_dir)
 
         # also install dependencies (currently, only setup.py knows about it)
         # let's extract them.
@@ -766,7 +769,7 @@ class TargetAndroid(Target):
         except IOError:
             self.buildozer.error('Failed to read python-for-android setup.py at {}'.format(
                 join(self.p4a_dir, 'setup.py')))
-            exit(1)
+            sys.exit(1)
         pip_deps = []
         for dep in deps:
             pip_deps.append("'{}'".format(dep))
@@ -939,6 +942,11 @@ class TargetAndroid(Target):
             cmd.append('--manifest-placeholders')
             cmd.append("{}".format(manifest_placeholders))
 
+        # support disabling of compilation
+        compile_py = self.buildozer.config.getdefault('app', 'android.no-compile-pyo', None)
+        if compile_py:
+            cmd.append('--no-compile-pyo')
+
         cmd.append('--arch')
         cmd.append(self._arch)
 
@@ -987,6 +995,12 @@ class TargetAndroid(Target):
                     entry=entrypoint),
                 cwd=self.buildozer.global_platform_dir)
         self.buildozer.environ.pop('ANDROID_SERIAL', None)
+
+        while True:
+            if self._get_pid():
+                break
+            sleep(.1)
+            self.buildozer.info('Waiting for application to start.')
 
         self.buildozer.info('Application started.')
 
@@ -1160,6 +1174,11 @@ class TargetAndroid(Target):
         icon = config.getdefault('app', 'icon.filename', '')
         if icon:
             build_cmd += [("--icon", join(self.buildozer.root_dir, icon))]
+        icon_fg = config.getdefault('app', 'icon.adaptive_foreground.filename', '')
+        icon_bg = config.getdefault('app', 'icon.adaptive_background.filename', '')
+        if icon_fg and icon_bg:
+            build_cmd += [("--icon-fg", join(self.buildozer.root_dir, icon_fg))]
+            build_cmd += [("--icon-bg", join(self.buildozer.root_dir, icon_bg))]
 
         # OUYA Console support
         ouya_category = config.getdefault('app', 'android.ouya.category',
@@ -1192,6 +1211,13 @@ class TargetAndroid(Target):
         wakelock = config.getbooldefault('app', 'android.wakelock', False)
         if wakelock:
             build_cmd += [("--wakelock", )]
+
+        # AndroidX ?
+        enable_androidx = config.getbooldefault('app',
+                                                'android.enable_androidx',
+                                                False)
+        if enable_androidx:
+            build_cmd += [("--enable-androidx", )]
 
         # intent filters
         intent_filters = config.getdefault(
@@ -1313,7 +1339,7 @@ class TargetAndroid(Target):
                 self.buildozer.error(
                     'Invalid library reference (path not found): {}'.format(
                         cref))
-                exit(1)
+                sys.exit(1)
             # get a relative path from the project file
             ref = relpath(ref, realpath(expanduser(dist_dir)))
             # ensure the reference exists
@@ -1416,6 +1442,18 @@ class TargetAndroid(Target):
 
         self.buildozer.info('Application pushed.')
 
+    def _get_pid(self):
+        pid, *_ = self.buildozer.cmd(
+            f'{self.adb_cmd} shell pidof {self._get_package()}',
+            get_stdout=True,
+            show_output=False,
+            break_on_error=False,
+            quiet=True,
+        )
+        if pid:
+            return pid.strip()
+        return False
+
     def cmd_logcat(self, *args):
         '''Show the log from the device
         '''
@@ -1427,10 +1465,23 @@ class TargetAndroid(Target):
             "app", "android.logcat_filters", "", section_sep=":", split_char=" ")
         filters = " ".join(filters)
         self.buildozer.environ['ANDROID_SERIAL'] = serial[0]
-        self.buildozer.cmd('{adb} logcat {filters}'.format(adb=self.adb_cmd,
-                                                           filters=filters),
-                           cwd=self.buildozer.global_platform_dir,
-                           show_output=True)
+        extra_args = []
+        pid = None
+        if self.buildozer.config.getdefault('app', 'android.logcat_pid_only'):
+            pid = self._get_pid()
+            if pid:
+                extra_args.extend(('--pid', pid))
+
+        self.buildozer.cmd(
+            f"{self.adb_cmd} logcat {filters} {' '.join(extra_args)}",
+            cwd=self.buildozer.global_platform_dir,
+            show_output=True,
+            run_condition=self._get_pid if pid else None,
+            break_on_error=False,
+        )
+
+        self.buildozer.info(f"{self._get_package()} terminated")
+
         self.buildozer.environ.pop('ANDROID_SERIAL', None)
 
 

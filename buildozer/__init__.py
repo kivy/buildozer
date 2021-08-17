@@ -19,7 +19,7 @@ from buildozer.jsonstore import JsonStore
 from sys import stdout, stderr, exit
 from re import search
 from os.path import join, exists, dirname, realpath, splitext, expanduser
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, TimeoutExpired
 from os import environ, unlink, walk, sep, listdir, makedirs
 from copy import copy
 from shutil import copyfile, rmtree, copytree, move
@@ -253,7 +253,7 @@ class Buildozer:
 
     def cmd(self, command, **kwargs):
         # prepare the environ, based on the system + our own env
-        env = copy(environ)
+        env = environ.copy()
         env.update(self.environ)
 
         # prepare the process
@@ -269,15 +269,18 @@ class Buildozer:
         get_stderr = kwargs.pop('get_stderr', False)
         break_on_error = kwargs.pop('break_on_error', True)
         sensible = kwargs.pop('sensible', False)
+        run_condition = kwargs.pop('run_condition', None)
+        quiet = kwargs.pop('quiet', False)
 
-        if not sensible:
-            self.debug('Run {0!r}'.format(command))
-        else:
-            if type(command) in (list, tuple):
-                self.debug('Run {0!r} ...'.format(command[0]))
+        if not quiet:
+            if not sensible:
+                self.debug('Run {0!r}'.format(command))
             else:
-                self.debug('Run {0!r} ...'.format(command.split()[0]))
-        self.debug('Cwd {}'.format(kwargs.get('cwd')))
+                if isinstance(command, (list, tuple)):
+                    self.debug('Run {0!r} ...'.format(command[0]))
+                else:
+                    self.debug('Run {0!r} ...'.format(command.split()[0]))
+            self.debug('Cwd {}'.format(kwargs.get('cwd')))
 
         # open the process
         if sys.platform == 'win32':
@@ -297,9 +300,9 @@ class Buildozer:
 
         ret_stdout = [] if get_stdout else None
         ret_stderr = [] if get_stderr else None
-        while True:
+        while not run_condition or run_condition():
             try:
-                readx = select.select([fd_stdout, fd_stderr], [], [])[0]
+                readx = select.select([fd_stdout, fd_stderr], [], [], 1)[0]
             except select.error:
                 break
             if fd_stdout in readx:
@@ -322,7 +325,13 @@ class Buildozer:
             stdout.flush()
             stderr.flush()
 
-        process.communicate()
+        try:
+            process.communicate(
+                timeout=(1 if run_condition and not run_condition() else None)
+            )
+        except TimeoutExpired:
+            pass
+
         if process.returncode != 0 and break_on_error:
             self.error('Command failed: {0}'.format(command))
             self.log_env(self.ERROR, kwargs['env'])
@@ -337,10 +346,12 @@ class Buildozer:
                 self.error('raising an issue with buildozer itself.')
             self.error('In case of a bug report, please add a full log with log_level = 2')
             raise BuildozerCommandException()
+
         if ret_stdout:
             ret_stdout = b''.join(ret_stdout)
         if ret_stderr:
             ret_stderr = b''.join(ret_stderr)
+
         return (ret_stdout.decode('utf-8', 'ignore') if ret_stdout else None,
                 ret_stderr.decode('utf-8') if ret_stderr else None,
                 process.returncode)
@@ -349,7 +360,7 @@ class Buildozer:
         from pexpect import spawnu
 
         # prepare the environ, based on the system + our own env
-        env = copy(environ)
+        env = environ.copy()
         env.update(self.environ)
 
         # prepare the process
@@ -924,8 +935,7 @@ class Buildozer:
 
             if not meth.__doc__:
                 continue
-            doc = [x for x in
-                    meth.__doc__.strip().splitlines()][0].strip()
+            doc = list(meth.__doc__.strip().splitlines())[0].strip()
             print('  {0:<18} {1}'.format(name, doc))
 
         print('')
