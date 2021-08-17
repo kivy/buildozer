@@ -100,6 +100,12 @@ class TargetAndroid(Target):
         else:
             self.extra_p4a_args += ' --ignore-setup-py'
 
+
+        activity_class_name = self.buildozer.config.getdefault(
+            'app', 'android.activity_class_name', 'org.kivy.android.PythonActivity')
+        if activity_class_name != 'org.kivy.android.PythonActivity':
+            self.extra_p4a_args += ' --activity-class-name={}'.format(activity_class_name)
+
         if self.buildozer.log_level >= 2:
             self.extra_p4a_args += ' --debug'
 
@@ -898,6 +904,31 @@ class TargetAndroid(Target):
             'app', 'android.uses_library', '')
         for lib in uses_library:
             cmd.append('--uses-library={}'.format(lib))
+
+        # support for activity-class-name
+        activity_class_name = self.buildozer.config.getdefault(
+            'app', 'android.activity_class_name', 'org.kivy.android.PythonActivity')
+        if activity_class_name != 'org.kivy.android.PythonActivity':
+            cmd.append('--activity-class-name={}'.format(activity_class_name))
+
+        # support for service-class-name
+        service_class_name = self.buildozer.config.getdefault(
+            'app', 'android.service_class_name', 'org.kivy.android.PythonService')
+        if service_class_name != 'org.kivy.android.PythonService':
+            cmd.append('--service-class-name={}'.format(service_class_name))
+
+        # support for extra-manifest-xml
+        extra_manifest_xml = self.buildozer.config.getdefault(
+            'app', 'android.extra_manifest_xml', '')
+        if extra_manifest_xml:
+            cmd.append('--extra-manifest-xml="{}"'.format(open(extra_manifest_xml, 'rt').read()))
+
+        # support for extra-manifest-application-arguments
+        extra_manifest_application_arguments = self.buildozer.config.getdefault(
+            'app', 'android.extra_manifest_application_arguments', '')
+        if extra_manifest_application_arguments:
+            args_body = open(extra_manifest_application_arguments, 'rt').read().replace('"', '\\"').replace('\n', ' ').replace('\t', ' ')
+            cmd.append('--extra-manifest-application-arguments="{}"'.format(args_body))
 
         # support for gradle dependencies
         gradle_dependencies = self.buildozer.config.getlist('app', 'android.gradle_dependencies', [])

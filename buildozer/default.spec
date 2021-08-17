@@ -136,7 +136,23 @@ fullscreen = 0
 # android.accept_sdk_license = False
 
 # (str) Android entry point, default is ok for Kivy-based app
-#android.entrypoint = org.renpy.android.PythonActivity
+#android.entrypoint = org.kivy.android.PythonActivity
+
+# (str) Full name including package path of the Java class that implements Android Activity
+# use that parameter together with android.entrypoint to set custom Java class instead of PythonActivity
+#android.activity_class_name = org.kivy.android.PythonActivity
+
+# (str) Extra xml to write directly inside the <manifest> element of AndroidManifest.xml
+# use that parameter to provide a filename from where to load your custom XML code
+#android.extra_manifest_xml = ./src/android/extra_manifest.xml
+
+# (str) Extra xml to write directly inside the <manifest><application> tag of AndroidManifest.xml
+# use that parameter to provide a filename from where to load your custom XML arguments:
+#android.extra_manifest_application_arguments = ./src/android/extra_manifest_application_arguments.xml
+
+# (str) Full name including package path of the Java class that implements Python Service
+# use that parameter to set custom Java class instead of PythonService
+#android.service_class_name = org.kivy.android.PythonService
 
 # (str) Android app theme, default is ok for Kivy-based app
 # android.apptheme = "@android:style/Theme.NoTitleBar"
