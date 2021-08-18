@@ -146,9 +146,10 @@ class TargetIos(Target):
         ios_requirements = [x for x in app_requirements if onlyname(x) in
                             available_modules]
 
-        need_compile = 0
         if last_requirements != ios_requirements:
-            need_compile = 1
+            needs_compilation = True
+        else:
+            needs_compilation = False
 
         # len('requirements.source.') == 20, so use name[20:]
         source_dirs = {'{}_DIR'.format(name[20:].upper()):
@@ -156,13 +157,13 @@ class TargetIos(Target):
                        for name, value in self.buildozer.config.items('app')
                        if name.startswith('requirements.source.')}
         if source_dirs:
-            need_compile = 1
+            needs_compilation = True
             self.buildozer.environ.update(source_dirs)
             self.buildozer.info('Using custom source dirs:\n    {}'.format(
                 '\n    '.join(['{} = {}'.format(k, v)
                                for k, v in source_dirs.items()])))
 
-        if not need_compile:
+        if not needs_compilation:
             self.buildozer.info('Distribution already compiled, pass.')
             return
 
@@ -300,6 +301,10 @@ class TargetIos(Target):
             basename(ipa)))
         self.buildozer.state['ios:latestipa'] = ipa
         self.buildozer.state['ios:latestmode'] = self.build_mode
+
+    def cmd_clean(self, *args):
+        super().cmd_clean(*args)
+        self.buildozer.state['ios.requirements'] = ''
 
     def cmd_deploy(self, *args):
         super().cmd_deploy(*args)
