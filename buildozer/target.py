@@ -12,6 +12,7 @@ class Target:
     def __init__(self, buildozer):
         self.buildozer = buildozer
         self.build_mode = 'debug'
+        self.artifact_format = 'apk'
         self.platform_update = False
 
     def check_requirements(self):
@@ -101,6 +102,7 @@ class Target:
     def cmd_debug(self, *args):
         self.buildozer.prepare_for_build()
         self.build_mode = 'debug'
+        self.artifact_format = 'apk'
         self.buildozer.build()
 
     def cmd_release(self, *args):
@@ -137,6 +139,7 @@ class Target:
                 exit(1)
 
         self.build_mode = 'release'
+        self.artifact_format = self.buildozer.config.getdefault('app', 'android.release_artifact', 'aab')
         self.buildozer.build()
 
     def cmd_deploy(self, *args):

@@ -38,3 +38,8 @@ jobs:
       run: |
         touch main.py
         buildozer android debug
+    - name: buildozer android release (aab)
+      run: |
+        touch main.py
+        export BUILDOZER_ALLOW_ORG_TEST_DOMAIN=1
+        buildozer android release

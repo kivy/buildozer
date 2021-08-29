@@ -57,7 +57,7 @@ def call_build_package(target_android):
     """
     buildozer = target_android.buildozer
     expected_dist_dir = (
-        '{buildozer_dir}/android/platform/build-armeabi-v7a/dists/myapp__armeabi-v7a'.format(
+        '{buildozer_dir}/android/platform/build-arm64-v8a_armeabi-v7a/dists/myapp'.format(
         buildozer_dir=buildozer.buildozer_dir)
     )
 
@@ -79,7 +79,7 @@ def call_build_package(target_android):
             '{expected_dist_dir}/bin/MyApplication-0.1-debug.apk'.format(
                 expected_dist_dir=expected_dist_dir
             ),
-            '{bin_dir}/myapp-0.1-armeabi-v7a-debug.apk'.format(bin_dir=buildozer.bin_dir),
+            '{bin_dir}/myapp-0.1-arm64-v8a_armeabi-v7a-debug.apk'.format(bin_dir=buildozer.bin_dir),
         )
     ]
     return m_execute_build_package
@@ -104,9 +104,9 @@ class TestTargetAndroid:
         """Tests init defaults."""
         target_android = init_target(self.temp_dir)
         buildozer = target_android.buildozer
-        assert target_android._arch == "armeabi-v7a"
+        assert target_android._archs == ["arm64-v8a", "armeabi-v7a"]
         assert target_android._build_dir.endswith(
-            ".buildozer/android/platform/build-armeabi-v7a"
+            ".buildozer/android/platform/build-arm64-v8a_armeabi-v7a"
         )
         assert target_android._p4a_bootstrap == "sdl2"
         assert target_android._p4a_cmd.endswith(
@@ -116,11 +116,10 @@ class TestTargetAndroid:
         assert (
             target_android.extra_p4a_args == (
                 ' --color=always'
-                ' --storage-dir="{buildozer_dir}/android/platform/build-armeabi-v7a" --ndk-api=21 --ignore-setup-py --debug'.format(
+                ' --storage-dir="{buildozer_dir}/android/platform/build-arm64-v8a_armeabi-v7a" --ndk-api=21 --ignore-setup-py --debug'.format(
                 buildozer_dir=buildozer.buildozer_dir)
             )
         )
-        assert target_android.p4a_apk_cmd == "apk --debug --bootstrap=sdl2"
         assert target_android.platform_update is False
 
     def test_init_positional_buildozer(self):

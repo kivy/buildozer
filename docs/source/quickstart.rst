@@ -28,7 +28,7 @@ Init and build for Android
    Don't worry, thoses files will be saved in a global directory and will be
    shared across the different project you'll manage with Buildozer.
 
-#. At the end, you should have an APK file in the `bin/` directory.
+#. At the end, you should have an APK or AAB file in the `bin/` directory.
 
 
 Run my application
