@@ -133,6 +133,14 @@ class TargetIos(Target):
         available_modules = self.toolchain("recipes --compact", get_stdout=True)[0]
         return available_modules.splitlines()[0].split()
 
+    def load_plist_from_file(self, plist_rfn):
+        with open(plist_rfn, 'rb') as f:
+            return plistlib.load(f)
+
+    def dump_plist_to_file(self, plist, plist_rfn):
+        with open(plist_rfn, 'wb') as f:
+            plistlib.dump(plist, f)
+
     def compile_platform(self):
         # for ios, the compilation depends really on the app requirements.
         # compile the distribution only if the requirements changed.
@@ -207,8 +215,7 @@ class TargetIos(Target):
         plist_rfn = join(self.app_project_dir, plist_fn)
         version = self.buildozer.get_version()
         self.buildozer.info('Update Plist {}'.format(plist_fn))
-        with open(plist_rfn, 'rb') as f:
-            plist = plistlib.load(f)
+        plist = self.load_plist_from_file(plist_rfn)
         plist['CFBundleIdentifier'] = self._get_package()
         plist['CFBundleShortVersionString'] = version
         plist['CFBundleVersion'] = '{}.{}'.format(version,
@@ -236,8 +243,7 @@ class TargetIos(Target):
             }
 
         # ok, write the modified plist.
-        with open(plist_rfn, 'wb') as f:
-            plistlib.dump(plist, f)
+        self.dump_plist_to_file(plist, plist_rfn)
 
         mode = self.build_mode.capitalize()
         self.xcodebuild(

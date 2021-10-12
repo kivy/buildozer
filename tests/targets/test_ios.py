@@ -182,10 +182,10 @@ class TestTargetIos:
         # fmt: off
         with patch_target_ios("_unlock_keychain") as m_unlock_keychain, \
              patch_buildozer_error() as m_error, \
-             mock.patch("buildozer.targets.ios.plistlib.readPlist") as m_readplist, \
-             mock.patch("buildozer.targets.ios.plistlib.writePlist") as m_writeplist, \
+             mock.patch("buildozer.targets.ios.TargetIos.load_plist_from_file") as m_load_plist_from_file, \
+             mock.patch("buildozer.targets.ios.TargetIos.dump_plist_to_file") as m_dump_plist_to_file, \
              patch_buildozer_cmd() as m_cmd:
-            m_readplist.return_value = {}
+            m_load_plist_from_file.return_value = {}
             target.build_package()
         # fmt: on
         assert m_unlock_keychain.call_args_list == [mock.call()]
@@ -195,10 +195,10 @@ class TestTargetIos:
                 'You must fill the "ios.codesign.debug" token.'
             )
         ]
-        assert m_readplist.call_args_list == [
+        assert m_load_plist_from_file.call_args_list == [
             mock.call("/ios/dir/myapp-ios/myapp-Info.plist")
         ]
-        assert m_writeplist.call_args_list == [
+        assert m_dump_plist_to_file.call_args_list == [
             mock.call(
                 {
                     "CFBundleIdentifier": "org.test.myapp",
