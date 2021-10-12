@@ -108,6 +108,11 @@ class TargetAndroid(Target):
         if self.buildozer.log_level >= 2:
             self.extra_p4a_args += ' --debug'
 
+        user_extra_p4a_args = self.buildozer.config.getdefault('app', 'p4a.extra_args',
+                                                               None)
+        if user_extra_p4a_args:
+            self.extra_p4a_args += ' ' + user_extra_p4a_args
+
         self.warn_on_deprecated_tokens()
 
     def warn_on_deprecated_tokens(self):
