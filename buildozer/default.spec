@@ -179,6 +179,12 @@ fullscreen = 0
 # (list) Android AAR archives to add
 #android.add_aars =
 
+# (list) Put these files or directories in the apk assets directory
+# Two forms, do not use an absolute path, including '~/' in the first form.
+# 1) android.add_assets = source_asset_relative_path
+# 2) android.add_assets = source_asset_path:destination_asset_path
+#android.add_assets =
+
 # (list) Gradle dependencies to add
 #android.gradle_dependencies =
 
