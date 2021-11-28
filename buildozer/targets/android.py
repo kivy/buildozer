@@ -912,7 +912,7 @@ class TargetAndroid(Target):
             else:
                 asset_src = asset
                 asset_dest = asset
-            cmd.append(realpath(expanduser(asset_src))+':'+asset_dest)
+            cmd.append(realpath(expanduser(asset_src)) + ':' + asset_dest)
 
         # support for uses-lib
         uses_library = self.buildozer.config.getlist(
