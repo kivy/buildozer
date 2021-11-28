@@ -909,7 +909,7 @@ class TargetAndroid(Target):
             cmd.append('--add-asset')
             if ':' in asset:
                 asset_src, asset_dest = asset.split(":")
-            else asset_dest:
+            else:
                 asset_src = asset
                 asset_dest = asset
             cmd.append(realpath(expanduser(asset_src))+':'+asset_dest)
