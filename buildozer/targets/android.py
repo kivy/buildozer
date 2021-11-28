@@ -907,9 +907,11 @@ class TargetAndroid(Target):
         assets = self.buildozer.config.getlist('app', 'android.add_assets', [])
         for asset in assets:
             cmd.append('--add-asset')
-            asset_src, asset_dest = asset.split(":")
-            if not asset_dest:
-                asset_dest = asset_src
+            if ':' in asset:
+                asset_src, asset_dest = asset.split(":")
+            else asset_dest:
+                asset_src = asset
+                asset_dest = asset
             cmd.append(realpath(expanduser(asset_src))+':'+asset_dest)
 
         # support for uses-lib
