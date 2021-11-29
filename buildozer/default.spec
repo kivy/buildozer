@@ -25,6 +25,7 @@ source.include_exts = py,png,jpg,kv,atlas
 #source.exclude_dirs = tests, bin, venv
 
 # (list) List of exclusions using pattern matching
+# Do not prefix with './'
 #source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
@@ -178,6 +179,12 @@ fullscreen = 0
 
 # (list) Android AAR archives to add
 #android.add_aars =
+
+# (list) Put these files or directories in the apk assets directory.
+# Either form may be used, and assets need not be in 'source.include_exts'.
+# 1) android.add_assets = source_asset_relative_path
+# 2) android.add_assets = source_asset_path:destination_asset_relative_path
+#android.add_assets =
 
 # (list) Gradle dependencies to add
 #android.gradle_dependencies =

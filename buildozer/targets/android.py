@@ -903,6 +903,17 @@ class TargetAndroid(Target):
             cmd.append('--add-aar')
             cmd.append(realpath(expanduser(aar)))
 
+        # support for assets folder
+        assets = self.buildozer.config.getlist('app', 'android.add_assets', [])
+        for asset in assets:
+            cmd.append('--add-asset')
+            if ':' in asset:
+                asset_src, asset_dest = asset.split(":")
+            else:
+                asset_src = asset
+                asset_dest = asset
+            cmd.append(realpath(expanduser(asset_src)) + ':' + asset_dest)
+
         # support for uses-lib
         uses_library = self.buildozer.config.getlist(
             'app', 'android.uses_library', '')
