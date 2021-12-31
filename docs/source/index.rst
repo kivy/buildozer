@@ -10,7 +10,7 @@ Buildozer is a tool that aim to package mobiles application easily. It
 automates the entire build process, download the prerequisites like
 python-for-android, Android SDK, NDK, etc.
 
-Buildozer manage a file named `buildozer.spec` in your application directory,
+Buildozer manages a file named `buildozer.spec` in your application directory,
 describing your application requirements and settings such as title, icon,
 included modules etc. It will use the specification file to create a package
 for Android, iOS, and more.
