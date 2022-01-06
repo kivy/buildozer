@@ -258,15 +258,6 @@ class TargetIos(Target):
                 app_lower=app_name.lower(), mode=mode)
         self.buildozer.state['ios:latestappdir'] = ios_app_dir
 
-        key = 'ios.codesign.{}'.format(self.build_mode)
-        ioscodesign = self.buildozer.config.getdefault('app', key, '')
-        if not ioscodesign:
-            self.buildozer.error('Cannot create the IPA package without'
-                ' signature. You must fill the "{}" token.'.format(key))
-            return
-        elif ioscodesign[0] not in ('"', "'"):
-            ioscodesign = '"{}"'.format(ioscodesign)
-
         intermediate_dir = join(self.ios_dir, '{}-{}.intermediates'.format(app_name, version))
         xcarchive = join(intermediate_dir, '{}-{}.xcarchive'.format(
             app_name, version))
@@ -286,8 +277,18 @@ class TargetIos(Target):
             '-destination \'generic/platform=iOS\'',
             'archive',
             'ENABLE_BITCODE=NO',
+            self.code_signing_allowed,
             self.code_signing_development_team,
             cwd=build_dir)
+
+        key = 'ios.codesign.{}'.format(self.build_mode)
+        ioscodesign = self.buildozer.config.getdefault('app', key, '')
+        if not ioscodesign:
+            self.buildozer.error('Cannot create the IPA package without'
+                ' signature. You must fill the "{}" token.'.format(key))
+            return
+        elif ioscodesign[0] not in ('"', "'"):
+            ioscodesign = '"{}"'.format(ioscodesign)
 
         self.buildozer.info('Creating IPA...')
         self.xcodebuild(
