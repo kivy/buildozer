@@ -283,6 +283,7 @@ class TargetIos(Target):
             f'-configuration {mode}',
             f'-scheme {app_name.lower()}',
             f'-archivePath "{xcarchive}"',
+            '-destination \'generic/platform=iOS\'',
             'archive',
             'ENABLE_BITCODE=NO',
             self.code_signing_development_team,
