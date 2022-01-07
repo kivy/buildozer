@@ -238,6 +238,63 @@ class TestTargetAndroid:
             )
         ]
 
+    def test_execute_build_package__debug__apk(self):
+        """Basic tests for the execute_build_package() method. (in debug mode)"""
+        target_android = init_target(self.temp_dir)
+        buildozer = target_android.buildozer
+        with patch_target_android("_p4a") as m__p4a:
+            target = TargetAndroid(buildozer)
+            target.execute_build_package([("debug",)])
+        assert m__p4a.call_args_list == [
+            mock.call(
+                "apk "
+                "--bootstrap sdl2 "
+                "--dist_name myapp "
+                "--copy-libs "
+                "--arch arm64-v8a "
+                "--arch armeabi-v7a"
+            )
+        ]
+
+    def test_execute_build_package__release__apk(self):
+        """Basic tests for the execute_build_package() method. (in apk release mode)"""
+        target_android = init_target(self.temp_dir)
+        buildozer = target_android.buildozer
+        with patch_target_android("_p4a") as m__p4a:
+            target = TargetAndroid(buildozer)
+            target.execute_build_package([("release",)])
+        assert m__p4a.call_args_list == [
+            mock.call(
+                "apk "
+                "--bootstrap sdl2 "
+                "--dist_name myapp "
+                "--release "
+                "--copy-libs "
+                "--arch arm64-v8a "
+                "--arch armeabi-v7a"
+            )
+        ]
+
+    def test_execute_build_package__release__aab(self):
+        """Basic tests for the execute_build_package() method. (in aab release mode)"""
+        target_android = init_target(self.temp_dir)
+        buildozer = target_android.buildozer
+        with patch_target_android("_p4a") as m__p4a:
+            target = TargetAndroid(buildozer)
+            target.artifact_format = "aab"
+            target.execute_build_package([("release",)])
+        assert m__p4a.call_args_list == [
+            mock.call(
+                "aab "
+                "--bootstrap sdl2 "
+                "--dist_name myapp "
+                "--release "
+                "--copy-libs "
+                "--arch arm64-v8a "
+                "--arch armeabi-v7a"
+            )
+        ]
+
     def test_numeric_version(self):
         """The `android.numeric_version` config should be passed to `build_package()`."""
         target_android = init_target(self.temp_dir, {
