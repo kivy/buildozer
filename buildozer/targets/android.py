@@ -1462,6 +1462,7 @@ class TargetAndroid(Target):
 
         if state.get('android:latestmode', '') != 'debug':
             self.buildozer.error('Only debug APK are supported for deploy')
+            return
 
         # search the APK in the bin dir
         apk = state['android:latestapk']
