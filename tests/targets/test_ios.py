@@ -176,7 +176,7 @@ class TestTargetIos:
         ]
 
     def test_build_package_no_signature(self):
-        """Code signing is currently required to go through final `xcodebuild` steps."""
+        """Code signing is currently required to go through final `xcodebuild` step."""
         target = init_target(self.temp_dir)
         target.ios_dir = "/ios/dir"
         # fmt: off
@@ -208,8 +208,18 @@ class TestTargetIos:
                 "/ios/dir/myapp-ios/myapp-Info.plist",
             )
         ]
-        assert m_cmd.call_args_list == [mock.call(mock.ANY, cwd=target.ios_dir), mock.call(
-            "xcodebuild -configuration Debug -allowProvisioningUpdates ENABLE_BITCODE=NO "
-            "CODE_SIGNING_ALLOWED=NO clean build",
-            cwd="/ios/dir/myapp-ios",
-        )]
+        assert m_cmd.call_args_list == [
+            mock.call(mock.ANY, cwd=target.ios_dir),
+            mock.call(
+                "xcodebuild -configuration Debug -allowProvisioningUpdates ENABLE_BITCODE=NO "
+                "CODE_SIGNING_ALLOWED=NO clean build",
+                cwd="/ios/dir/myapp-ios",
+            ),
+            mock.call(
+                "xcodebuild -alltargets -configuration Debug -scheme myapp "
+                "-archivePath \"/ios/dir/myapp-0.1.intermediates/myapp-0.1.xcarchive\" "
+                "-destination \'generic/platform=iOS\' "
+                "archive ENABLE_BITCODE=NO CODE_SIGNING_ALLOWED=NO",
+                cwd="/ios/dir/myapp-ios",
+            ),
+        ]
