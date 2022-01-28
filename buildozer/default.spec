@@ -101,7 +101,7 @@ fullscreen = 0
 # (int) Target Android API, should be as high as possible.
 #android.api = 27
 
-# (int) Minimum API your APK will support.
+# (int) Minimum API your APK / AAB will support.
 #android.minapi = 21
 
 # (int) Android SDK version to use
@@ -260,8 +260,9 @@ fullscreen = 0
 # (bool) Copy library instead of making a libpymodules.so
 #android.copy_libs = 1
 
-# (str) The Android arch to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
-android.arch = armeabi-v7a
+# (list) The Android archs to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
+# In past, was `android.arch` as we weren't supporting builds for multiple archs at the same time.
+android.archs = arm64-v8a, armeabi-v7a
 
 # (int) overrides automatic versionCode computation (used in build.gradle)
 # this is not the same as app version and should only be edited if you know what you're doing
@@ -281,6 +282,9 @@ android.allow_backup = True
 
 # (bool) disables the compilation of py to pyc/pyo files when packaging
 # android.no-compile-pyo = True
+
+# (str) The format used to package the app for release mode (aab or apk).
+# android.release_artifact = aab
 
 #
 # Python for android (p4a) specific
@@ -381,7 +385,7 @@ warn_on_root = 1
 # (str) Path to build artifact storage, absolute or relative to spec file
 # build_dir = ./.buildozer
 
-# (str) Path to build output (i.e. .apk, .ipa) storage
+# (str) Path to build output (i.e. .apk, .aab, .ipa) storage
 # bin_dir = ./bin
 
 #    -----------------------------------------------------------------------------

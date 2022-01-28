@@ -47,7 +47,7 @@ DEPRECATED_TOKENS = (('app', 'android.sdk'), )
 # does.
 DEFAULT_SDK_TAG = '6514223'
 
-DEFAULT_ARCH = 'armeabi-v7a'
+DEFAULT_ARCHS = ['arm64-v8a', 'armeabi-v7a']
 
 MSG_P4A_RECOMMENDED_NDK_ERROR = (
     "WARNING: Unable to find recommended Android NDK for current "
@@ -62,21 +62,28 @@ class TargetAndroid(Target):
     p4a_fork = 'kivy'
     p4a_branch = 'master'
     p4a_commit = 'HEAD'
-    p4a_apk_cmd = "apk --debug --bootstrap="
     p4a_recommended_ndk_version = None
     extra_p4a_args = ''
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._arch = self.buildozer.config.getdefault(
-            'app', 'android.arch', DEFAULT_ARCH)
+        if self.buildozer.config.has_option(
+            "app", "android.arch"
+        ) and not self.buildozer.config.has_option("app", "android.archs"):
+            self.buildozer.error("`android.archs` not detected, instead `android.arch` is present.")
+            self.buildozer.error("`android.arch` will be removed and ignored in future.")
+            self.buildozer.error("If you're seeing this error, please migrate to `android.archs`.")
+            self._archs = self.buildozer.config.getlist(
+                'app', 'android.arch', DEFAULT_ARCHS)
+        else:
+            self._archs = self.buildozer.config.getlist(
+                'app', 'android.archs', DEFAULT_ARCHS)
         self._build_dir = join(
-            self.buildozer.platform_dir, 'build-{}'.format(self._arch))
+            self.buildozer.platform_dir, 'build-{}'.format(self.archs_snake))
         executable = sys.executable or 'python'
         self._p4a_cmd = '{} -m pythonforandroid.toolchain '.format(executable)
         self._p4a_bootstrap = self.buildozer.config.getdefault(
             'app', 'p4a.bootstrap', 'sdl2')
-        self.p4a_apk_cmd += self._p4a_bootstrap
         color = 'always' if USE_COLOR else 'never'
         self.extra_p4a_args = ' --color={} --storage-dir="{}"'.format(
             color, self._build_dir)
@@ -248,6 +255,10 @@ class TargetAndroid(Target):
                  'installed'.format(sdkmanager_path)))
         return sdkmanager_path
 
+    @property
+    def archs_snake(self):
+        return "_".join(self._archs)
+
     def check_requirements(self):
         if platform in ('win32', 'cygwin'):
             try:
@@ -314,6 +325,13 @@ class TargetAndroid(Target):
                         ' permission {0}'.format(permission))
 
         super().check_configuration_tokens(errors)
+
+    def _p4a_have_aab_support(self):
+        returncode = self._p4a("aab -h", break_on_error=False, show_output=False)[2]
+        if returncode == 0:
+            return True
+        else:
+            return False
 
     def _get_available_permissions(self):
         key = 'android:available_permissions'
@@ -687,6 +705,12 @@ class TargetAndroid(Target):
         # ultimate configuration check.
         # some of our configuration cannot be check without platform.
         self.check_configuration_tokens()
+        if not self._p4a_have_aab_support():
+            self.buildozer.error(
+                "This buildozer version requires a python-for-android version with AAB (Android App Bundle) support. "
+                "Please update your pinned version accordingly."
+            )
+            raise BuildozerException()
 
         self.buildozer.environ.update({
             'PACKAGES_PATH': self.buildozer.global_packages_dir,
@@ -809,32 +833,28 @@ class TargetAndroid(Target):
         if local_recipes:
             options.append('--local-recipes')
             options.append(local_recipes)
-        self._p4a(
-            ("create --dist_name={} --bootstrap={} --requirements={} "
-             "--arch {} {}").format(
-                 dist_name, self._p4a_bootstrap, requirements,
-                 self._arch, " ".join(options)),
-            get_stdout=True)[0]
+
+        p4a_create = "create --dist_name={} --bootstrap={} --requirements={} ".format(dist_name, self._p4a_bootstrap, requirements)
+
+        for arch in self._archs:
+            p4a_create += "--arch {} ".format(arch)
+
+        p4a_create += " ".join(options)
+
+        self._p4a(p4a_create, get_stdout=True)[0]
 
     def get_available_packages(self):
         return True
 
-    def get_dist_dir(self, dist_name, arch):
-        """Find the dist dir with the given name and target arch, if one
+    def get_dist_dir(self, dist_name):
+        """Find the dist dir with the given name if one
         already exists, otherwise return a new dist_dir name.
         """
-        expected_dist_name = generate_dist_folder_name(dist_name, arch_names=[arch])
 
         # If the expected dist name does exist, simply use that
-        expected_dist_dir = join(self._build_dir, 'dists', expected_dist_name)
+        expected_dist_dir = join(self._build_dir, 'dists', dist_name)
         if exists(expected_dist_dir):
             return expected_dist_dir
-
-        # For backwards compatibility, check if a directory without
-        # the arch exists. If so, this is probably the target dist.
-        old_dist_dir = join(self._build_dir, 'dists', dist_name)
-        if exists(old_dist_dir):
-            return old_dist_dir
 
         # If no directory has been found yet, our dist probably
         # doesn't exist yet, so use the expected name
@@ -848,7 +868,7 @@ class TargetAndroid(Target):
         # wrapper from previous old_toolchain to new toolchain
         dist_name = self.buildozer.config.get('app', 'package.name')
         local_recipes = self.get_local_recipes_dir()
-        cmd = [self.p4a_apk_cmd, "--dist_name", dist_name]
+        cmd = [self.artifact_format, "--bootstrap", self._p4a_bootstrap, "--dist_name", dist_name]
         for args in build_cmd:
             option, values = args[0], args[1:]
             if option == "debug":
@@ -962,14 +982,16 @@ class TargetAndroid(Target):
         if compile_py:
             cmd.append('--no-compile-pyo')
 
-        cmd.append('--arch')
-        cmd.append(self._arch)
+        for arch in self._archs:
+            cmd.append('--arch')
+            cmd.append(arch)
 
         cmd = " ".join(cmd)
         self._p4a(cmd)
 
     def get_release_mode(self):
-        if self.check_p4a_sign_env():
+        # aab, also if unsigned is named as *-release
+        if self.check_p4a_sign_env() or self.artifact_format == "aab":
             return "release"
         return "release-unsigned"
 
@@ -1060,8 +1082,7 @@ class TargetAndroid(Target):
 
     def build_package(self):
         dist_name = self.buildozer.config.get('app', 'package.name')
-        arch = self.buildozer.config.getdefault('app', 'android.arch', DEFAULT_ARCH)
-        dist_dir = self.get_dist_dir(dist_name, arch)
+        dist_dir = self.get_dist_dir(dist_name)
         config = self.buildozer.config
         package = self._get_package()
         version = self.buildozer.get_version()
@@ -1078,7 +1099,7 @@ class TargetAndroid(Target):
             patterns = config.getlist('app', config_key, [])
             if not patterns:
                 continue
-            if self._arch != lib_dir:
+            if lib_dir not in self._archs:
                 continue
 
             self.buildozer.debug('Search and copy libs for {}'.format(lib_dir))
@@ -1294,9 +1315,12 @@ class TargetAndroid(Target):
         if is_gradle_build:
             # on gradle build, the apk use the package name, and have no version
             packagename_src = basename(dist_dir)  # gradle specifically uses the folder name
-            apk = u'{packagename}-{mode}.apk'.format(
-                packagename=packagename_src, mode=mode)
-            apk_dir = join(dist_dir, "build", "outputs", "apk", mode_sign)
+            artifact = u'{packagename}-{mode}.{artifact_format}'.format(
+                packagename=packagename_src, mode=mode, artifact_format=self.artifact_format)
+            if self.artifact_format == "apk":
+                artifact_dir = join(dist_dir, "build", "outputs", "apk", mode_sign)
+            elif self.artifact_format == "aab":
+                artifact_dir = join(dist_dir, "build", "outputs", "bundle", mode_sign)
         else:
             # on ant, the apk use the title, and have version
             bl = u'\'" ,'
@@ -1304,23 +1328,23 @@ class TargetAndroid(Target):
             if hasattr(apptitle, 'decode'):
                 apptitle = apptitle.decode('utf-8')
             apktitle = ''.join([x for x in apptitle if x not in bl])
-            apk = u'{title}-{version}-{mode}.apk'.format(
+            artifact = u'{title}-{version}-{mode}.apk'.format(
                 title=apktitle,
                 version=version,
                 mode=mode)
-            apk_dir = join(dist_dir, "bin")
+            artifact_dir = join(dist_dir, "bin")
 
-        apk_dest = u'{packagename}-{version}-{arch}-{mode}.apk'.format(
+        artifact_dest = u'{packagename}-{version}-{arch}-{mode}.{artifact_format}'.format(
             packagename=packagename, mode=mode, version=version,
-            arch=self._arch)
+            arch=self.archs_snake, artifact_format=self.artifact_format)
 
         # copy to our place
-        copyfile(join(apk_dir, apk), join(self.buildozer.bin_dir, apk_dest))
+        copyfile(join(artifact_dir, artifact), join(self.buildozer.bin_dir, artifact_dest))
 
         self.buildozer.info('Android packaging done!')
         self.buildozer.info(
-            u'APK {0} available in the bin directory'.format(apk_dest))
-        self.buildozer.state['android:latestapk'] = apk_dest
+            u'APK {0} available in the bin directory'.format(artifact_dest))
+        self.buildozer.state['android:latestapk'] = artifact_dest
         self.buildozer.state['android:latestmode'] = self.build_mode
 
     def _update_libraries_references(self, dist_dir):
@@ -1438,6 +1462,7 @@ class TargetAndroid(Target):
 
         if state.get('android:latestmode', '') != 'debug':
             self.buildozer.error('Only debug APK are supported for deploy')
+            return
 
         # search the APK in the bin dir
         apk = state['android:latestapk']
@@ -1503,28 +1528,3 @@ class TargetAndroid(Target):
 def get_target(buildozer):
     buildozer.targetname = "android"
     return TargetAndroid(buildozer)
-
-
-def generate_dist_folder_name(base_dist_name, arch_names=None):
-    """Generate the distribution folder name to use, based on a
-    combination of the input arguments.
-
-    WARNING: This function is copied from python-for-android. It would
-    be preferable to have a proper interface, either importing the p4a
-    code or having a p4a dist dir query option.
-
-    Parameters
-    ----------
-    base_dist_name : str
-        The core distribution identifier string
-    arch_names : list of str
-        The architecture compile targets
-
-    """
-    if arch_names is None:
-        arch_names = ["no_arch_specified"]
-
-    return '{}__{}'.format(
-        base_dist_name,
-        '_'.join(arch_names)
-    )
