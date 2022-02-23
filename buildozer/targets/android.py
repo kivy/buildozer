@@ -481,7 +481,7 @@ class TargetAndroid(Target):
 
         architecture = 'x86_64' if is_64 else 'x86'
         unpacked = 'android-ndk-r{0}'
-        archive = archive.format(self.android_ndk_version, architecture)
+        archive = archive.format(self.android_ndk_version, architecture if int(android_ndk_version[:2]) < 23 else '')
         unpacked = unpacked.format(self.android_ndk_version)
 
         if _version >= 11:
