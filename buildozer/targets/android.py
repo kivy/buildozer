@@ -474,12 +474,13 @@ class TargetAndroid(Target):
                 ext = 'tar.bz2'
             else:
                 ext = 'zip'
-            archive = 'android-ndk-r{0}-' + _platform + '-{1}.' + ext
+            archive = 'android-ndk-r{0}-' + _platform + '{1}.' + ext
             is_64 = (os.uname()[4] == 'x86_64')
         else:
             raise SystemError('Unsupported platform: {}'.format(platform))
 
         architecture = 'x86_64' if is_64 else 'x86'
+        architecture = '' if _version >= 23 else f'-{architecture}'
         unpacked = 'android-ndk-r{0}'
         archive = archive.format(self.android_ndk_version, architecture)
         unpacked = unpacked.format(self.android_ndk_version)
