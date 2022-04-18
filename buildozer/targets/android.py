@@ -1179,6 +1179,11 @@ class TargetAndroid(Target):
             meta = '{}={}'.format(key.strip(), value.strip())
             build_cmd += [("--meta-data", meta)]
 
+        # add res
+        res = config.getdefault('app', 'android.add_res', '')
+        if res:
+            build_cmd += [("--add-res", join(self.buildozer.root_dir, res))]
+
         # add extra Java jar files
         add_jars = config.getlist('app', 'android.add_jars', [])
         for pattern in add_jars:
