@@ -63,8 +63,8 @@ class TargetIos(Target):
     def __init__(self, buildozer):
         super().__init__(buildozer)
         executable = sys.executable or 'python'
-        self._toolchain_cmd = f"{executable} toolchain.py "
-        self._xcodebuild_cmd = "xcodebuild "
+        self._toolchain_cmd = [executable, "toolchain.py"]
+        self._xcodebuild_cmd = ["xcodebuild"]
         # set via install_platform()
         self.ios_dir = None
         self.ios_deploy_dir = None
@@ -87,7 +87,7 @@ class TargetIos(Target):
         self.buildozer.debug('Check availability of a iPhone SDK')
         sdk = cmd('xcodebuild -showsdks | fgrep "iphoneos" |'
                 'tail -n 1 | awk \'{print $2}\'',
-                get_stdout=True)[0]
+                get_stdout=True, shell=True)[0]
         if not sdk:
             raise Exception(
                 'No iPhone SDK found. Please install at least one iOS SDK.')
@@ -95,7 +95,7 @@ class TargetIos(Target):
             self.buildozer.debug(' -> found %r' % sdk)
 
         self.buildozer.debug('Check Xcode path')
-        xcode = cmd('xcode-select -print-path', get_stdout=True)[0]
+        xcode = cmd(["xcode-select", "-print-path"], get_stdout=True)[0]
         if not xcode:
             raise Exception('Unable to get xcode path')
         self.buildozer.debug(' -> found {0}'.format(xcode))
@@ -113,10 +113,11 @@ class TargetIos(Target):
 
     def toolchain(self, cmd, **kwargs):
         kwargs.setdefault('cwd', self.ios_dir)
-        return self.buildozer.cmd(self._toolchain_cmd + cmd, **kwargs)
+        return self.buildozer.cmd([*self._toolchain_cmd, *cmd], **kwargs)
 
     def xcodebuild(self, *args, **kwargs):
-        return self.buildozer.cmd(self._xcodebuild_cmd + ' '.join(arg for arg in args if arg is not None), **kwargs)
+        filtered_args = [arg for arg in args if arg is not None]
+        return self.buildozer.cmd([*self._xcodebuild_cmd, *filtered_args], **kwargs)
 
     @property
     def code_signing_allowed(self):
@@ -130,7 +131,7 @@ class TargetIos(Target):
         return f"DEVELOPMENT_TEAM={team}" if team else None
 
     def get_available_packages(self):
-        available_modules = self.toolchain("recipes --compact", get_stdout=True)[0]
+        available_modules = self.toolchain(["recipes", "--compact"], get_stdout=True)[0]
         return available_modules.splitlines()[0].split()
 
     def load_plist_from_file(self, plist_rfn):
@@ -174,8 +175,7 @@ class TargetIos(Target):
             self.buildozer.info('Distribution already compiled, pass.')
             return
 
-        modules_str = ' '.join(ios_requirements)
-        self.toolchain(f"build {modules_str}")
+        self.toolchain(["build", *ios_requirements])
 
         if not self.buildozer.file_exists(self.ios_deploy_dir, 'ios-deploy'):
             self.xcodebuild(cwd=self.ios_deploy_dir)
@@ -199,15 +199,15 @@ class TargetIos(Target):
             'package.name'))
 
         ios_frameworks = self.buildozer.config.getlist('app', 'ios.frameworks', '')
-        frameworks_cmd = ''
+        frameworks_cmd = []
         for framework in ios_frameworks:
-            frameworks_cmd += '--add-framework={} '.format(framework)
+            frameworks_cmd.append(f"--add-framework={framework}")
 
         self.app_project_dir = join(self.ios_dir, '{0}-ios'.format(app_name.lower()))
         if not self.buildozer.file_exists(self.app_project_dir):
-            cmd = f"create {frameworks_cmd}{app_name} {self.buildozer.app_dir}"
+            cmd = ["create", *frameworks_cmd, app_name, self.buildozer.app_dir]
         else:
-            cmd = f"update {frameworks_cmd}{app_name}-ios"
+            cmd = ["update", *frameworks_cmd, f"{app_name}-ios"]
         self.toolchain(cmd)
 
         # fix the plist
@@ -247,12 +247,14 @@ class TargetIos(Target):
 
         mode = self.build_mode.capitalize()
         self.xcodebuild(
-            f'-configuration {mode}',
+            "-configuration",
+            mode,
             '-allowProvisioningUpdates',
             'ENABLE_BITCODE=NO',
             self.code_signing_allowed,
             self.code_signing_development_team,
-            'clean build',
+            'clean',
+            'build',
             cwd=self.app_project_dir)
         ios_app_dir = '{app_lower}-ios/build/{mode}-iphoneos/{app_lower}.app'.format(
                 app_lower=app_name.lower(), mode=mode)
@@ -271,10 +273,14 @@ class TargetIos(Target):
         self.buildozer.info('Creating archive...')
         self.xcodebuild(
             '-alltargets',
-            f'-configuration {mode}',
-            f'-scheme {app_name.lower()}',
-            f'-archivePath "{xcarchive}"',
-            '-destination \'generic/platform=iOS\'',
+            '-configuration',
+            mode,
+            '-scheme',
+            app_name.lower(),
+            '-archivePath',
+            xcarchive,
+            '-destination',
+            'generic/platform=iOS',
             'archive',
             'ENABLE_BITCODE=NO',
             self.code_signing_allowed,
@@ -325,8 +331,9 @@ class TargetIos(Target):
         app_name = app_name.lower()
 
         ios_dir = ios_dir = join(self.buildozer.platform_dir, 'kivy-ios')
-        self.buildozer.cmd('open {}.xcodeproj'.format(
-            app_name), cwd=join(ios_dir, '{}-ios'.format(app_name)))
+        self.buildozer.cmd(
+            ["open", f"{app_name}.xcodeproj"], cwd=join(ios_dir, f"{app_name}-ios")
+        )
 
     def _run_ios_deploy(self, lldb=False):
         state = self.buildozer.state
@@ -343,10 +350,11 @@ class TargetIos(Target):
             debug_mode = ''
             self.buildozer.info('Deploy the application')
 
-        self.buildozer.cmd('{iosdeploy} {debug_mode} -b {app_dir}'.format(
-            iosdeploy=join(self.ios_deploy_dir, 'ios-deploy'),
-            debug_mode=debug_mode, app_dir=ios_app_dir),
-            cwd=self.ios_dir, show_output=True)
+        self.buildozer.cmd(
+            [join(self.ios_deploy_dir, "ios-deploy"), debug_mode, "-b", ios_app_dir],
+            cwd=self.ios_dir,
+            show_output=True,
+        )
 
     def _create_icons(self):
         icon = self.buildozer.config.getdefault('app', 'icon.filename', '')
@@ -357,7 +365,7 @@ class TargetIos(Target):
             self.buildozer.error('Icon {} does not exists'.format(icon_fn))
             return
 
-        self.toolchain(f"icon {self.app_project_dir} {icon_fn}")
+        self.toolchain(["icon", self.app_project_dir, icon_fn])
 
     def check_configuration_tokens(self):
         errors = []
@@ -394,8 +402,9 @@ class TargetIos(Target):
             print('  - {}'.format(x))
 
     def _get_available_identities(self):
-        output = self.buildozer.cmd('security find-identity -v -p codesigning',
-                get_stdout=True)[0]
+        output = self.buildozer.cmd(
+            ["security", "find-identity", "-v", "-p", "codesigning"], get_stdout=True
+        )[0]
 
         lines = output.splitlines()[:-1]
         lines = [u'"{}"'.format(x.split('"')[1]) for x in lines]
@@ -410,14 +419,17 @@ class TargetIos(Target):
 
         if not password:
             # no password available, try to unlock anyway...
-            error = self.buildozer.cmd('security unlock-keychain -u',
+            error = self.buildozer.cmd(["security", "unlock-keychain", "-u"],
                     break_on_error=False)[2]
             if not error:
                 return
         else:
             # password available, try to unlock
-            error = self.buildozer.cmd('security unlock-keychain -p {}'.format(
-                password), break_on_error=False, sensible=True)[2]
+            error = self.buildozer.cmd(
+                ["security", "unlock-keychain", "-p", password],
+                break_on_error=False,
+                sensible=True,
+            )[2]
             if not error:
                 return
 
@@ -427,8 +439,11 @@ class TargetIos(Target):
         while attempt:
             attempt -= 1
             password = getpass('Password to unlock the default keychain:')
-            error = self.buildozer.cmd('security unlock-keychain -p "{}"'.format(
-                password), break_on_error=False, sensible=True)[2]
+            error = self.buildozer.cmd(
+                ["security", "unlock-keychain", "-p", password],
+                break_on_error=False,
+                sensible=True,
+            )[2]
             if not error:
                 correct = True
                 break

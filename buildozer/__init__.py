@@ -261,7 +261,6 @@ class Buildozer:
         kwargs.setdefault('stdout', PIPE)
         kwargs.setdefault('stderr', PIPE)
         kwargs.setdefault('close_fds', True)
-        kwargs.setdefault('shell', True)
         kwargs.setdefault('show_output', self.log_level > 1)
 
         show_output = kwargs.pop('show_output')
@@ -515,9 +514,11 @@ class Buildozer:
     def _install_application_requirement(self, module):
         self._ensure_virtualenv()
         self.debug('Install requirement {} in virtualenv'.format(module))
-        self.cmd('pip install --target={} {}'.format(self.applibs_dir, module),
-                 env=self.env_venv,
-                 cwd=self.buildozer_dir)
+        self.cmd(
+            ["pip", "install", f"--target={self.applibs_dir}", module],
+            env=self.env_venv,
+            cwd=self.buildozer_dir,
+        )
 
     def check_garden_requirements(self):
         garden_requirements = self.config.getlist('app',
@@ -530,13 +531,15 @@ class Buildozer:
             return
         self.venv = join(self.buildozer_dir, 'venv')
         if not self.file_exists(self.venv):
-            self.cmd('python3 -m venv ./venv',
+            self.cmd(["python3", "-m", "venv", "./venv"],
                     cwd=self.buildozer_dir)
 
         # read virtualenv output and parse it
-        output = self.cmd('bash -c "source venv/bin/activate && env"',
-                get_stdout=True,
-                cwd=self.buildozer_dir)
+        output = self.cmd(
+            ["bash", "-c", "source venv/bin/activate && env"],
+            get_stdout=True,
+            cwd=self.buildozer_dir,
+        )
         self.env_venv = copy(self.environ)
         for line in output[0].splitlines():
             args = line.split('=', 1)
@@ -594,22 +597,22 @@ class Buildozer:
 
     def file_extract(self, archive, cwd=None):
         if archive.endswith('.tgz') or archive.endswith('.tar.gz'):
-            self.cmd('tar xzf {0}'.format(archive), cwd=cwd)
+            self.cmd(["tar", "xzf", archive], cwd=cwd)
             return
 
         if archive.endswith('.tbz2') or archive.endswith('.tar.bz2'):
             # XXX same as before
-            self.cmd('tar xjf {0}'.format(archive), cwd=cwd)
+            self.cmd(["tar", "xjf", archive], cwd=cwd)
             return
 
         if archive.endswith('.bin'):
             # To process the bin files for linux and darwin systems
-            self.cmd('chmod a+x {0}'.format(archive), cwd=cwd)
-            self.cmd('./{0}'.format(archive), cwd=cwd)
+            self.cmd(["chmod", "a+x", archive], cwd=cwd)
+            self.cmd([f"./{archive}"], cwd=cwd)
             return
 
         if archive.endswith('.zip'):
-            self.cmd('unzip -q {}'.format(join(cwd, archive)), cwd=cwd)
+            self.cmd(["unzip", "-q", join(cwd, archive)], cwd=cwd)
             return
 
         raise Exception('Unhandled extraction for type {0}'.format(archive))
