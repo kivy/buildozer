@@ -53,7 +53,6 @@ class TestTargetIos:
         """Basic tests for the check_requirements() method."""
         target = init_target(self.temp_dir)
         buildozer = target.buildozer
-        assert not hasattr(target, "adb_cmd")
         assert not hasattr(target, "javac_cmd")
         assert "PATH" not in buildozer.environ
         with patch_buildozer_checkbin() as m_checkbin:

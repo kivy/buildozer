@@ -31,6 +31,7 @@ from os import environ
 from os.path import exists, join, realpath, expanduser, basename, relpath
 from platform import architecture
 from shutil import copyfile, rmtree, which
+import shlex
 from glob import glob
 from time import sleep
 
@@ -113,11 +114,8 @@ class TargetAndroid(Target):
         if self.buildozer.log_level >= 2:
             self.extra_p4a_args.append("--debug")
 
-        # FIXME: user_extra_p4a_args is a string, but we want a list
-        user_extra_p4a_args = self.buildozer.config.getdefault('app', 'p4a.extra_args',
-                                                               None)
-        if user_extra_p4a_args:
-            self.extra_p4a_args.append(user_extra_p4a_args)
+        user_extra_p4a_args = self.buildozer.config.getdefault('app', 'p4a.extra_args', "")
+        self.extra_p4a_args.extend(shlex.split(user_extra_p4a_args))
 
         self.warn_on_deprecated_tokens()
 
@@ -262,13 +260,13 @@ class TargetAndroid(Target):
                 self._set_win32_java_home()
             except:
                 traceback.print_exc()
-            self.adb_cmd = join(self.android_sdk_dir, 'platform-tools',
+            self.adb_executable = join(self.android_sdk_dir, 'platform-tools',
                                 'adb.exe')
             self.javac_cmd = self._locate_java('javac.exe')
             self.keytool_cmd = self._locate_java('keytool.exe')
         # darwin, linux
         else:
-            self.adb_cmd = join(self.android_sdk_dir, 'platform-tools', 'adb')
+            self.adb_executable = join(self.android_sdk_dir, 'platform-tools', 'adb')
             self.javac_cmd = self._locate_java('javac')
             self.keytool_cmd = self._locate_java('keytool')
 
@@ -282,9 +280,8 @@ class TargetAndroid(Target):
 
         # Adb arguments:
         adb_args = self.buildozer.config.getdefault(
-            "app", "android.adb_args", None)
-        if adb_args is not None:
-            self.adb_cmd += ' ' + adb_args
+            "app", "android.adb_args", "")
+        self.adb_args = shlex.split(adb_args)
 
         # Need to add internally installed ant to path for external tools
         # like adb to use
@@ -1024,11 +1021,19 @@ class TargetAndroid(Target):
             self.buildozer.environ['ANDROID_SERIAL'] = serial
             self.buildozer.info('Run on {}'.format(serial))
             self.buildozer.cmd(
-                '{adb} shell am start -n {package}/{entry} -a {entry}'.format(
-                    adb=self.adb_cmd,
-                    package=package,
-                    entry=entrypoint),
-                cwd=self.buildozer.global_platform_dir)
+                [
+                    self.adb_executable,
+                    *self.adb_args,
+                    "shell",
+                    "am",
+                    "start",
+                    "-n",
+                    f"{package}/{entrypoint}",
+                    "-a",
+                    entrypoint,
+                ],
+                cwd=self.buildozer.global_platform_dir,
+            )
         self.buildozer.environ.pop('ANDROID_SERIAL', None)
 
         while True:
@@ -1403,8 +1408,9 @@ class TargetAndroid(Target):
         serial = environ.get('ANDROID_SERIAL')
         if serial:
             return serial.split(',')
-        lines = self.buildozer.cmd('{} devices'.format(self.adb_cmd),
-                               get_stdout=True)[0].splitlines()
+        lines = self.buildozer.cmd(
+            [self.adb_executable, *self.adb_args, "devices"], get_stdout=True
+        )[0].splitlines()
         serials = []
         for serial in lines:
             if not serial:
@@ -1428,9 +1434,9 @@ class TargetAndroid(Target):
             print('To set up ADB in this shell session, execute:')
             print('    alias adb=$(buildozer {} adb --alias 2>&1 >/dev/null)'
                   .format(self.targetname))
-            sys.stderr.write(self.adb_cmd + '\n')
+            sys.stderr.write(self.adb_executable + '\n')
         else:
-            self.buildozer.cmd(' '.join([self.adb_cmd] + args))
+            self.buildozer.cmd([self.adb_executable, *self.adb_args, *args])
 
     def cmd_deploy(self, *args):
         super().cmd_deploy(*args)
@@ -1453,16 +1459,23 @@ class TargetAndroid(Target):
         for serial in self.serials:
             self.buildozer.environ['ANDROID_SERIAL'] = serial
             self.buildozer.info('Deploy on {}'.format(serial))
-            self.buildozer.cmd('{0} install -r "{1}"'.format(
-                               self.adb_cmd, full_apk),
-                               cwd=self.buildozer.global_platform_dir)
+            self.buildozer.cmd(
+                [self.adb_executable, *self.adb_args, "install", "-r", full_apk],
+                cwd=self.buildozer.global_platform_dir,
+            )
         self.buildozer.environ.pop('ANDROID_SERIAL', None)
 
         self.buildozer.info('Application pushed.')
 
     def _get_pid(self):
         pid, *_ = self.buildozer.cmd(
-            f'{self.adb_cmd} shell pidof {self._get_package()}',
+            [
+                self.adb_executable,
+                *self.adb_args,
+                "shell",
+                "pidof",
+                self._get_package(),
+            ],
             get_stdout=True,
             show_output=False,
             break_on_error=False,
@@ -1491,7 +1504,7 @@ class TargetAndroid(Target):
                 extra_args.extend(('--pid', pid))
 
         self.buildozer.cmd(
-            f"{self.adb_cmd} logcat {filters} {' '.join(extra_args)}",
+            [self.adb_executable, *self.adb_args, "logcat", filters, *extra_args],
             cwd=self.buildozer.global_platform_dir,
             show_output=True,
             run_condition=self._get_pid if pid else None,

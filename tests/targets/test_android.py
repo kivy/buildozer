@@ -151,7 +151,8 @@ class TestTargetAndroid:
         """Basic tests for the check_requirements() method."""
         target_android = init_target(self.temp_dir)
         buildozer = target_android.buildozer
-        assert not hasattr(target_android, "adb_cmd")
+        assert not hasattr(target_android, "adb_executable")
+        assert not hasattr(target_android, "adb_args")
         assert not hasattr(target_android, "javac_cmd")
         assert "PATH" not in buildozer.environ
         with patch_buildozer_checkbin() as m_checkbin:
@@ -162,9 +163,8 @@ class TestTargetAndroid:
             mock.call("Java compiler (javac)", "javac"),
             mock.call("Java keytool (keytool)", "keytool"),
         ]
-        assert target_android.adb_cmd.endswith(
-            ".buildozer/android/platform/android-sdk/platform-tools/adb"
-        )
+        assert target_android.adb_executable.endswith(".buildozer/android/platform/android-sdk/platform-tools/adb")
+        assert target_android.adb_args == []
         assert target_android.javac_cmd == "javac"
         assert target_android.keytool_cmd == "keytool"
         assert "PATH" in buildozer.environ
