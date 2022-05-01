@@ -26,6 +26,8 @@ from shutil import copyfile, rmtree, copytree, move
 from fnmatch import fnmatch
 
 from pprint import pformat
+import shlex
+import pexpect
 
 from urllib.request import FancyURLopener
 from configparser import ConfigParser
@@ -356,7 +358,6 @@ class Buildozer:
                 process.returncode)
 
     def cmd_expect(self, command, **kwargs):
-        from pexpect import spawnu
 
         # prepare the environ, based on the system + our own env
         env = environ.copy()
@@ -377,7 +378,7 @@ class Buildozer:
             self.debug('Run (expect) {0!r} ...'.format(command.split()[0]))
 
         self.debug('Cwd {}'.format(kwargs.get('cwd')))
-        return spawnu(command, **kwargs)
+        return pexpect.spawnu(shlex.join(command), **kwargs)
 
     def check_configuration_tokens(self):
         '''Ensure the spec file is 'correct'.

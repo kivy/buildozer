@@ -32,6 +32,7 @@ from os.path import exists, join, realpath, expanduser, basename, relpath
 from platform import architecture
 from shutil import copyfile, rmtree, which
 import shlex
+import pexpect
 from glob import glob
 from time import sleep
 
@@ -553,19 +554,19 @@ class TargetAndroid(Target):
 
         kwargs = {}
         if auto_accept_license:
-            # `SIGPIPE` is not being reported somehow, but `EPIPE` is.
-            # This leads to a stderr "Broken pipe" message which is harmless,
-            # but doesn't look good on terminal, hence redirecting to /dev/null
-            yes_command = 'yes 2>/dev/null'
-            android_sdk_dir = self.android_sdk_dir
-            sdkmanager_path = self.sdkmanager_path
-            sdk_root = f"--sdk_root={android_sdk_dir}"
-            command = f"{yes_command} | {sdkmanager_path} {sdk_root} --licenses"
-            self.buildozer.cmd(command, cwd=self.android_sdk_dir, shell=True)
+            kwargs["return_child"] = True
         else:
             kwargs['show_output'] = True
 
-        self._sdkmanager(*sdkmanager_commands, **kwargs)
+        ret_child = self._sdkmanager(*sdkmanager_commands, **kwargs)
+
+        if auto_accept_license:
+            while ret_child.isalive():
+                pexp_match = ret_child.expect(
+                    ["(y/N)", pexpect.EOF, pexpect.TIMEOUT], timeout=300
+                )
+                if pexp_match == 0:
+                    ret_child.sendline("y")
 
     def _read_version_subdir(self, *args):
         versions = []
