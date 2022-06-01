@@ -102,7 +102,7 @@ class Target:
     def cmd_debug(self, *args):
         self.buildozer.prepare_for_build()
         self.build_mode = 'debug'
-        self.artifact_format = 'apk'
+        self.artifact_format = self.buildozer.config.getdefault('app', 'android.debug_artifact', 'apk')
         self.buildozer.build()
 
     def cmd_release(self, *args):
