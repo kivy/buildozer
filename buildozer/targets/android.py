@@ -918,6 +918,12 @@ class TargetAndroid(Target):
             cmd.append('--blacklist')
             cmd.append(realpath(expanduser(blacklist_src)))
 
+        # support for java directory
+        javadirs = self.buildozer.config.getlist('app', 'android.add_src', [])
+        for javadir in javadirs:
+            cmd.append('--add-source')
+            cmd.append(realpath(expanduser(javadir)))
+
         # support for aars
         aars = self.buildozer.config.getlist('app', 'android.add_aars', [])
         for aar in aars:
@@ -1111,9 +1117,6 @@ class TargetAndroid(Target):
 
         # update the project.properties libraries references
         self._update_libraries_references(dist_dir)
-
-        # add src files
-        self._add_java_src(dist_dir)
 
         # generate the whitelist if needed
         self._generate_whitelist(dist_dir)
@@ -1398,26 +1401,6 @@ class TargetAndroid(Target):
                 fd.write(u'android.library.reference.{}={}\n'.format(index + 1, ref))
 
         self.buildozer.debug('project.properties updated')
-
-    def _add_java_src(self, dist_dir):
-        java_src = self.buildozer.config.getlist('app', 'android.add_src', [])
-
-        gradle_files = ["build.gradle", "gradle", "gradlew"]
-        is_gradle_build = any((
-            exists(join(dist_dir, x)) for x in gradle_files))
-        if is_gradle_build:
-            src_dir = join(dist_dir, "src", "main", "java")
-            self.buildozer.info(
-                "Gradle project detected, copy files {}".format(src_dir))
-        else:
-            src_dir = join(dist_dir, 'src')
-            self.buildozer.info(
-                "Ant project detected, copy files in {}".format(src_dir))
-
-        for pattern in java_src:
-            for fn in glob(expanduser(pattern.strip())):
-                last_component = basename(fn)
-                self.buildozer.file_copytree(fn, join(src_dir, last_component))
 
     @property
     def serials(self):
