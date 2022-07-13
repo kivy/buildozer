@@ -998,7 +998,7 @@ class TargetAndroid(Target):
 
     def get_release_mode(self):
         # aab, also if unsigned is named as *-release
-        if self.check_p4a_sign_env() or self.artifact_format == "aab":
+        if self.check_p4a_sign_env() or self.artifact_format in ["aab", "aar"]:
             return "release"
         return "release-unsigned"
 
@@ -1325,6 +1325,9 @@ class TargetAndroid(Target):
                 artifact_dir = join(dist_dir, "build", "outputs", "apk", mode_sign)
             elif self.artifact_format == "aab":
                 artifact_dir = join(dist_dir, "build", "outputs", "bundle", mode_sign)
+            elif self.artifact_format == "aar":
+                artifact_dir = join(dist_dir, "build", "outputs", "aar")
+
         else:
             # on ant, the apk use the title, and have version
             bl = u'\'" ,'
