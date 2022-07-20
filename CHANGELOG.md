@@ -1,5 +1,58 @@
 # Change Log
 
+## [1.4.0](https://github.com/kivy/buildozer/tree/1.4.0) (2022-07-20)
+
+[Full Changelog](https://github.com/kivy/buildozer/compare/1.3.0...1.4.0)
+
+**Closed issues:**
+
+- error [\#1461](https://github.com/kivy/buildozer/issues/1461)
+- error [\#1460](https://github.com/kivy/buildozer/issues/1460)
+- ModuleNotFoundError: No module named '\_bz2' [\#1457](https://github.com/kivy/buildozer/issues/1457)
+- `java.nio.file.NoSuchFileException` [\#1456](https://github.com/kivy/buildozer/issues/1456)
+- kivy app doesnt start on android [\#1455](https://github.com/kivy/buildozer/issues/1455)
+- \(WSL\) buildozer adb doesn't recognize usb [\#1453](https://github.com/kivy/buildozer/issues/1453)
+- Error: Command \[...\] returned non-zero exit status 1 [\#1452](https://github.com/kivy/buildozer/issues/1452)
+- Command failed: /home/username/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager --sdk\_root=/home/username/.buildozer/android/platform/android-sdk platform-tools [\#1449](https://github.com/kivy/buildozer/issues/1449)
+- gradlew assembly Debug execution error when building apk [\#1447](https://github.com/kivy/buildozer/issues/1447)
+- How to run Python script in background in android? [\#1446](https://github.com/kivy/buildozer/issues/1446)
+- buildozer appclean doesnt work. [\#1443](https://github.com/kivy/buildozer/issues/1443)
+- Flags android.gradle\_dependencies && android.add\_jars don't work. [\#1442](https://github.com/kivy/buildozer/issues/1442)
+- ModuleNotFoundError: No module named 'PIL' [\#1440](https://github.com/kivy/buildozer/issues/1440)
+- Bulldozer error while running "buildozer -v android debug" [\#1439](https://github.com/kivy/buildozer/issues/1439)
+- started app on three different andoid phones - there is no internet connection on 2 of them [\#1434](https://github.com/kivy/buildozer/issues/1434)
+- Not Able to change the python version under buildozer 1.3.0 [\#1432](https://github.com/kivy/buildozer/issues/1432)
+- ndk r22 invalid  [\#1431](https://github.com/kivy/buildozer/issues/1431)
+- error building numpy with bulldozer [\#1426](https://github.com/kivy/buildozer/issues/1426)
+- sh.CommandNotFound: cmake [\#1424](https://github.com/kivy/buildozer/issues/1424)
+- Compile-time name 'JNIUS\_PYTHON3' not defined [\#1422](https://github.com/kivy/buildozer/issues/1422)
+- Error Building hostpython3 for arm64-v8a with buildozer [\#1421](https://github.com/kivy/buildozer/issues/1421)
+- building for android failed [\#1420](https://github.com/kivy/buildozer/issues/1420)
+- Error "Aidl not found, please install it." [\#1416](https://github.com/kivy/buildozer/issues/1416)
+- Buildozer Release Signign Issue [\#1415](https://github.com/kivy/buildozer/issues/1415)
+- Unable to run the buildozer command on initial application [\#1414](https://github.com/kivy/buildozer/issues/1414)
+- buildozer -v android debug error,please help me,thank you! [\#1413](https://github.com/kivy/buildozer/issues/1413)
+- Buildozer failed to create android app [\#1412](https://github.com/kivy/buildozer/issues/1412)
+- module encodings found error or something else [\#1408](https://github.com/kivy/buildozer/issues/1408)
+- \[ERROR\]:   Build failed: Requested API target 27 is not available, install it with the SDK android tool. [\#1404](https://github.com/kivy/buildozer/issues/1404)
+- buildozer requirements for firebase-admin Python?  [\#1402](https://github.com/kivy/buildozer/issues/1402)
+- I am given the following error, which I believe is due to recent changes for aab support in buildozer:  " This buildozer version requires a python-for-android version with AAB \(Android App Bundle\) support. Please update your pinned version accordingly [\#1401](https://github.com/kivy/buildozer/issues/1401)
+- How to mention Python modules used in Kivy buildozer.spec file? [\#1400](https://github.com/kivy/buildozer/issues/1400)
+- Приложение вылетает при запуске [\#1399](https://github.com/kivy/buildozer/issues/1399)
+- Buildozer deploy failed with python3 -m venv venv command [\#1389](https://github.com/kivy/buildozer/issues/1389)
+- Gradlew Build error for Android on Linux [\#1371](https://github.com/kivy/buildozer/issues/1371)
+- AAB [\#1353](https://github.com/kivy/buildozer/issues/1353)
+- Error creating apk on Macos Big Sur [\#1345](https://github.com/kivy/buildozer/issues/1345)
+- BUILD FAILED [\#1335](https://github.com/kivy/buildozer/issues/1335)
+
+**Merged pull requests:**
+
+- Updates default buildozer.spec NDK from 19b to 23b [\#1462](https://github.com/kivy/buildozer/pull/1462) ([misl6](https://github.com/misl6))
+- use p4a --add-source instead of manual copy of java files [\#1450](https://github.com/kivy/buildozer/pull/1450) ([tito](https://github.com/tito))
+- fix aar build [\#1444](https://github.com/kivy/buildozer/pull/1444) ([mzakharo](https://github.com/mzakharo))
+- Our self-hosted Apple Silicon runner now has been migrated to actions/runner v2.292.0 which now supports arm64 natively [\#1438](https://github.com/kivy/buildozer/pull/1438) ([misl6](https://github.com/misl6))
+- Changes for NDK23 [\#1427](https://github.com/kivy/buildozer/pull/1427) ([HyTurtle](https://github.com/HyTurtle))
+- Bump version to 1.4.0.dev0 [\#1411](https://github.com/kivy/buildozer/pull/1411) ([misl6](https://github.com/misl6))
 
 ## [1.3.0](https://github.com/kivy/buildozer/tree/1.3.0) (2022-03-13)
 [Full Changelog](https://github.com/kivy/buildozer/compare/1.2.0...1.3.0)
