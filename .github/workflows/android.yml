@@ -1,4 +1,8 @@
 on: [push, pull_request]
+
+env:
+  PYTHONFORANDROID_PREREQUISITES_INSTALL_INTERACTIVE: 0
+
 name: Android
 jobs:
   Integration:
