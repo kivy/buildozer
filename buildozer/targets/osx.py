@@ -6,6 +6,7 @@ import sys
 if sys.platform != 'darwin':
     raise NotImplementedError('This will only work on osx')
 
+import os
 from buildozer.target import Target
 from os.path import exists, join, abspath, dirname
 from subprocess import check_call, check_output
@@ -99,22 +100,26 @@ class TargetOSX(Target):
         package_name = bcg('app', 'package.name')
         domain = bcg('app', 'package.domain')
         title = bcg('app', 'title')
-        app_deps = open('requirements.txt').read()
+        source = bcg('app', 'source.dir')
+        app_deps = None
+        if os.path.exists('{}/requirements.txt'.format(source)):
+            app_deps = open('{}/requirements.txt'.format(source)).read()
+            # remove kivy from app_deps
+            app_deps = [a for a in app_deps.split('\n') if not a.startswith('#') and a not in ['kivy', '']]
         icon = bc.getdefault('app', 'icon.filename', '')
         version = self.buildozer.get_version()
         author = bc.getdefault('app', 'author', '')
 
         self.buildozer.info('Create {}.app'.format(package_name))
         cwd = join(self.buildozer.platform_dir, 'kivy-sdk-packager-master', 'osx')
-        # remove kivy from app_deps
-        app_deps = [a for a in app_deps.split('\n') if not a.startswith('#') and a not in ['kivy', '']]
 
-        cmd = [
-            'Kivy.app/Contents/Resources/script',
-             '-m', 'pip', 'install',
-             ]
-        cmd.extend(app_deps)
-        check_output(cmd, cwd=cwd)
+        if app_deps is not None:
+            cmd = [
+                'Kivy.app/Contents/Resources/script',
+                '-m', 'pip', 'install',
+                ]
+            cmd.extend(app_deps)
+            check_output(cmd, cwd=cwd)
 
         cmd = [
             'python', 'package_app.py', self.buildozer.app_dir,
