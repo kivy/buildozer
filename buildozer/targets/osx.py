@@ -134,7 +134,7 @@ class TargetOSX(Target):
         self.buildozer.info('{}.app created.'.format(package_name))
         self.buildozer.info('Creating {}.dmg'.format(package_name))
         check_output(
-            ('sh', '-x', 'create-osx-dmg.sh', package_name + '.app'),
+            ('sh', '-x', 'create-osx-dmg.sh', package_name + '.app', package_name),
             cwd=cwd)
         self.buildozer.info('{}.dmg created'.format(package_name))
         self.buildozer.info('moving {}.dmg to bin.'.format(package_name))
