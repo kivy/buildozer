@@ -104,7 +104,8 @@ class TargetOSX(Target):
             app_deps = open('{}/requirements.txt'.format(self.buildozer.app_dir)).read()
             # remove kivy from app_deps
             app_deps = [a for a in app_deps.split('\n') if not a.startswith('#') and a not in ['kivy', '']]
-        icon = bc.getdefault('app', 'icon.filename', '')
+        source = bcg('app', 'source.dir')
+        icon = str(bc.getdefault('app', 'icon.filename', '')).replace(source, '{}'.format(self.buildozer.app_dir))
         version = self.buildozer.get_version()
         author = bc.getdefault('app', 'author', '')
 
