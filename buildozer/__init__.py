@@ -514,10 +514,13 @@ class Buildozer:
 
     def _install_application_requirement(self, module):
         self._ensure_virtualenv()
-        self.debug('Install requirement {} in virtualenv'.format(module))
-        self.cmd('pip install --target={} {}'.format(self.applibs_dir, module),
-                 env=self.env_venv,
-                 cwd=self.buildozer_dir)
+        if  'osx' in '{}'.format(self.target) and 'python' in '{}'.format(module):
+            self.debug('Install requirement {} in virtualenv ignored for target: {}'.format(module, self.target))
+        else:
+            self.debug('Install requirement {} in virtualenv'.format(module))
+            self.cmd('pip install --target={} {}'.format(self.applibs_dir, module),
+                    env=self.env_venv,
+                    cwd=self.buildozer_dir)
 
     def check_garden_requirements(self):
         garden_requirements = self.config.getlist('app',
