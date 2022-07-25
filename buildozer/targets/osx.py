@@ -46,8 +46,8 @@ class TargetOSX(Target):
                 self.buildozer.info('Downloading kivy...')
                 status_code = check_output(
                     ('curl', '-L', '--write-out', '%{http_code}', '-o', 'Kivy{}.dmg'.format(py_branch),
-                    'https://kivy.org/downloads/{}/Kivy-{}-osx-python{}.dmg'
-                    .format(current_kivy_vers, current_kivy_vers, py_branch)),
+                    'https://kivy.org/downloads/{}/Kivy.dmg'  # -{}-osx-python{}.dmg'
+                    .format(current_kivy_vers)),  # , current_kivy_vers, py_branch)),
                     cwd=cwd)
 
                 if status_code == "404":
