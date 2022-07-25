@@ -6,7 +6,6 @@ import sys
 if sys.platform != 'darwin':
     raise NotImplementedError('This will only work on osx')
 
-import os
 from buildozer.target import Target
 from os.path import exists, join, abspath, dirname
 from subprocess import check_call, check_output
@@ -100,10 +99,9 @@ class TargetOSX(Target):
         package_name = bcg('app', 'package.name')
         domain = bcg('app', 'package.domain')
         title = bcg('app', 'title')
-        source = bcg('app', 'source.dir')
         app_deps = None
-        if os.path.exists('{}/requirements.txt'.format(source)):
-            app_deps = open('{}/requirements.txt'.format(source)).read()
+        if exists('{}/requirements.txt'.format(self.buildozer.app_dir)):
+            app_deps = open('{}/requirements.txt'.format(self.buildozer.app_dir)).read()
             # remove kivy from app_deps
             app_deps = [a for a in app_deps.split('\n') if not a.startswith('#') and a not in ['kivy', '']]
         icon = bc.getdefault('app', 'icon.filename', '')
