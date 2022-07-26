@@ -6,7 +6,7 @@ Generic Python packager for Android / iOS. Desktop later.
 
 '''
 
-__version__ = '1.4.1.dev0'
+__version__ = '1.4.0'
 
 import os
 import re
@@ -515,8 +515,6 @@ class Buildozer:
     def _install_application_requirement(self, module):
         self._ensure_virtualenv()
         if  'osx' in '{}'.format(self.target):
-            if 'python' in '{}'.format(module) or 'kivy' in '{}'.format(module):
-                self.debug('Install requirement {} in virtualenv ignored for target: osx'.format(module))
                 return
 
         self.debug('Install requirement {} in virtualenv'.format(module))
