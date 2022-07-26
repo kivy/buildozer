@@ -515,7 +515,7 @@ class Buildozer:
     def _install_application_requirement(self, module):
         self._ensure_virtualenv()
         if  'osx' in '{}'.format(self.target):
-                return
+            return
 
         self.debug('Install requirement {} in virtualenv'.format(module))
         self.cmd('pip install --target={} {}'.format(self.applibs_dir, module),
