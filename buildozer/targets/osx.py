@@ -3,6 +3,7 @@ OSX target, based on kivy-sdk-packager
 '''
 
 import sys
+
 if sys.platform != 'darwin':
     raise NotImplementedError('This will only work on osx')
 
@@ -19,7 +20,7 @@ class TargetOSX(Target):
         if exists(
                 join(self.buildozer.platform_dir, 'kivy-sdk-packager-master')):
             self.buildozer.info(
-                    'kivy-sdk-packager found at '
+                'kivy-sdk-packager found at '
                 '{}'.format(self.buildozer.platform_dir))
             return
 
@@ -27,7 +28,7 @@ class TargetOSX(Target):
         platdir = self.buildozer.platform_dir
         check_call(
             ('curl', '-O', '-L',
-            'https://github.com/kivy/kivy-sdk-packager/archive/master.zip'),
+             'https://github.com/kivy/kivy-sdk-packager/archive/master.zip'),
             cwd=platdir)
         check_call(('unzip', 'master.zip'), cwd=platdir)
         check_call(('rm', 'master.zip'), cwd=platdir)
@@ -39,15 +40,15 @@ class TargetOSX(Target):
             self.buildozer.info('Kivy found in Applications dir...')
             check_call(
                 ('cp', '-a', '/Applications/Kivy{}.app'.format(py_branch),
-                'Kivy.app'), cwd=cwd)
+                 'Kivy.app'), cwd=cwd)
 
         else:
             if not exists(join(cwd, 'Kivy{}.dmg'.format(py_branch))):
                 self.buildozer.info('Downloading kivy...')
                 status_code = check_output(
                     ('curl', '-L', '--write-out', '%{http_code}', '-o', 'Kivy{}.dmg'.format(py_branch),
-                    'https://kivy.org/downloads/{}/Kivy-{}-osx-python{}.dmg'
-                    .format(current_kivy_vers, current_kivy_vers, py_branch)),
+                     'https://kivy.org/downloads/{}/Kivy.dmg'  # -{}-osx-python{}.dmg'
+                     .format(current_kivy_vers)),  # , current_kivy_vers, py_branch)),
                     cwd=cwd)
 
                 if status_code == "404":
@@ -85,11 +86,24 @@ class TargetOSX(Target):
             self.buildozer.info('Check target configuration tokens')
             self.buildozer.error(
                 '{0} error(s) found in the buildozer.spec'.format(
-                len(errors)))
+                    len(errors)))
             for error in errors:
                 print(error)
             sys.exit(1)
         # check
+
+    def _install_application_requirement(self, module):
+        self.buildozer._ensure_virtualenv()
+        if 'osx' in '{}'.format(self.buildozer.target):
+            if 'kivy' in '{}'.format(module) or 'buildozer' in '{}'.format(module):
+                self.buildozer.debug('Install requirement {} in virtualenv ignored for target: osx'.format(module))
+                return
+
+        self.buildozer.debug('Install requirement {} in virtualenv'.format(module))
+        cwd = join(self.buildozer.platform_dir, 'kivy-sdk-packager-master', 'osx')
+        self.buildozer.cmd(['Kivy.app/Contents/Resources/script', '-m', 'pip', 'install', '--upgrade', 'pip'], cwd=cwd)
+        self.buildozer.cmd(['Kivy.app/Contents/Resources/script', '-m', 'pip', 'install', '--upgrade', '--force-reinstall', '--target={}/_applibs'.format(self.buildozer.app_dir), '{}'.format(module)],
+                           cwd=cwd)
 
     def build_package(self):
         self.buildozer.info('Building package')
@@ -99,31 +113,34 @@ class TargetOSX(Target):
         package_name = bcg('app', 'package.name')
         domain = bcg('app', 'package.domain')
         title = bcg('app', 'title')
-        app_deps = open('requirements.txt').read()
+        source = bcg('app', 'source.dir')
+        app_deps = None
+        if exists('{}/requirements.txt'.format(source)):
+            app_deps = open('{}/requirements.txt'.format(self.buildozer.app_dir)).read()
+            # remove # from app_deps
+            app_deps = [a for a in app_deps.split('\n') if not a.startswith('#')]
         icon = bc.getdefault('app', 'icon.filename', '')
+        if source in icon:
+            icon = '{}'.format(icon).replace('{}'.format(source), '{}'.format(self.buildozer.app_dir))
         version = self.buildozer.get_version()
         author = bc.getdefault('app', 'author', '')
 
         self.buildozer.info('Create {}.app'.format(package_name))
+        self.buildozer.mkdir('{}/_applibs'.format(self.buildozer.app_dir))
         cwd = join(self.buildozer.platform_dir, 'kivy-sdk-packager-master', 'osx')
-        # remove kivy from app_deps
-        app_deps = [a for a in app_deps.split('\n') if not a.startswith('#') and a not in ['kivy', '']]
 
-        cmd = [
-            'Kivy.app/Contents/Resources/script',
-             '-m', 'pip', 'install',
-             ]
-        cmd.extend(app_deps)
-        check_output(cmd, cwd=cwd)
+        if app_deps is not None:
+            for dep in app_deps:
+                self._install_application_requirement(dep.replace('>', '='))
 
         cmd = [
             'python', 'package_app.py', self.buildozer.app_dir,
             '--appname={}'.format(package_name),
-             '--bundlename={}'.format(title),
-             '--bundleid={}'.format(domain),
-             '--bundleversion={}'.format(version),
-             '--displayname={}'.format(title)
-             ]
+            '--bundlename={}'.format(title),
+            '--bundleid={}'.format(domain),
+            '--bundleversion={}'.format(version),
+            '--displayname={}'.format(title)
+        ]
         if icon:
             cmd.append('--icon={}'.format(icon))
         if author:
@@ -134,7 +151,7 @@ class TargetOSX(Target):
         self.buildozer.info('{}.app created.'.format(package_name))
         self.buildozer.info('Creating {}.dmg'.format(package_name))
         check_output(
-            ('sh', '-x', 'create-osx-dmg.sh', package_name + '.app'),
+            ('sh', '-x', 'create-osx-dmg.sh', package_name + '.app', package_name),
             cwd=cwd)
         self.buildozer.info('{}.dmg created'.format(package_name))
         self.buildozer.info('moving {}.dmg to bin.'.format(package_name))
