@@ -112,12 +112,12 @@ class TargetOSX(Target):
         package_name = bcg('app', 'package.name')
         domain = bcg('app', 'package.domain')
         title = bcg('app', 'title')
+        source = bcg('app', 'source.dir')
         app_deps = None
-        if exists('{}/requirements.txt'.format(self.buildozer.app_dir)):
+        if exists('{}/requirements.txt'.format(source)):
             app_deps = open('{}/requirements.txt'.format(self.buildozer.app_dir)).read()
             # remove # from app_deps
             app_deps = [a for a in app_deps.split('\n') if not a.startswith('#')]
-        source = bcg('app', 'source.dir')
         icon = bc.getdefault('app', 'icon.filename', '')
         if source in icon:
             icon = '{}'.format(icon).replace('{}'.format(source), '{}'.format(self.buildozer.app_dir))
