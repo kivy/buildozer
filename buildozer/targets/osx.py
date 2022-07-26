@@ -118,7 +118,9 @@ class TargetOSX(Target):
             # remove # from app_deps
             app_deps = [a for a in app_deps.split('\n') if not a.startswith('#')]
         source = bcg('app', 'source.dir')
-        icon = str(bc.getdefault('app', 'icon.filename', '')).replace(source, '{}'.format(self.buildozer.app_dir))
+        icon = bc.getdefault('app', 'icon.filename', '')
+        if source in icon:
+            icon = '{}'.format(icon).replace('{}'.format(source), '{}'.format(self.buildozer.app_dir))
         version = self.buildozer.get_version()
         author = bc.getdefault('app', 'author', '')
 
