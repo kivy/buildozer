@@ -53,7 +53,6 @@ class TestTargetIos:
         """Basic tests for the check_requirements() method."""
         target = init_target(self.temp_dir)
         buildozer = target.buildozer
-        assert not hasattr(target, "adb_cmd")
         assert not hasattr(target, "javac_cmd")
         assert "PATH" not in buildozer.environ
         with patch_buildozer_checkbin() as m_checkbin:
@@ -68,8 +67,8 @@ class TestTargetIos:
             mock.call("automake", "automake"),
             mock.call("libtool", "libtool"),
         ]
-        assert target._toolchain_cmd.endswith("toolchain.py ")
-        assert target._xcodebuild_cmd == "xcodebuild "
+        assert target._toolchain_cmd[-1] == "toolchain.py"
+        assert target._xcodebuild_cmd == ["xcodebuild"]
 
     def test_check_configuration_tokens(self):
         """Basic tests for the check_configuration_tokens() method."""
@@ -97,7 +96,7 @@ class TestTargetIos:
             m_toolchain.return_value = ("hostpython3 kivy pillow python3 sdl2", None, 0)
             available_packages = target.get_available_packages()
         assert m_toolchain.call_args_list == [
-            mock.call("recipes --compact", get_stdout=True)
+            mock.call(["recipes", "--compact"], get_stdout=True)
         ]
         assert available_packages == [
             "hostpython3",
@@ -115,9 +114,24 @@ class TestTargetIos:
         with patch_buildozer_cmd() as m_cmd:
             target.install_platform()
         assert m_cmd.call_args_list == [
-            mock.call("git clone https://github.com/kivy/kivy-ios", cwd=mock.ANY),
             mock.call(
-                "git clone --branch 1.10.0 https://github.com/phonegap/ios-deploy",
+                [
+                    "git",
+                    "clone",
+                    "--branch",
+                    "master",
+                    "https://github.com/kivy/kivy-ios",
+                ],
+                cwd=mock.ANY,
+            ),
+            mock.call(
+                [
+                    "git",
+                    "clone",
+                    "--branch",
+                    "1.10.0",
+                    "https://github.com/phonegap/ios-deploy",
+                ],
                 cwd=mock.ANY,
             ),
         ]
@@ -137,7 +151,7 @@ class TestTargetIos:
             target.compile_platform()
         # fmt: on
         assert m_get_available_packages.call_args_list == [mock.call()]
-        assert m_toolchain.call_args_list == [mock.call("build python3")]
+        assert m_toolchain.call_args_list == [mock.call(["build", "python3"])]
         assert m_file_exists.call_args_list == [
             mock.call(target.ios_deploy_dir, "ios-deploy")
         ]
@@ -210,16 +224,31 @@ class TestTargetIos:
         ]
         assert m_cmd.call_args_list == [
             mock.call(mock.ANY, cwd=target.ios_dir),
-            mock.call(
-                "xcodebuild -configuration Debug -allowProvisioningUpdates ENABLE_BITCODE=NO "
-                "CODE_SIGNING_ALLOWED=NO clean build",
+            mock.call([
+                "xcodebuild",
+                "-configuration",
+                "Debug",
+                "-allowProvisioningUpdates",
+                "ENABLE_BITCODE=NO",
+                "CODE_SIGNING_ALLOWED=NO",
+                "clean",
+                "build"],
                 cwd="/ios/dir/myapp-ios",
             ),
-            mock.call(
-                "xcodebuild -alltargets -configuration Debug -scheme myapp "
-                "-archivePath \"/ios/dir/myapp-0.1.intermediates/myapp-0.1.xcarchive\" "
-                "-destination \'generic/platform=iOS\' "
-                "archive ENABLE_BITCODE=NO CODE_SIGNING_ALLOWED=NO",
+            mock.call([
+                "xcodebuild",
+                "-alltargets",
+                "-configuration",
+                "Debug",
+                "-scheme",
+                "myapp",
+                "-archivePath",
+                "/ios/dir/myapp-0.1.intermediates/myapp-0.1.xcarchive",
+                "-destination",
+                "generic/platform=iOS",
+                "archive",
+                "ENABLE_BITCODE=NO",
+                "CODE_SIGNING_ALLOWED=NO"],
                 cwd="/ios/dir/myapp-ios",
             ),
         ]

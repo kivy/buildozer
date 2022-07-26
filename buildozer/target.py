@@ -228,8 +228,6 @@ class Target:
             branch = config.getdefault('app', '{}_branch'.format(key), branch)
             default_url = url_format.format(owner=owner, repo=repo, branch=branch)
             url = config.getdefault('app', '{}_url'.format(key), default_url)
-            if branch != 'master':
-                url = "--branch {} {}".format(branch, url)
         return path, url, branch
 
     def install_or_update_repo(self, repo, **kwargs):
@@ -252,15 +250,14 @@ class Target:
         custom_dir, clone_url, clone_branch = self.path_or_git_url(repo, **kwargs)
         if not self.buildozer.file_exists(install_dir):
             if custom_dir:
-                cmd('mkdir -p "{}"'.format(install_dir))
-                cmd('cp -a "{}"/* "{}"/'.format(custom_dir, install_dir))
+                cmd(["mkdir", "-p", install_dir])
+                cmd(["cp", "-a", f"{custom_dir}/*", f"{install_dir}/"])
             else:
-                cmd('git clone {}'.format(clone_url),
-                        cwd=self.buildozer.platform_dir)
+                cmd(["git", "clone", "--branch", clone_branch, clone_url], cwd=self.buildozer.platform_dir)
         elif self.platform_update:
             if custom_dir:
-                cmd('cp -a "{}"/* "{}"/'.format(custom_dir, install_dir))
+                cmd(["cp", "-a", f"{custom_dir}/*", f"{install_dir}/"])
             else:
-                cmd('git clean -dxf', cwd=install_dir)
-                cmd('git pull origin {}'.format(clone_branch), cwd=install_dir)
+                cmd(["git", "clean", "-dxf"], cwd=install_dir)
+                cmd(["git", "pull", "origin", clone_branch], cwd=install_dir)
         return install_dir
