@@ -123,11 +123,12 @@ class TargetOSX(Target):
         author = bc.getdefault('app', 'author', '')
 
         self.buildozer.info('Create {}.app'.format(package_name))
+        self.buildozer.mkdir('{}/_applibs'.format(self.buildozer.app_dir))
         cwd = join(self.buildozer.platform_dir, 'kivy-sdk-packager-master', 'osx')
 
         if app_deps is not None:
             for dep in app_deps:
-                self._install_application_requirement(dep)
+                self._install_application_requirement(dep.replace('>', '='))
 
         cmd = [
             'python', 'package_app.py', self.buildozer.app_dir,

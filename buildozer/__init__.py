@@ -519,8 +519,8 @@ class Buildozer:
 
         self.debug('Install requirement {} in virtualenv'.format(module))
         self.cmd('pip install --target={} {}'.format(self.applibs_dir, module),
-                env=self.env_venv,
-                cwd=self.buildozer_dir)
+                    env=self.env_venv,
+                    cwd=self.buildozer_dir)
 
     def check_garden_requirements(self):
         garden_requirements = self.config.getlist('app',
