@@ -102,8 +102,8 @@ class TargetOSX(Target):
         app_deps = None
         if exists('{}/requirements.txt'.format(self.buildozer.app_dir)):
             app_deps = open('{}/requirements.txt'.format(self.buildozer.app_dir)).read()
-            # remove kivy from app_deps
-            app_deps = [a for a in app_deps.split('\n') if not a.startswith('#') and a not in ['kivy', '']]
+            # remove # from app_deps
+            app_deps = [a for a in app_deps.split('\n') if not a.startswith('#')]
         source = bcg('app', 'source.dir')
         icon = str(bc.getdefault('app', 'icon.filename', '')).replace(source, '{}'.format(self.buildozer.app_dir))
         version = self.buildozer.get_version()
@@ -113,12 +113,8 @@ class TargetOSX(Target):
         cwd = join(self.buildozer.platform_dir, 'kivy-sdk-packager-master', 'osx')
 
         if app_deps is not None:
-            cmd = [
-                'Kivy.app/Contents/Resources/script',
-                '-m', 'pip', 'install',
-                ]
-            cmd.extend(app_deps)
-            check_output(cmd, cwd=cwd)
+            for dep in app_deps:
+                self.buildozer._install_application_requirement(dep)
 
         cmd = [
             'python', 'package_app.py', self.buildozer.app_dir,
