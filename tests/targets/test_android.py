@@ -2,6 +2,7 @@ import os
 import tempfile
 from six import StringIO
 from unittest import mock
+import sys
 
 import pytest
 
@@ -109,26 +110,22 @@ class TestTargetAndroid:
             ".buildozer/android/platform/build-arm64-v8a_armeabi-v7a"
         )
         assert target_android._p4a_bootstrap == "sdl2"
-        assert target_android._p4a_cmd.endswith(
-            "python -m pythonforandroid.toolchain "
-        )
+        assert target_android._p4a_cmd == [sys.executable or 'python', "-m", "pythonforandroid.toolchain"]
         assert target_android.build_mode == "debug"
-        assert (
-            target_android.extra_p4a_args == (
-                ' --color=always'
-                ' --storage-dir="{buildozer_dir}/android/platform/build-arm64-v8a_armeabi-v7a" --ndk-api=21 --ignore-setup-py --debug'.format(
-                buildozer_dir=buildozer.buildozer_dir)
-            )
-        )
+        assert target_android.extra_p4a_args == [
+            "--color=always",
+            f"--storage-dir={buildozer.buildozer_dir}/android/platform/build-arm64-v8a_armeabi-v7a",
+            "--ndk-api=21",
+            "--ignore-setup-py",
+            "--debug",
+        ]
         assert target_android.platform_update is False
 
     def test_init_positional_buildozer(self):
         """Positional `buildozer` argument is required."""
         with pytest.raises(TypeError) as ex_info:
             TargetAndroid()
-        assert ex_info.value.args == (
-            "__init__() missing 1 required positional argument: 'buildozer'",
-        )
+        assert ex_info.value.args[-1].endswith("__init__() missing 1 required positional argument: 'buildozer'")
 
     def test_sdkmanager(self):
         """Tests the _sdkmanager() method."""
@@ -154,7 +151,8 @@ class TestTargetAndroid:
         """Basic tests for the check_requirements() method."""
         target_android = init_target(self.temp_dir)
         buildozer = target_android.buildozer
-        assert not hasattr(target_android, "adb_cmd")
+        assert not hasattr(target_android, "adb_executable")
+        assert not hasattr(target_android, "adb_args")
         assert not hasattr(target_android, "javac_cmd")
         assert "PATH" not in buildozer.environ
         with patch_buildozer_checkbin() as m_checkbin:
@@ -165,9 +163,8 @@ class TestTargetAndroid:
             mock.call("Java compiler (javac)", "javac"),
             mock.call("Java keytool (keytool)", "keytool"),
         ]
-        assert target_android.adb_cmd.endswith(
-            ".buildozer/android/platform/android-sdk/platform-tools/adb"
-        )
+        assert target_android.adb_executable.endswith(".buildozer/android/platform/android-sdk/platform-tools/adb")
+        assert target_android.adb_args == []
         assert target_android.javac_cmd == "javac"
         assert target_android.keytool_cmd == "keytool"
         assert "PATH" in buildozer.environ
@@ -223,7 +220,7 @@ class TestTargetAndroid:
         assert m_execute_build_package.call_args_list == [
             mock.call(
                 [
-                    ("--name", "'My Application'"),
+                    ("--name", "My Application"),
                     ("--version", "0.1"),
                     ("--package", "org.test.myapp"),
                     ("--minsdk", "21"),
@@ -246,14 +243,18 @@ class TestTargetAndroid:
             target = TargetAndroid(buildozer)
             target.execute_build_package([("debug",)])
         assert m__p4a.call_args_list == [
-            mock.call(
-                "apk "
-                "--bootstrap sdl2 "
-                "--dist_name myapp "
-                "--copy-libs "
-                "--arch arm64-v8a "
-                "--arch armeabi-v7a"
-            )
+            mock.call([
+                "apk",
+                "--bootstrap",
+                "sdl2",
+                "--dist_name",
+                "myapp",
+                "--copy-libs",
+                "--arch",
+                "arm64-v8a",
+                "--arch",
+                "armeabi-v7a"
+            ])
         ]
 
     def test_execute_build_package__release__apk(self):
@@ -264,15 +265,19 @@ class TestTargetAndroid:
             target = TargetAndroid(buildozer)
             target.execute_build_package([("release",)])
         assert m__p4a.call_args_list == [
-            mock.call(
-                "apk "
-                "--bootstrap sdl2 "
-                "--dist_name myapp "
-                "--release "
-                "--copy-libs "
-                "--arch arm64-v8a "
-                "--arch armeabi-v7a"
-            )
+            mock.call([
+                "apk",
+                "--bootstrap",
+                "sdl2",
+                "--dist_name",
+                "myapp",
+                "--release",
+                "--copy-libs",
+                "--arch",
+                "arm64-v8a",
+                "--arch",
+                "armeabi-v7a"
+            ])
         ]
 
     def test_execute_build_package__release__aab(self):
@@ -284,15 +289,19 @@ class TestTargetAndroid:
             target.artifact_format = "aab"
             target.execute_build_package([("release",)])
         assert m__p4a.call_args_list == [
-            mock.call(
-                "aab "
-                "--bootstrap sdl2 "
-                "--dist_name myapp "
-                "--release "
-                "--copy-libs "
-                "--arch arm64-v8a "
-                "--arch armeabi-v7a"
-            )
+            mock.call([
+                "aab",
+                "--bootstrap",
+                "sdl2",
+                "--dist_name",
+                "myapp",
+                "--release",
+                "--copy-libs",
+                "--arch",
+                "arm64-v8a",
+                "--arch",
+                "armeabi-v7a",
+            ])
         ]
 
     def test_numeric_version(self):
@@ -305,7 +314,7 @@ class TestTargetAndroid:
         assert m_execute_build_package.call_args_list == [
             mock.call(
                 [
-                    ("--name", "'My Application'"),
+                    ("--name", "My Application"),
                     ("--version", "0.1"),
                     ("--package", "org.test.myapp"),
                     ("--minsdk", "21"),
@@ -340,7 +349,7 @@ class TestTargetAndroid:
         assert m_execute_build_package.call_args_list == [
             mock.call(
                 [
-                    ('--name', "'My Application'"),
+                    ('--name', "My Application"),
                     ('--version', '0.1'),
                     ('--package', 'org.test.myapp'),
                     ('--minsdk', '21'),
@@ -366,7 +375,7 @@ class TestTargetAndroid:
         assert m_execute_build_package.call_args_list == [
             mock.call(
                 [
-                    ("--name", "'My Application'"),
+                    ("--name", "My Application"),
                     ("--version", "0.1"),
                     ("--package", "org.test.myapp"),
                     ("--minsdk", "21"),
@@ -392,7 +401,7 @@ class TestTargetAndroid:
         assert m_execute_build_package.call_args_list == [
             mock.call(
                 [
-                    ("--name", "'My Application'"),
+                    ("--name", "My Application"),
                     ("--version", "0.1"),
                     ("--package", "org.test.myapp"),
                     ("--minsdk", "21"),
@@ -420,7 +429,7 @@ class TestTargetAndroid:
             target_android._install_p4a()
 
         assert mock.call(
-            'git clone -b master --single-branch https://custom-p4a-url/p4a.git python-for-android',
+            ["git", "clone", "-b", "master", "--single-branch", "https://custom-p4a-url/p4a.git", "python-for-android"],
             cwd=mock.ANY) in m_cmd.call_args_list
 
     def test_install_platform_p4a_clone_fork(self):
@@ -434,7 +443,7 @@ class TestTargetAndroid:
             target_android._install_p4a()
 
         assert mock.call(
-            'git clone -b master --single-branch https://github.com/fork/python-for-android.git python-for-android',
+            ["git", "clone", "-b", "master", "--single-branch", "https://github.com/fork/python-for-android.git", "python-for-android"],
             cwd=mock.ANY) in m_cmd.call_args_list
 
     def test_install_platform_p4a_clone_default(self):
@@ -446,5 +455,5 @@ class TestTargetAndroid:
             target_android._install_p4a()
 
         assert mock.call(
-            'git clone -b master --single-branch https://github.com/kivy/python-for-android.git python-for-android',
+            ["git", "clone", "-b", "master", "--single-branch", "https://github.com/kivy/python-for-android.git", "python-for-android"],
             cwd=mock.ANY) in m_cmd.call_args_list
