@@ -366,13 +366,17 @@ class TargetIos(Target):
         icon = self.buildozer.config.getdefault('app', 'icon.filename', '')
         if not icon:
             return
+
         # get icon size and make it for god for not get err
         img = Image.open(icon)
-        if img.height != 72 or img.width != 72:
+        if img.height != 72 or img.width != 72 or not str(icon).endswith('.png'):
             self.buildozer.debug('Icon size as bad format try to make a new format: {}/{} to 72/72.'.format(img.height, img.width))
             size = 72, 72
             img = img.resize(size, Image.ANTIALIAS)
             img.save(join(self.app_project_dir, 'icon.png'), "PNG")
+        else:
+            self.buildozer.cmd(['cp', icon, f'{self.app_project_dir}/icon.png'])
+
         icon_fn = join(self.app_project_dir, 'icon.png')
         if not self.buildozer.file_exists(icon_fn):
             self.buildozer.error('Icon {} does not exists'.format(icon_fn))
