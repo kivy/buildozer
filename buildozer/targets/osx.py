@@ -9,7 +9,6 @@ if sys.platform != 'darwin':
 
 from buildozer.target import Target
 from os.path import exists, join, abspath, dirname
-from subprocess import check_call, check_output
 
 
 class TargetOSX(Target):
@@ -26,41 +25,41 @@ class TargetOSX(Target):
 
         self.buildozer.info('kivy-sdk-packager does not exist, clone it')
         platdir = self.buildozer.platform_dir
-        check_call(
-            ('curl', '-O', '-L',
-             'https://github.com/kivy/kivy-sdk-packager/archive/master.zip'),
+        self.buildozer.cmd(
+            ['curl', '-O', '-L',
+             'https://github.com/kivy/kivy-sdk-packager/archive/master.zip'],
             cwd=platdir)
-        check_call(('unzip', 'master.zip'), cwd=platdir)
-        check_call(('rm', 'master.zip'), cwd=platdir)
+        self.buildozer.cmd(['unzip', 'master.zip'], cwd=platdir)
+        self.buildozer.cmd(['rm', 'master.zip'], cwd=platdir)
 
     def download_kivy(self, cwd, py_branch=2):
         current_kivy_vers = self.buildozer.config.get('app', 'osx.kivy_version')
 
         if exists('/Applications/Kivy{}.app'.format(py_branch)):
             self.buildozer.info('Kivy found in Applications dir...')
-            check_call(
-                ('cp', '-a', '/Applications/Kivy{}.app'.format(py_branch),
-                 'Kivy.app'), cwd=cwd)
+            self.buildozer.cmd(
+                ['cp', '-a', '/Applications/Kivy{}.app'.format(py_branch),
+                 'Kivy.app'], cwd=cwd)
 
         else:
             if not exists(join(cwd, 'Kivy{}.dmg'.format(py_branch))):
                 self.buildozer.info('Downloading kivy...')
-                status_code = check_output(
-                    ('curl', '-L', '--write-out', '%{http_code}', '-o', 'Kivy{}.dmg'.format(py_branch),
+                status_code = self.buildozer.cmd(
+                    ['curl', '-L', '--write-out', '%{http_code}', '-o', 'Kivy{}.dmg'.format(py_branch),
                      'https://kivy.org/downloads/{}/Kivy.dmg'  # -{}-osx-python{}.dmg'
-                     .format(current_kivy_vers)),  # , current_kivy_vers, py_branch)),
+                     .format(current_kivy_vers)],  # , current_kivy_vers, py_branch)),
                     cwd=cwd)
 
                 if status_code == "404":
                     self.buildozer.error(
                         "Unable to download the Kivy App. Check osx.kivy_version in your buildozer.spec, and verify "
                         "Kivy servers are accessible. https://kivy.org/downloads/")
-                    check_call(("rm", "Kivy{}.dmg".format(py_branch)), cwd=cwd)
+                    self.buildozer.cmd(["rm", "Kivy{}.dmg".format(py_branch)], cwd=cwd)
                     sys.exit(1)
 
             self.buildozer.info('Extracting and installing Kivy...')
-            check_call(('hdiutil', 'attach', cwd + '/Kivy{}.dmg'.format(py_branch)))
-            check_call(('cp', '-a', '/Volumes/Kivy/Kivy.app', './Kivy.app'), cwd=cwd)
+            self.buildozer.cmd(['hdiutil', 'attach', cwd + '/Kivy{}.dmg'.format(py_branch)])
+            self.buildozer.cmd(['cp', '-a', '/Volumes/Kivy/Kivy.app', './Kivy.app'], cwd=cwd)
 
     def ensure_kivyapp(self):
         self.buildozer.info('check if Kivy.app exists in local dir')
@@ -146,20 +145,20 @@ class TargetOSX(Target):
         if author:
             cmd.append('--author={}'.format(author))
 
-        check_output(cmd, cwd=cwd)
+        self.buildozer.cmd(cmd, cwd=cwd)
 
         self.buildozer.info('{}.app created.'.format(package_name))
         self.buildozer.info('Creating {}.dmg'.format(package_name))
-        check_output(
-            ('sh', '-x', 'create-osx-dmg.sh', package_name + '.app', package_name),
+        self.buildozer.cmd(
+            ['sh', '-x', 'create-osx-dmg.sh', package_name + '.app', package_name],
             cwd=cwd)
         self.buildozer.info('{}.dmg created'.format(package_name))
         self.buildozer.info('moving {}.dmg to bin.'.format(package_name))
         binpath = join(
             self.buildozer.user_build_dir or
             dirname(abspath(self.buildozer.specfilename)), 'bin')
-        check_output(
-            ('cp', '-a', package_name + '.dmg', binpath),
+        self.buildozer.cmd(
+            ['cp', '-a', package_name + '.dmg', binpath],
             cwd=cwd)
         self.buildozer.info('All Done!')
 
