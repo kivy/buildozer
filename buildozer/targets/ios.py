@@ -299,9 +299,12 @@ class TargetIos(Target):
         self.buildozer.info('Creating IPA...')
         self.xcodebuild(
             '-exportArchive',
-            f'-archivePath "{xcarchive}"',
-            f'-exportOptionsPlist "{plist_rfn}"',
-            f'-exportPath "{ipa_tmp}"',
+            '-archivePath',
+            xcarchive,
+            '-exportOptionsPlist',
+            plist_rfn,
+            '-exportPath',
+            ipa_tmp,
             f'CODE_SIGN_IDENTITY={ioscodesign}',
             'ENABLE_BITCODE=NO',
             cwd=build_dir)
