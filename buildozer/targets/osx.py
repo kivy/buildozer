@@ -116,7 +116,7 @@ class TargetOSX(Target):
         source = bcg('app', 'source.dir')
         app_deps = None
         if exists('{}/requirements.txt'.format(source)):
-            app_deps = open('{}/requirements.txt'.format(self.buildozer.app_dir)).read()
+            app_deps = open('{}/requirements.txt'.format(source)).read()
             # remove # from app_deps
             app_deps = [a for a in app_deps.split('\n') if not a.startswith('#')]
         icon = bc.getdefault('app', 'icon.filename', '')
