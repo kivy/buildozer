@@ -4,7 +4,7 @@ import codecs
 import unittest
 import buildozer as buildozer_module
 from buildozer import Buildozer
-from six import StringIO
+from io import StringIO
 import tempfile
 from unittest import mock
 
