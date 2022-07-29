@@ -107,6 +107,7 @@ Usage:
 Available targets:
     android        Android target, based on python-for-android project
     ios            iOS target, based on kivy-ios project
+    osx            MacOs X target, based on kivy-sdk-packager project
 
 Global commands (without target):
     distclean          Clean the whole Buildozer environment
