@@ -186,21 +186,19 @@ fullscreen = 0
 # 2) android.add_assets = source_asset_path:destination_asset_relative_path
 #android.add_assets =
 
-# Copy/overwrite directories and its files (from within the "user_res" directory, as in the example below)
-# in the android res directory in res/
+# Copy/overwrite directories and its files in the android res directory in res/
+# from within the "android_resources" directory, as in the example below.
 # Example, create:
-# user_res/
+# android_resources/
 #     drawable/
 #         graphic.png
 #     anim/
 #         anim.xml
 #     xml/
 #         strings.xml
-# And then, you must pass the "user_res" directory path to the add_res argument
-# The default p4a res directories are: "values", "layout", "mipmap", "mipmap-anydpi-v26",
-# "drawable", "drawable-mdpi", "drawable-hdpi", "drawable-xhdpi", " drawable-xxhdpi"
-# See https://developer.android.com/guide/topics/resources/providing-resources
-#android.add_res = "path/to/user_res/folder"
+# And then, you must pass the "android_resources" directory path to the add_res argument
+# For general documentation see https://developer.android.com/guide/topics/resources/providing-resources
+# android.add_res = "path/to/android_resources"
 
 # (list) Gradle dependencies to add
 #android.gradle_dependencies =
