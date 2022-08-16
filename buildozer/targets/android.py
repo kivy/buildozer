@@ -320,7 +320,7 @@ class TargetAndroid(Target):
         super().check_configuration_tokens(errors)
 
     def _p4a_have_aab_support(self):
-        returncode = self._p4a(["aab", "-h"], break_on_error=False, show_output=False)[2]
+        returncode = self._p4a(["aab", "-h"], break_on_error=False)[2]
         if returncode == 0:
             return True
         else:
