@@ -517,7 +517,7 @@ class Buildozer:
         if  'osx' in f'{self.target}':
             return
 
-        # if you get obsulete files style =x.x.x maybe need uncomment next line
+        # if you get obsolete files style =x.x.x maybe need uncomment next line
         # module = str(module).replace('>', '=')
         self._ensure_virtualenv()
         self.debug(f'Install requirement {module} in virtualenv')
