@@ -93,14 +93,12 @@ class TargetOSX(Target):
 
     def _install_application_requirement(self, module):
         self.buildozer._ensure_virtualenv()
-        if 'osx' in '{}'.format(self.buildozer.target):
-            if 'kivy' in '{}'.format(module) or 'buildozer' in '{}'.format(module):
-                self.buildozer.debug('Install requirement {} in virtualenv ignored for target: osx'.format(module))
-                return
+        if 'kivy' in '{}'.format(module) or 'buildozer' in '{}'.format(module):
+            self.buildozer.debug('Install requirement {} in virtualenv ignored for target: osx'.format(module))
+            return
 
         self.buildozer.debug('Install requirement {} in virtualenv'.format(module))
         cwd = join(self.buildozer.platform_dir, 'kivy-sdk-packager-master', 'osx')
-        # self.buildozer.cmd(['Kivy.app/Contents/Resources/script', '-m', 'pip', 'install', '--upgrade', 'pip'], cwd=cwd)
         self.buildozer.cmd(['Kivy.app/Contents/Resources/script', '-m', 'pip', 'install', '--upgrade', '--force-reinstall', '--target={}/_applibs'.format(self.buildozer.app_dir), '{}'.format(module)],
                            cwd=cwd)
 
