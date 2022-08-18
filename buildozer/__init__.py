@@ -159,7 +159,7 @@ class Buildozer:
     def prepare_for_build(self):
         '''Prepare the build.
         '''
-        assert(self.target is not None)
+        assert self.target is not None
         if hasattr(self.target, '_build_prepared'):
             return
 
@@ -190,8 +190,8 @@ class Buildozer:
 
         (:meth:`prepare_for_build` must have been call before.)
         '''
-        assert(self.target is not None)
-        assert(hasattr(self.target, '_build_prepared'))
+        assert self.target is not None
+        assert hasattr(self.target, '_build_prepared')
 
         if hasattr(self.target, '_build_done'):
             return
