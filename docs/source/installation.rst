@@ -37,7 +37,7 @@ To use buildozer in Windows you need first to enable Windows Subsystem for Linux
 
 These instructions were tested with WSL 1 and Ubuntu 18.04 LTS, and WSL2 with Ubuntu 20.04 and 22.04. 
 
-After installing WSL and Ubuntu in your Windows machine, open Ubuntu and run the commands listed on the previous section and restart your WSL terminal to enable the path change.
+After installing WSL and Ubuntu on your Windows machine, open Ubuntu, run the commands listed in the previous section, and restart your WSL terminal to enable the path change.
 
 Copy your Kivy project directory from the Windows partition to the WSL partition, and follow the Quickstart Instructions. **Do not** change to the project directory on the Windows partition and build there, this may give unexpected and obscure fails. 
 
