@@ -881,7 +881,7 @@ class TargetAndroid(Target):
         presplash_color = self.buildozer.config.getdefault('app', 'android.presplash_color', None)
         if presplash_color:
             cmd.append('--presplash-color')
-            cmd.append("'{}'".format(presplash_color))
+            cmd.append("{}".format(presplash_color))
 
         # support for services
         services = self.buildozer.config.getlist('app', 'services', [])
