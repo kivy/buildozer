@@ -14,49 +14,34 @@ First, install the buildozer project with::
 Targeting Android
 -----------------
 
-Android on Ubuntu 20.04 (64bit)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Android on Ubuntu 20.04 and 22.04 (64bit)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 (expected to work as well in later version, but only regularly tested in the latest LTS)
 
 ::
 
     sudo apt update
-    sudo apt install -y git zip unzip openjdk-13-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+    sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
     pip3 install --user --upgrade Cython==0.29.19 virtualenv  # the --user should be removed if you do this in a venv
 
     # add the following line at the end of your ~/.bashrc file
     export PATH=$PATH:~/.local/bin/
+    
+If openjdk-17 is not compatible with other installed programs, for Buildozer the minimum compatible openjdk version is 11. 
 
-Android on Windows 10
-~~~~~~~~~~~~~~~~~~~~~
+Android on Windows 10 or 11
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To use buildozer in Windows 10 you need first to enable Windows Subsystem for Linux (WSL) and install a Linux distribution: https://docs.microsoft.com/en-us/windows/wsl/install-win10.
+To use buildozer in Windows you need first to enable Windows Subsystem for Linux (WSL) and install a Linux distribution: https://docs.microsoft.com/en-us/windows/wsl/install.
 
-These instructions were tested with WSL 1 and Ubuntu 18.04 LTS. 
+These instructions were tested with WSL 1 and Ubuntu 18.04 LTS, and WSL2 with Ubuntu 20.04 and 22.04. 
 
-After installing WSL and Ubuntu in your Windows 10 machine, open Ubuntu and do this:
+After installing WSL and Ubuntu on your Windows machine, open Ubuntu, run the commands listed in the previous section, and restart your WSL terminal to enable the path change.
 
-1) Run the commands listed on the previous section (Android in Ubuntu 18.04 (64-bit).
-2) Run the following commands:
+Copy your Kivy project directory from the Windows partition to the WSL partition, and follow the Quickstart Instructions. **Do not** change to the project directory on the Windows partition and build there, this may give unexpected and obscure fails. 
 
-::
-
-    # Use here the python version you need
-    sudo apt install -y python3.7-venv
-    # Create a folder for buildozer. For example: C:\buildozer
-    mkdir /mnt/c/buildozer
-    cd /mnt/c/buildozer
-    python3.7 -m venv venv-buildozer
-    source venv/bin/activate
-    python -m pip install --upgrade pip
-    python -m pip install --upgrade wheel
-    python -m pip install --upgrade cython 
-    python -m pip install --upgrade virtualenv 
-    python -m pip install --upgrade buildozer
-    # Restart your WSL terminal to enable the path change
-
-Windows Subsystem for Linux does not have direct access to USB. Due to this, you need to install the Windows version of ADB (Android Debug Bridge):
+For debugging, WSL does not have direct access to USB. Copy the .apk file to the Windows partition and run ADB (Android Debug Bridge) from a Windows prompt. ADB is part of Android Studio, if you do not have this installed you can install just the platform tools which also contain ADB. 
 
 - Go to https://developer.android.com/studio/releases/platform-tools and click on "Download SDK Platform-Tools for Windows".
 
