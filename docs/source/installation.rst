@@ -41,7 +41,7 @@ After installing WSL and Ubuntu on your Windows machine, open Ubuntu, run the co
 
 Copy your Kivy project directory from the Windows partition to the WSL partition, and follow the Quickstart Instructions. **Do not** change to the project directory on the Windows partition and build there, this may give unexpected and obscure fails. 
 
-For debugging, WSL does not have direct access to USB. Copy the .apk file to the Windows partition and run  ADB (Android Debug Bridge) from a Windows prompt. ADB is part of Andriod Studio, if you do not have this installed you can install just the platform tools which also contain ADB. 
+For debugging, WSL does not have direct access to USB. Copy the .apk file to the Windows partition and run ADB (Android Debug Bridge) from a Windows prompt. ADB is part of Android Studio, if you do not have this installed you can install just the platform tools which also contain ADB. 
 
 - Go to https://developer.android.com/studio/releases/platform-tools and click on "Download SDK Platform-Tools for Windows".
 
