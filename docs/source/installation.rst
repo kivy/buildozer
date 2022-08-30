@@ -27,6 +27,8 @@ Android on Ubuntu 20.04 and 22.04 (64bit)
 
     # add the following line at the end of your ~/.bashrc file
     export PATH=$PATH:~/.local/bin/
+    
+If openjdk-17 is not compatible with other installed programs, for Buildozer the minimum compatible openjdk version is 11. 
 
 Android on Windows 10 or 11
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
