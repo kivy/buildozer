@@ -186,6 +186,12 @@ fullscreen = 0
 # 2) android.add_assets = source_asset_path:destination_asset_relative_path
 #android.add_assets =
 
+# (list) Put these files in the apk res directory.
+# Either form may be used, and resources need not be in 'source.include_exts'.
+# 1) android.add_resources = source_resource_relative_path
+# 2) android.add_resources = source_resource_path:destination_resource_relative_path
+#android.add_resources =
+
 # (list) Gradle dependencies to add
 #android.gradle_dependencies =
 
