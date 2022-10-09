@@ -9,7 +9,7 @@ if sys.platform == 'win32':
 from platform import uname
 WSL = 'microsoft' in uname()[2].lower()
 
-ANDROID_API = '27'
+ANDROID_API = '31'
 ANDROID_MINAPI = '21'
 APACHE_ANT_VERSION = '1.9.4'
 
