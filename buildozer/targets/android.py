@@ -931,6 +931,17 @@ class TargetAndroid(Target):
                 asset_dest = asset
             cmd.append(realpath(expanduser(asset_src)) + ':' + asset_dest)
 
+        # support for res folder
+        resources = self.buildozer.config.getlist('app', 'android.add_resources', [])
+        for resource in resources:
+            cmd.append('--add-resource')
+            if ':' in resource:
+                resource_src, resource_dest = resource.split(":")
+            else:
+                resource_src = resource
+                resource_dest = resource
+            cmd.append(realpath(expanduser(resource_src)) + ':' + resource_dest)
+
         # support for uses-lib
         uses_library = self.buildozer.config.getlist(
             'app', 'android.uses_library', '')
