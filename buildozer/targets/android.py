@@ -939,7 +939,7 @@ class TargetAndroid(Target):
                 resource_src, resource_dest = resource.split(":")
             else:
                 resource_src = resource
-                resource_dest = resource
+                resource_dest = ""
             cmd.append(realpath(expanduser(resource_src)) + ':' + resource_dest)
 
         # support for uses-lib
