@@ -59,6 +59,7 @@ RUN apt update -qq > /dev/null \
     patch \
     pkg-config \
     python3-pip \
+    python3-venv \
     python3-setuptools \
     sudo \
     unzip \
@@ -76,6 +77,6 @@ WORKDIR ${WORK_DIR}
 COPY --chown=user:user . ${SRC_DIR}
 
 # installs buildozer and dependencies
-RUN pip3 install --user --upgrade Cython==0.29.19 wheel pip virtualenv ${SRC_DIR}
+RUN pip3 install --user --upgrade Cython==0.29.19 wheel pip ${SRC_DIR}
 
 ENTRYPOINT ["buildozer"]
