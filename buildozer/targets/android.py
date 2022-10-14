@@ -474,7 +474,7 @@ class TargetAndroid(Target):
             else:
                 ext = 'zip'
             archive = 'android-ndk-r{0}-' + _platform + '{1}.' + ext
-            is_64 = (os.uname()[4] == 'x86_64')
+            is_64 = ('64' in os.uname()[4])
         else:
             raise SystemError('Unsupported platform: {}'.format(platform))
 
