@@ -959,7 +959,7 @@ class TargetAndroid(Target):
         extra_manifest_xml = self.buildozer.config.getdefault(
             'app', 'android.extra_manifest_xml', '')
         if extra_manifest_xml:
-            cmd.append('--extra-manifest-xml="{}"'.format(open(extra_manifest_xml, 'rt').read()))
+            cmd.append('--extra-manifest-xml="{}"'.format(open(extra_manifest_xml, 'rt').read().replace('"', '\\"')))
 
         # support for extra-manifest-application-arguments
         extra_manifest_application_arguments = self.buildozer.config.getdefault(
@@ -967,6 +967,13 @@ class TargetAndroid(Target):
         if extra_manifest_application_arguments:
             args_body = open(extra_manifest_application_arguments, 'rt').read().replace('"', '\\"').replace('\n', ' ').replace('\t', ' ')
             cmd.append('--extra-manifest-application-arguments="{}"'.format(args_body))
+            
+        # support for extra-manifest-application-xml
+        extra_manifest_application_xml = self.buildozer.config.getdefault(
+            'app', 'android.extra_manifest_application_xml', '')
+        if extra_manifest_application_xml:
+            args_body = open(extra_manifest_application_xml, 'rt').read().replace('"', '\\"')
+            cmd.append('--extra-manifest-application-xml="{}"'.format(args_body))
 
         # support for gradle dependencies
         gradle_dependencies = self.buildozer.config.getlist('app', 'android.gradle_dependencies', [])

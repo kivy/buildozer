@@ -151,6 +151,10 @@ fullscreen = 0
 # use that parameter to provide a filename from where to load your custom XML arguments:
 #android.extra_manifest_application_arguments = ./src/android/extra_manifest_application_arguments.xml
 
+# (str) Extra xml to write directly inside the <application> element of AndroidManifest.xml
+# use that parameter to provide a filename from where to load your custom XML arguments:
+# android.extra_manifest_application_xml = ./src/android/extra_manifest_application.xml
+
 # (str) Full name including package path of the Java class that implements Python Service
 # use that parameter to set custom Java class instead of PythonService
 #android.service_class_name = org.kivy.android.PythonService
