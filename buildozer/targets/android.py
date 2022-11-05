@@ -1258,7 +1258,7 @@ class TargetAndroid(Target):
         # AndroidX ?
         enable_androidx = config.getbooldefault('app',
                                                 'android.enable_androidx',
-                                                False)
+                                                self.android_api > 28)
         if enable_androidx:
             build_cmd += [("--enable-androidx", )]
 
