@@ -283,8 +283,8 @@ android.allow_backup = True
 # Usage example : android.manifest_placeholders = [myCustomUrl:\"org.kivy.customurl\"]
 # android.manifest_placeholders = [:]
 
-# (bool) disables the compilation of py to pyc/pyo files when packaging
-# android.no-compile-pyo = True
+# (bool) Skip byte compile for .py files
+# android.no-byte-compile-python = False
 
 # (str) The format used to package the app for release mode (aab or apk or aar).
 # android.release_artifact = aab
