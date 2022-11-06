@@ -980,10 +980,10 @@ class TargetAndroid(Target):
             cmd.append('--manifest-placeholders')
             cmd.append("{}".format(manifest_placeholders))
 
-        # support disabling of compilation
-        compile_py = self.buildozer.config.getdefault('app', 'android.no-compile-pyo', None)
-        if compile_py:
-            cmd.append('--no-compile-pyo')
+        # support disabling of byte compile for .py files
+        no_byte_compile = self.buildozer.config.getdefault('app', 'android.no-byte-compile-python', False)
+        if no_byte_compile:
+            cmd.append('--no-byte-compile-python')
 
         for arch in self._archs:
             cmd.append('--arch')
