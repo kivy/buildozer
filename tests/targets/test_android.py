@@ -230,6 +230,7 @@ class TestTargetAndroid:
                     ("--android-apptheme", "@android:style/Theme.NoTitleBar"),
                     ("--orientation", "portrait"),
                     ("--window",),
+                    ('--enable-androidx',),
                     ("debug",),
                 ]
             )
@@ -324,6 +325,7 @@ class TestTargetAndroid:
                     ("--android-apptheme", "@android:style/Theme.NoTitleBar"),
                     ("--orientation", "portrait"),
                     ("--window",),
+                    ('--enable-androidx',),
                     ("--numeric-version", "1234"),
                     ("debug",),
                 ]
@@ -359,6 +361,7 @@ class TestTargetAndroid:
                     ('--android-apptheme', '@android:style/Theme.NoTitleBar'),
                     ('--orientation', 'portrait'),
                     ('--window',),
+                    ('--enable-androidx',),
                     ('--intent-filters', os.path.realpath(filters_path)),
                     ('debug',),
                 ]
@@ -385,6 +388,7 @@ class TestTargetAndroid:
                     ("--android-apptheme", "@android:style/Theme.NoTitleBar"),
                     ("--orientation", "portrait"),
                     ("--window",),
+                    ('--enable-androidx',),
                     ("--allow-backup", "false"),
                     ("debug",),
                 ]
@@ -411,6 +415,7 @@ class TestTargetAndroid:
                     ("--android-apptheme", "@android:style/Theme.NoTitleBar"),
                     ("--orientation", "portrait"),
                     ("--window",),
+                    ('--enable-androidx',),
                     ("--backup-rules", "{root_dir}/backup_rules.xml".format(root_dir=buildozer.root_dir)),
                     ("debug",),
                 ]
