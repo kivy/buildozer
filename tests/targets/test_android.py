@@ -462,3 +462,55 @@ class TestTargetAndroid:
         assert mock.call(
             ["git", "clone", "-b", "master", "--single-branch", "https://github.com/kivy/python-for-android.git", "python-for-android"],
             cwd=mock.ANY) in m_cmd.call_args_list
+
+    def test_orientation(self):
+        target_android = init_target(self.temp_dir, {
+            "orientation": "portrait,portrait-reverse"
+        })
+        buildozer = target_android.buildozer
+        m_execute_build_package = call_build_package(target_android)
+        assert m_execute_build_package.call_args_list == [
+            mock.call(
+                [
+                    ("--name", "My Application"),
+                    ("--version", "0.1"),
+                    ("--package", "org.test.myapp"),
+                    ("--minsdk", "21"),
+                    ("--ndk-api", "21"),
+                    ("--private", "{buildozer_dir}/android/app".format(buildozer_dir=buildozer.buildozer_dir)),
+                    ("--android-entrypoint", "org.kivy.android.PythonActivity"),
+                    ("--android-apptheme", "@android:style/Theme.NoTitleBar"),
+                    ("--orientation", "portrait"),
+                    ("--orientation", "portrait-reverse"),
+                    ("--window",),
+                    ('--enable-androidx',),
+                    ("debug",),
+                ]
+            )
+        ]
+
+    def test_manifest_orientation(self):
+        target_android = init_target(self.temp_dir, {
+            "android.manifest.orientation": "fullSensor"
+        })
+        buildozer = target_android.buildozer
+        m_execute_build_package = call_build_package(target_android)
+        assert m_execute_build_package.call_args_list == [
+            mock.call(
+                [
+                    ("--name", "My Application"),
+                    ("--version", "0.1"),
+                    ("--package", "org.test.myapp"),
+                    ("--minsdk", "21"),
+                    ("--ndk-api", "21"),
+                    ("--private", "{buildozer_dir}/android/app".format(buildozer_dir=buildozer.buildozer_dir)),
+                    ("--android-entrypoint", "org.kivy.android.PythonActivity"),
+                    ("--android-apptheme", "@android:style/Theme.NoTitleBar"),
+                    ("--orientation", "portrait"),
+                    ("--window",),
+                    ('--enable-androidx',),
+                    ("--manifest-orientation", "fullSensor"),
+                    ("debug",),
+                ]
+            )
+        ]

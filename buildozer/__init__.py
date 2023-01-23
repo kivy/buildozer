@@ -410,10 +410,10 @@ class Buildozer:
             adderror('[app] "version.filename" is missing'
                      ', required by "version.regex"')
 
-        orientation = get('app', 'orientation', 'landscape')
-        if orientation not in ('landscape', 'portrait', 'all', 'sensorLandscape'):
-            adderror('[app] "orientation" have an invalid value')
-
+        orientation = self.config.getlist("app", "orientation", ["landscape"])
+        for o in orientation:
+            if o not in ("landscape", "portrait", "landscape-reverse", "portrait-reverse"):
+                adderror(f'[app] "{o}" is not a valid  value for "orientation"')
         if errors:
             self.error('{0} error(s) found in the buildozer.spec'.format(
                 len(errors)))

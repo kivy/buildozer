@@ -1257,10 +1257,9 @@ class TargetAndroid(Target):
 
         if config.getdefault('app', 'p4a.bootstrap', 'sdl2') != 'service_only':
             # add orientation
-            orientation = config.getdefault('app', 'orientation', 'landscape')
-            if orientation == 'all':
-                orientation = 'sensor'
-            build_cmd += [("--orientation", orientation)]
+            orientation = config.getlist('app', 'orientation', ['landscape'])
+            for orient in orientation:
+                build_cmd += [("--orientation", orient)]
 
             # fullscreen ?
             fullscreen = config.getbooldefault('app', 'fullscreen', True)
@@ -1291,6 +1290,12 @@ class TargetAndroid(Target):
             'app', 'android.manifest.launch_mode', '')
         if launch_mode:
             build_cmd += [("--activity-launch-mode", launch_mode)]
+
+        # screenOrientation
+        manifest_orientation = config.getdefault(
+            'app', 'android.manifest.orientation', '')
+        if manifest_orientation:
+            build_cmd += [("--manifest-orientation", manifest_orientation)]
 
         # numeric version
         numeric_version = config.getdefault('app', 'android.numeric_version')
