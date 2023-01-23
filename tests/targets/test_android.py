@@ -176,7 +176,7 @@ class TestTargetAndroid:
             "buildozer.targets.android.Target.check_configuration_tokens"
         ) as m_check_configuration_tokens:
             target_android.check_configuration_tokens()
-        assert m_check_configuration_tokens.call_args_list == [mock.call([])]
+        assert m_check_configuration_tokens.call_args_list == [mock.call()]
 
     @pytest.mark.parametrize("platform", ["linux", "darwin"])
     def test_install_android_sdk(self, platform):

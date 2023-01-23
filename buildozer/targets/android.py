@@ -303,66 +303,12 @@ class TargetAndroid(Target):
         checkbin('Java compiler (javac)', self.javac_cmd)
         checkbin('Java keytool (keytool)', self.keytool_cmd)
 
-    def check_configuration_tokens(self):
-        errors = []
-
-        # check the permission
-        available_permissions = self._get_available_permissions()
-        if available_permissions:
-            permissions = self.buildozer.config.getlist(
-                'app', 'android.permissions', [])
-            for permission in permissions:
-                # no check on full named permission
-                # like com.google.android.providers.gsf.permission.READ_GSERVICES
-                if '.' in permission:
-                    continue
-                permission = permission.upper()
-                if permission not in available_permissions:
-                    errors.append(
-                        '[app] "android.permission" contain an unknown'
-                        ' permission {0}'.format(permission))
-
-        super().check_configuration_tokens(errors)
-
     def _p4a_have_aab_support(self):
         returncode = self._p4a(["aab", "-h"], break_on_error=False)[2]
         if returncode == 0:
             return True
         else:
             return False
-
-    def _get_available_permissions(self):
-        key = 'android:available_permissions'
-        key_sdk = 'android:available_permissions_sdk'
-
-        current_platform_tools = self._android_get_installed_platform_tools_version()
-
-        refresh_permissions = False
-        sdk = self.buildozer.state.get(key_sdk, None)
-        if not sdk or sdk != current_platform_tools:
-            refresh_permissions = True
-        if key not in self.buildozer.state:
-            refresh_permissions = True
-        if not refresh_permissions:
-            return self.buildozer.state[key]
-
-        try:
-            self.buildozer.debug(
-                'Read available permissions from api-versions.xml')
-            import xml.etree.ElementTree as ET
-            fn = join(self.android_sdk_dir, 'platform-tools', 'api',
-                      'api-versions.xml')
-            with io.open(fn, encoding='utf-8') as fd:
-                doc = ET.fromstring(fd.read())
-            fields = doc.findall(
-                './/class[@name="android/Manifest$permission"]/field[@name]')
-            available_permissions = [x.attrib['name'] for x in fields]
-
-            self.buildozer.state[key] = available_permissions
-            self.buildozer.state[key_sdk] = current_platform_tools
-            return available_permissions
-        except:
-            return None
 
     def _set_win32_java_home(self):
         if 'JAVA_HOME' in self.buildozer.environ:
@@ -520,38 +466,6 @@ class TargetAndroid(Target):
             build_tools_versions.append(parse(version))
 
         return build_tools_versions
-
-    def _android_get_installed_platform_tools_version(self):
-        """
-        Crudely parse out the installed platform-tools version
-        """
-
-        platform_tools_dir = os.path.join(
-            self.android_sdk_dir,
-            'platform-tools')
-
-        if not os.path.exists(platform_tools_dir):
-            return None
-
-        data_file = os.path.join(platform_tools_dir, 'source.properties')
-        if not os.path.exists(data_file):
-            return None
-
-        with open(data_file, 'r') as fileh:
-            lines = fileh.readlines()
-
-        for line in lines:
-            if line.startswith('Pkg.Revision='):
-                break
-        else:
-            self.buildozer.error('Read {} but found no Pkg.Revision'.format(data_file))
-            # Don't actually exit, in case the build env is
-            # okay. Something else will fault if it's important.
-            return None
-
-        revision = line.split('=')[1].strip()
-
-        return revision
 
     def _android_update_sdk(self, *sdkmanager_commands):
         """Update the tools and package-tools if possible"""
@@ -1155,10 +1069,6 @@ class TargetAndroid(Target):
         # add permissions
         permissions = config.getlist('app', 'android.permissions', [])
         for permission in permissions:
-            # force the latest component to be uppercase
-            permission = permission.split('.')
-            permission[-1] = permission[-1].upper()
-            permission = '.'.join(permission)
             build_cmd += [("--permission", permission)]
 
         # add features
