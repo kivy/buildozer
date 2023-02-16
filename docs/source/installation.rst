@@ -61,13 +61,7 @@ Android on macOS
 
 ::
 
-    brew install openssl
-    sudo ln -sfn /usr/local/opt/openssl /usr/local/ssl
-    brew install pkg-config autoconf automake
     python3 -m pip install --user --upgrade Cython==0.29.33 virtualenv  # the --user should be removed if you do this in a venv
-
-    # add the following line at the end of your `~/.bashrc` file
-    export PATH=$PATH:~/Library/Python/3.7/bin
 
 
 TroubleShooting
