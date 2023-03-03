@@ -813,6 +813,10 @@ class TargetAndroid(Target):
         if self.buildozer.config.getbooldefault('app', 'android.copy_libs', True):
             cmd.append("--copy-libs")
 
+        # Home-app usage
+        if self.buildozer.config.getbooldefault('app', 'android.home_app', False):
+            cmd.append("--home-app")
+
         # support for recipes in a local directory within the project
         if local_recipes:
             cmd.append('--local-recipes')

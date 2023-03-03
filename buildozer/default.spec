@@ -163,6 +163,9 @@ fullscreen = 0
 # (list) Pattern to whitelist for the whole project
 #android.whitelist =
 
+# (bool) If True, your application will become into a launcher/home-app
+# android.home_app = False
+
 # (str) Path to a custom whitelist file
 #android.whitelist_src =
 
