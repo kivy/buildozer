@@ -129,5 +129,5 @@ Section [app]
 
 - `home_app`: Boolean, Home App (launcher app) usage.
 
-  Defaults to false, your application will be listed as a Home App (launcher app).
+  Defaults to false, your application will be listed as a Home App (launcher app) if true.
 
