@@ -127,3 +127,7 @@ Section [app]
   bar will be hidden. If you want to let the user access the status bar,
   hour, notifications, use 0 as a value.
 
+- `home_app`: Boolean, Home App (launcher app) usage.
+
+  Defaults to false, your application will be listed as a Home App (launcher app).
+
