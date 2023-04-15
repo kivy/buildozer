@@ -6,8 +6,10 @@ import sys
 import plistlib
 from buildozer import BuildozerCommandException
 from buildozer.target import Target, no_config
+from os import environ
 from os.path import join, basename, expanduser, realpath
 from getpass import getpass
+from setuptools.config import read_configuration
 
 
 PHP_TEMPLATE = '''
@@ -78,7 +80,6 @@ class TargetIos(Target):
         checkbin('Xcode xcodebuild', 'xcodebuild')
         checkbin('Xcode xcode-select', 'xcode-select')
         checkbin('Git git', 'git')
-        checkbin('Cython cython', 'cython')
         checkbin('pkg-config', 'pkg-config')
         checkbin('autoconf', 'autoconf')
         checkbin('automake', 'automake')
@@ -100,12 +101,31 @@ class TargetIos(Target):
             raise Exception('Unable to get xcode path')
         self.buildozer.debug(' -> found {0}'.format(xcode))
 
+    def install_requirements(self, repo: str):
+        self.buildozer.info('Installing {} dependencies'.format(repo))
+
+        if 'VIRTUAL_ENV' in environ or 'CONDA_PREFIX' in environ:
+            options = ''
+        else:
+            options = '--user'
+        
+        cfg_path = join(self.buildozer.platform_dir, repo, 'setup.cfg')
+        config = read_configuration(cfg_path)
+
+        requirements = ''
+        for r in config['options']['install_requires']:
+            requirements += f' "{r}"'
+
+        self.buildozer.cmd(f'pip install {options} {requirements}')
+
     def install_platform(self):
         """
         Clones `kivy/kivy-ios` and `phonegap/ios-deploy` then sets `ios_dir`
         and `ios_deploy_dir` accordingly.
         """
         self.ios_dir = self.install_or_update_repo('kivy-ios', platform='ios')
+        self.install_requirements('kivy-ios')
+
         self.ios_deploy_dir = self.install_or_update_repo('ios-deploy',
                                                           platform='ios',
                                                           branch='1.7.0',
