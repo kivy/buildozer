@@ -513,8 +513,14 @@ class Buildozer:
         self.state['cache.applibs'] = requirements
 
     def _install_application_requirement(self, module):
+        # ignore *.spec requirements for osx target, uses requirements.txt section of target
+        if  'osx' in f'{self.target}':
+            return
+
+        # if you get obsolete files style =x.x.x maybe need uncomment next line
+        # module = str(module).replace('>', '=')
         self._ensure_virtualenv()
-        self.debug('Install requirement {} in virtualenv'.format(module))
+        self.debug(f'Install requirement {module} in virtualenv')
         self.cmd(
             ["pip", "install", f"--target={self.applibs_dir}", module],
             env=self.env_venv,

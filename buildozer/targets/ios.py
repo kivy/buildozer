@@ -8,6 +8,7 @@ from buildozer import BuildozerCommandException
 from buildozer.target import Target, no_config
 from os.path import join, basename, expanduser, realpath
 from getpass import getpass
+from PIL import Image
 
 
 PHP_TEMPLATE = '''
@@ -299,14 +300,19 @@ class TargetIos(Target):
         self.buildozer.info('Creating IPA...')
         self.xcodebuild(
             '-exportArchive',
-            f'-archivePath "{xcarchive}"',
-            f'-exportOptionsPlist "{plist_rfn}"',
-            f'-exportPath "{ipa_tmp}"',
+            '-archivePath',
+            xcarchive,
+            '-exportOptionsPlist',
+            plist_rfn,
+            '-exportPath',
+            ipa_tmp,
             f'CODE_SIGN_IDENTITY={ioscodesign}',
             'ENABLE_BITCODE=NO',
             cwd=build_dir)
 
         self.buildozer.info('Moving IPA to bin...')
+        # clean out dir
+        self.buildozer.rmdir(ipa)
         self.buildozer.file_rename(ipa_tmp, ipa)
 
         self.buildozer.info('iOS packaging done!')
@@ -360,7 +366,18 @@ class TargetIos(Target):
         icon = self.buildozer.config.getdefault('app', 'icon.filename', '')
         if not icon:
             return
-        icon_fn = join(self.buildozer.app_dir, icon)
+
+        # get icon size and make it for god for not get err
+        img = Image.open(icon)
+        if img.height != 72 or img.width != 72 or not str(icon).endswith('.png'):
+            self.buildozer.debug('Icon size as bad format try to make a new format: {}/{} to 72/72.'.format(img.height, img.width))
+            size = 72, 72
+            img = img.resize(size, Image.ANTIALIAS)
+            img.save(join(self.app_project_dir, 'icon.png'), "PNG")
+        else:
+            self.buildozer.cmd(['cp', icon, f'{self.app_project_dir}/icon.png'])
+
+        icon_fn = join(self.app_project_dir, 'icon.png')
         if not self.buildozer.file_exists(icon_fn):
             self.buildozer.error('Icon {} does not exists'.format(icon_fn))
             return
