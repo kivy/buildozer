@@ -32,49 +32,42 @@ class TargetOSX(Target):
         check_call(('unzip', 'master.zip'), cwd=platdir)
         check_call(('rm', 'master.zip'), cwd=platdir)
 
-    def download_kivy(self, cwd, py_branch=2):
+    def download_kivy(self, cwd):
         current_kivy_vers = self.buildozer.config.get('app', 'osx.kivy_version')
 
-        if exists('/Applications/Kivy{}.app'.format(py_branch)):
+        if exists('/Applications/Kivy.app'):
             self.buildozer.info('Kivy found in Applications dir...')
             check_call(
-                ('cp', '-a', '/Applications/Kivy{}.app'.format(py_branch),
+                ('cp', '-a', '/Applications/Kivy.app',
                 'Kivy.app'), cwd=cwd)
 
         else:
-            if not exists(join(cwd, 'Kivy{}.dmg'.format(py_branch))):
+            if not exists(join(cwd, 'Kivy.dmg')):
                 self.buildozer.info('Downloading kivy...')
                 status_code = check_output(
-                    ('curl', '-L', '--write-out', '%{http_code}', '-o', 'Kivy{}.dmg'.format(py_branch),
-                    'https://kivy.org/downloads/{}/Kivy-{}-osx-python{}.dmg'
-                    .format(current_kivy_vers, current_kivy_vers, py_branch)),
+                    ('curl', '-L', '--write-out', '%{http_code}', '-o', 'Kivy.dmg',
+                    f'https://kivy.org/downloads/{current_kivy_vers}/Kivy.dmg'),
                     cwd=cwd)
 
                 if status_code == "404":
                     self.buildozer.error(
                         "Unable to download the Kivy App. Check osx.kivy_version in your buildozer.spec, and verify "
                         "Kivy servers are accessible. https://kivy.org/downloads/")
-                    check_call(("rm", "Kivy{}.dmg".format(py_branch)), cwd=cwd)
+                    check_call(("rm", "Kivy.dmg"), cwd=cwd)
                     sys.exit(1)
 
             self.buildozer.info('Extracting and installing Kivy...')
-            check_call(('hdiutil', 'attach', cwd + '/Kivy{}.dmg'.format(py_branch)))
+            check_call(('hdiutil', 'attach', cwd + '/Kivy.dmg'))
             check_call(('cp', '-a', '/Volumes/Kivy/Kivy.app', './Kivy.app'), cwd=cwd)
 
     def ensure_kivyapp(self):
         self.buildozer.info('check if Kivy.app exists in local dir')
         kivy_app_dir = join(self.buildozer.platform_dir, 'kivy-sdk-packager-master', 'osx')
 
-        py_branch = self.buildozer.config.get('app', 'osx.python_version')
-
-        if not int(py_branch) in (2, 3):
-            self.buildozer.error('incompatible python version... aborting')
-            sys.exit(1)
-
         if exists(join(kivy_app_dir, 'Kivy.app')):
             self.buildozer.info('Kivy.app found at ' + kivy_app_dir)
         else:
-            self.download_kivy(kivy_app_dir, py_branch)
+            self.download_kivy(kivy_app_dir)
 
     def check_requirements(self):
         self.ensure_sdk()
@@ -97,6 +90,7 @@ class TargetOSX(Target):
         bc = self.buildozer.config
         bcg = bc.get
         package_name = bcg('app', 'package.name')
+        pyver = bcg('app', 'osx.python_version')
         domain = bcg('app', 'package.domain')
         title = bcg('app', 'title')
         app_deps = open('requirements.txt').read()
@@ -117,7 +111,7 @@ class TargetOSX(Target):
         check_output(cmd, cwd=cwd)
 
         cmd = [
-            'python', 'package_app.py', self.buildozer.app_dir,
+            f'python{pyver}', 'package_app.py', self.buildozer.app_dir,
             '--appname={}'.format(package_name),
              '--bundlename={}'.format(title),
              '--bundleid={}'.format(domain),
@@ -134,7 +128,7 @@ class TargetOSX(Target):
         self.buildozer.info('{}.app created.'.format(package_name))
         self.buildozer.info('Creating {}.dmg'.format(package_name))
         check_output(
-            ('sh', '-x', 'create-osx-dmg.sh', package_name + '.app'),
+            ('sh', '-x', 'create-osx-dmg.sh', package_name + '.app', package_name, '-s', '1'),
             cwd=cwd)
         self.buildozer.info('{}.dmg created'.format(package_name))
         self.buildozer.info('moving {}.dmg to bin.'.format(package_name))
@@ -169,7 +163,7 @@ class TargetOSX(Target):
         return result
 
     def get_available_packages(self):
-        return ['kivy']
+        return ['kivy', 'python3']
 
     def run_commands(self, args):
         if not args:
