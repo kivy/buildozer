@@ -90,7 +90,6 @@ class TargetOSX(Target):
         bc = self.buildozer.config
         bcg = bc.get
         package_name = bcg('app', 'package.name')
-        pyver = bcg('app', 'osx.python_version')
         domain = bcg('app', 'package.domain')
         title = bcg('app', 'title')
         app_deps = open('requirements.txt').read()
@@ -111,7 +110,7 @@ class TargetOSX(Target):
         check_output(cmd, cwd=cwd)
 
         cmd = [
-            f'python{pyver}', 'package_app.py', self.buildozer.app_dir,
+            sys.executable, 'package_app.py', self.buildozer.app_dir,
             '--appname={}'.format(package_name),
              '--bundlename={}'.format(title),
              '--bundleid={}'.format(domain),
