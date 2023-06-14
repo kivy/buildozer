@@ -1063,13 +1063,8 @@ class TargetAndroid(Target):
                                            self.android_minapi)),
             ("--ndk-api", config.getdefault('app', 'android.minapi',
                                             self.android_minapi)),
+            ("--private", self.buildozer.app_dir),
         ]
-        is_private_storage = config.getbooldefault(
-            'app', 'android.private_storage', True)
-        if is_private_storage:
-            build_cmd += [("--private", self.buildozer.app_dir)]
-        else:
-            build_cmd += [("--dir", self.buildozer.app_dir)]
 
         # add permissions
         permissions = config.getlist('app', 'android.permissions', [])

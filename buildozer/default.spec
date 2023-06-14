@@ -115,9 +115,6 @@ fullscreen = 0
 # (int) Android NDK API to use. This is the minimum API your app will support, it should usually match android.minapi.
 #android.ndk_api = 21
 
-# (bool) Use --private data storage (True) or --dir public storage (False)
-#android.private_storage = True
-
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
 #android.ndk_path =
 
@@ -371,7 +368,7 @@ ios.kivy_ios_branch = master
 #ios.ios_deploy_dir = ../ios_deploy
 # Or specify URL and branch
 ios.ios_deploy_url = https://github.com/phonegap/ios-deploy
-ios.ios_deploy_branch = 1.10.0
+ios.ios_deploy_branch = 1.12.2
 
 # (bool) Whether or not to sign the code
 ios.codesign.allowed = false

@@ -129,7 +129,7 @@ class TestTargetIos:
                     "git",
                     "clone",
                     "--branch",
-                    "1.10.0",
+                    "1.12.2",
                     "https://github.com/phonegap/ios-deploy",
                 ],
                 cwd=mock.ANY,
