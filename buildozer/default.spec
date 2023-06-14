@@ -163,6 +163,13 @@ fullscreen = 0
 # (bool) If True, your application will be listed as a home app (launcher app)
 # android.home_app = False
 
+# (str) Defaults to never for ignoring cutouts/notch
+# A display cutout is an area on some devices that extends into the display surface.
+# It allows for an edge-to-edge experience while providing space for important sensors on the front of the device.
+# Available options for Android API >= 28 are default, shortEdges, never and defaults to never.
+# Android documentation: https://developer.android.com/develop/ui/views/layout/display-cutout
+#android.display_cutout = never
+
 # (str) Path to a custom whitelist file
 #android.whitelist_src =
 
