@@ -823,8 +823,8 @@ class TargetAndroid(Target):
             cmd.append("--display-cutout={}".format(display_cutout))
         else:
             raise BuildozerException(
-                ("You have stated the wrong option for android.display_cutout. "
-                 "One of the following options are required: 'default', 'shortEdges' and 'never'.")
+                "You have stated the wrong option for android.display_cutout. "
+                "One of the following options are required: 'default', 'shortEdges' and 'never'.")
 
         # support for recipes in a local directory within the project
         if local_recipes:
