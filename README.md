@@ -73,7 +73,7 @@ A Dockerfile is available to use buildozer through a Docker environment.
 
 
 ### Example Build with Caching
-Build and keep downloaded SDK and NDK in `~/.buildozer` directory: 
+- Build and keep downloaded SDK and NDK in `~/.buildozer` directory: 
 
       docker run -v $HOME/.buildozer:/home/user/.buildozer -v $(pwd):/home/user/hostcwd kivy/buildozer android debug
 
