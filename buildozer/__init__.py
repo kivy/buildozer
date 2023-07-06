@@ -912,9 +912,6 @@ class Buildozer:
                 yield target, m
             except NotImplementedError:
                 pass
-            except:
-                raise
-                pass
 
     def usage(self):
         print('Usage:')
