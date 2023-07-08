@@ -22,8 +22,8 @@ def patch_buildozer_file_exists():
     return patch_buildozer("file_exists")
 
 
-def patch_buildozer_error():
-    return patch_buildozer("error")
+def patch_logger_error():
+    return mock.patch("buildozer.logger.Logger.error")
 
 
 def default_specfile_path():

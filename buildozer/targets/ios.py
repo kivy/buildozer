@@ -84,7 +84,7 @@ class TargetIos(Target):
         checkbin('automake', 'automake')
         checkbin('libtool', 'libtool')
 
-        self.buildozer.debug('Check availability of a iPhone SDK')
+        self.logger.debug('Check availability of a iPhone SDK')
         sdk = cmd('xcodebuild -showsdks | fgrep "iphoneos" |'
                 'tail -n 1 | awk \'{print $2}\'',
                 get_stdout=True, shell=True)[0]
@@ -92,13 +92,13 @@ class TargetIos(Target):
             raise Exception(
                 'No iPhone SDK found. Please install at least one iOS SDK.')
         else:
-            self.buildozer.debug(' -> found %r' % sdk)
+            self.logger.debug(' -> found %r' % sdk)
 
-        self.buildozer.debug('Check Xcode path')
+        self.logger.debug('Check Xcode path')
         xcode = cmd(["xcode-select", "-print-path"], get_stdout=True)[0]
         if not xcode:
             raise Exception('Unable to get xcode path')
-        self.buildozer.debug(' -> found {0}'.format(xcode))
+        self.logger.debug(' -> found {0}'.format(xcode))
 
     def install_platform(self):
         """
@@ -167,12 +167,12 @@ class TargetIos(Target):
         if source_dirs:
             need_compile = 1
             self.buildozer.environ.update(source_dirs)
-            self.buildozer.info('Using custom source dirs:\n    {}'.format(
+            self.logger.info('Using custom source dirs:\n    {}'.format(
                 '\n    '.join(['{} = {}'.format(k, v)
                                for k, v in source_dirs.items()])))
 
         if not need_compile:
-            self.buildozer.info('Distribution already compiled, pass.')
+            self.logger.info('Distribution already compiled, pass.')
             return
 
         self.toolchain(["build", *ios_requirements])
@@ -214,7 +214,7 @@ class TargetIos(Target):
         plist_fn = '{}-Info.plist'.format(app_name.lower())
         plist_rfn = join(self.app_project_dir, plist_fn)
         version = self.buildozer.get_version()
-        self.buildozer.info('Update Plist {}'.format(plist_fn))
+        self.logger.info('Update Plist {}'.format(plist_fn))
         plist = self.load_plist_from_file(plist_rfn)
         plist['CFBundleIdentifier'] = self._get_package()
         plist['CFBundleShortVersionString'] = version
@@ -232,7 +232,7 @@ class TargetIos(Target):
         if any((app_url, display_image_url, full_size_image_url)):
 
             if not all((app_url, display_image_url, full_size_image_url)):
-                self.buildozer.error("Options ios.manifest.app_url, ios.manifest.display_image_url"
+                self.logger.error("Options ios.manifest.app_url, ios.manifest.display_image_url"
                                      " and ios.manifest.full_size_image_url should be defined all together")
                 return
 
@@ -270,7 +270,7 @@ class TargetIos(Target):
 
         self.buildozer.rmdir(intermediate_dir)
 
-        self.buildozer.info('Creating archive...')
+        self.logger.info('Creating archive...')
         self.xcodebuild(
             '-alltargets',
             '-configuration',
@@ -290,13 +290,13 @@ class TargetIos(Target):
         key = 'ios.codesign.{}'.format(self.build_mode)
         ioscodesign = self.buildozer.config.getdefault('app', key, '')
         if not ioscodesign:
-            self.buildozer.error('Cannot create the IPA package without'
+            self.logger.error('Cannot create the IPA package without'
                 ' signature. You must fill the "{}" token.'.format(key))
             return
         elif ioscodesign[0] not in ('"', "'"):
             ioscodesign = '"{}"'.format(ioscodesign)
 
-        self.buildozer.info('Creating IPA...')
+        self.logger.info('Creating IPA...')
         self.xcodebuild(
             '-exportArchive',
             f'-archivePath "{xcarchive}"',
@@ -306,11 +306,11 @@ class TargetIos(Target):
             'ENABLE_BITCODE=NO',
             cwd=build_dir)
 
-        self.buildozer.info('Moving IPA to bin...')
+        self.logger.info('Moving IPA to bin...')
         self.buildozer.file_rename(ipa_tmp, ipa)
 
-        self.buildozer.info('iOS packaging done!')
-        self.buildozer.info('IPA {0} available in the bin directory'.format(
+        self.logger.info('iOS packaging done!')
+        self.logger.info('IPA {0} available in the bin directory'.format(
             basename(ipa)))
         self.buildozer.state['ios:latestipa'] = ipa
         self.buildozer.state['ios:latestmode'] = self.build_mode
@@ -338,17 +338,17 @@ class TargetIos(Target):
     def _run_ios_deploy(self, lldb=False):
         state = self.buildozer.state
         if 'ios:latestappdir' not in state:
-            self.buildozer.error(
+            self.logger.error(
                 'App not built yet. Run "debug" or "release" first.')
             return
         ios_app_dir = state.get('ios:latestappdir')
 
         if lldb:
             debug_mode = '-d'
-            self.buildozer.info('Deploy and start the application')
+            self.logger.info('Deploy and start the application')
         else:
             debug_mode = ''
-            self.buildozer.info('Deploy the application')
+            self.logger.info('Deploy the application')
 
         self.buildozer.cmd(
             [join(self.ios_deploy_dir, "ios-deploy"), debug_mode, "-b", ios_app_dir],
@@ -362,7 +362,7 @@ class TargetIos(Target):
             return
         icon_fn = join(self.buildozer.app_dir, icon)
         if not self.buildozer.file_exists(icon_fn):
-            self.buildozer.error('Icon {} does not exists'.format(icon_fn))
+            self.logger.error('Icon {} does not exists'.format(icon_fn))
             return
 
         self.toolchain(["icon", self.app_project_dir, icon_fn])
@@ -447,10 +447,10 @@ class TargetIos(Target):
             if not error:
                 correct = True
                 break
-            self.buildozer.error('Invalid keychain password')
+            self.logger.error('Invalid keychain password')
 
         if not correct:
-            self.buildozer.error('Unable to unlock the keychain, exiting.')
+            self.logger.error('Unable to unlock the keychain, exiting.')
             raise BuildozerCommandException()
 
         # maybe user want to save it for further reuse?

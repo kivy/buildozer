@@ -10,8 +10,8 @@ from tests.targets.utils import (
     init_buildozer,
     patch_buildozer_checkbin,
     patch_buildozer_cmd,
-    patch_buildozer_error,
     patch_buildozer_file_exists,
+    patch_logger_error,
 )
 
 
@@ -195,7 +195,7 @@ class TestTargetIos:
         target.ios_dir = "/ios/dir"
         # fmt: off
         with patch_target_ios("_unlock_keychain") as m_unlock_keychain, \
-             patch_buildozer_error() as m_error, \
+             patch_logger_error() as m_error, \
              mock.patch("buildozer.targets.ios.TargetIos.load_plist_from_file") as m_load_plist_from_file, \
              mock.patch("buildozer.targets.ios.TargetIos.dump_plist_to_file") as m_dump_plist_to_file, \
              patch_buildozer_cmd() as m_cmd:
