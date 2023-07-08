@@ -22,7 +22,7 @@ from os.path import join, exists, dirname, realpath, splitext, expanduser
 from subprocess import Popen, PIPE, TimeoutExpired
 from os import environ, unlink, walk, sep, listdir, makedirs
 from copy import copy
-from shutil import copyfile, rmtree, copytree, move
+from shutil import copyfile, rmtree, copytree, move, which
 from fnmatch import fnmatch
 
 from pprint import pformat
@@ -243,13 +243,10 @@ class Buildozer:
 
     def checkbin(self, msg, fn):
         self.debug('Search for {0}'.format(msg))
-        if exists(fn):
-            return realpath(fn)
-        for dn in environ['PATH'].split(':'):
-            rfn = realpath(join(dn, fn))
-            if exists(rfn):
-                self.debug(' -> found at {0}'.format(rfn))
-                return rfn
+        executable_location = which(fn)
+        if executable_location:
+            self.debug(' -> found at {0}'.format(executable_location))
+            return realpath(executable_location)
         self.error('{} not found, please install it.'.format(msg))
         exit(1)
 
