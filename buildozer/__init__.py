@@ -16,16 +16,16 @@ import codecs
 import textwrap
 import warnings
 from buildozer.jsonstore import JsonStore
+from buildozer.logger import Logger
 from sys import stdout, stderr, exit
 from re import search
 from os.path import join, exists, dirname, realpath, splitext, expanduser
 from subprocess import Popen, PIPE, TimeoutExpired
 from os import environ, unlink, walk, sep, listdir, makedirs
 from copy import copy
-from shutil import copyfile, rmtree, copytree, move
+from shutil import copyfile, rmtree, copytree, move, which
 from fnmatch import fnmatch
 
-from pprint import pformat
 import shlex
 import pexpect
 
@@ -36,41 +36,6 @@ try:
 except ImportError:
     # on windows, no fcntl
     fcntl = None
-try:
-    # if installed, it can give color to windows as well
-    import colorama
-    colorama.init()
-
-    RESET_SEQ = colorama.Fore.RESET + colorama.Style.RESET_ALL
-    COLOR_SEQ = lambda x: x  # noqa: E731
-    BOLD_SEQ = ''
-    if sys.platform == 'win32':
-        BLACK = colorama.Fore.BLACK + colorama.Style.DIM
-    else:
-        BLACK = colorama.Fore.BLACK + colorama.Style.BRIGHT
-    RED = colorama.Fore.RED
-    BLUE = colorama.Fore.CYAN
-    USE_COLOR = 'NO_COLOR' not in environ
-
-except ImportError:
-    if sys.platform != 'win32':
-        RESET_SEQ = "\033[0m"
-        COLOR_SEQ = lambda x: "\033[1;{}m".format(30 + x)  # noqa: E731
-        BOLD_SEQ = "\033[1m"
-        BLACK = 0
-        RED = 1
-        BLUE = 4
-        USE_COLOR = 'NO_COLOR' not in environ
-    else:
-        RESET_SEQ = ''
-        COLOR_SEQ = ''
-        BOLD_SEQ = ''
-        RED = BLUE = BLACK = 0
-        USE_COLOR = False
-
-# error, info, debug
-LOG_LEVELS_C = (RED, BLUE, BLACK)
-LOG_LEVELS_T = 'EID'
 SIMPLE_HTTP_SERVER_PORT = 8000
 
 
@@ -101,15 +66,10 @@ class BuildozerCommandException(BuildozerException):
 
 class Buildozer:
 
-    ERROR = 0
-    INFO = 1
-    DEBUG = 2
-
     standard_cmds = ('distclean', 'update', 'debug', 'release',
                      'deploy', 'run', 'serve')
 
     def __init__(self, filename='buildozer.spec', target=None):
-        self.log_level = 2
         self.environ = {}
         self.specfilename = filename
         self.state = None
@@ -123,6 +83,8 @@ class Buildozer:
         self.config.getbooldefault = self._get_config_bool
         self.config.getrawdefault = self._get_config_raw_default
 
+        self.logger = Logger()
+
         if exists(filename):
             self.config.read(filename, "utf-8")
             self.check_configuration_tokens()
@@ -132,8 +94,9 @@ class Buildozer:
         set_config_from_envs(self.config)
 
         try:
-            self.log_level = int(self.config.getdefault(
-                'buildozer', 'log_level', '2'))
+            self.logger.set_level(
+                int(self.config.getdefault(
+                    'buildozer', 'log_level', '2')))
         except Exception:
             pass
 
@@ -163,20 +126,20 @@ class Buildozer:
         if hasattr(self.target, '_build_prepared'):
             return
 
-        self.info('Preparing build')
+        self.logger.info('Preparing build')
 
-        self.info('Check requirements for {0}'.format(self.targetname))
+        self.logger.info('Check requirements for {0}'.format(self.targetname))
         self.target.check_requirements()
 
-        self.info('Install platform')
+        self.logger.info('Install platform')
         self.target.install_platform()
 
-        self.info('Check application requirements')
+        self.logger.info('Check application requirements')
         self.check_application_requirements()
 
         self.check_garden_requirements()
 
-        self.info('Compile platform')
+        self.logger.info('Compile platform')
         self.target.compile_platform()
 
         # flag to prevent multiple build
@@ -200,57 +163,26 @@ class Buildozer:
         self.build_id = int(self.state.get('cache.build_id', '0')) + 1
         self.state['cache.build_id'] = str(self.build_id)
 
-        self.info('Build the application #{}'.format(self.build_id))
+        self.logger.info('Build the application #{}'.format(self.build_id))
         self.build_application()
 
-        self.info('Package the application')
+        self.logger.info('Package the application')
         self.target.build_package()
 
         # flag to prevent multiple build
         self.target._build_done = True
 
     #
-    # Log functions
-    #
-
-    def log(self, level, msg):
-        if level > self.log_level:
-            return
-        if USE_COLOR:
-            color = COLOR_SEQ(LOG_LEVELS_C[level])
-            print(''.join((RESET_SEQ, color, '# ', msg, RESET_SEQ)))
-        else:
-            print('{} {}'.format(LOG_LEVELS_T[level], msg))
-
-    def debug(self, msg):
-        self.log(self.DEBUG, msg)
-
-    def log_env(self, level, env):
-        """dump env into debug logger in readable format"""
-        self.log(level, "ENVIRONMENT:")
-        for k, v in env.items():
-            self.log(level, "    {} = {}".format(k, pformat(v)))
-
-    def info(self, msg):
-        self.log(self.INFO, msg)
-
-    def error(self, msg):
-        self.log(self.ERROR, msg)
-
-    #
     # Internal check methods
     #
 
     def checkbin(self, msg, fn):
-        self.debug('Search for {0}'.format(msg))
-        if exists(fn):
-            return realpath(fn)
-        for dn in environ['PATH'].split(':'):
-            rfn = realpath(join(dn, fn))
-            if exists(rfn):
-                self.debug(' -> found at {0}'.format(rfn))
-                return rfn
-        self.error('{} not found, please install it.'.format(msg))
+        self.logger.debug('Search for {0}'.format(msg))
+        executable_location = which(fn)
+        if executable_location:
+            self.logger.debug(' -> found at {0}'.format(executable_location))
+            return realpath(executable_location)
+        self.logger.error('{} not found, please install it.'.format(msg))
         exit(1)
 
     def cmd(self, command, **kwargs):
@@ -263,7 +195,7 @@ class Buildozer:
         kwargs.setdefault('stdout', PIPE)
         kwargs.setdefault('stderr', PIPE)
         kwargs.setdefault('close_fds', True)
-        kwargs.setdefault('show_output', self.log_level > 1)
+        kwargs.setdefault('show_output', self.logger.log_level > 1)
 
         show_output = kwargs.pop('show_output')
         get_stdout = kwargs.pop('get_stdout', False)
@@ -275,13 +207,13 @@ class Buildozer:
 
         if not quiet:
             if not sensible:
-                self.debug('Run {0!r}'.format(command))
+                self.logger.debug('Run {0!r}'.format(command))
             else:
                 if isinstance(command, (list, tuple)):
-                    self.debug('Run {0!r} ...'.format(command[0]))
+                    self.logger.debug('Run {0!r} ...'.format(command[0]))
                 else:
-                    self.debug('Run {0!r} ...'.format(command.split()[0]))
-            self.debug('Cwd {}'.format(kwargs.get('cwd')))
+                    self.logger.debug('Run {0!r} ...'.format(command.split()[0]))
+            self.logger.debug('Cwd {}'.format(kwargs.get('cwd')))
 
         # open the process
         if sys.platform == 'win32':
@@ -334,18 +266,18 @@ class Buildozer:
             pass
 
         if process.returncode != 0 and break_on_error:
-            self.error('Command failed: {0}'.format(command))
-            self.log_env(self.ERROR, kwargs['env'])
-            self.error('')
-            self.error('Buildozer failed to execute the last command')
-            if self.log_level <= self.INFO:
-                self.error('If the error is not obvious, please raise the log_level to 2')
-                self.error('and retry the latest command.')
+            self.logger.error('Command failed: {0}'.format(command))
+            self.logger.log_env(self.logger.ERROR, kwargs['env'])
+            self.logger.error('')
+            self.logger.error('Buildozer failed to execute the last command')
+            if self.logger.log_level <= self.logger.INFO:
+                self.logger.error('If the error is not obvious, please raise the log_level to 2')
+                self.logger.error('and retry the latest command.')
             else:
-                self.error('The error might be hidden in the log above this error')
-                self.error('Please read the full log, and search for it before')
-                self.error('raising an issue with buildozer itself.')
-            self.error('In case of a bug report, please add a full log with log_level = 2')
+                self.logger.error('The error might be hidden in the log above this error')
+                self.logger.error('Please read the full log, and search for it before')
+                self.logger.error('raising an issue with buildozer itself.')
+            self.logger.error('In case of a bug report, please add a full log with log_level = 2')
             raise BuildozerCommandException()
 
         if ret_stdout:
@@ -365,7 +297,7 @@ class Buildozer:
 
         # prepare the process
         kwargs.setdefault('env', env)
-        kwargs.setdefault('show_output', self.log_level > 1)
+        kwargs.setdefault('show_output', self.logger.log_level > 1)
         sensible = kwargs.pop('sensible', False)
         show_output = kwargs.pop('show_output')
 
@@ -373,17 +305,17 @@ class Buildozer:
             kwargs['logfile'] = codecs.getwriter('utf8')(stdout.buffer)
 
         if not sensible:
-            self.debug('Run (expect) {0!r}'.format(command))
+            self.logger.debug('Run (expect) {0!r}'.format(command))
         else:
-            self.debug('Run (expect) {0!r} ...'.format(command.split()[0]))
+            self.logger.debug('Run (expect) {0!r} ...'.format(command.split()[0]))
 
-        self.debug('Cwd {}'.format(kwargs.get('cwd')))
+        self.logger.debug('Cwd {}'.format(kwargs.get('cwd')))
         return pexpect.spawnu(shlex.join(command), **kwargs)
 
     def check_configuration_tokens(self):
         '''Ensure the spec file is 'correct'.
         '''
-        self.info('Check configuration tokens')
+        self.logger.info('Check configuration tokens')
         self.migrate_configuration_tokens()
         get = self.config.getdefault
         errors = []
@@ -415,7 +347,7 @@ class Buildozer:
             if o not in ("landscape", "portrait", "landscape-reverse", "portrait-reverse"):
                 adderror(f'[app] "{o}" is not a valid  value for "orientation"')
         if errors:
-            self.error('{0} error(s) found in the buildozer.spec'.format(
+            self.logger.error('{0} error(s) found in the buildozer.spec'.format(
                 len(errors)))
             for error in errors:
                 print(error)
@@ -438,14 +370,14 @@ class Buildozer:
                 value = config.get("app", entry_old)
                 config.set("app", entry_new, value)
                 config.remove_option("app", entry_old)
-                self.error("In section [app]: {} is deprecated, rename to {}!".format(
+                self.logger.error("In section [app]: {} is deprecated, rename to {}!".format(
                     entry_old, entry_new))
 
     def check_build_layout(self):
         '''Ensure the build (local and global) directory layout and files are
         ready.
         '''
-        self.info('Ensure build layout')
+        self.logger.info('Ensure build layout')
 
         if not exists(self.specfilename):
             print('No {0} found in the current directory. Abandon.'.format(
@@ -486,7 +418,7 @@ class Buildozer:
                         target_available_packages]
 
         if requirements and hasattr(sys, 'real_prefix'):
-            e = self.error
+            e = self.logger.error
             e('virtualenv is needed to install pure-Python modules, but')
             e('virtualenv does not support nesting, and you are running')
             e('buildozer in one. Please run buildozer outside of a')
@@ -498,7 +430,7 @@ class Buildozer:
             exists(self.applibs_dir) and
             self.state.get('cache.applibs', '') == requirements
         ):
-            self.debug('Application requirements already installed, pass')
+            self.logger.debug('Application requirements already installed, pass')
             return
 
         # recreate applibs
@@ -514,7 +446,7 @@ class Buildozer:
 
     def _install_application_requirement(self, module):
         self._ensure_virtualenv()
-        self.debug('Install requirement {} in virtualenv'.format(module))
+        self.logger.debug('Install requirement {} in virtualenv'.format(module))
         self.cmd(
             ["pip", "install", f"--target={self.applibs_dir}", module],
             env=self.env_venv,
@@ -559,13 +491,13 @@ class Buildozer:
     def mkdir(self, dn):
         if exists(dn):
             return
-        self.debug('Create directory {0}'.format(dn))
+        self.logger.debug('Create directory {0}'.format(dn))
         makedirs(dn)
 
     def rmdir(self, dn):
         if not exists(dn):
             return
-        self.debug('Remove directory and subdirectory {}'.format(dn))
+        self.logger.debug('Remove directory and subdirectory {}'.format(dn))
         rmtree(dn)
 
     def file_matches(self, patterns):
@@ -583,9 +515,9 @@ class Buildozer:
         if cwd:
             source = join(cwd, source)
             target = join(cwd, target)
-        self.debug('Rename {0} to {1}'.format(source, target))
+        self.logger.debug('Rename {0} to {1}'.format(source, target))
         if not os.path.isdir(os.path.dirname(target)):
-            self.error(('Rename {0} to {1} fails because {2} is not a '
+            self.logger.error(('Rename {0} to {1} fails because {2} is not a '
                         'directory').format(source, target, target))
         move(source, target)
 
@@ -593,7 +525,7 @@ class Buildozer:
         if cwd:
             source = join(cwd, source)
             target = join(cwd, target)
-        self.debug('Copy {0} to {1}'.format(source, target))
+        self.logger.debug('Copy {0} to {1}'.format(source, target))
         copyfile(source, target)
 
     def file_extract(self, archive, cwd=None):
@@ -632,7 +564,7 @@ class Buildozer:
             copyfile(src, dest)
 
     def clean_platform(self):
-        self.info('Clean the platform build directory')
+        self.logger.info('Clean the platform build directory')
         if not exists(self.platform_dir):
             return
         rmtree(self.platform_dir)
@@ -654,7 +586,7 @@ class Buildozer:
         if self.file_exists(filename):
             unlink(filename)
 
-        self.debug('Downloading {0}'.format(url))
+        self.logger.debug('Downloading {0}'.format(url))
         urlretrieve(url, filename, report_hook)
         return filename
 
@@ -688,7 +620,7 @@ class Buildozer:
                         'Unable to find capture version in {0}\n'
                         ' (looking for `{1}`)'.format(fn, regex))
                 version = match.groups()[0]
-                self.debug('Captured version: {0}'.format(version))
+                self.logger.debug('Captured version: {0}'.format(version))
                 return version
 
         raise Exception('Missing version or version.regex + version.filename')
@@ -716,7 +648,7 @@ class Buildozer:
         exclude_patterns = [pat.lower() for pat in exclude_patterns]
         include_patterns = [pat.lower() for pat in include_patterns]
 
-        self.debug('Copy application source from {}'.format(source_dir))
+        self.logger.debug('Copy application source from {}'.format(source_dir))
 
         rmtree(self.app_dir)
 
@@ -795,7 +727,7 @@ class Buildozer:
                 self.mkdir(dfn)
 
                 # copy!
-                self.debug('Copy {0}'.format(sfn))
+                self.logger.debug('Copy {0}'.format(sfn))
                 copyfile(sfn, rfn)
 
     def _copy_application_libs(self):
@@ -818,7 +750,7 @@ class Buildozer:
         data = header + data
         with open(main_py, 'wb') as fd:
             fd.write(data)
-        self.info('Patched service/main.py to include applibs')
+        self.logger.info('Patched service/main.py to include applibs')
 
     def namify(self, name):
         '''Return a "valid" name from a name with lot of invalid chars
@@ -982,7 +914,7 @@ class Buildozer:
             arg = args.pop(0)
 
             if arg in ('-v', '--verbose'):
-                self.log_level = 2
+                self.logger.set_level(2)
 
             elif arg in ('-h', '--help'):
                 self.usage()
@@ -1056,7 +988,7 @@ class Buildozer:
         print("Warning: Your ndk, sdk and all other cached packages will be"
               " removed. Continue? (y/n)")
         if sys.stdin.readline().lower()[0] == 'y':
-            self.info('Clean the global build directory')
+            self.logger.info('Clean the global build directory')
             if not exists(self.global_buildozer_dir):
                 return
             rmtree(self.global_buildozer_dir)
@@ -1069,14 +1001,14 @@ class Buildozer:
         more than the user intends.
         '''
         if self.user_build_dir is not None:
-            self.error(
+            self.logger.error(
                 ('Failed: build_dir is specified as {} in the buildozer config. `appclean` will '
                  'not attempt to delete files in a user-specified build directory.').format(self.user_build_dir))
         elif exists(self.buildozer_dir):
-            self.info('Deleting {}'.format(self.buildozer_dir))
+            self.logger.info('Deleting {}'.format(self.buildozer_dir))
             rmtree(self.buildozer_dir)
         else:
-            self.error('{} already deleted, skipping.'.format(self.buildozer_dir))
+            self.logger.error('{} already deleted, skipping.'.format(self.buildozer_dir))
 
     def cmd_help(self, *args):
         '''Show the Buildozer help.

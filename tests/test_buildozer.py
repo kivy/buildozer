@@ -5,6 +5,7 @@ import unittest
 import buildozer as buildozer_module
 from buildozer import Buildozer
 from io import StringIO
+from sys import platform
 import tempfile
 from unittest import mock
 
@@ -57,7 +58,7 @@ class TestBuildozer(unittest.TestCase):
         replace = 'log_level = {}'.format(log_level)
         cls.file_re_sub(specfilename, pattern, replace)
         buildozer = Buildozer(specfilename)
-        assert buildozer.log_level == log_level
+        assert buildozer.logger.log_level == log_level
 
     def test_buildozer_base(self):
         """
@@ -91,41 +92,11 @@ class TestBuildozer(unittest.TestCase):
         """
         # the default log level value is known
         buildozer = Buildozer('does_not_exist.spec')
-        assert buildozer.log_level == 2
+        assert buildozer.logger.log_level == 2
         # sets log level to 1 on the spec file
         self.set_specfile_log_level(self.specfile.name, 1)
         buildozer = Buildozer(self.specfile.name)
-        assert buildozer.log_level == 1
-
-    def test_log_print(self):
-        """
-        Checks logger prints different info depending on log level.
-        """
-        # sets log level to 1 in the spec file
-        self.set_specfile_log_level(self.specfile.name, 1)
-        buildozer = Buildozer(self.specfile.name)
-        assert buildozer.log_level == 1
-        # at this level, debug messages shouldn't not be printed
-        with mock.patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            buildozer.debug('debug message')
-            buildozer.info('info message')
-            buildozer.error('error message')
-        # using `in` keyword rather than `==` because of bash color prefix/suffix
-        assert 'debug message' not in mock_stdout.getvalue()
-        assert 'info message' in mock_stdout.getvalue()
-        assert 'error message' in mock_stdout.getvalue()
-        # sets log level to 2 in the spec file
-        self.set_specfile_log_level(self.specfile.name, 2)
-        buildozer = Buildozer(self.specfile.name)
-        assert buildozer.log_level == 2
-        # at this level all message types should be printed
-        with mock.patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            buildozer.debug('debug message')
-            buildozer.info('info message')
-            buildozer.error('error message')
-        assert 'debug message' in mock_stdout.getvalue()
-        assert 'info message' in mock_stdout.getvalue()
-        assert 'error message' in mock_stdout.getvalue()
+        assert buildozer.logger.log_level == 1
 
     def test_run_command_unknown(self):
         """
@@ -140,6 +111,9 @@ class TestBuildozer(unittest.TestCase):
                 buildozer.run_command(args)
         assert mock_stdout.getvalue() == 'Unknown command/target {}\n'.format(command)
 
+    @unittest.skipIf(
+        platform == "win32",
+        "Test can't handle when resulting path is normalised on Windows")
     def test_android_ant_path(self):
         """
         Verify that the selected ANT path is being used from the spec file

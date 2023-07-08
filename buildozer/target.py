@@ -2,6 +2,8 @@ from sys import exit
 import os
 from os.path import join
 
+from buildozer.logger import Logger
+
 
 def no_config(f):
     f.__no_config = True
@@ -14,16 +16,17 @@ class Target:
         self.build_mode = 'debug'
         self.artifact_format = 'apk'
         self.platform_update = False
+        self.logger = Logger()
 
     def check_requirements(self):
         pass
 
     def check_configuration_tokens(self, errors=None):
         if errors:
-            self.buildozer.info('Check target configuration tokens')
-            self.buildozer.error(
+            self.logger.info('Check target configuration tokens')
+            self.logger.error(
                 '{0} error(s) found in the buildozer.spec'.format(
-                len(errors)))
+                    len(errors)))
             for error in errors:
                 print(error)
             exit(1)
@@ -49,7 +52,7 @@ class Target:
 
     def run_commands(self, args):
         if not args:
-            self.buildozer.error('Missing target command')
+            self.logger.error('Missing target command')
             self.buildozer.usage()
             exit(1)
 
@@ -68,7 +71,7 @@ class Target:
                 last_command.append(arg)
             else:
                 if not last_command:
-                    self.buildozer.error('Argument passed without a command')
+                    self.logger.error('Argument passed without a command')
                     self.buildozer.usage()
                     exit(1)
                 last_command.append(arg)
@@ -80,7 +83,7 @@ class Target:
         for item in result:
             command, args = item[0], item[1:]
             if not hasattr(self, 'cmd_{0}'.format(command)):
-                self.buildozer.error('Unknown command {0}'.format(command))
+                self.logger.error('Unknown command {0}'.format(command))
                 exit(1)
 
             func = getattr(self, 'cmd_{0}'.format(command))
@@ -106,7 +109,7 @@ class Target:
         self.buildozer.build()
 
     def cmd_release(self, *args):
-        error = self.buildozer.error
+        error = self.logger.error
         self.buildozer.prepare_for_build()
         if self.buildozer.config.get("app", "package.domain") == "org.test":
             error("")
