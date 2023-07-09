@@ -17,15 +17,15 @@ class TargetOSX(Target):
     targetname = "osx"
 
     def ensure_sdk(self):
-        self.buildozer.info('Check if kivy-sdk-packager exists')
+        self.logger.info('Check if kivy-sdk-packager exists')
         if exists(
                 join(self.buildozer.platform_dir, 'kivy-sdk-packager-master')):
-            self.buildozer.info(
+            self.logger.info(
                     'kivy-sdk-packager found at '
                     '{}'.format(self.buildozer.platform_dir))
             return
 
-        self.buildozer.info('kivy-sdk-packager does not exist, clone it')
+        self.logger.info('kivy-sdk-packager does not exist, clone it')
         platdir = self.buildozer.platform_dir
         check_call(
             ('curl', '-O', '-L',
@@ -38,14 +38,14 @@ class TargetOSX(Target):
         current_kivy_vers = self.buildozer.config.get('app', 'osx.kivy_version')
 
         if exists('/Applications/Kivy.app'):
-            self.buildozer.info('Kivy found in Applications dir...')
+            self.logger.info('Kivy found in Applications dir...')
             check_call(
                 ('cp', '-a', '/Applications/Kivy.app',
                     'Kivy.app'), cwd=cwd)
 
         else:
             if not exists(join(cwd, 'Kivy.dmg')):
-                self.buildozer.info('Downloading kivy...')
+                self.logger.info('Downloading kivy...')
                 status_code = check_output((
                     'curl', '-L', '--write-out', '%{http_code}',
                     '-o', 'Kivy.dmg',
