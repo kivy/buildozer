@@ -6,6 +6,7 @@ Main Buildozer client
 
 import sys
 from buildozer import Buildozer, BuildozerCommandException, BuildozerException
+from buildozer.logger import Logger
 
 
 def main():
@@ -16,7 +17,7 @@ def main():
         # the command failed.
         sys.exit(1)
     except BuildozerException as error:
-        Buildozer().error('%s' % error)
+        Logger().error('%s' % error)
         sys.exit(1)
 
 

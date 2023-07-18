@@ -17,6 +17,7 @@ import socket
 import sys
 from buildozer import (
     Buildozer, BuildozerCommandException, BuildozerException, __version__)
+from buildozer.logger import Logger
 from sys import stdout, stdin, exit
 from select import select
 from os.path import join, expanduser, realpath, exists, splitext
@@ -271,7 +272,7 @@ def main():
     except BuildozerCommandException:
         pass
     except BuildozerException as error:
-        Buildozer().error('%s' % error)
+        Logger().error('%s' % error)
 
 
 if __name__ == '__main__':
