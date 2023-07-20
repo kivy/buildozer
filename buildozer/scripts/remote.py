@@ -17,6 +17,7 @@ import socket
 import sys
 from buildozer import (
     Buildozer, BuildozerCommandException, BuildozerException, __version__)
+from buildozer.logger import Logger
 from sys import stdout, stdin, exit
 from select import select
 from os.path import join, expanduser, realpath, exists, splitext
@@ -41,7 +42,7 @@ class BuildozerRemote(Buildozer):
             arg = args.pop(0)
 
             if arg in ('-v', '--verbose'):
-                self.log_level = 2
+                self.logger.log_level = 2
 
             elif arg in ('-p', '--profile'):
                 self.config_profile = args.pop(0)
@@ -63,7 +64,7 @@ class BuildozerRemote(Buildozer):
         remote_name = args[0]
         remote_section = 'remote:{}'.format(remote_name)
         if not self.config.has_section(remote_section):
-            self.error('Unknown remote "{}", must be configured first.'.format(
+            self.logger.error('Unknown remote "{}", must be configured first.'.format(
                 remote_name))
             return
 
@@ -78,13 +79,13 @@ class BuildozerRemote(Buildozer):
         self.remote_identity = self.config.get(
                 remote_section, 'identity', '')
         if not remote_host:
-            self.error('Missing "host = " for {}'.format(remote_section))
+            self.logger.error('Missing "host = " for {}'.format(remote_section))
             return
         if not remote_user:
-            self.error('Missing "user = " for {}'.format(remote_section))
+            self.logger.error('Missing "user = " for {}'.format(remote_section))
             return
         if not remote_build_dir:
-            self.error('Missing "build_directory = " for {}'.format(remote_section))
+            self.logger.error('Missing "build_directory = " for {}'.format(remote_section))
             return
 
         # fake the target
@@ -92,7 +93,7 @@ class BuildozerRemote(Buildozer):
         self.check_build_layout()
 
         # prepare our source code
-        self.info('Prepare source code to sync')
+        self.logger.info('Prepare source code to sync')
         self._copy_application_sources()
         self._ssh_connect()
         try:
@@ -104,7 +105,7 @@ class BuildozerRemote(Buildozer):
             self._ssh_close()
 
     def _ssh_connect(self):
-        self.info('Connecting to {}'.format(self.remote_host))
+        self.logger.info('Connecting to {}'.format(self.remote_host))
         self._ssh_client = client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.load_system_host_keys()
@@ -116,7 +117,7 @@ class BuildozerRemote(Buildozer):
         self._sftp_client = client.open_sftp()
 
     def _ssh_close(self):
-        self.debug('Closing remote connection')
+        self.logger.debug('Closing remote connection')
         self._sftp_client.close()
         self._ssh_client.close()
 
@@ -125,16 +126,16 @@ class BuildozerRemote(Buildozer):
         root_dir = s.normalize('.')
         self.remote_build_dir = join(root_dir, self.remote_build_dir,
                 self.package_full_name)
-        self.debug('Remote build directory: {}'.format(self.remote_build_dir))
+        self.logger.debug('Remote build directory: {}'.format(self.remote_build_dir))
         self._ssh_mkdir(self.remote_build_dir)
         self._ssh_sync(__path__[0])  # noqa: F821 undefined name
 
     def _sync_application_sources(self):
-        self.info('Synchronize application sources')
+        self.logger.info('Synchronize application sources')
         self._ssh_sync(self.app_dir)
 
         # create custom buildozer.spec
-        self.info('Create custom buildozer.spec')
+        self.logger.info('Create custom buildozer.spec')
         config = ConfigParser()
         config.read('buildozer.spec')
         config.set('app', 'source.dir', 'app')
@@ -145,7 +146,7 @@ class BuildozerRemote(Buildozer):
         fd.close()
 
     def _do_remote_commands(self, args):
-        self.info('Execute remote buildozer')
+        self.logger.info('Execute remote buildozer')
         cmd = (
             'source ~/.profile;'
             'cd {0};'
@@ -153,14 +154,14 @@ class BuildozerRemote(Buildozer):
             'python -c "import buildozer, sys;'
             'buildozer.Buildozer().run_command(sys.argv[1:])" {1} {2} 2>&1').format(
             self.remote_build_dir,
-            '--verbose' if self.log_level == 2 else '',
+            '--verbose' if self.logger.log_level == 2 else '',
             ' '.join(args),
         )
         self._ssh_command(cmd)
 
     def _ssh_mkdir(self, *args):
         directory = join(*args)
-        self.debug('Create remote directory {}'.format(directory))
+        self.logger.debug('Create remote directory {}'.format(directory))
         try:
             self._sftp_client.mkdir(directory)
         except IOError:
@@ -168,11 +169,11 @@ class BuildozerRemote(Buildozer):
             try:
                 self._sftp_client.stat(directory)
             except IOError:
-                self.error('Unable to create remote directory {}'.format(directory))
+                self.logger.error('Unable to create remote directory {}'.format(directory))
                 raise
 
     def _ssh_sync(self, directory, mode='put'):
-        self.debug('Syncing {} directory'.format(directory))
+        self.logger.debug('Syncing {} directory'.format(directory))
         directory = realpath(expanduser(directory))
         base_strip = directory.rfind('/')
         if mode == 'get':
@@ -191,11 +192,11 @@ class BuildozerRemote(Buildozer):
                     continue
                 local_file = join(root, fn)
                 remote_file = join(self.remote_build_dir, root[base_strip + 1:], fn)
-                self.debug('Sync {} -> {}'.format(local_file, remote_file))
+                self.logger.debug('Sync {} -> {}'.format(local_file, remote_file))
                 self._sftp_client.put(local_file, remote_file)
 
     def _ssh_command(self, command):
-        self.debug('Execute remote command {}'.format(command))
+        self.logger.debug('Execute remote command {}'.format(command))
         transport = self._ssh_client.get_transport()
         channel = transport.open_session()
         try:
@@ -271,7 +272,7 @@ def main():
     except BuildozerCommandException:
         pass
     except BuildozerException as error:
-        Buildozer().error('%s' % error)
+        Logger().error('%s' % error)
 
 
 if __name__ == '__main__':
