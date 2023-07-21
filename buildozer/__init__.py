@@ -15,8 +15,6 @@ import select
 import codecs
 import textwrap
 import warnings
-from buildozer.jsonstore import JsonStore
-from buildozer.logger import Logger
 from sys import stdout, stderr, exit
 from re import search
 from os.path import join, exists, dirname, realpath, splitext, expanduser
@@ -30,12 +28,16 @@ import shlex
 import pexpect
 
 from urllib.request import FancyURLopener
-from configparser import ConfigParser
 try:
     import fcntl
 except ImportError:
     # on windows, no fcntl
     fcntl = None
+
+from buildozer.jsonstore import JsonStore
+from buildozer.logger import Logger
+from buildozer.specparser import SpecParser
+
 SIMPLE_HTTP_SERVER_PORT = 8000
 
 
@@ -75,23 +77,13 @@ class Buildozer:
         self.state = None
         self.build_id = None
         self.config_profile = ''
-        self.config = ConfigParser(allow_no_value=True)
-        self.config.optionxform = lambda value: value
-        self.config.getlist = self._get_config_list
-        self.config.getlistvalues = self._get_config_list_values
-        self.config.getdefault = self._get_config_default
-        self.config.getbooldefault = self._get_config_bool
-        self.config.getrawdefault = self._get_config_raw_default
+        self.config = SpecParser()
 
         self.logger = Logger()
 
         if exists(filename):
             self.config.read(filename, "utf-8")
             self.check_configuration_tokens()
-
-        # Check all section/tokens for env vars, and replace the
-        # config value if a suitable env var exists.
-        set_config_from_envs(self.config)
 
         try:
             self.logger.set_level(
@@ -1074,99 +1066,3 @@ class Buildozer:
                 print('merged ({}, {}) into {} (profile is {})'.format(name,
                         value, section_base, profile))
                 self.config.set(section_base, name, value)
-
-    def _get_config_list_values(self, *args, **kwargs):
-        kwargs['with_values'] = True
-        return self._get_config_list(*args, **kwargs)
-
-    def _get_config_list(self, section, token, default=None, with_values=False):
-        # monkey-patch method for ConfigParser
-        # get a key as a list of string, separated from the comma
-
-        # check if an env var exists that should replace the file config
-        set_config_token_from_env(section, token, self.config)
-
-        # if a section:token is defined, let's use the content as a list.
-        l_section = '{}:{}'.format(section, token)
-        if self.config.has_section(l_section):
-            values = self.config.options(l_section)
-            if with_values:
-                return ['{}={}'.format(key, self.config.get(l_section, key)) for
-                        key in values]
-            else:
-                return [x.strip() for x in values]
-
-        values = self.config.getdefault(section, token, '')
-        if not values:
-            return default
-        values = values.split(',')
-        if not values:
-            return default
-        return [x.strip() for x in values]
-
-    def _get_config_default(self, section, token, default=None):
-        # monkey-patch method for ConfigParser
-        # get an appropriate env var if it exists, else
-        # get a key in a section, or the default
-
-        # check if an env var exists that should replace the file config
-        set_config_token_from_env(section, token, self.config)
-
-        if not self.config.has_section(section):
-            return default
-        if not self.config.has_option(section, token):
-            return default
-        return self.config.get(section, token)
-
-    def _get_config_bool(self, section, token, default=False):
-        # monkey-patch method for ConfigParser
-        # get a key in a section, or the default
-
-        # check if an env var exists that should replace the file config
-        set_config_token_from_env(section, token, self.config)
-
-        if not self.config.has_section(section):
-            return default
-        if not self.config.has_option(section, token):
-            return default
-        return self.config.getboolean(section, token)
-
-    def _get_config_raw_default(self, section, token, default=None, section_sep="=", split_char=" "):
-        l_section = '{}:{}'.format(section, token)
-        if self.config.has_section(l_section):
-            return [section_sep.join(item) for item in self.config.items(l_section)]
-        if not self.config.has_option(section, token):
-            return default.split(split_char)
-        return self.config.get(section, token).split(split_char)
-
-
-def set_config_from_envs(config):
-    '''Takes a ConfigParser, and checks every section/token for an
-    environment variable of the form SECTION_TOKEN, with any dots
-    replaced by underscores. If the variable exists, sets the config
-    variable to the env value.
-    '''
-    for section in config.sections():
-        for token in config.options(section):
-            set_config_token_from_env(section, token, config)
-
-
-def set_config_token_from_env(section, token, config):
-    '''Given a config section and token, checks for an appropriate
-    environment variable. If the variable exists, sets the config entry to
-    its value.
-
-    The environment variable checked is of the form SECTION_TOKEN, all
-    upper case, with any dots replaced by underscores.
-
-    Returns True if the environment variable exists and was used, or
-    False otherwise.
-
-    '''
-    env_var_name = ''.join([section.upper(), '_',
-                            token.upper().replace('.', '_')])
-    env_var = os.environ.get(env_var_name)
-    if env_var is None:
-        return False
-    config.set(section, token, env_var)
-    return True

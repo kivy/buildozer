@@ -1,3 +1,8 @@
+# This .spec config file tells Buildozer an app's requirements for being built.
+#
+# It largely follows the syntax of an .ini file.
+# See the end of the file for more details and warnings about common mistakes.
+
 [app]
 
 # (str) Title of your application
@@ -447,3 +452,37 @@ warn_on_root = 1
 #    Then, invoke the command line with the "demo" profile:
 #
 #buildozer --profile demo android debug
+
+### Notes about using this file: ###
+#
+#   Buildozer uses a variant of Python's ConfigSpec to read this file.
+#   For the syntax, including interpolations, see
+#       https://docs.python.org/3/library/configparser.html#supported-ini-file-structure
+#
+#   Warning: Comments cannot be used "inline" - i.e.
+#       [app]
+#       title = My Application # This is not a comment, it is part of the title.
+#
+#   Warning: Indented text is treated as a multiline string - i.e.
+#       [app]
+#       title = My Application
+#          package.name = myapp # This is all part of the title.
+#
+#   Buildozer's .spec files have some additional features:
+#
+#   Buildozer supports lists - i.e.
+#       [app]
+#       source.include_exts = py,png,jpg
+#       #                     ^ This is a list.
+#
+#       [app:source.include_exts]
+#       py
+#       png
+#       jpg
+#       # ^ This is an alternative syntax for a list.
+#
+#   Buildozer's option names are case-sensitive, unlike most .ini files.
+#
+#   Buildozer supports overriding options through environment variables.
+#   Name an environment variable as SECTION_OPTION to override a value in a .spec
+#   file.
