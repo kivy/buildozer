@@ -24,7 +24,7 @@ jobs:
         source .ci/osx_ci.sh
         arm64_set_path_and_python_version ${{ matrix.python }}
         pip install -e .
-        pip install Cython cookiecutter pbxproj
+        pip install Cython==0.29.36 cookiecutter pbxproj
     - name: Check buildozer installation
       run: |
         source .ci/osx_ci.sh
