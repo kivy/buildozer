@@ -46,6 +46,8 @@ class TestSpecParser(unittest.TestCase):
             sp.read([spec_path])
             assert sp.get("section.1", "attribute.1") == "Env Value"
 
+        del environ["SECTION_1_ATTRIBUTE_1"]
+
     def test_new_getters(self):
         sp = SpecParser()
         sp.read_string(
@@ -117,6 +119,55 @@ class TestSpecParser(unittest.TestCase):
 
         assert sp.get("section1", "attribute1") == "a"
         assert sp.get("section1", "Attribute1") == "A"
+
+    def test_profiles(self):
+        sp = SpecParser()
+        sp.read_string(
+            """
+                [section1]
+                attribute1=full system
+                [section1 @demo1, demo2]
+                attribute1=demo mode
+            """
+        )
+
+        # Before a profile is set, return the basic version.
+        assert sp.get("section1", "attribute1") == "full system"
+
+        # Empty profile makes no difference.
+        sp.apply_profile(None)
+        assert sp.get("section1", "attribute1") == "full system"
+
+        # Inapplicable profile makes no difference
+        sp.apply_profile("doesn't exist")
+        assert sp.get("section1", "attribute1") == "full system"
+
+        # Applicable profile changes value
+        sp.apply_profile("demo2")
+        assert sp.get("section1", "attribute1") == "demo mode"
+
+    def test_profiles_vs_env_var(self):
+        sp = SpecParser()
+
+        environ["SECTION1_ATTRIBUTE1"] = "simulation mode"
+
+        sp.read_string(
+            """
+                [section1]
+                attribute1=full system
+                [section1@demo1,demo2]
+                attribute1=demo mode
+            """
+        )
+
+        # Before a profile is set, env var should win.
+        assert sp.get("section1", "attribute1") == "simulation mode"
+
+        # Applicable profile: env var should still win
+        sp.apply_profile("demo1")
+        assert sp.get("section1", "attribute1") == "simulation mode"
+
+        del environ["SECTION1_ATTRIBUTE1"]
 
     def test_controversial_cases(self):
         """Some aspects of the config syntax seem to cause confusion.

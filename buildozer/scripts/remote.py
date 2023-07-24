@@ -36,6 +36,8 @@ except ImportError:
 
 class BuildozerRemote(Buildozer):
     def run_command(self, args):
+        profile = None
+
         while args:
             if not args[0].startswith('-'):
                 break
@@ -45,7 +47,7 @@ class BuildozerRemote(Buildozer):
                 self.logger.log_level = 2
 
             elif arg in ('-p', '--profile'):
-                self.config_profile = args.pop(0)
+                profile = args.pop(0)
 
             elif arg in ('-h', '--help'):
                 self.usage()
@@ -55,7 +57,7 @@ class BuildozerRemote(Buildozer):
                 print('Buildozer (remote) {0}'.format(__version__))
                 exit(0)
 
-        self._merge_config_profile()
+        self.config.apply_profile(profile)
 
         if len(args) < 2:
             self.usage()

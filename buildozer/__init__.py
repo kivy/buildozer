@@ -76,7 +76,6 @@ class Buildozer:
         self.specfilename = filename
         self.state = None
         self.build_id = None
-        self.config_profile = ''
         self.config = SpecParser()
 
         self.logger = Logger()
@@ -900,6 +899,8 @@ class Buildozer:
         self.run_command(cmd)
 
     def run_command(self, args):
+        profile = None
+
         while args:
             if not args[0].startswith('-'):
                 break
@@ -913,13 +914,13 @@ class Buildozer:
                 exit(0)
 
             elif arg in ('-p', '--profile'):
-                self.config_profile = args.pop(0)
+                profile = args.pop(0)
 
             elif arg == '--version':
                 print('Buildozer {0}'.format(__version__))
                 exit(0)
 
-        self._merge_config_profile()
+        self.config.apply_profile(profile)
 
         self.check_root()
 
@@ -1034,35 +1035,3 @@ class Buildozer:
         print("Serving via HTTP at port {}".format(SIMPLE_HTTP_SERVER_PORT))
         print("Press Ctrl+c to quit serving.")
         httpd.serve_forever()
-
-    #
-    # Private
-    #
-
-    def _merge_config_profile(self):
-        profile = self.config_profile
-        if not profile:
-            return
-        for section in self.config.sections():
-
-            # extract the profile part from the section name
-            # example: [app@default,hd]
-            parts = section.split('@', 1)
-            if len(parts) < 2:
-                continue
-
-            # create a list that contain all the profiles of the current section
-            # ['default', 'hd']
-            section_base, section_profiles = parts
-            section_profiles = section_profiles.split(',')
-            if profile not in section_profiles:
-                continue
-
-            # the current profile is one available in the section
-            # merge with the general section, or make it one.
-            if not self.config.has_section(section_base):
-                self.config.add_section(section_base)
-            for name, value in self.config.items(section):
-                print('merged ({}, {}) into {} (profile is {})'.format(name,
-                        value, section_base, profile))
-                self.config.set(section_base, name, value)

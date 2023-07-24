@@ -6,12 +6,15 @@
             - either comma separated, or in their own [section:option] section.
         - environment variable overrides of values
             - overrides applied at construction.
+        - profiles
         - case-sensitive keys
         - "No values" are permitted.
 """
 
 from configparser import ConfigParser
 from os import environ
+
+from buildozer.logger import Logger
 
 
 class SpecParser(ConfigParser):
@@ -49,8 +52,14 @@ class SpecParser(ConfigParser):
     # Add new getters
 
     def getlist(
-        self, section, token, default=None, with_values=False, strip=True,
-        section_sep="=", split_char=","
+        self,
+        section,
+        token,
+        default=None,
+        with_values=False,
+        strip=True,
+        section_sep="=",
+        split_char=",",
     ):
         """Return a list of strings.
 
@@ -83,8 +92,8 @@ class SpecParser(ConfigParser):
         return values if not strip else [x.strip() for x in values]
 
     def getlistvalues(self, section, token, default=None):
-        """ Convenience function.
-            Deprecated - call getlist directly."""
+        """Convenience function.
+        Deprecated - call getlist directly."""
         return self.getlist(section, token, default, with_values=True)
 
     def getdefault(self, section, token, default=None):
@@ -99,7 +108,55 @@ class SpecParser(ConfigParser):
         Deprecated - call getboolean directly."""
         return self.getboolean(section, token, fallback=default)
 
-    # Handle env vars.
+    def apply_profile(self, profile):
+        """
+        Sections marked with an @ followed by a list of profiles are only
+        applied if the profile is provided here.
+
+        Implementation Note: A better structure would be for the Profile to be
+        provided in the constructor, so this could be a private method
+        automatically applied on read *before* _override_config_from_envs(),
+        but that will require a significant restructure of Buildozer.
+
+        Instead, this must be called by the client after the read, and the env
+        var overrides need to be reapplied to the relevant options.
+        """
+        if not profile:
+            return
+        for section in self.sections():
+
+            # extract the profile part from the section name
+            # example: [app@default,hd]
+            parts = section.split("@", 1)
+            if len(parts) < 2:
+                continue
+
+            # create a list that contain all the profiles of the current section
+            # ['default', 'hd']
+            section_base, section_profiles = parts
+            section_profiles = section_profiles.split(",")
+
+            # Trim
+            section_base = section_base.strip()
+            section_profiles = [profile.strip() for profile in section_profiles]
+
+            if profile not in section_profiles:
+                continue
+
+            # the current profile is one available in the section
+            # merge with the general section, or make it one.
+            if not self.has_section(section_base):
+                self.add_section(section_base)
+            for name, value in self.items(section):
+                Logger().debug(
+                    "merged ({}, {}) into {} (profile is {})".format(
+                        name, value, section_base, profile
+                    )
+                )
+                self.set(section_base, name, value)
+
+                # Reapply env var, if any.
+                self._override_config_token_from_env(section_base, name)
 
     def _override_config_from_envs(self):
         """Takes a ConfigParser, and checks every section/token for an
