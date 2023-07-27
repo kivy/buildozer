@@ -2,7 +2,8 @@
 Installation
 ============
 
-Buildozer itself doesn't depend on any library Python >= 3.3.
+Buildozer is tested on Python 3.7 and above but may work on
+earlier versions, back to Python 3.3.
 Depending the platform you want to target, you might need more tools installed.
 Buildozer tries to give you hints or tries to install few things for
 you, but it doesn't cover every situation.
