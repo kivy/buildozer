@@ -2,7 +2,7 @@
 Installation
 ============
 
-Buildozer is tested on Python 3.7 and above but may work on
+Buildozer is tested on Python 3.8 and above but may work on
 earlier versions, back to Python 3.3.
 Depending the platform you want to target, you might need more tools installed.
 Buildozer tries to give you hints or tries to install few things for
