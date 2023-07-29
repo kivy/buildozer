@@ -1432,8 +1432,12 @@ class TargetAndroid(Target):
         serial = self.serials[0:]
         if not serial:
             return
-        filters = self.buildozer.config.getrawdefault(
-            "app", "android.logcat_filters", "", section_sep=":", split_char=" ")
+        filters = self.buildozer.config.getlist(
+            "app",
+            "android.logcat_filters",
+            default="",
+            section_sep=":",
+            strip=False)
         filters = " ".join(filters)
         self.buildozer.environ['ANDROID_SERIAL'] = serial[0]
         extra_args = []

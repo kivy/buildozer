@@ -1,3 +1,8 @@
+# This .spec config file tells Buildozer an app's requirements for being built.
+#
+# It largely follows the syntax of an .ini file.
+# See the end of the file for more details and warnings about common mistakes.
+
 [app]
 
 # (str) Title of your application
@@ -410,40 +415,54 @@ warn_on_root = 1
 # (str) Path to build output (i.e. .apk, .aab, .ipa) storage
 # bin_dir = ./bin
 
-#    -----------------------------------------------------------------------------
-#    List as sections
+#-----------------------------------------------------------------------------
+#   Notes about using this file:
 #
-#    You can define all the "list" as [section:key].
-#    Each line will be considered as a option to the list.
-#    Let's take [app] / source.exclude_patterns.
-#    Instead of doing:
+#   Buildozer uses a variant of Python's ConfigSpec to read this file.
+#   For the basic syntax, including interpolations, see
+#       https://docs.python.org/3/library/configparser.html#supported-ini-file-structure
 #
-#[app]
-#source.exclude_patterns = license,data/audio/*.wav,data/images/original/*
+#   Warning: Comments cannot be used "inline" - i.e.
+#       [app]
+#       title = My Application # This is not a comment, it is part of the title.
 #
-#    This can be translated into:
+#   Warning: Indented text is treated as a multiline string - i.e.
+#       [app]
+#       title = My Application
+#          package.name = myapp # This is all part of the title.
 #
-#[app:source.exclude_patterns]
-#license
-#data/audio/*.wav
-#data/images/original/*
+#   Buildozer's .spec files have some additional features:
 #
-
-
-#    -----------------------------------------------------------------------------
-#    Profiles
+#   Buildozer supports lists - i.e.
+#       [app]
+#       source.include_exts = py,png,jpg
+#       #                     ^ This is a list.
 #
-#    You can extend section / key with a profile
-#    For example, you want to deploy a demo version of your application without
-#    HD content. You could first change the title to add "(demo)" in the name
-#    and extend the excluded directories to remove the HD content.
+#       [app:source.include_exts]
+#       py
+#       png
+#       jpg
+#       # ^ This is an alternative syntax for a list.
 #
-#[app@demo]
-#title = My Application (demo)
+#   Buildozer's option names are case-sensitive, unlike most .ini files.
 #
-#[app:source.exclude_patterns@demo]
-#images/hd/*
+#   Buildozer supports overriding options through environment variables.
+#   Name an environment variable as SECTION_OPTION to override a value in a .spec
+#   file.
 #
-#    Then, invoke the command line with the "demo" profile:
+#   Buildozer support overriding options through profiles.
+#   For example, you want to deploy a demo version of your application without
+#   HD content. You could first change the title to add "(demo)" in the name
+#   and extend the excluded directories to remove the HD content.
 #
-#buildozer --profile demo android debug
+#       [app@demo]
+#       title = My Application (demo)
+#
+#       [app:source.exclude_patterns@demo]
+#       images/hd/*
+#
+#   Then, invoke the command line with the "demo" profile:
+#
+#        buildozer --profile demo android debug
+#
+#   Environment variable overrides have priority over profile overrides.
