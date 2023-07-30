@@ -2,8 +2,9 @@
 Android target, based on python-for-android project
 '''
 
+import os
 import sys
-if sys.platform == 'win32':
+if sys.platform == 'win32' and not os.getenv("KIVY_WIN32_ANDROID_EXPERIMENTAL"):
     raise NotImplementedError('Windows platform not yet working for Android')
 
 from platform import uname
@@ -20,7 +21,6 @@ APACHE_ANT_VERSION = '1.9.4'
 DEFAULT_ANDROID_NDK_VERSION = '17c'
 
 import traceback
-import os
 import io
 import re
 import ast
@@ -245,11 +245,14 @@ class TargetAndroid(Target):
     @property
     def sdkmanager_path(self):
         sdkmanager_path = join(
-            self.android_sdk_dir, 'tools', 'bin', 'sdkmanager')
+            self.android_sdk_dir, 'tools', 'bin',
+            'sdkmanager.bat'
+            if platform in ('win32', 'cygwin')
+            else 'sdkmanager')
         if not os.path.isfile(sdkmanager_path):
             raise BuildozerException(
                 ('sdkmanager path "{}" does not exist, sdkmanager is not'
-                 'installed'.format(sdkmanager_path)))
+                 ' installed'.format(sdkmanager_path)))
         return sdkmanager_path
 
     @property
@@ -314,14 +317,14 @@ class TargetAndroid(Target):
     def _set_win32_java_home(self):
         if 'JAVA_HOME' in self.buildozer.environ:
             return
-        import _winreg
-        with _winreg.OpenKey(
-                _winreg.HKEY_LOCAL_MACHINE,
+        import winreg
+        with winreg.OpenKey(
+                winreg.HKEY_LOCAL_MACHINE,
                 r"SOFTWARE\JavaSoft\Java Development Kit") as jdk:  # @UndefinedVariable
-            current_version, _type = _winreg.QueryValueEx(
+            current_version, _type = winreg.QueryValueEx(
                 jdk, "CurrentVersion")  # @UndefinedVariable
-            with _winreg.OpenKey(jdk, current_version) as cv:  # @UndefinedVariable
-                java_home, _type = _winreg.QueryValueEx(
+            with winreg.OpenKey(jdk, current_version) as cv:  # @UndefinedVariable
+                java_home, _type = winreg.QueryValueEx(
                     cv, "JavaHome")  # @UndefinedVariable
             self.buildozer.environ['JAVA_HOME'] = java_home
 
@@ -410,7 +413,7 @@ class TargetAndroid(Target):
         if platform in ('win32', 'cygwin'):
             # Checking of 32/64 bits at Windows from: https://stackoverflow.com/a/1405971/798575
             import struct
-            archive = 'android-ndk-r{0}-windows-{1}.zip'
+            archive = 'android-ndk-r{0}-windows.zip'
             is_64 = (8 * struct.calcsize("P") == 64)
         elif is_darwin or is_linux or is_freebsd:
             _platform = 'linux' if (is_linux or is_freebsd) else 'darwin'
