@@ -17,16 +17,16 @@ package.domain = org.test
 # (str) Source code where the main.py live
 source.dir = .
 
-# (list) Source files to include (let empty to include all the files)
+# (list) Source files to include (leave empty to include all the files)
 source.include_exts = py,png,jpg,kv,atlas
 
 # (list) List of inclusions using pattern matching
 #source.include_patterns = assets/*,images/*.png
 
-# (list) Source files to exclude (let empty to not exclude anything)
+# (list) Source files to exclude (leave empty to not exclude anything)
 #source.exclude_exts = spec
 
-# (list) List of directory to exclude (let empty to not exclude anything)
+# (list) List of directory to exclude (leave empty to not exclude anything)
 #source.exclude_dirs = tests, bin, venv
 
 # (list) List of exclusions using pattern matching
@@ -58,7 +58,13 @@ requirements = python3,kivy
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse
 orientation = portrait
 
-# (list) List of service to declare
+# (list) List of services to declare
+# This is currently only relevant to Android services.
+# Each service consists of a name (a valid Java class name, with the first letter capitalized)
+# followed by a colon, followed by the name of the Python script (.py file) that should be
+# launched. This is optionally followed by ":foreground" for foreground services or
+# ":foreground:sticky" for sticky foreground services. The default is a background service.
+# Bound services are not supported.
 #services = NAME:ENTRYPOINT_TO_PY,NAME2:ENTRYPOINT2_TO_PY
 
 #
@@ -126,7 +132,7 @@ fullscreen = 0
 # (str) ANT directory (if empty, it will be automatically downloaded.)
 #android.ant_path =
 
-# (bool) If True, then skip trying to update the Android sdk
+# (bool) If True, then skip trying to update the Android SDK
 # This can be useful to avoid excess Internet downloads or save time
 # when an update is due and you just want to test/build your package
 # android.skip_update = False
@@ -338,6 +344,7 @@ android.allow_backup = True
 #p4a.hook =
 
 # (str) Bootstrap to use for android builds
+# Run "buildozer android p4a -- bootstraps" for a list of valid values.
 # p4a.bootstrap = sdl2
 
 # (int) port number to specify an explicit --port= p4a argument (eg for bootstrap flask)
