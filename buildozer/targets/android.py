@@ -244,11 +244,13 @@ class TargetAndroid(Target):
 
     @property
     def sdkmanager_path(self):
-        sdkmanager_path = join(
-            self.android_sdk_dir, 'tools', 'bin',
+        sdk_manager_name = (
             'sdkmanager.bat'
             if platform in ('win32', 'cygwin')
-            else 'sdkmanager')
+            else 'sdkmanager'
+        )
+        sdkmanager_path = join(
+            self.android_sdk_dir, 'tools', 'bin', sdk_manager_name)
         if not os.path.isfile(sdkmanager_path):
             raise BuildozerException(
                 ('sdkmanager path "{}" does not exist, sdkmanager is not'
