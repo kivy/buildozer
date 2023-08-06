@@ -59,6 +59,7 @@ requirements = python3,kivy
 orientation = portrait
 
 # (list) List of services to declare
+# This is currently only relevant to Android services.
 # Each service consists of a name (a valid Java class name, with the first letter capitalized)
 # followed by a colon, followed by the name of the Python script (.py file) that should be
 # launched. This is optionally followed by ":foreground" for foreground services or
