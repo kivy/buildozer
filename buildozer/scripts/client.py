@@ -5,7 +5,9 @@ Main Buildozer client
 '''
 
 import sys
-from buildozer import Buildozer, BuildozerCommandException, BuildozerException
+
+from buildozer import Buildozer
+from buildozer.exceptions import BuildozerCommandException, BuildozerException
 from buildozer.logger import Logger
 
 
