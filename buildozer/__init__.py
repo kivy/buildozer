@@ -34,6 +34,7 @@ except ImportError:
     # on windows, no fcntl
     fcntl = None
 
+from buildozer.exceptions import BuildozerCommandException
 from buildozer.jsonstore import JsonStore
 from buildozer.logger import Logger
 from buildozer.specparser import SpecParser
@@ -48,22 +49,6 @@ class ChromeDownloader(FancyURLopener):
 
 
 urlretrieve = ChromeDownloader().retrieve
-
-
-class BuildozerException(Exception):
-    '''
-    Exception raised for general situations buildozer cannot process.
-    '''
-    pass
-
-
-class BuildozerCommandException(BuildozerException):
-    '''
-    Exception raised when an external command failed.
-
-    See: `Buildozer.cmd()`.
-    '''
-    pass
 
 
 class Buildozer:

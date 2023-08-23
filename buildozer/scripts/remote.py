@@ -13,25 +13,27 @@ You need paramiko to make it work.
 
 __all__ = ["BuildozerRemote"]
 
-import socket
-import sys
-from buildozer import (
-    Buildozer, BuildozerCommandException, BuildozerException, __version__)
-from buildozer.logger import Logger
-from sys import stdout, stdin, exit
-from select import select
-from os.path import join, expanduser, realpath, exists, splitext
-from os import makedirs, walk, getcwd
 from configparser import ConfigParser
+from os import makedirs, walk, getcwd
+from os.path import join, expanduser, realpath, exists, splitext
+import socket
+from select import select
+import sys
+from sys import stdout, stdin, exit
 try:
     import termios
     has_termios = True
 except ImportError:
     has_termios = False
+
 try:
     import paramiko
 except ImportError:
     print('Paramiko missing: pip install paramiko')
+
+from buildozer import Buildozer, __version__
+from buildozer.exceptions import BuildozerCommandException, BuildozerException
+from buildozer.logger import Logger
 
 
 class BuildozerRemote(Buildozer):

@@ -2,12 +2,14 @@
 iOS target, based on kivy-ios project
 '''
 
-import sys
-import plistlib
-from buildozer import BuildozerCommandException
-from buildozer.target import Target, no_config
-from os.path import join, basename, expanduser, realpath
+
 from getpass import getpass
+from os.path import join, basename, expanduser, realpath
+import plistlib
+import sys
+
+from buildozer.exceptions import BuildozerCommandException
+from buildozer.target import Target, no_config
 
 
 PHP_TEMPLATE = '''

@@ -20,25 +20,27 @@ APACHE_ANT_VERSION = '1.9.4'
 # doesn't support any newer NDK.
 DEFAULT_ANDROID_NDK_VERSION = '17c'
 
-import traceback
-import io
-import re
 import ast
-from sys import platform, executable
-from buildozer import BuildozerException
-from buildozer.logger import USE_COLOR
-from buildozer.target import Target
+from glob import glob
+import io
 from os import environ
 from os.path import exists, join, realpath, expanduser, basename, relpath
 from platform import architecture
-from shutil import copyfile, rmtree, which
+import re
 import shlex
-import pexpect
-from glob import glob
+from shutil import copyfile, rmtree, which
+from sys import platform, executable
 from time import sleep
+import traceback
 
-from buildozer.libs.version import parse
 from distutils.version import LooseVersion
+import pexpect
+
+from buildozer.exceptions import BuildozerException
+from buildozer.logger import USE_COLOR
+from buildozer.target import Target
+from buildozer.libs.version import parse
+
 
 # buildozer.spec tokens that used to exist but are now ignored
 DEPRECATED_TOKENS = (('app', 'android.sdk'), )

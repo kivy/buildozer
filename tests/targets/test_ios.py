@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from buildozer import BuildozerCommandException
+from buildozer.exceptions import BuildozerCommandException
 from buildozer.targets.ios import TargetIos
 from tests.targets.utils import (
     init_buildozer,
