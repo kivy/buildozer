@@ -8,21 +8,21 @@ Generic Python packager for Android / iOS. Desktop later.
 
 __version__ = '1.5.1.dev0'
 
-import os
-import re
-import sys
-import select
 import codecs
+from copy import copy
+from fnmatch import fnmatch
+import os
+from os import environ, unlink, walk, sep, listdir
+from os.path import join, exists, dirname, realpath, splitext, expanduser
+import re
+from re import search
+import select
+from shutil import copyfile, rmtree, copytree, move, which
+from subprocess import Popen, PIPE, TimeoutExpired
+import sys
+from sys import stdout, stderr, exit
 import textwrap
 import warnings
-from sys import stdout, stderr, exit
-from re import search
-from os.path import join, exists, dirname, realpath, splitext, expanduser
-from subprocess import Popen, PIPE, TimeoutExpired
-from os import environ, unlink, walk, sep, listdir, makedirs
-from copy import copy
-from shutil import copyfile, rmtree, copytree, move, which
-from fnmatch import fnmatch
 
 import shlex
 import pexpect
@@ -34,6 +34,7 @@ except ImportError:
     # on windows, no fcntl
     fcntl = None
 
+from buildozer.buildops import mkdir, rmdir
 from buildozer.exceptions import BuildozerCommandException
 from buildozer.jsonstore import JsonStore
 from buildozer.logger import Logger
@@ -361,22 +362,22 @@ class Buildozer:
             exit(1)
 
         # create global dir
-        self.mkdir(self.global_buildozer_dir)
-        self.mkdir(self.global_cache_dir)
+        mkdir(self.global_buildozer_dir)
+        mkdir(self.global_cache_dir)
 
         # create local .buildozer/ dir
-        self.mkdir(self.buildozer_dir)
+        mkdir(self.buildozer_dir)
         # create local bin/ dir
-        self.mkdir(self.bin_dir)
+        mkdir(self.bin_dir)
 
-        self.mkdir(self.applibs_dir)
+        mkdir(self.applibs_dir)
         self.state = JsonStore(join(self.buildozer_dir, 'state.db'))
 
         target = self.targetname
         if target:
-            self.mkdir(join(self.global_platform_dir, target, 'platform'))
-            self.mkdir(join(self.buildozer_dir, target, 'platform'))
-            self.mkdir(join(self.buildozer_dir, target, 'app'))
+            mkdir(join(self.global_platform_dir, target, 'platform'))
+            mkdir(join(self.buildozer_dir, target, 'platform'))
+            mkdir(join(self.buildozer_dir, target, 'app'))
 
     def check_application_requirements(self):
         '''Ensure the application requirements are all available and ready to be
@@ -410,8 +411,8 @@ class Buildozer:
             return
 
         # recreate applibs
-        self.rmdir(self.applibs_dir)
-        self.mkdir(self.applibs_dir)
+        rmdir(self.applibs_dir)
+        mkdir(self.applibs_dir)
 
         # ok now check the availability of all requirements
         for requirement in requirements:
@@ -463,18 +464,6 @@ class Buildozer:
         # ensure any sort of compilation will fail
         self.env_venv['CC'] = '/bin/false'
         self.env_venv['CXX'] = '/bin/false'
-
-    def mkdir(self, dn):
-        if exists(dn):
-            return
-        self.logger.debug('Create directory {0}'.format(dn))
-        makedirs(dn)
-
-    def rmdir(self, dn):
-        if not exists(dn):
-            return
-        self.logger.debug('Remove directory and subdirectory {}'.format(dn))
-        rmtree(dn)
 
     def file_matches(self, patterns):
         from glob import glob
@@ -700,7 +689,7 @@ class Buildozer:
 
                 # ensure the directory exists
                 dfn = dirname(rfn)
-                self.mkdir(dfn)
+                mkdir(dfn)
 
                 # copy!
                 self.logger.debug('Copy {0}'.format(sfn))
