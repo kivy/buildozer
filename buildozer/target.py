@@ -2,6 +2,7 @@ from sys import exit
 import os
 from os.path import join
 
+import buildozer.buildops as buildops
 from buildozer.logger import Logger
 
 
@@ -253,7 +254,7 @@ class Target:
         custom_dir, clone_url, clone_branch = self.path_or_git_url(repo, **kwargs)
         if not self.buildozer.file_exists(install_dir):
             if custom_dir:
-                cmd(["mkdir", "-p", install_dir])
+                buildops.mkdir(install_dir)
                 cmd(["cp", "-a", f"{custom_dir}/*", f"{install_dir}/"])
             else:
                 cmd(["git", "clone", "--branch", clone_branch, clone_url], cwd=self.buildozer.platform_dir)

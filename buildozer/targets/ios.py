@@ -8,6 +8,7 @@ from os.path import join, basename, expanduser, realpath
 import plistlib
 import sys
 
+import buildozer.buildops as buildops
 from buildozer.exceptions import BuildozerCommandException
 from buildozer.target import Target, no_config
 
@@ -270,7 +271,7 @@ class TargetIos(Target):
         ipa = join(self.buildozer.bin_dir, ipa_name)
         build_dir = join(self.ios_dir, '{}-ios'.format(app_name.lower()))
 
-        self.buildozer.rmdir(intermediate_dir)
+        buildops.rmdir(intermediate_dir)
 
         self.logger.info('Creating archive...')
         self.xcodebuild(
