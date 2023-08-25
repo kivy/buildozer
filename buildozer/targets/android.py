@@ -28,7 +28,7 @@ from os.path import exists, join, realpath, expanduser, basename, relpath
 from platform import architecture
 import re
 import shlex
-from shutil import copyfile, rmtree, which
+from shutil import which
 from sys import platform, executable
 from time import sleep
 import traceback
@@ -36,6 +36,7 @@ import traceback
 from distutils.version import LooseVersion
 import pexpect
 
+import buildozer.buildops as buildops
 from buildozer.exceptions import BuildozerException
 from buildozer.logger import USE_COLOR
 from buildozer.target import Target
@@ -450,9 +451,10 @@ class TargetAndroid(Target):
         self.logger.info('Unpacking Android NDK')
         self.buildozer.file_extract(archive,
                                     cwd=self.buildozer.global_platform_dir)
-        self.buildozer.file_rename(unpacked,
-                                   ndk_dir,
-                                   cwd=self.buildozer.global_platform_dir)
+        buildops.rename(
+            unpacked,
+            ndk_dir,
+            cwd=self.buildozer.global_platform_dir)
         self.logger.info('Android NDK installation done.')
         return ndk_dir
 
@@ -681,7 +683,7 @@ class TargetAndroid(Target):
                     self.logger.info(
                         f"Detected old url/branch ({cur_url}/{cur_branch}), deleting..."
                     )
-                    rmtree(p4a_dir)
+                    buildops.rmdir(p4a_dir)
 
             if not self.buildozer.file_exists(p4a_dir):
                 cmd(
@@ -1052,7 +1054,7 @@ class TargetAndroid(Target):
 
             self.logger.debug('Search and copy libs for {}'.format(lib_dir))
             for fn in self.buildozer.file_matches(patterns):
-                self.buildozer.file_copy(
+                buildops.file_copy(
                     join(self.buildozer.root_dir, fn),
                     join(dist_dir, 'libs', lib_dir, basename(fn)))
 
@@ -1289,7 +1291,9 @@ class TargetAndroid(Target):
             arch=self.archs_snake, artifact_format=self.artifact_format)
 
         # copy to our place
-        copyfile(join(artifact_dir, artifact), join(self.buildozer.bin_dir, artifact_dest))
+        buildops.file_copy(
+            join(artifact_dir, artifact),
+            join(self.buildozer.bin_dir, artifact_dest))
 
         self.logger.info('Android packaging done!')
         self.logger.info(

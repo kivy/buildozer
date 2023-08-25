@@ -17,7 +17,7 @@ from os.path import join, exists, dirname, realpath, splitext, expanduser
 import re
 from re import search
 import select
-from shutil import copyfile, rmtree, copytree, move, which
+from shutil import which
 from subprocess import Popen, PIPE, TimeoutExpired
 import sys
 from sys import stdout, stderr, exit
@@ -476,23 +476,6 @@ class Buildozer:
     def file_exists(self, *args):
         return exists(join(*args))
 
-    def file_rename(self, source, target, cwd=None):
-        if cwd:
-            source = join(cwd, source)
-            target = join(cwd, target)
-        self.logger.debug('Rename {0} to {1}'.format(source, target))
-        if not os.path.isdir(os.path.dirname(target)):
-            self.logger.error(('Rename {0} to {1} fails because {2} is not a '
-                        'directory').format(source, target, target))
-        move(source, target)
-
-    def file_copy(self, source, target, cwd=None):
-        if cwd:
-            source = join(cwd, source)
-            target = join(cwd, target)
-        self.logger.debug('Copy {0} to {1}'.format(source, target))
-        copyfile(source, target)
-
     def file_extract(self, archive, cwd=None):
         if archive.endswith('.tgz') or archive.endswith('.tar.gz'):
             self.cmd(["tar", "xzf", archive], cwd=cwd)
@@ -515,24 +498,11 @@ class Buildozer:
 
         raise Exception('Unhandled extraction for type {0}'.format(archive))
 
-    def file_copytree(self, src, dest):
-        print('copy {} to {}'.format(src, dest))
-        if os.path.isdir(src):
-            if not os.path.isdir(dest):
-                os.makedirs(dest)
-            files = os.listdir(src)
-            for f in files:
-                self.file_copytree(
-                    os.path.join(src, f),
-                    os.path.join(dest, f))
-        else:
-            copyfile(src, dest)
-
     def clean_platform(self):
         self.logger.info('Clean the platform build directory')
         if not exists(self.platform_dir):
             return
-        rmtree(self.platform_dir)
+        buildops.rmdir(self.platform_dir)
 
     def download(self, url, filename, cwd=None):
         def report_hook(index, blksize, size):
@@ -615,7 +585,7 @@ class Buildozer:
 
         self.logger.debug('Copy application source from {}'.format(source_dir))
 
-        rmtree(self.app_dir)
+        buildops.rmdir(self.app_dir)
 
         for root, dirs, files in walk(source_dir, followlinks=True):
             # avoid hidden directory
@@ -693,14 +663,14 @@ class Buildozer:
 
                 # copy!
                 self.logger.debug('Copy {0}'.format(sfn))
-                copyfile(sfn, rfn)
+                buildops.file_copy(sfn, rfn)
 
     def _copy_application_libs(self):
         # copy also the libs
-        copytree(self.applibs_dir, join(self.app_dir, '_applibs'))
+        buildops.file_copytree(self.applibs_dir, join(self.app_dir, '_applibs'))
 
     def _add_sitecustomize(self):
-        copyfile(join(dirname(__file__), 'sitecustomize.py'),
+        buildops.file_copy(join(dirname(__file__), 'sitecustomize.py'),
                 join(self.app_dir, 'sitecustomize.py'))
 
         main_py = join(self.app_dir, 'service', 'main.py')
@@ -946,7 +916,7 @@ class Buildozer:
         if exists('buildozer.spec'):
             print('ERROR: You already have a buildozer.spec file.')
             exit(1)
-        copyfile(join(dirname(__file__), 'default.spec'), 'buildozer.spec')
+        buildops.file_copy(join(dirname(__file__), 'default.spec'), 'buildozer.spec')
         print('File buildozer.spec created, ready to customize!')
 
     def cmd_distclean(self, *args):
@@ -958,7 +928,7 @@ class Buildozer:
             self.logger.info('Clean the global build directory')
             if not exists(self.global_buildozer_dir):
                 return
-            rmtree(self.global_buildozer_dir)
+            buildops.rmdir(self.global_buildozer_dir)
 
     def cmd_appclean(self, *args):
         '''Clean the .buildozer folder in the app directory.
@@ -973,7 +943,7 @@ class Buildozer:
                  'not attempt to delete files in a user-specified build directory.').format(self.user_build_dir))
         elif exists(self.buildozer_dir):
             self.logger.info('Deleting {}'.format(self.buildozer_dir))
-            rmtree(self.buildozer_dir)
+            buildops.rmdir(self.buildozer_dir)
         else:
             self.logger.error('{} already deleted, skipping.'.format(self.buildozer_dir))
 
@@ -996,12 +966,8 @@ class Buildozer:
     def cmd_serve(self, *args):
         '''Serve the bin directory via SimpleHTTPServer
         '''
-        try:
-            from http.server import SimpleHTTPRequestHandler
-            from socketserver import TCPServer
-        except ImportError:
-            from SimpleHTTPServer import SimpleHTTPRequestHandler
-            from SocketServer import TCPServer
+        from http.server import SimpleHTTPRequestHandler
+        from socketserver import TCPServer
 
         os.chdir(self.bin_dir)
         handler = SimpleHTTPRequestHandler

@@ -65,7 +65,7 @@ def call_build_package(target_android):
     with patch_target_android('_update_libraries_references') as m_update_libraries_references, \
          patch_target_android('_generate_whitelist') as m_generate_whitelist, \
          mock.patch('buildozer.targets.android.TargetAndroid.execute_build_package') as m_execute_build_package, \
-         mock.patch('buildozer.targets.android.copyfile') as m_copyfile, \
+         mock.patch('buildozer.targets.android.buildops.file_copy') as m_copyfile, \
          mock.patch('buildozer.targets.android.os.listdir') as m_listdir:
         m_listdir.return_value = ['30.0.0-rc2']
         target_android.build_package()
