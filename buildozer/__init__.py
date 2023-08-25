@@ -34,7 +34,7 @@ except ImportError:
     # on windows, no fcntl
     fcntl = None
 
-from buildozer.buildops import mkdir, rmdir
+import buildozer.buildops as buildops
 from buildozer.exceptions import BuildozerCommandException
 from buildozer.jsonstore import JsonStore
 from buildozer.logger import Logger
@@ -362,22 +362,22 @@ class Buildozer:
             exit(1)
 
         # create global dir
-        mkdir(self.global_buildozer_dir)
-        mkdir(self.global_cache_dir)
+        buildops.mkdir(self.global_buildozer_dir)
+        buildops.mkdir(self.global_cache_dir)
 
         # create local .buildozer/ dir
-        mkdir(self.buildozer_dir)
+        buildops.mkdir(self.buildozer_dir)
         # create local bin/ dir
-        mkdir(self.bin_dir)
+        buildops.mkdir(self.bin_dir)
 
-        mkdir(self.applibs_dir)
+        buildops.mkdir(self.applibs_dir)
         self.state = JsonStore(join(self.buildozer_dir, 'state.db'))
 
         target = self.targetname
         if target:
-            mkdir(join(self.global_platform_dir, target, 'platform'))
-            mkdir(join(self.buildozer_dir, target, 'platform'))
-            mkdir(join(self.buildozer_dir, target, 'app'))
+            buildops.mkdir(join(self.global_platform_dir, target, 'platform'))
+            buildops.mkdir(join(self.buildozer_dir, target, 'platform'))
+            buildops.mkdir(join(self.buildozer_dir, target, 'app'))
 
     def check_application_requirements(self):
         '''Ensure the application requirements are all available and ready to be
@@ -411,8 +411,8 @@ class Buildozer:
             return
 
         # recreate applibs
-        rmdir(self.applibs_dir)
-        mkdir(self.applibs_dir)
+        buildops.rmdir(self.applibs_dir)
+        buildops.mkdir(self.applibs_dir)
 
         # ok now check the availability of all requirements
         for requirement in requirements:
@@ -689,7 +689,7 @@ class Buildozer:
 
                 # ensure the directory exists
                 dfn = dirname(rfn)
-                mkdir(dfn)
+                buildops.mkdir(dfn)
 
                 # copy!
                 self.logger.debug('Copy {0}'.format(sfn))
