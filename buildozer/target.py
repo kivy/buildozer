@@ -255,12 +255,12 @@ class Target:
         if not self.buildozer.file_exists(install_dir):
             if custom_dir:
                 buildops.mkdir(install_dir)
-                cmd(["cp", "-a", f"{custom_dir}/*", f"{install_dir}/"])
+                buildops.file_copytree(custom_dir, install_dir)
             else:
                 cmd(["git", "clone", "--branch", clone_branch, clone_url], cwd=self.buildozer.platform_dir)
         elif self.platform_update:
             if custom_dir:
-                cmd(["cp", "-a", f"{custom_dir}/*", f"{install_dir}/"])
+                buildops.file_copytree(custom_dir, install_dir)
             else:
                 cmd(["git", "clean", "-dxf"], cwd=install_dir)
                 cmd(["git", "pull", "origin", clone_branch], cwd=install_dir)

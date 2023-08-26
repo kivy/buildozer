@@ -9,6 +9,7 @@ if sys.platform != 'darwin':
 from os.path import exists, join, abspath, dirname
 from subprocess import check_call, check_output
 
+import buildozer.buildops as buildops
 from buildozer.target import Target
 
 
@@ -32,17 +33,14 @@ class TargetOSX(Target):
                 'https://github.com/kivy/kivy-sdk-packager/archive/master.zip'),
             cwd=platdir)
         check_call(('unzip', 'master.zip'), cwd=platdir)
-        check_call(('rm', 'master.zip'), cwd=platdir)
+        buildops.file_remove(join(platdir, 'master.zip'))
 
     def download_kivy(self, cwd):
         current_kivy_vers = self.buildozer.config.get('app', 'osx.kivy_version')
 
         if exists('/Applications/Kivy.app'):
             self.logger.info('Kivy found in Applications dir...')
-            check_call(
-                ('cp', '-a', '/Applications/Kivy.app',
-                    'Kivy.app'), cwd=cwd)
-
+            buildops.file_copy('/Applications/Kivy.app', 'Kivy.app', cwd=cwd)
         else:
             if not exists(join(cwd, 'Kivy.dmg')):
                 self.logger.info('Downloading kivy...')
@@ -56,12 +54,13 @@ class TargetOSX(Target):
                     self.logger.error(
                         "Unable to download the Kivy App. Check osx.kivy_version in your buildozer.spec, and verify "
                         "Kivy servers are accessible. https://kivy.org/downloads/")
-                    check_call(("rm", "Kivy.dmg"), cwd=cwd)
+                    buildops.file_remove(join(cwd, "Kivy.dmg"))
                     sys.exit(1)
 
             self.logger.info('Extracting and installing Kivy...')
             check_call(('hdiutil', 'attach', cwd + '/Kivy.dmg'))
-            check_call(('cp', '-a', '/Volumes/Kivy/Kivy.app', './Kivy.app'), cwd=cwd)
+            buildops.file_copy(
+                '/Volumes/Kivy/Kivy.app', './Kivy.app', cwd=cwd)
 
     def ensure_kivyapp(self):
         self.logger.info('check if Kivy.app exists in local dir')
@@ -139,9 +138,9 @@ class TargetOSX(Target):
         binpath = join(
             self.buildozer.user_build_dir or
             dirname(abspath(self.buildozer.specfilename)), 'bin')
-        check_output(
-            ('cp', '-a', package_name + '.dmg', binpath),
-            cwd=cwd)
+        buildops.file_copytree(
+            join(cwd, package_name + '.dmg'),
+            binpath)
         self.logger.info('All Done!')
 
     def compile_platform(self):
