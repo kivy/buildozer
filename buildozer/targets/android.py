@@ -283,7 +283,7 @@ class TargetAndroid(Target):
             # Check for C header <zlib.h>.
             is_debian_like = which("dpkg") is not None
             if is_debian_like and \
-                    not self.buildozer.file_exists('/usr/include/zlib.h'):
+                    not buildops.file_exists('/usr/include/zlib.h'):
                 raise BuildozerException(
                     'zlib headers must be installed, '
                     'run: sudo apt-get install zlib1g-dev')
@@ -344,7 +344,7 @@ class TargetAndroid(Target):
 
     def _install_apache_ant(self):
         ant_dir = self.apache_ant_dir
-        if self.buildozer.file_exists(ant_dir):
+        if buildops.file_exists(ant_dir):
             self.logger.info('Apache ANT found at {0}'.format(ant_dir))
             return ant_dir
 
@@ -364,7 +364,7 @@ class TargetAndroid(Target):
 
     def _install_android_sdk(self):
         sdk_dir = self.android_sdk_dir
-        if self.buildozer.file_exists(sdk_dir):
+        if buildops.file_exists(sdk_dir):
             self.logger.info('Android SDK found at {0}'.format(sdk_dir))
             return sdk_dir
 
@@ -396,7 +396,7 @@ class TargetAndroid(Target):
 
     def _install_android_ndk(self):
         ndk_dir = self.android_ndk_dir
-        if self.buildozer.file_exists(ndk_dir):
+        if buildops.file_exists(ndk_dir):
             self.logger.info('Android NDK found at {0}'.format(ndk_dir))
             return ndk_dir
 
@@ -579,7 +579,7 @@ class TargetAndroid(Target):
         # 3. finally, install the android for the current api
         self.logger.info('Downloading platform api target if necessary')
         android_platform = join(self.android_sdk_dir, 'platforms', 'android-{}'.format(self.android_api))
-        if not self.buildozer.file_exists(android_platform):
+        if not buildops.file_exists(android_platform):
             if not skip_upd:
                 self._sdkmanager(f"platforms;android-{self.android_api}")
             else:
@@ -663,14 +663,14 @@ class TargetAndroid(Target):
                                                           'p4a.source_dir')
         if system_p4a_dir:
             # Don't install anything, just check that the dir does exist
-            if not self.buildozer.file_exists(p4a_dir):
+            if not buildops.file_exists(p4a_dir):
                 self.logger.error(
                     'Path for p4a.source_dir does not exist')
                 self.logger.error('')
                 raise BuildozerException()
         else:
             # check that url/branch has not been changed
-            if self.buildozer.file_exists(p4a_dir):
+            if buildops.file_exists(p4a_dir):
                 cur_url = cmd(
                     ["git", "config", "--get", "remote.origin.url"],
                     get_stdout=True,
@@ -685,7 +685,7 @@ class TargetAndroid(Target):
                     )
                     buildops.rmdir(p4a_dir)
 
-            if not self.buildozer.file_exists(p4a_dir):
+            if not buildops.file_exists(p4a_dir):
                 cmd(
                     [
                         "git",
@@ -1053,7 +1053,7 @@ class TargetAndroid(Target):
                 continue
 
             self.logger.debug('Search and copy libs for {}'.format(lib_dir))
-            for fn in self.buildozer.file_matches(patterns):
+            for fn in buildops.file_matches(patterns):
                 buildops.file_copy(
                     join(self.buildozer.root_dir, fn),
                     join(dist_dir, 'libs', lib_dir, basename(fn)))
@@ -1305,7 +1305,7 @@ class TargetAndroid(Target):
         # ensure the project.properties exist
         project_fn = join(dist_dir, 'project.properties')
 
-        if not self.buildozer.file_exists(project_fn):
+        if not buildops.file_exists(project_fn):
             content = [
                 'target=android-{}\n'.format(self.android_api),
                 'APP_PLATFORM={}\n'.format(self.android_minapi)]
@@ -1328,7 +1328,7 @@ class TargetAndroid(Target):
         for cref in app_references:
             # get the full path of the current reference
             ref = realpath(join(source_dir, cref))
-            if not self.buildozer.file_exists(ref):
+            if not buildops.file_exists(ref):
                 self.logger.error(
                     'Invalid library reference (path not found): {}'.format(
                         cref))
@@ -1402,7 +1402,7 @@ class TargetAndroid(Target):
         # search the APK in the bin dir
         apk = state['android:latestapk']
         full_apk = join(self.buildozer.bin_dir, apk)
-        if not self.buildozer.file_exists(full_apk):
+        if not buildops.file_exists(full_apk):
             self.logger.error(
                 'Unable to found the latest APK. Please run "debug" again.')
 

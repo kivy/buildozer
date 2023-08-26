@@ -180,7 +180,8 @@ class TargetIos(Target):
 
         self.toolchain(["build", *ios_requirements])
 
-        if not self.buildozer.file_exists(self.ios_deploy_dir, 'ios-deploy'):
+        if not buildops.file_exists(
+                join(self.ios_deploy_dir, 'ios-deploy')):
             self.xcodebuild(cwd=self.ios_deploy_dir)
 
         self.buildozer.state['ios.requirements'] = ios_requirements
@@ -207,7 +208,7 @@ class TargetIos(Target):
             frameworks_cmd.append(f"--add-framework={framework}")
 
         self.app_project_dir = join(self.ios_dir, '{0}-ios'.format(app_name.lower()))
-        if not self.buildozer.file_exists(self.app_project_dir):
+        if not buildops.file_exists(self.app_project_dir):
             cmd = ["create", *frameworks_cmd, app_name, self.buildozer.app_dir]
         else:
             cmd = ["update", *frameworks_cmd, f"{app_name}-ios"]
@@ -364,7 +365,7 @@ class TargetIos(Target):
         if not icon:
             return
         icon_fn = join(self.buildozer.app_dir, icon)
-        if not self.buildozer.file_exists(icon_fn):
+        if not buildops.file_exists(icon_fn):
             self.logger.error('Icon {} does not exists'.format(icon_fn))
             return
 
@@ -416,7 +417,7 @@ class TargetIos(Target):
     def _unlock_keychain(self):
         password_file = join(self.buildozer.buildozer_dir, '.ioscodesign')
         password = None
-        if self.buildozer.file_exists(password_file):
+        if buildops.file_exists(password_file):
             with open(password_file) as fd:
                 password = fd.read()
 

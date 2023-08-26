@@ -18,8 +18,8 @@ def patch_buildozer_checkbin():
     return patch_buildozer("checkbin")
 
 
-def patch_buildozer_file_exists():
-    return patch_buildozer("file_exists")
+def patch_buildops_file_exists():
+    return mock.patch("buildozer.buildops.file_exists")
 
 
 def patch_logger_error():

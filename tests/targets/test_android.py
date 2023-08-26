@@ -12,7 +12,7 @@ from tests.targets.utils import (
     patch_buildozer,
     patch_buildozer_checkbin,
     patch_buildozer_cmd,
-    patch_buildozer_file_exists,
+    patch_buildops_file_exists,
 )
 
 
@@ -182,7 +182,7 @@ class TestTargetAndroid:
     def test_install_android_sdk(self, platform):
         """Basic tests for the _install_android_sdk() method."""
         target_android = init_target(self.temp_dir)
-        with patch_buildozer_file_exists() as m_file_exists, patch_buildozer_download() as m_download:
+        with patch_buildops_file_exists() as m_file_exists, patch_buildozer_download() as m_download:
             m_file_exists.return_value = True
             sdk_dir = target_android._install_android_sdk()
         assert m_file_exists.call_args_list == [
@@ -190,7 +190,7 @@ class TestTargetAndroid:
         ]
         assert m_download.call_args_list == []
         assert sdk_dir.endswith(".buildozer/android/platform/android-sdk")
-        with patch_buildozer_file_exists() as m_file_exists, \
+        with patch_buildops_file_exists() as m_file_exists, \
                 patch_buildozer_download() as m_download, \
                 patch_buildozer_file_extract() as m_file_extract, \
                 patch_platform(platform):
