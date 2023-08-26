@@ -66,7 +66,7 @@ class Buildozer:
 
         self.logger = Logger()
 
-        if exists(filename):
+        if buildops.file_exists(filename):
             self.config.read(filename, "utf-8")
             self.check_configuration_tokens()
 
@@ -356,7 +356,7 @@ class Buildozer:
         '''
         self.logger.info('Ensure build layout')
 
-        if not exists(self.specfilename):
+        if not buildops.file_exists(self.specfilename):
             print('No {0} found in the current directory. Abandon.'.format(
                 self.specfilename))
             exit(1)
@@ -440,7 +440,7 @@ class Buildozer:
         if hasattr(self, 'venv'):
             return
         self.venv = join(self.buildozer_dir, 'venv')
-        if not self.file_exists(self.venv):
+        if not buildops.file_exists(self.venv):
             self.cmd(["python3", "-m", "venv", "./venv"],
                     cwd=self.buildozer_dir)
 
@@ -464,17 +464,6 @@ class Buildozer:
         # ensure any sort of compilation will fail
         self.env_venv['CC'] = '/bin/false'
         self.env_venv['CXX'] = '/bin/false'
-
-    def file_matches(self, patterns):
-        from glob import glob
-        result = []
-        for pattern in patterns:
-            matches = glob(expanduser(pattern.strip()))
-            result.extend(matches)
-        return result
-
-    def file_exists(self, *args):
-        return exists(join(*args))
 
     def file_extract(self, archive, cwd=None):
         if archive.endswith('.tgz') or archive.endswith('.tar.gz'):
@@ -518,7 +507,7 @@ class Buildozer:
         url = url + filename
         if cwd:
             filename = join(cwd, filename)
-        if self.file_exists(filename):
+        if buildops.file_exists(filename):
             unlink(filename)
 
         self.logger.debug('Downloading {0}'.format(url))
@@ -674,7 +663,7 @@ class Buildozer:
                 join(self.app_dir, 'sitecustomize.py'))
 
         main_py = join(self.app_dir, 'service', 'main.py')
-        if not self.file_exists(main_py):
+        if not buildops.file_exists(main_py):
             return
 
         header = (b'import sys, os; '

@@ -252,7 +252,7 @@ class Target:
         cmd = self.buildozer.cmd
         install_dir = join(self.buildozer.platform_dir, repo)
         custom_dir, clone_url, clone_branch = self.path_or_git_url(repo, **kwargs)
-        if not self.buildozer.file_exists(install_dir):
+        if not buildops.file_exists(install_dir):
             if custom_dir:
                 buildops.mkdir(install_dir)
                 buildops.file_copytree(custom_dir, install_dir)

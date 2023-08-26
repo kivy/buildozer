@@ -1,3 +1,4 @@
+import os.path
 import sys
 import tempfile
 from unittest import mock
@@ -10,7 +11,7 @@ from tests.targets.utils import (
     init_buildozer,
     patch_buildozer_checkbin,
     patch_buildozer_cmd,
-    patch_buildozer_file_exists,
+    patch_buildops_file_exists,
     patch_logger_error,
 )
 
@@ -145,7 +146,7 @@ class TestTargetIos:
         # fmt: off
         with patch_target_ios("get_available_packages") as m_get_available_packages, \
              patch_target_ios("toolchain") as m_toolchain, \
-             patch_buildozer_file_exists() as m_file_exists:
+             patch_buildops_file_exists() as m_file_exists:
             m_get_available_packages.return_value = ["hostpython3", "python3"]
             m_file_exists.return_value = True
             target.compile_platform()
@@ -153,7 +154,7 @@ class TestTargetIos:
         assert m_get_available_packages.call_args_list == [mock.call()]
         assert m_toolchain.call_args_list == [mock.call(["build", "python3"])]
         assert m_file_exists.call_args_list == [
-            mock.call(target.ios_deploy_dir, "ios-deploy")
+            mock.call(os.path.join(target.ios_deploy_dir, "ios-deploy"))
         ]
 
     def test_get_package(self):

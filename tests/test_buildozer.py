@@ -134,7 +134,7 @@ class TestBuildozer(unittest.TestCase):
         assert download.call_args_list == [
             mock.call("https://archive.apache.org/dist/ant/binaries/", mock.ANY, cwd=my_ant_path)]
         # Mock ant already installed
-        with mock.patch.object(Buildozer, 'file_exists', return_value=True):
+        with mock.patch('buildozer.buildops.file_exists', return_value=True):
             ant_path = target._install_apache_ant()
         assert ant_path == my_ant_path
 
