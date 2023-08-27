@@ -311,7 +311,7 @@ class TargetIos(Target):
             cwd=build_dir)
 
         self.logger.info('Moving IPA to bin...')
-        buildops.file_rename(ipa_tmp, ipa)
+        buildops.rename(ipa_tmp, ipa)
 
         self.logger.info('iOS packaging done!')
         self.logger.info('IPA {0} available in the bin directory'.format(
