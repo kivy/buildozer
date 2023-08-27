@@ -12,12 +12,11 @@ import codecs
 from copy import copy
 from fnmatch import fnmatch
 import os
-from os import environ, unlink, walk, sep, listdir
+from os import environ, walk, sep, listdir
 from os.path import join, exists, dirname, realpath, splitext, expanduser
 import re
 from re import search
 import select
-from shutil import which
 from subprocess import Popen, PIPE, TimeoutExpired
 import sys
 from sys import stdout, stderr, exit
@@ -27,7 +26,6 @@ import warnings
 import shlex
 import pexpect
 
-from urllib.request import FancyURLopener
 try:
     import fcntl
 except ImportError:
@@ -41,15 +39,6 @@ from buildozer.logger import Logger
 from buildozer.specparser import SpecParser
 
 SIMPLE_HTTP_SERVER_PORT = 8000
-
-
-class ChromeDownloader(FancyURLopener):
-    version = (
-        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
-        '(KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36')
-
-
-urlretrieve = ChromeDownloader().retrieve
 
 
 class Buildozer:
@@ -148,19 +137,6 @@ class Buildozer:
 
         # flag to prevent multiple build
         self.target._build_done = True
-
-    #
-    # Internal check methods
-    #
-
-    def checkbin(self, msg, fn):
-        self.logger.debug('Search for {0}'.format(msg))
-        executable_location = which(fn)
-        if executable_location:
-            self.logger.debug(' -> found at {0}'.format(executable_location))
-            return realpath(executable_location)
-        self.logger.error('{} not found, please install it.'.format(msg))
-        exit(1)
 
     def cmd(self, command, **kwargs):
         # prepare the environ, based on the system + our own env
@@ -492,27 +468,6 @@ class Buildozer:
         if not exists(self.platform_dir):
             return
         buildops.rmdir(self.platform_dir)
-
-    def download(self, url, filename, cwd=None):
-        def report_hook(index, blksize, size):
-            if size <= 0:
-                progression = '{0} bytes'.format(index * blksize)
-            else:
-                progression = '{0:.2f}%'.format(
-                        index * blksize * 100. / float(size))
-            if "CI" not in environ:
-                stdout.write('- Download {}\r'.format(progression))
-                stdout.flush()
-
-        url = url + filename
-        if cwd:
-            filename = join(cwd, filename)
-        if buildops.file_exists(filename):
-            unlink(filename)
-
-        self.logger.debug('Downloading {0}'.format(url))
-        urlretrieve(url, filename, report_hook)
-        return filename
 
     def get_version(self):
         c = self.config

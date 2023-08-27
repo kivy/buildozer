@@ -9,7 +9,7 @@ from buildozer.exceptions import BuildozerCommandException
 from buildozer.targets.ios import TargetIos
 from tests.targets.utils import (
     init_buildozer,
-    patch_buildozer_checkbin,
+    patch_buildops_checkbin,
     patch_buildozer_cmd,
     patch_buildops_file_exists,
     patch_logger_error,
@@ -56,7 +56,7 @@ class TestTargetIos:
         buildozer = target.buildozer
         assert not hasattr(target, "javac_cmd")
         assert "PATH" not in buildozer.environ
-        with patch_buildozer_checkbin() as m_checkbin:
+        with patch_buildops_checkbin() as m_checkbin:
             target.check_requirements()
         assert m_checkbin.call_args_list == [
             mock.call("Xcode xcodebuild", "xcodebuild"),

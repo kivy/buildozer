@@ -125,7 +125,7 @@ class TestBuildozer(unittest.TestCase):
         target = TargetAndroid(buildozer=buildozer)
 
         # Mock first run
-        with mock.patch('buildozer.Buildozer.download') as download, \
+        with mock.patch('buildozer.buildops.download') as download, \
                 mock.patch('buildozer.Buildozer.file_extract') as m_file_extract, \
                 mock.patch('os.makedirs'):
             ant_path = target._install_apache_ant()

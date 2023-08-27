@@ -10,7 +10,7 @@ from buildozer.targets.android import TargetAndroid
 from tests.targets.utils import (
     init_buildozer,
     patch_buildozer,
-    patch_buildozer_checkbin,
+    patch_buildops_checkbin,
     patch_buildozer_cmd,
     patch_buildops_file_exists,
 )
@@ -20,8 +20,8 @@ def patch_buildozer_cmd_expect():
     return patch_buildozer("cmd_expect")
 
 
-def patch_buildozer_download():
-    return patch_buildozer("download")
+def patch_buildops_download():
+    return mock.patch("buildozer.buildops.download")
 
 
 def patch_buildozer_file_extract():
@@ -155,7 +155,7 @@ class TestTargetAndroid:
         assert not hasattr(target_android, "adb_args")
         assert not hasattr(target_android, "javac_cmd")
         assert "PATH" not in buildozer.environ
-        with patch_buildozer_checkbin() as m_checkbin:
+        with patch_buildops_checkbin() as m_checkbin:
             target_android.check_requirements()
         assert m_checkbin.call_args_list == [
             mock.call("Git (git)", "git"),
@@ -182,7 +182,7 @@ class TestTargetAndroid:
     def test_install_android_sdk(self, platform):
         """Basic tests for the _install_android_sdk() method."""
         target_android = init_target(self.temp_dir)
-        with patch_buildops_file_exists() as m_file_exists, patch_buildozer_download() as m_download:
+        with patch_buildops_file_exists() as m_file_exists, patch_buildops_download() as m_download:
             m_file_exists.return_value = True
             sdk_dir = target_android._install_android_sdk()
         assert m_file_exists.call_args_list == [
@@ -191,7 +191,7 @@ class TestTargetAndroid:
         assert m_download.call_args_list == []
         assert sdk_dir.endswith(".buildozer/android/platform/android-sdk")
         with patch_buildops_file_exists() as m_file_exists, \
-                patch_buildozer_download() as m_download, \
+                patch_buildops_download() as m_download, \
                 patch_buildozer_file_extract() as m_file_extract, \
                 patch_platform(platform):
             m_file_exists.return_value = False

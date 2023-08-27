@@ -8,6 +8,7 @@ if sys.platform != 'darwin':
 
 from os.path import exists, join, abspath, dirname
 from subprocess import check_call, check_output
+import urllib
 
 import buildozer.buildops as buildops
 from buildozer.target import Target
@@ -28,9 +29,9 @@ class TargetOSX(Target):
 
         self.logger.info('kivy-sdk-packager does not exist, clone it')
         platdir = self.buildozer.platform_dir
-        check_call(
-            ('curl', '-O', '-L',
-                'https://github.com/kivy/kivy-sdk-packager/archive/master.zip'),
+        buildops.download(
+            'https://github.com/kivy/kivy-sdk-packager/archive/master.zip',
+            'master.zip',
             cwd=platdir)
         check_call(('unzip', 'master.zip'), cwd=platdir)
         buildops.file_remove(join(platdir, 'master.zip'))
@@ -44,16 +45,19 @@ class TargetOSX(Target):
         else:
             if not exists(join(cwd, 'Kivy.dmg')):
                 self.logger.info('Downloading kivy...')
-                status_code = check_output((
-                    'curl', '-L', '--write-out', '%{http_code}',
-                    '-o', 'Kivy.dmg',
-                    f'https://kivy.org/downloads/{current_kivy_vers}/Kivy.dmg'),
-                    cwd=cwd)
-
-                if status_code == "404":
+                try:
+                    buildops.download(
+                        f'https://kivy.org/downloads/'
+                        f'{current_kivy_vers}/Kivy.dmg',
+                        'Kivy.dmg',
+                        cwd=cwd
+                    )
+                except urllib.Error:
                     self.logger.error(
-                        "Unable to download the Kivy App. Check osx.kivy_version in your buildozer.spec, and verify "
-                        "Kivy servers are accessible. https://kivy.org/downloads/")
+                        "Unable to download the Kivy App. "
+                        "Check osx.kivy_version in your buildozer.spec, and "
+                        "verify Kivy servers are accessible. "
+                        "https://kivy.org/downloads/")
                     buildops.file_remove(join(cwd, "Kivy.dmg"))
                     sys.exit(1)
 
