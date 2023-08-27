@@ -8,7 +8,7 @@ if sys.platform != 'darwin':
 
 from os.path import exists, join, abspath, dirname
 from subprocess import check_call, check_output
-import urllib
+import urllib.error
 
 import buildozer.buildops as buildops
 from buildozer.target import Target
@@ -52,7 +52,7 @@ class TargetOSX(Target):
                         'Kivy.dmg',
                         cwd=cwd
                     )
-                except urllib.Error:
+                except urllib.error.URLError:
                     self.logger.error(
                         "Unable to download the Kivy App. "
                         "Check osx.kivy_version in your buildozer.spec, and "
