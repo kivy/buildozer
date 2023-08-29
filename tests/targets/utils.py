@@ -14,8 +14,8 @@ def patch_buildozer_cmd():
     return patch_buildozer("cmd")
 
 
-def patch_buildozer_checkbin():
-    return patch_buildozer("checkbin")
+def patch_buildops_checkbin():
+    return mock.patch("buildozer.buildops.checkbin")
 
 
 def patch_buildops_file_exists():

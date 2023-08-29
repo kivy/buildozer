@@ -75,17 +75,16 @@ class TargetIos(Target):
     def check_requirements(self):
         if sys.platform != "darwin":
             raise NotImplementedError("Only macOS is supported for iOS target")
-        checkbin = self.buildozer.checkbin
         cmd = self.buildozer.cmd
 
-        checkbin('Xcode xcodebuild', 'xcodebuild')
-        checkbin('Xcode xcode-select', 'xcode-select')
-        checkbin('Git git', 'git')
-        checkbin('Cython cython', 'cython')
-        checkbin('pkg-config', 'pkg-config')
-        checkbin('autoconf', 'autoconf')
-        checkbin('automake', 'automake')
-        checkbin('libtool', 'libtool')
+        buildops.checkbin('Xcode xcodebuild', 'xcodebuild')
+        buildops.checkbin('Xcode xcode-select', 'xcode-select')
+        buildops.checkbin('Git git', 'git')
+        buildops.checkbin('Cython cython', 'cython')
+        buildops.checkbin('pkg-config', 'pkg-config')
+        buildops.checkbin('autoconf', 'autoconf')
+        buildops.checkbin('automake', 'automake')
+        buildops.checkbin('libtool', 'libtool')
 
         self.logger.debug('Check availability of a iPhone SDK')
         sdk = cmd('xcodebuild -showsdks | fgrep "iphoneos" |'

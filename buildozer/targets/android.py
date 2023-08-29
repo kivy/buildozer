@@ -306,11 +306,10 @@ class TargetAndroid(Target):
         else:
             path.append(os.environ['PATH'])
         self.buildozer.environ['PATH'] = ':'.join(path)
-        checkbin = self.buildozer.checkbin
-        checkbin('Git (git)', 'git')
-        checkbin('Cython (cython)', 'cython')
-        checkbin('Java compiler (javac)', self.javac_cmd)
-        checkbin('Java keytool (keytool)', self.keytool_cmd)
+        buildops.checkbin('Git (git)', 'git')
+        buildops.checkbin('Cython (cython)', 'cython')
+        buildops.checkbin('Java compiler (javac)', self.javac_cmd)
+        buildops.checkbin('Java keytool (keytool)', self.keytool_cmd)
 
     def _p4a_have_aab_support(self):
         returncode = self._p4a(["aab", "-h"], break_on_error=False)[2]
@@ -354,9 +353,10 @@ class TargetAndroid(Target):
         self.logger.info('Android ANT is missing, downloading')
         archive = 'apache-ant-{0}-bin.tar.gz'.format(APACHE_ANT_VERSION)
         url = 'https://archive.apache.org/dist/ant/binaries/'
-        self.buildozer.download(url,
-                                archive,
-                                cwd=ant_dir)
+        buildops.download(
+            url,
+            archive,
+            cwd=ant_dir)
         self.buildozer.file_extract(archive,
                                     cwd=ant_dir)
         self.logger.info('Apache ANT installation done.')
@@ -382,9 +382,10 @@ class TargetAndroid(Target):
             os.makedirs(sdk_dir)
 
         url = 'https://dl.google.com/android/repository/'
-        self.buildozer.download(url,
-                                archive,
-                                cwd=sdk_dir)
+        buildops.download(
+            url,
+            archive,
+            cwd=sdk_dir)
 
         self.logger.info('Unpacking Android SDK')
         self.buildozer.file_extract(archive,
@@ -444,7 +445,7 @@ class TargetAndroid(Target):
         else:
             url = 'https://dl.google.com/android/ndk/'
 
-        self.buildozer.download(url,
+        buildops.download(url,
                                 archive,
                                 cwd=self.buildozer.global_platform_dir)
 
@@ -598,7 +599,7 @@ class TargetAndroid(Target):
                                                   'build-tools')
         aidl_cmd = join(self.android_sdk_dir, 'build-tools',
                         str(v_build_tools), 'aidl')
-        self.buildozer.checkbin('Aidl', aidl_cmd)
+        buildops.checkbin('Aidl', aidl_cmd)
         _, _, returncode = self.buildozer.cmd(aidl_cmd,
                                               break_on_error=False,
                                               show_output=False)
