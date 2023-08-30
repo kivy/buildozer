@@ -249,7 +249,6 @@ class Target:
         :Returns:
             fully qualified path to updated git repo
         """
-        cmd = self.buildozer.cmd
         install_dir = join(self.buildozer.platform_dir, repo)
         custom_dir, clone_url, clone_branch = self.path_or_git_url(repo, **kwargs)
         if not buildops.file_exists(install_dir):
@@ -257,11 +256,20 @@ class Target:
                 buildops.mkdir(install_dir)
                 buildops.file_copytree(custom_dir, install_dir)
             else:
-                cmd(["git", "clone", "--branch", clone_branch, clone_url], cwd=self.buildozer.platform_dir)
+                buildops.cmd(
+                    ["git", "clone", "--branch", clone_branch, clone_url],
+                    cwd=self.buildozer.platform_dir,
+                    env=self.buildozer.environ)
         elif self.platform_update:
             if custom_dir:
                 buildops.file_copytree(custom_dir, install_dir)
             else:
-                cmd(["git", "clean", "-dxf"], cwd=install_dir)
-                cmd(["git", "pull", "origin", clone_branch], cwd=install_dir)
+                buildops.cmd(
+                    ["git", "clean", "-dxf"],
+                    cwd=install_dir,
+                    env=self.buildozer.environ)
+                buildops.cmd(
+                    ["git", "pull", "origin", clone_branch],
+                    cwd=install_dir,
+                    env=self.buildozer.environ)
         return install_dir

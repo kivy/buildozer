@@ -8,32 +8,18 @@ Generic Python packager for Android / iOS. Desktop later.
 
 __version__ = '1.5.1.dev0'
 
-import codecs
-from copy import copy
 from fnmatch import fnmatch
 import os
 from os import environ, walk, sep, listdir
 from os.path import join, exists, dirname, realpath, splitext, expanduser
 import re
 from re import search
-import select
-from subprocess import Popen, PIPE, TimeoutExpired
 import sys
-from sys import stdout, stderr, exit
+from sys import exit
 import textwrap
 import warnings
 
-import shlex
-import pexpect
-
-try:
-    import fcntl
-except ImportError:
-    # on windows, no fcntl
-    fcntl = None
-
 import buildozer.buildops as buildops
-from buildozer.exceptions import BuildozerCommandException
 from buildozer.jsonstore import JsonStore
 from buildozer.logger import Logger
 from buildozer.specparser import SpecParser
@@ -47,7 +33,7 @@ class Buildozer:
                      'deploy', 'run', 'serve')
 
     def __init__(self, filename='buildozer.spec', target=None):
-        self.environ = {}
+        self.environ = environ.copy()
         self.specfilename = filename
         self.state = None
         self.build_id = None
@@ -137,133 +123,6 @@ class Buildozer:
 
         # flag to prevent multiple build
         self.target._build_done = True
-
-    def cmd(self, command, **kwargs):
-        # prepare the environ, based on the system + our own env
-        env = environ.copy()
-        env.update(self.environ)
-
-        # prepare the process
-        kwargs.setdefault('env', env)
-        kwargs.setdefault('stdout', PIPE)
-        kwargs.setdefault('stderr', PIPE)
-        kwargs.setdefault('close_fds', True)
-        kwargs.setdefault('show_output', self.logger.log_level > 1)
-
-        show_output = kwargs.pop('show_output')
-        get_stdout = kwargs.pop('get_stdout', False)
-        get_stderr = kwargs.pop('get_stderr', False)
-        break_on_error = kwargs.pop('break_on_error', True)
-        sensible = kwargs.pop('sensible', False)
-        run_condition = kwargs.pop('run_condition', None)
-        quiet = kwargs.pop('quiet', False)
-
-        if not quiet:
-            if not sensible:
-                self.logger.debug('Run {0!r}'.format(command))
-            else:
-                if isinstance(command, (list, tuple)):
-                    self.logger.debug('Run {0!r} ...'.format(command[0]))
-                else:
-                    self.logger.debug('Run {0!r} ...'.format(command.split()[0]))
-            self.logger.debug('Cwd {}'.format(kwargs.get('cwd')))
-
-        # open the process
-        if sys.platform == 'win32':
-            kwargs.pop('close_fds', None)
-        process = Popen(command, **kwargs)
-
-        # prepare fds
-        fd_stdout = process.stdout.fileno()
-        fd_stderr = process.stderr.fileno()
-        if fcntl:
-            fcntl.fcntl(
-                fd_stdout, fcntl.F_SETFL,
-                fcntl.fcntl(fd_stdout, fcntl.F_GETFL) | os.O_NONBLOCK)
-            fcntl.fcntl(
-                fd_stderr, fcntl.F_SETFL,
-                fcntl.fcntl(fd_stderr, fcntl.F_GETFL) | os.O_NONBLOCK)
-
-        ret_stdout = [] if get_stdout else None
-        ret_stderr = [] if get_stderr else None
-        while not run_condition or run_condition():
-            try:
-                readx = select.select([fd_stdout, fd_stderr], [], [], 1)[0]
-            except select.error:
-                break
-            if fd_stdout in readx:
-                chunk = process.stdout.read()
-                if not chunk:
-                    break
-                if get_stdout:
-                    ret_stdout.append(chunk)
-                if show_output:
-                    stdout.write(chunk.decode('utf-8', 'replace'))
-            if fd_stderr in readx:
-                chunk = process.stderr.read()
-                if not chunk:
-                    break
-                if get_stderr:
-                    ret_stderr.append(chunk)
-                if show_output:
-                    stderr.write(chunk.decode('utf-8', 'replace'))
-
-            stdout.flush()
-            stderr.flush()
-
-        try:
-            process.communicate(
-                timeout=(1 if run_condition and not run_condition() else None)
-            )
-        except TimeoutExpired:
-            pass
-
-        if process.returncode != 0 and break_on_error:
-            self.logger.error('Command failed: {0}'.format(command))
-            self.logger.log_env(self.logger.ERROR, kwargs['env'])
-            self.logger.error('')
-            self.logger.error('Buildozer failed to execute the last command')
-            if self.logger.log_level <= self.logger.INFO:
-                self.logger.error('If the error is not obvious, please raise the log_level to 2')
-                self.logger.error('and retry the latest command.')
-            else:
-                self.logger.error('The error might be hidden in the log above this error')
-                self.logger.error('Please read the full log, and search for it before')
-                self.logger.error('raising an issue with buildozer itself.')
-            self.logger.error('In case of a bug report, please add a full log with log_level = 2')
-            raise BuildozerCommandException()
-
-        if ret_stdout:
-            ret_stdout = b''.join(ret_stdout)
-        if ret_stderr:
-            ret_stderr = b''.join(ret_stderr)
-
-        return (ret_stdout.decode('utf-8', 'ignore') if ret_stdout else None,
-                ret_stderr.decode('utf-8') if ret_stderr else None,
-                process.returncode)
-
-    def cmd_expect(self, command, **kwargs):
-
-        # prepare the environ, based on the system + our own env
-        env = environ.copy()
-        env.update(self.environ)
-
-        # prepare the process
-        kwargs.setdefault('env', env)
-        kwargs.setdefault('show_output', self.logger.log_level > 1)
-        sensible = kwargs.pop('sensible', False)
-        show_output = kwargs.pop('show_output')
-
-        if show_output:
-            kwargs['logfile'] = codecs.getwriter('utf8')(stdout.buffer)
-
-        if not sensible:
-            self.logger.debug('Run (expect) {0!r}'.format(command))
-        else:
-            self.logger.debug('Run (expect) {0!r} ...'.format(command.split()[0]))
-
-        self.logger.debug('Cwd {}'.format(kwargs.get('cwd')))
-        return pexpect.spawnu(shlex.join(command), **kwargs)
 
     def check_configuration_tokens(self):
         '''Ensure the spec file is 'correct'.
@@ -400,7 +259,7 @@ class Buildozer:
     def _install_application_requirement(self, module):
         self._ensure_virtualenv()
         self.logger.debug('Install requirement {} in virtualenv'.format(module))
-        self.cmd(
+        buildops.cmd(
             ["pip", "install", f"--target={self.applibs_dir}", module],
             env=self.env_venv,
             cwd=self.buildozer_dir,
@@ -417,16 +276,19 @@ class Buildozer:
             return
         self.venv = join(self.buildozer_dir, 'venv')
         if not buildops.file_exists(self.venv):
-            self.cmd(["python3", "-m", "venv", "./venv"],
-                    cwd=self.buildozer_dir)
+            buildops.cmd(
+                ["python3", "-m", "venv", "./venv"],
+                cwd=self.buildozer_dir,
+                env=self.environ)
 
         # read virtualenv output and parse it
-        output = self.cmd(
+        assert sys.platform != "win32", "Can't call bash on Windows"
+        output = buildops.cmd(
             ["bash", "-c", "source venv/bin/activate && env"],
             get_stdout=True,
             cwd=self.buildozer_dir,
-        )
-        self.env_venv = copy(self.environ)
+            env=self.environ)
+        self.env_venv = self.environ.copy()
         for line in output[0].splitlines():
             args = line.split('=', 1)
             if len(args) != 2:
@@ -440,28 +302,6 @@ class Buildozer:
         # ensure any sort of compilation will fail
         self.env_venv['CC'] = '/bin/false'
         self.env_venv['CXX'] = '/bin/false'
-
-    def file_extract(self, archive, cwd=None):
-        if archive.endswith('.tgz') or archive.endswith('.tar.gz'):
-            self.cmd(["tar", "xzf", archive], cwd=cwd)
-            return
-
-        if archive.endswith('.tbz2') or archive.endswith('.tar.bz2'):
-            # XXX same as before
-            self.cmd(["tar", "xjf", archive], cwd=cwd)
-            return
-
-        if archive.endswith('.bin'):
-            # To process the bin files for linux and darwin systems
-            self.cmd(["chmod", "a+x", archive], cwd=cwd)
-            self.cmd([f"./{archive}"], cwd=cwd)
-            return
-
-        if archive.endswith('.zip'):
-            self.cmd(["unzip", "-q", join(cwd, archive)], cwd=cwd)
-            return
-
-        raise Exception('Unhandled extraction for type {0}'.format(archive))
 
     def clean_platform(self):
         self.logger.info('Clean the platform build directory')

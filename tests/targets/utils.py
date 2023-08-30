@@ -6,12 +6,8 @@ import buildozer as buildozer_module
 from buildozer import Buildozer
 
 
-def patch_buildozer(method):
-    return mock.patch("buildozer.Buildozer.{method}".format(method=method))
-
-
-def patch_buildozer_cmd():
-    return patch_buildozer("cmd")
+def patch_buildops_cmd():
+    return mock.patch("buildozer.buildops.cmd")
 
 
 def patch_buildops_checkbin():

@@ -5,12 +5,13 @@ from unittest import mock
 
 import pytest
 
+from buildozer.buildops import CommandResult
 from buildozer.exceptions import BuildozerCommandException
 from buildozer.targets.ios import TargetIos
 from tests.targets.utils import (
     init_buildozer,
     patch_buildops_checkbin,
-    patch_buildozer_cmd,
+    patch_buildops_cmd,
     patch_buildops_file_exists,
     patch_logger_error,
 )
@@ -53,9 +54,7 @@ class TestTargetIos:
     def test_check_requirements(self):
         """Basic tests for the check_requirements() method."""
         target = init_target(self.temp_dir)
-        buildozer = target.buildozer
         assert not hasattr(target, "javac_cmd")
-        assert "PATH" not in buildozer.environ
         with patch_buildops_checkbin() as m_checkbin:
             target.check_requirements()
         assert m_checkbin.call_args_list == [
@@ -112,7 +111,7 @@ class TestTargetIos:
         target = init_target(self.temp_dir)
         assert target.ios_dir is None
         assert target.ios_deploy_dir is None
-        with patch_buildozer_cmd() as m_cmd:
+        with patch_buildops_cmd() as m_cmd:
             target.install_platform()
         assert m_cmd.call_args_list == [
             mock.call(
@@ -124,6 +123,7 @@ class TestTargetIos:
                     "https://github.com/kivy/kivy-ios",
                 ],
                 cwd=mock.ANY,
+                env=mock.ANY,
             ),
             mock.call(
                 [
@@ -134,6 +134,7 @@ class TestTargetIos:
                     "https://github.com/phonegap/ios-deploy",
                 ],
                 cwd=mock.ANY,
+                env=mock.ANY,
             ),
         ]
         assert target.ios_dir.endswith(".buildozer/ios/platform/kivy-ios")
@@ -176,12 +177,12 @@ class TestTargetIos:
         target = init_target(self.temp_dir)
         # fmt: off
         with mock.patch("buildozer.targets.ios.getpass") as m_getpass, \
-             patch_buildozer_cmd() as m_cmd, \
+             patch_buildops_cmd() as m_cmd, \
              pytest.raises(BuildozerCommandException):
             m_getpass.return_value = "password"
             # the `security unlock-keychain` command returned an error
             # hence we'll get prompted to enter the password
-            m_cmd.return_value = (None, None, 123)
+            m_cmd.return_value = CommandResult(None, None, 123)
             target._unlock_keychain()
         # fmt: on
         assert m_getpass.call_args_list == [
@@ -199,7 +200,7 @@ class TestTargetIos:
              patch_logger_error() as m_error, \
              mock.patch("buildozer.targets.ios.TargetIos.load_plist_from_file") as m_load_plist_from_file, \
              mock.patch("buildozer.targets.ios.TargetIos.dump_plist_to_file") as m_dump_plist_to_file, \
-             patch_buildozer_cmd() as m_cmd:
+             patch_buildops_cmd() as m_cmd:
             m_load_plist_from_file.return_value = {}
             target.build_package()
         # fmt: on
@@ -224,7 +225,7 @@ class TestTargetIos:
             )
         ]
         assert m_cmd.call_args_list == [
-            mock.call(mock.ANY, cwd=target.ios_dir),
+            mock.call(mock.ANY, cwd=target.ios_dir, env=mock.ANY),
             mock.call([
                 "xcodebuild",
                 "-configuration",
@@ -235,6 +236,7 @@ class TestTargetIos:
                 "clean",
                 "build"],
                 cwd="/ios/dir/myapp-ios",
+                env=mock.ANY,
             ),
             mock.call([
                 "xcodebuild",
@@ -251,5 +253,6 @@ class TestTargetIos:
                 "ENABLE_BITCODE=NO",
                 "CODE_SIGNING_ALLOWED=NO"],
                 cwd="/ios/dir/myapp-ios",
+                env=mock.ANY,
             ),
         ]
