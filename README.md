@@ -194,8 +194,7 @@ discussions about developing the Kivy framework and its sister projects:
 We also have a Discord channel:
 
 * Server     : https://chat.kivy.org
-* Channel    : #support
-
+* Channel    : #dev
 
 ## License
 
