@@ -44,3 +44,15 @@ jobs:
       run: docker build --tag=kivy/buildozer .
     - name: Docker run
       run: docker run kivy/buildozer --version
+
+  Documentation:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Requirements
+      run: pip install -U sphinx
+    - name: Check links
+      run: sphinx-build -b linkcheck docs/source docs/build
+    - name: Generate documentation
+      run: sphinx-build docs/source docs/build
+
