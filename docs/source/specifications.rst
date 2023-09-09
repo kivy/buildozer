@@ -32,32 +32,46 @@ Section [app]
   The location must be a directory that contains a `main.py` file. It defaults
   to the directory where `buildozer.spec` is.
 
-- `source.include_exts`: List, file extensions to include.
+- Source Inclusion/Exclusion options.
 
-  By default, not all files in your `source.dir` are included, but only some
-  of them (`py,png,jpg,kv,atlas`), depending on the extension. Feel free to
-  add your own extensions, or use an empty value if you want to include
-  everything.
+  - `source.include_exts`: List, file extensions to include.
+  - `source.exclude_exts`: List, file extensions to exclude, even if included by
+    `source.include_exts`
+  - `source.exclude_dirs`: List, directories to exclude.
+  - `source.exclude_patterns`: List, files to exclude if they match a pattern.
+  - `source.include_patterns`: List, files to include if they match a pattern, even if excluded by
+    `source.exclude_dirs` or `source.exclude_patterns`
 
-- `source.exclude_exts`: List, file extensions to exclude.
+  By default, not all files are in your `source.dir` are included. You can
+  use these options to alter which files are included in your app and which
+  are excluded.
 
-  In contrary to `source.include_exts`, you could include all the files you
-  want except the ones that end with an extension listed in this token. If
-  empty, no files will be excluded based on their extensions.
+  Directories and files starting with a "." are always excluded; this cannot be
+  overridden.
 
-- `source.exclude_dirs`: List, directories to exclude.
+  Files that have an extension that is not in `source.include_exts` are excluded.
+  (The default suggestion is `py,png,jpg,kv,atlas`. You may want to include other
+  file extensions such as resource files: gif, xml, mp3, etc.)  File names that
+  have no extension (i.e contain no ".") are not excluded here.
+  `source.exclude_exts` takes priority over `source.include_exts` - it excludes any listed extensions
+  that were previously included.
 
-  Same as `source.exclude_exts`, but for directories. You can exclude your
+  Files and directories in directories listed in `source.exclude_dirs` are excluded. For example, you can exclude your
   `tests` and `bin` directory with::
 
-    source.exclude_dirs = tests, bin
+        source.exclude_dirs = tests, bin
 
-- `source.exclude_patterns`: List, files to exclude if they match a pattern.
+  `source.exclude_patterns` are also excluded. This is useful for excluding individual
+  files. For example::
 
-  If you have a more complex application layout, you might need a pattern to
-  exclude files. It also works if you don't have a pattern. For example::
+         source.exclude_patterns = license
 
-    source.exclude_patterns = license,images/originals/*
+  These dir and pattern exclusions may be overridden with
+  `source.include_patterns` - files and directories that match will once again be included.
+
+  However, `source.include_patterns` does not override the `source.include_exts` nor
+  `source.exclude_exts`. `source.include_patterns` also cannot be used to include files or directories that
+  start with ".")
 
 - `version.regex`: Regex, Regular expression to capture the version in
   `version.filename`.
