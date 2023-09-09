@@ -302,14 +302,14 @@ class TargetAndroid(Target):
             "app", "android.adb_args", "")
         self.adb_args = shlex.split(adb_args)
 
-        # Need to add internally installed ant to path for external tools
-        # like adb to use
-        path = [join(self.apache_ant_dir, 'bin')]
-        if 'PATH' in self.buildozer.environ:
-            path.append(self.buildozer.environ['PATH'])
-        else:
-            path.append(os.environ['PATH'])
-        self.buildozer.environ['PATH'] = ':'.join(path)
+        # Need to add internally-installed ant to path for external tools
+        # (like adb) to use
+        self.buildozer.environ['PATH'] = os.pathsep.join(
+            [
+                join(self.apache_ant_dir, 'bin'),
+                self.buildozer.environ['PATH'],
+            ])
+
         buildops.checkbin('Git (git)', 'git')
         buildops.checkbin('Cython (cython)', 'cython')
         buildops.checkbin('Java compiler (javac)', self.javac_cmd)

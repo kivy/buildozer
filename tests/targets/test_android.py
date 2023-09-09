@@ -1,4 +1,5 @@
 import os
+import os.path
 import tempfile
 from io import StringIO
 from unittest import mock
@@ -153,7 +154,7 @@ class TestTargetAndroid:
         assert not hasattr(target_android, "adb_executable")
         assert not hasattr(target_android, "adb_args")
         assert not hasattr(target_android, "javac_cmd")
-        del buildozer.environ["PATH"]
+        assert "PATH" in buildozer.environ
         with patch_buildops_checkbin() as m_checkbin:
             target_android.check_requirements()
         assert m_checkbin.call_args_list == [
@@ -166,7 +167,10 @@ class TestTargetAndroid:
         assert target_android.adb_args == []
         assert target_android.javac_cmd == "javac"
         assert target_android.keytool_cmd == "keytool"
-        assert "PATH" in buildozer.environ
+        assert buildozer.environ["PATH"].startswith(
+            os.path.join(
+                target_android.apache_ant_dir, "bin")
+        )
 
     def test_check_configuration_tokens(self):
         """Basic tests for the check_configuration_tokens() method."""
