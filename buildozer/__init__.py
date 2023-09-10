@@ -18,6 +18,7 @@ import sys
 from sys import exit
 import textwrap
 import warnings
+import venv
 
 import buildozer.buildops as buildops
 from buildozer.jsonstore import JsonStore
@@ -38,6 +39,7 @@ class Buildozer:
         self.state = None
         self.build_id = None
         self.config = SpecParser()
+        self._venv_created = False
 
         self.logger = Logger()
 
@@ -225,11 +227,17 @@ class Buildozer:
             return
 
         # remove all the requirements that the target can compile
+
+        # TODO: Make more general - filter at the first non [a-z0-9_-] char?
         onlyname = lambda x: x.split('==')[0]  # noqa: E731
+
         requirements = [x for x in requirements if onlyname(x) not in
                         target_available_packages]
 
-        if requirements and hasattr(sys, 'real_prefix'):
+        # Technique defined in venv library documentation.
+        currently_in_venv = sys.prefix != sys.base_prefix
+
+        if requirements and currently_in_venv:
             e = self.logger.error
             e('virtualenv is needed to install pure-Python modules, but')
             e('virtualenv does not support nesting, and you are running')
@@ -237,7 +245,7 @@ class Buildozer:
             e('virtualenv instead.')
             exit(1)
 
-        # did we already installed the libs ?
+        # did we already install the libs ?
         if (
             exists(self.applibs_dir) and
             self.state.get('cache.applibs', '') == requirements
@@ -272,14 +280,14 @@ class Buildozer:
             warnings.warn("`garden_requirements` settings is deprecated, use `requirements` instead", DeprecationWarning)
 
     def _ensure_virtualenv(self):
-        if hasattr(self, 'venv'):
+        # Only do it once.
+        if self._venv_created:
             return
-        self.venv = join(self.buildozer_dir, 'venv')
-        if not buildops.file_exists(self.venv):
-            buildops.cmd(
-                ["python3", "-m", "venv", "./venv"],
-                cwd=self.buildozer_dir,
-                env=self.environ)
+
+        venv_dir = join(self.buildozer_dir, 'venv')
+        if not buildops.file_exists(venv_dir):
+            venv.create(venv_dir)
+        self._venv_created = True
 
         # read virtualenv output and parse it
         assert sys.platform != "win32", "Can't call bash on Windows"
@@ -305,8 +313,6 @@ class Buildozer:
 
     def clean_platform(self):
         self.logger.info('Clean the platform build directory')
-        if not exists(self.platform_dir):
-            return
         buildops.rmdir(self.platform_dir)
 
     def get_version(self):
@@ -446,7 +452,6 @@ class Buildozer:
                 buildops.mkdir(dfn)
 
                 # copy!
-                self.logger.debug('Copy {0}'.format(sfn))
                 buildops.file_copy(sfn, rfn)
 
     def _copy_application_libs(self):
@@ -695,7 +700,7 @@ class Buildozer:
                 sys.exit()
 
     def cmd_init(self, *args):
-        '''Create a initial buildozer.spec in the current directory
+        '''Create an initial buildozer.spec in the current directory
         '''
         if exists('buildozer.spec'):
             print('ERROR: You already have a buildozer.spec file.')
