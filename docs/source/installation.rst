@@ -2,15 +2,12 @@
 Installation
 ============
 
-Buildozer is tested on Python 3.8 and above but may work on
-earlier versions, back to Python 3.3.
-Depending the platform you want to target, you might need more tools installed.
-Buildozer tries to give you hints or tries to install few things for
+Depending the platform you want to target, you might need a few dependencies installed.
+Buildozer tries to give you hints and tries to install few things for
 you, but it doesn't cover every situation.
 
-First, install the buildozer project with::
+Buildozer is tested on Python 3.8 and above.
 
-    pip3 install --user --upgrade buildozer
 
 Targeting Android
 -----------------
@@ -18,18 +15,23 @@ Targeting Android
 Android on Ubuntu 20.04 and 22.04 (64bit)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-(expected to work as well in later version, but only regularly tested in the latest LTS)
+(Buildozer is expected to work in later versions of Ubuntu, but it is only regularly tested on the latest LTS version
+of Ubuntu.)
 
 ::
 
     sudo apt update
     sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-    pip3 install --user --upgrade Cython==0.29.33 virtualenv  # the --user should be removed if you do this in a venv
 
     # add the following line at the end of your ~/.bashrc file
     export PATH=$PATH:~/.local/bin/
     
 If openjdk-17 is not compatible with other installed programs, for Buildozer the minimum compatible openjdk version is 11. 
+
+Then install the buildozer project with::
+
+    pip3 install --user --upgrade buildozer
+
 
 Android on Windows 10 or 11
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -39,6 +41,10 @@ To use buildozer in Windows you need first to enable Windows Subsystem for Linux
 These instructions were tested with WSL 1 and Ubuntu 18.04 LTS, and WSL2 with Ubuntu 20.04 and 22.04. 
 
 After installing WSL and Ubuntu on your Windows machine, open Ubuntu, run the commands listed in the previous section, and restart your WSL terminal to enable the path change.
+
+Install the buildozer project with::
+
+    pip3 install --user --upgrade buildozer
 
 Copy your Kivy project directory from the Windows partition to the WSL partition, and follow the Quickstart Instructions. **Do not** change to the project directory on the Windows partition and build there, this may give unexpected and obscure fails. 
 
@@ -51,7 +57,7 @@ For debugging, WSL does not have direct access to USB. Copy the .apk file to the
 Before Using Buildozer
 ~~~~~~~~~~~~~~~~~~~~~~
 
-If you wish, clone your code to a new folder, where the build process will run.
+If you wish, clone your code to a new folder where the build process will run.
 
 You don't need to create a virtualenv for your code requirements. But just add these requirements to a configuration file called buildozer.spec as you will see in the following sections.
 
@@ -62,7 +68,7 @@ Android on macOS
 
 ::
 
-    python3 -m pip install --user --upgrade Cython==0.29.33 virtualenv  # the --user should be removed if you do this in a venv
+    python3 -m pip install --user --upgrade buildozer # the --user should be removed if you do this in a venv
 
 
 TroubleShooting
@@ -97,16 +103,14 @@ Targeting IOS
 
 Install XCode and command line tools (through the AppStore)
 
-
 Install homebrew (https://brew.sh)
 
 ::
 
     brew install pkg-config sdl2 sdl2_image sdl2_ttf sdl2_mixer gstreamer autoconf automake
 
-
-Install pip and virtualenv
+Install Buildozer and its ios dependencies
 
 ::
 
-    python3 -m pip install --user --upgrade pip virtualenv kivy-ios
+    python3 -m pip install --user --upgrade buildozer[ios]
