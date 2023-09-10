@@ -79,17 +79,6 @@ class TargetOSX(Target):
         self.ensure_sdk()
         self.ensure_kivyapp()
 
-    def check_configuration_tokens(self, errors=None):
-        if errors:
-            self.logger.info('Check target configuration tokens')
-            self.logger.error(
-                '{0} error(s) found in the buildozer.spec'.format(
-                    len(errors)))
-            for error in errors:
-                print(error)
-            sys.exit(1)
-        # check
-
     def build_package(self):
         self.logger.info('Building package')
 
@@ -147,9 +136,6 @@ class TargetOSX(Target):
             binpath)
         self.logger.info('All Done!')
 
-    def compile_platform(self):
-        pass
-
     def install_platform(self):
         # ultimate configuration check.
         # some of our configuration cannot be checked without platform.
@@ -158,16 +144,6 @@ class TargetOSX(Target):
         self.buildozer.environ.update({
             'PACKAGES_PATH': self.buildozer.global_packages_dir,
         })
-
-    def get_custom_commands(self):
-        result = []
-        for x in dir(self):
-            if not x.startswith('cmd_'):
-                continue
-            if x[4:] in self.buildozer.standard_cmds:
-                continue
-            result.append((x[4:], getattr(self, x).__doc__))
-        return result
 
     def get_available_packages(self):
         return ['kivy', 'python3']
@@ -211,36 +187,6 @@ class TargetOSX(Target):
                 self.check_configuration_tokens()
 
             func(args)
-
-    def check_build_prepared(self):
-        self._build_prepared = False
-
-    def cmd_clean(self, *args):
-        self.buildozer.clean_platform()
-
-    def cmd_update(self, *args):
-        self.platform_update = True
-        self.buildozer.prepare_for_build()
-
-    def cmd_debug(self, *args):
-        self.buildozer.prepare_for_build()
-        self.build_mode = 'debug'
-        self.check_build_prepared()
-        self.buildozer.build()
-
-    def cmd_release(self, *args):
-        self.buildozer.prepare_for_build()
-        self.build_mode = 'release'
-        self.buildozer.build()
-
-    def cmd_deploy(self, *args):
-        self.buildozer.prepare_for_build()
-
-    def cmd_run(self, *args):
-        self.buildozer.prepare_for_build()
-
-    def cmd_serve(self, *args):
-        self.buildozer.cmd_serve()
 
 
 def get_target(buildozer):
