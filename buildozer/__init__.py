@@ -235,6 +235,7 @@ class Buildozer:
                         target_available_packages]
 
         # Technique defined in venv library documentation.
+        # See: https://docs.python.org/3/library/venv.html#how-venvs-work
         currently_in_venv = sys.prefix != sys.base_prefix
 
         if requirements and currently_in_venv:
