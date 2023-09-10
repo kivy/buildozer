@@ -72,6 +72,9 @@ class TargetAndroid(Target):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.artifact_format = 'apk'
+
         if self.buildozer.config.has_option(
             "app", "android.arch"
         ) and not self.buildozer.config.has_option("app", "android.archs"):
@@ -988,6 +991,14 @@ class TargetAndroid(Target):
                          "--sign will not be passed").format(key))
                 check = False
         return check
+
+    def cmd_debug(self, *args):
+        self.artifact_format = self.buildozer.config.getdefault('app', 'android.debug_artifact', 'apk')
+        super().cmd_debug(*args)
+
+    def cmd_release(self, *args):
+        self.artifact_format = self.buildozer.config.getdefault('app', 'android.release_artifact', 'aab')
+        super().cmd_release(*args)
 
     def cmd_run(self, *args):
         entrypoint = self.buildozer.config.getdefault(
