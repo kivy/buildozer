@@ -75,7 +75,6 @@ class TargetIos(Target):
     def check_requirements(self):
         if sys.platform != "darwin":
             raise NotImplementedError("Only macOS is supported for iOS target")
-        cmd = self.buildozer.cmd
 
         buildops.checkbin('Xcode xcodebuild', 'xcodebuild')
         buildops.checkbin('Xcode xcode-select', 'xcode-select')
@@ -87,9 +86,20 @@ class TargetIos(Target):
         buildops.checkbin('libtool', 'libtool')
 
         self.logger.debug('Check availability of a iPhone SDK')
-        sdk = cmd('xcodebuild -showsdks | fgrep "iphoneos" |'
-                'tail -n 1 | awk \'{print $2}\'',
-                get_stdout=True, shell=True)[0]
+        sdk_list = buildops.cmd(
+            ['xcodebuild', '-showsdks'],
+            get_stdout=True,
+            env=self.buildozer.environ).stdout
+        iphoneos_lines = [
+            line
+            for line in sdk_list.split("\n")
+            if "iphoneos" in line]
+        if not iphoneos_lines:
+            sdk = None
+        else:
+            last_iphoneos_line = iphoneos_lines[-1]
+            sdk = last_iphoneos_line.split()[1]  # Second column
+
         if not sdk:
             raise Exception(
                 'No iPhone SDK found. Please install at least one iOS SDK.')
@@ -97,7 +107,10 @@ class TargetIos(Target):
             self.logger.debug(' -> found %r' % sdk)
 
         self.logger.debug('Check Xcode path')
-        xcode = cmd(["xcode-select", "-print-path"], get_stdout=True)[0]
+        xcode = buildops.cmd(
+            ["xcode-select", "-print-path"],
+            get_stdout=True,
+            env=self.buildozer.environ).stdout
         if not xcode:
             raise Exception('Unable to get xcode path')
         self.logger.debug(' -> found {0}'.format(xcode))
@@ -115,11 +128,17 @@ class TargetIos(Target):
 
     def toolchain(self, cmd, **kwargs):
         kwargs.setdefault('cwd', self.ios_dir)
-        return self.buildozer.cmd([*self._toolchain_cmd, *cmd], **kwargs)
+        return buildops.cmd(
+            [*self._toolchain_cmd, *cmd],
+            env=self.buildozer.environ,
+            **kwargs)
 
     def xcodebuild(self, *args, **kwargs):
         filtered_args = [arg for arg in args if arg is not None]
-        return self.buildozer.cmd([*self._xcodebuild_cmd, *filtered_args], **kwargs)
+        return buildops.cmd(
+            [*self._xcodebuild_cmd, *filtered_args],
+            env=self.buildozer.environ,
+            **kwargs)
 
     @property
     def code_signing_allowed(self):
@@ -333,9 +352,11 @@ class TargetIos(Target):
             'package.name'))
         app_name = app_name.lower()
 
-        ios_dir = ios_dir = join(self.buildozer.platform_dir, 'kivy-ios')
-        self.buildozer.cmd(
-            ["open", f"{app_name}.xcodeproj"], cwd=join(ios_dir, f"{app_name}-ios")
+        ios_dir = join(self.buildozer.platform_dir, 'kivy-ios')
+        buildops.cmd(
+            ["open", f"{app_name}.xcodeproj"],
+            cwd=join(ios_dir, f"{app_name}-ios"),
+            env=self.buildozer.environ
         )
 
     def _run_ios_deploy(self, lldb=False):
@@ -353,11 +374,11 @@ class TargetIos(Target):
             debug_mode = ''
             self.logger.info('Deploy the application')
 
-        self.buildozer.cmd(
+        buildops.cmd(
             [join(self.ios_deploy_dir, "ios-deploy"), debug_mode, "-b", ios_app_dir],
             cwd=self.ios_dir,
             show_output=True,
-        )
+            env=self.buildozer.environ)
 
     def _create_icons(self):
         icon = self.buildozer.config.getdefault('app', 'icon.filename', '')
@@ -405,9 +426,11 @@ class TargetIos(Target):
             print('  - {}'.format(x))
 
     def _get_available_identities(self):
-        output = self.buildozer.cmd(
-            ["security", "find-identity", "-v", "-p", "codesigning"], get_stdout=True
-        )[0]
+        output = buildops.cmd(
+            ["security", "find-identity", "-v", "-p", "codesigning"],
+            get_stdout=True,
+            env=self.buildozer.environ
+        ).stdout
 
         lines = output.splitlines()[:-1]
         lines = [u'"{}"'.format(x.split('"')[1]) for x in lines]
@@ -422,17 +445,21 @@ class TargetIos(Target):
 
         if not password:
             # no password available, try to unlock anyway...
-            error = self.buildozer.cmd(["security", "unlock-keychain", "-u"],
-                    break_on_error=False)[2]
+            error = buildops.cmd(
+                ["security", "unlock-keychain", "-u"],
+                break_on_error=False,
+                quiet=True,  # Log doesn't need secure info
+                env=self.buildozer.environ).return_code
             if not error:
                 return
         else:
             # password available, try to unlock
-            error = self.buildozer.cmd(
+            error = buildops.cmd(
                 ["security", "unlock-keychain", "-p", password],
                 break_on_error=False,
-                sensible=True,
-            )[2]
+                quiet=True,  # Log doesn't need secure info
+                env=self.buildozer.environ
+            ).return_code
             if not error:
                 return
 
@@ -442,11 +469,12 @@ class TargetIos(Target):
         while attempt:
             attempt -= 1
             password = getpass('Password to unlock the default keychain:')
-            error = self.buildozer.cmd(
+            error = buildops.cmd(
                 ["security", "unlock-keychain", "-p", password],
+                quiet=True,  # Log doesn't need secure info
                 break_on_error=False,
-                sensible=True,
-            )[2]
+                env=self.buildozer.environ
+            ).return_code
             if not error:
                 correct = True
                 break

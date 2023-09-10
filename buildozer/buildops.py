@@ -22,7 +22,6 @@ import time
 import tarfile
 from threading import Thread
 from urllib.request import Request, urlopen
-from zipfile import ZipFile
 
 from buildozer.exceptions import BuildozerCommandException
 from buildozer.logger import Logger
@@ -121,15 +120,24 @@ def file_extract(archive, env, cwd="."):
         str(archive).endswith(extension)
         for extension in (".tgz", ".tar.gz", ".tbz2", ".tar.bz2")
     ):
-        LOGGER.debug("Extracting {0}".format(archive))
+        LOGGER.debug("Extracting {0} to {1}".format(archive, cwd))
         with tarfile.open(path, "r") as compressed_file:
             compressed_file.extractall(cwd)
         return
 
     if path.suffix == ".zip":
-        LOGGER.debug("Extracting {0}".format(archive))
-        with ZipFile(path, "r") as compressed_file:
-            compressed_file.extractall(cwd)
+        LOGGER.debug("Extracting {0} to {1}".format(archive, cwd))
+        assert platform != "win32", "unzip unavailable on Windows"
+        # This should use python's zipfile library, with suitable handling of
+        # Unix permissions.
+        # However, this lead to unexpected config script issues, so sticking to
+        # unzip for now.
+        return_code = cmd(
+            ["unzip", "-q", join(cwd, archive)], cwd=cwd, env=env
+        ).return_code
+        if return_code != 0:
+            raise BuildozerCommandException(
+                "Unzip gave bad return code: {}".format(return_code))
         return
 
     if path.suffix == ".bin":
@@ -263,7 +271,8 @@ def cmd(
     termination due to run_condition returning False will result in an
     error code.
 
-    quiet parameter reduces logging.
+    quiet parameter reduces logging; useful to keep passwords in command lines
+    out of the log.
 
     The env parameter is deliberately not optional, to ensure it is considered
     during the migration to use this library. Once completed, it can return
@@ -321,12 +330,8 @@ def cmd(
     if process.returncode != 0 and break_on_error:
         _command_fail(command, env, process.returncode)
 
-    ret_stdout = (
-        b"".join(ret_stdout).decode("utf-8", "ignore") if ret_stdout else None
-    )
-    ret_stderr = (
-        b"".join(ret_stderr).decode("utf-8", "ignore") if ret_stderr else None
-    )
+    ret_stdout = b"".join(ret_stdout).decode("utf-8", "ignore") if ret_stdout else None
+    ret_stderr = b"".join(ret_stderr).decode("utf-8", "ignore") if ret_stderr else None
 
     return CommandResult(ret_stdout, ret_stderr, process.returncode)
 
@@ -338,17 +343,13 @@ def _command_fail(command, env, returncode):
     LOGGER.error("")
     LOGGER.error("Buildozer failed to execute the last command")
     if LOGGER.log_level <= LOGGER.INFO:
-        LOGGER.error(
-            "If the error is not obvious, please raise the log_level to 2"
-        )
+        LOGGER.error("If the error is not obvious, please raise the log_level to 2")
         LOGGER.error("and retry the latest command.")
     else:
         LOGGER.error("The error might be hidden in the log above this error")
         LOGGER.error("Please read the full log, and search for it before")
         LOGGER.error("raising an issue with buildozer itself.")
-    LOGGER.error(
-        "In case of a bug report, please add a full log with log_level = 2"
-    )
+    LOGGER.error("In case of a bug report, please add a full log with log_level = 2")
     raise BuildozerCommandException()
 
 
@@ -373,9 +374,7 @@ def cmd_expect(command, env, **kwargs):
     LOGGER.debug("Cwd {}".format(kwargs.get("cwd")))
 
     assert platform != "win32", "pexpect.spawn is not available on Windows."
-    return pexpect.spawn(
-        shlex.join(command), env=env, encoding="utf-8", **kwargs
-    )
+    return pexpect.spawn(shlex.join(command), env=env, encoding="utf-8", **kwargs)
 
 
 def _report_download_progress(bytes_read, total_size):

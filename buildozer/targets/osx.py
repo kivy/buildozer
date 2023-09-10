@@ -33,7 +33,8 @@ class TargetOSX(Target):
             'https://github.com/kivy/kivy-sdk-packager/archive/master.zip',
             'master.zip',
             cwd=platdir)
-        check_call(('unzip', 'master.zip'), cwd=platdir)
+        buildops.file_extract(
+            'master.zip', cwd=platdir, env=self.buildozer.environ)
         buildops.file_remove(join(platdir, 'master.zip'))
 
     def download_kivy(self, cwd):

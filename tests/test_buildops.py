@@ -222,6 +222,8 @@ class TestBuildOps(TestCase):
         with mock.patch(
             "buildozer.buildops.LOGGER"
         ) as m_logger, TemporaryDirectory() as base_dir:
+            m_logger.log_level = 2
+            m_logger.INFO = 1
 
             # Test behaviour when the source doesn't exist
             nonexistent_path = Path(base_dir) / "wrongfiletype.txt"
@@ -239,10 +241,10 @@ class TestBuildOps(TestCase):
             m_logger.reset_mock()
 
             nonexistent_path = Path(base_dir) / "nonexistent.zip"
-            with self.assertRaises(FileNotFoundError):
+            with self.assertRaises(BuildozerCommandException):
                 buildops.file_extract(nonexistent_path, environ)
             m_logger.debug.assert_called()
-            m_logger.error.assert_not_called()
+            m_logger.error.assert_called()
             m_logger.reset_mock()
 
             # Create a zip file and unzip it.
@@ -259,6 +261,9 @@ class TestBuildOps(TestCase):
             with open(text_file_path, "r") as uncompressed_file:
                 assert uncompressed_file.read() == "Text to zip"
             m_logger.reset_mock()
+
+            # Todo: Create a multi-file zip file with permissions.
+            # Show it unpacks.
 
             # Create a tgz file and untgz it.
             text_file_path = Path(base_dir) / "text_to_tgz.txt"
