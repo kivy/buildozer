@@ -22,6 +22,7 @@ import time
 import tarfile
 from threading import Thread
 from urllib.request import Request, urlopen
+from zipfile import ZipFile
 
 from buildozer.exceptions import BuildozerCommandException
 from buildozer.logger import Logger
@@ -127,17 +128,23 @@ def file_extract(archive, env, cwd="."):
 
     if path.suffix == ".zip":
         LOGGER.debug("Extracting {0} to {1}".format(archive, cwd))
-        assert platform != "win32", "unzip unavailable on Windows"
-        # This should use python's zipfile library, with suitable handling of
-        # Unix permissions.
-        # However, this lead to unexpected config script issues, so sticking to
-        # unzip for now.
-        return_code = cmd(
-            ["unzip", "-q", join(cwd, archive)], cwd=cwd, env=env
-        ).return_code
-        if return_code != 0:
-            raise BuildozerCommandException(
-                "Unzip gave bad return code: {}".format(return_code))
+        if platform == "win32":
+            # This won't work on Unix/OSX, because Android NDK (for example)
+            # relies on non-standard handling of file permissions and symbolic
+            # links that Python's zipfile doesn't support.
+            # Windows doesn't support them either.
+            with ZipFile(path, "r") as compressed_file:
+                compressed_file.extractall(cwd)
+            return
+        else:
+            # This won't work on Windows, because there is no unzip command
+            # there
+            return_code = cmd(
+                ["unzip", "-q", join(cwd, archive)], cwd=cwd, env=env
+            ).return_code
+            if return_code != 0:
+                raise BuildozerCommandException(
+                    "Unzip gave bad return code: {}".format(return_code))
         return
 
     if path.suffix == ".bin":

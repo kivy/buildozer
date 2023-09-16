@@ -241,10 +241,14 @@ class TestBuildOps(TestCase):
             m_logger.reset_mock()
 
             nonexistent_path = Path(base_dir) / "nonexistent.zip"
-            with self.assertRaises(BuildozerCommandException):
+            try:
                 buildops.file_extract(nonexistent_path, environ)
-            m_logger.debug.assert_called()
-            m_logger.error.assert_called()
+                self.fail("No exception raised")
+            except FileNotFoundError:
+                pass  # This is raised by zipfile on Windows.
+            except BuildozerCommandException:
+                pass  # This is raised by cmd when not on Windows.
+
             m_logger.reset_mock()
 
             # Create a zip file and unzip it.
