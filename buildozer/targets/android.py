@@ -74,6 +74,7 @@ class TargetAndroid(Target):
         super().__init__(*args, **kwargs)
 
         self.artifact_format = 'apk'
+        self._serials = None
 
         if self.buildozer.config.has_option(
             "app", "android.arch"
@@ -1405,7 +1406,7 @@ class TargetAndroid(Target):
 
     @property
     def serials(self):
-        if hasattr(self, '_serials'):
+        if self._serials is not None:
             return self._serials
         serial = environ.get('ANDROID_SERIAL')
         if serial:

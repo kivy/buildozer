@@ -40,6 +40,8 @@ class Buildozer:
         self.build_id = None
         self.config = SpecParser()
         self._venv_created = False
+        self._build_prepared = False
+        self._build_done = False
 
         self.logger = Logger()
 
@@ -77,7 +79,7 @@ class Buildozer:
         '''Prepare the build.
         '''
         assert self.target is not None
-        if hasattr(self.target, '_build_prepared'):
+        if self._build_prepared:
             return
 
         self.logger.info('Preparing build')
@@ -97,7 +99,7 @@ class Buildozer:
         self.target.compile_platform()
 
         # flag to prevent multiple build
-        self.target._build_prepared = True
+        self._build_prepared = True
 
     def build(self):
         '''Do the build.
@@ -108,9 +110,9 @@ class Buildozer:
         (:meth:`prepare_for_build` must have been call before.)
         '''
         assert self.target is not None
-        assert hasattr(self.target, '_build_prepared')
+        assert self._build_prepared
 
-        if hasattr(self.target, '_build_done'):
+        if self._build_done:
             return
 
         # increment the build number
@@ -124,7 +126,7 @@ class Buildozer:
         self.target.build_package()
 
         # flag to prevent multiple build
-        self.target._build_done = True
+        self._build_done = True
 
     def check_configuration_tokens(self):
         '''Ensure the spec file is 'correct'.
