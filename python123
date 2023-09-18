@@ -1,0 +1,90 @@
+import pygame
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Constants
+WIDTH, HEIGHT = 800, 600  # Increase the dimensions for a larger screen
+GRID_SIZE = 10  # Decrease the grid size for smaller pixels
+GRID_WIDTH = WIDTH // GRID_SIZE
+GRID_HEIGHT = HEIGHT // GRID_SIZE
+WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+
+# Create the game window
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Snake Game")
+
+# Initialize snake and food
+snake = [(GRID_WIDTH // 2, GRID_HEIGHT // 2)]
+food = (random.randint(0, GRID_WIDTH - 1), random.randint(0, GRID_HEIGHT - 1))
+dx, dy = 0, 0
+score = 0
+font = pygame.font.Font(None, 36)
+
+# Main game loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                dx, dy = 0, -1
+            elif event.key == pygame.K_DOWN:
+                dx, dy = 0, 1
+            elif event.key == pygame.K_LEFT:
+                dx, dy = -1, 0
+            elif event.key == pygame.K_RIGHT:
+                dx, dy = 1, 0
+
+    # Move the snake
+    new_head = (snake[0][0] + dx, snake[0][1] + dy)
+    snake.insert(0, new_head)
+
+    # Check for collisions with food
+    if snake[0] == food:
+        score += 1
+        food = (random.randint(0, GRID_WIDTH - 1), random.randint(0, GRID_HEIGHT - 1))
+    else:
+        snake.pop()
+
+    # Check for game over conditions
+    if (
+        snake[0][0] < 0
+        or snake[0][0] >= GRID_WIDTH
+        or snake[0][1] < 0
+        or snake[0][1] >= GRID_HEIGHT
+        or snake[0] in snake[1:]
+    ):
+        running = False
+
+    # Clear the screen
+    screen.fill((0, 0, 0))
+
+    # Draw the snake
+    for segment in snake:
+        pygame.draw.rect(
+            screen, GREEN, (segment[0] * GRID_SIZE, segment[1] * GRID_SIZE, GRID_SIZE, GRID_SIZE)
+        )
+
+    # Draw the food
+    pygame.draw.rect(
+        screen, RED, (food[0] * GRID_SIZE, food[1] * GRID_SIZE, GRID_SIZE, GRID_SIZE)
+    )
+
+    # Draw the score
+    score_text = font.render(f"Score: {score}", True, WHITE)
+    screen.blit(score_text, (10, 10))
+
+    # Update the display
+    pygame.display.flip()
+
+    # Control game speed
+    pygame.time.delay(150)
+
+# Quit Pygame
+pygame.quit()
+
