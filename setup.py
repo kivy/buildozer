@@ -64,7 +64,7 @@ setup(
         ],
     package_data={'buildozer': ['default.spec']},
     include_package_data=True,
-    install_requires=['pexpect', 'virtualenv', 'sh'],
+    install_requires=['pexpect', 'virtualenv', 'sh',"rich"],
     classifiers=[
         'Development Status :: 5 - Production/Stable', 
         'Intended Audience :: Developers',
