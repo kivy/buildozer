@@ -29,7 +29,7 @@ Note that this tool has nothing to do with the eponymous online build service
 ## Installing Buildozer with target Python 3 (default):
 
 - Install buildozer:
-
+```bash
       # via pip (latest stable, recommended)
       # if you use a virtualenv, don't use the `--user` option
       pip install --user buildozer
@@ -43,40 +43,43 @@ Note that this tool has nothing to do with the eponymous online build service
       cd buildozer
       python setup.py build
       pip install -e .
-
+```
 - Check buildozer is in your path
-
-      `which buildozer`
-      # if there is no result, and you installed with --user, add this line at the end of your `~/.bashrc` file.
-      export PATH=~/.local/bin/:$PATH
-      # and then run
-      . ~/.bashrc
+```bash
+which buildozer
+```
+if there is no result, and you installed with `--user`, add this line at the end of your `~/.bashrc` file:
+`export PATH=~/.local/bin/:$PATH`
+# and then run
+. ~/.bashrc
 
 - Go into your application directory and run:
-
-      buildozer init
-      # edit the buildozer.spec, then
-      buildozer android debug deploy run
-
+```bash
+buildozer init
+# edit the buildozer.spec, then
+buildozer android debug deploy run
+```
 
 ## Buildozer Docker image
 
 A Dockerfile is available to use buildozer through a Docker environment.
 
 - Build with:
-
+```bash
       docker build --tag=buildozer .
+```
 
 - Run with:
-
-      docker run --volume "$(pwd)":/home/user/hostcwd buildozer --version
+```
+docker run --volume "$(pwd)":/home/user/hostcwd buildozer --version
+```
 
 
 ### Example Build with Caching
 - Build and keep downloaded SDK and NDK in `~/.buildozer` directory: 
-
-      docker run -v $HOME/.buildozer:/home/user/.buildozer -v $(pwd):/home/user/hostcwd kivy/buildozer android debug
-
+```bash
+docker run -v $HOME/.buildozer:/home/user/.buildozer -v $(pwd):/home/user/hostcwd kivy/buildozer android debug
+```
 
 ## Buildozer GitHub action
 
@@ -87,7 +90,7 @@ See [full workflow example](https://github.com/ArtemSBulgakov/buildozer-action#f
 
 ## Examples of Buildozer commands
 
-```
+```bash
 # buildozer target command
 buildozer android clean
 buildozer android update
@@ -105,7 +108,7 @@ buildozer setdefault android debug deploy run
 
 ## Usage
 
-```
+```yml
 Usage:
     buildozer [--profile <name>] [--verbose] [target] <command>...
     buildozer --version
