@@ -48,10 +48,9 @@ pip install -e .
 ```bash
 which buildozer
 ```
-if there is no result, and you installed with `--user`, add this line at the end of your `~/.bashrc` file:
-`export PATH=~/.local/bin/:$PATH`
-# and then run
-. ~/.bashrc
+if there is no result, and you installed with `--user`, add this line at the end of your `~/.bashrc` (or `~/.zshrc` if you use zsh) file:
+`export PATH=~/.local/bin/:$PATH`, and then run
+`. ~/.bashrc` (or `. ~/.zshrc`)
 
 - Go into your application directory and run:
 ```bash
@@ -156,16 +155,16 @@ See [buildozer/default.spec](https://raw.github.com/kivy/buildozer/master/buildo
 
 You can override the value of *any* `buildozer.spec` config token by
 setting an appropriate environment variable. These are all of the
-form ``$SECTION_TOKEN``, where SECTION is the config file section and
+form `$SECTION_TOKEN`, where SECTION is the config file section and
 TOKEN is the config token to override. Dots are replaced by
 underscores.
 
-For example, here are some config tokens from the [app] section of the
+For example, here are some config tokens from the `[app]` section of the
 config, along with the environment variables that would override them.
 
-- ``title`` -> ``$APP_TITLE``
-- ``package.name`` -> ``$APP_PACKAGE_NAME``
-- ``p4a.source_dir`` -> ``$APP_P4A_SOURCE_DIR``
+- `title` -> `$APP_TITLE`
+- `package.name` -> `$APP_PACKAGE_NAME`
+- `p4a.source_dir` -> `$APP_P4A_SOURCE_DIR`
 
 ## Support
 
