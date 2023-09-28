@@ -30,19 +30,19 @@ Note that this tool has nothing to do with the eponymous online build service
 
 - Install buildozer:
 ```bash
-      # via pip (latest stable, recommended)
-      # if you use a virtualenv, don't use the `--user` option
-      pip install --user buildozer
+# via pip (latest stable, recommended)
+# if you use a virtualenv, don't use the `--user` option
+pip install --user buildozer
 
-      # latest dev version
-      # if you use a virtualenv, don't use the `--user` option
-      pip install --user https://github.com/kivy/buildozer/archive/master.zip
+# latest dev version
+# if you use a virtualenv, don't use the `--user` option
+pip install --user https://github.com/kivy/buildozer/archive/master.zip
 
-      # git clone, for working on buildozer
-      git clone https://github.com/kivy/buildozer
-      cd buildozer
-      python setup.py build
-      pip install -e .
+# git clone, for working on buildozer
+git clone https://github.com/kivy/buildozer
+cd buildozer
+python setup.py build
+pip install -e .
 ```
 - Check buildozer is in your path
 ```bash
@@ -66,7 +66,7 @@ A Dockerfile is available to use buildozer through a Docker environment.
 
 - Build with:
 ```bash
-      docker build --tag=buildozer .
+docker build --tag=buildozer .
 ```
 
 - Run with:
