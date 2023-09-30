@@ -128,7 +128,8 @@ Global commands (without target):
   setdefault         Set the default command to run when no arguments are given
   version            Show the Buildozer version
 
-Target commands: clean      Clean the target environment
+Target commands: 
+  clean      Clean the target environment
   update     Update the target dependencies
   debug      Build the application in debug mode
   release    Build the application in release mode
@@ -145,7 +146,7 @@ Target "android" commands:
   use --alias to make an alias
   logcat             Show the log from the device
   p4a                Run p4a commands. Args must come after --, or use --alias
-  to make an alias
+                     to make an alias
 ```
 
 ## `buildozer.spec`
