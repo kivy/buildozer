@@ -65,11 +65,11 @@ A Dockerfile is available to use buildozer through a Docker environment.
 
 - Build with:
 
-      docker build --tag=buildozer .
+      docker build --tag=kivy/buildozer .
 
 - Run with:
 
-      docker run --volume "$(pwd)":/home/user/hostcwd buildozer --version
+      docker run --volume "$(pwd)":/home/user/hostcwd kivy/buildozer --version
 
 
 ### Example Build with Caching
