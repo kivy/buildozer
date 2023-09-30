@@ -62,7 +62,7 @@ A Dockerfile is available to use buildozer through a Docker environment.
 - Build with:
 
 ```bash
-docker build --tag=buildozer .
+docker build --tag=kivy/buildozer .
 ```
 
 For macOS, build with:
@@ -74,7 +74,7 @@ docker buildx build --platform=linux/amd64 -t kivy/buildozer .
 - Run with:
 
 ```bash
-docker run --volume "$(pwd)":/home/user/hostcwd buildozer --version
+docker run --volume "$(pwd)":/home/user/hostcwd kivy/buildozer --version
 ```
 
 > [!WARNING]  
