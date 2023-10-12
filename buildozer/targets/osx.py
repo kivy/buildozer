@@ -94,6 +94,8 @@ class TargetOSX(Target):
 
         self.logger.info('Create {}.app'.format(package_name))
         cwd = join(self.buildozer.platform_dir, 'kivy-sdk-packager-master', 'osx')
+        osx_deps = open(join(cwd, 'requirements.txt')).read()
+        app_deps += osx_deps
         # remove kivy from app_deps
         app_deps = [a for a in app_deps.split('\n') if not a.startswith('#') and a not in ['kivy', '']]
 
