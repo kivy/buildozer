@@ -168,8 +168,7 @@ config, along with the environment variables that would override them.
 
 If you need assistance, you can ask for help on our mailing list:
 
-* User Group : https://groups.google.com/group/kivy-users
-* Email      : kivy-users@googlegroups.com
+User Group: [Kivy Users Google Group](https://groups.google.com/group/kivy-users)
 
 Discord channel:
 
