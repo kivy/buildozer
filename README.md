@@ -166,17 +166,12 @@ config, along with the environment variables that would override them.
 
 ## Support
 
-If you need assistance, you can ask for help on our mailing list:
+If you need help, please feel free to seek assistance through our support channels:
 
-* User Group : https://groups.google.com/group/kivy-users
-* Email      : kivy-users@googlegroups.com
+Join the  [Kivy Users Google Group](https://groups.google.com/group/kivy-users).
+Participate in discussions on [Discord](https://chat.kivy.org).
 
-Discord channel:
-
-Server : https://chat.kivy.org
-Channel : #support
-
-For [debugging on Android](https://python-for-android.readthedocs.io/en/stable/troubleshooting/?highlight=adb#debugging-on-android), don't hesitate to use ADB to get logs of your application.
+Additionally, for troubleshooting Android-related issues, you can utilize ADB to obtain logs for your application. Detailed instructions can be found in the [debugging on Android](https://python-for-android.readthedocs.io/en/stable/troubleshooting/?highlight=adb#debugging-on-android) documentation.
 
 
 ## Contributing
