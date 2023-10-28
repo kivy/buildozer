@@ -27,7 +27,7 @@ jobs:
 
             We try to use GitHub issues only to track work for developers to do to fix bugs and add new features to Buildozer. This issue has been closed, because it doesn't describe a bug or new feature request for Buildozer.
 
-            There is a mailing list and a Discord channel to support Kivy users debugging their own systems, which should be able to help. They are linked in the [ReadMe](https://github.com/kivy/buildozer#support). For building Android apps, there is an unofficial [Buildozer Users' Guide](https://github.com/Android-for-Python/Android-for-Python-Users) that has a lot of useful debugging tips.
+            There is a mailing list and a Discord channel to support Kivy users debugging their own systems, which should be able to help. They are linked in the [ReadMe](https://github.com/kivy/buildozer#support).
 
             Of course, if it turns out you have stumbled over a bug in Buildozer, we do want to hear about it here. The support channels should be able to help you craft an appropriate bug report.
           
