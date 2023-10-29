@@ -3,12 +3,14 @@ OSX target, based on kivy-sdk-packager
 """
 
 import sys
+
 if sys.platform != 'darwin':
     raise NotImplementedError('This will only work on osx')
 
-from os.path import exists, join, abspath, dirname
-from subprocess import check_call, check_output
 import urllib.error
+from os.path import abspath, dirname
+from pathlib import Path
+from subprocess import check_call, check_output
 
 import buildozer.buildops as buildops
 from buildozer.target import Target
@@ -18,62 +20,72 @@ class TargetOSX(Target):
 
     targetname = "osx"
 
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.kivy_sdk_dir = Path(self.buildozer.platform_dir) / 'kivy-sdk-packager-master'
+        self.kivy_app_dir = self.kivy_sdk_dir / 'osx'
+
     def ensure_sdk(self):
         self.logger.info('Check if kivy-sdk-packager exists')
-        if exists(
-                join(self.buildozer.platform_dir, 'kivy-sdk-packager-master')):
+
+        if self.kivy_sdk_dir.exists():
             self.logger.info(
-                    'kivy-sdk-packager found at '
-                    '{}'.format(self.buildozer.platform_dir))
+                'kivy-sdk-packager found at {}'.format(self.buildozer.platform_dir)
+            )
             return
 
         self.logger.info('kivy-sdk-packager does not exist, clone it')
-        platdir = self.buildozer.platform_dir
+        platdir = Path(self.buildozer.platform_dir)
         buildops.download(
             'https://github.com/kivy/kivy-sdk-packager/archive/',
             'master.zip',
             cwd=platdir)
         buildops.file_extract(
             'master.zip', cwd=platdir, env=self.buildozer.environ)
-        buildops.file_remove(join(platdir, 'master.zip'))
+        buildops.file_remove( platdir / 'master.zip' )
 
-    def download_kivy(self, cwd):
+    def download_kivy(self):
         current_kivy_vers = self.buildozer.config.get('app', 'osx.kivy_version')
 
-        if exists('/Applications/Kivy.app'):
-            self.logger.info('Kivy found in Applications dir...')
-            buildops.file_copy('/Applications/Kivy.app', 'Kivy.app', cwd=cwd)
-        else:
-            if not exists(join(cwd, 'Kivy.dmg')):
-                self.logger.info('Downloading kivy...')
-                try:
-                    buildops.download(
-                        f'https://kivy.org/downloads/{current_kivy_vers}/',
-                        'Kivy.dmg',
-                        cwd=cwd
-                    )
-                except urllib.error.URLError:
-                    self.logger.error(
-                        "Unable to download the Kivy App. "
-                        "Check osx.kivy_version in your buildozer.spec, and "
-                        "verify Kivy servers are accessible. "
-                        "https://kivy.org/downloads/")
-                    buildops.file_remove(join(cwd, "Kivy.dmg"))
-                    sys.exit(1)
+        kivy_app = self.kivy_app_dir / "Kivy.app"
+        kivy_dmg = self.kivy_app_dir  / "Kivy.dmg"
+        kivy_app_at_dmg = Path('/Volumes/Kivy') / "Kivy.app"
+        kivy_app_at_app_dir = Path('/Applications') / "Kivy.app"
 
-            self.logger.info('Extracting and installing Kivy...')
-            check_call(('hdiutil', 'attach', f'{cwd}/Kivy.dmg'))
-            buildops.file_copytree(
-                '/Volumes/Kivy/Kivy.app', f'{cwd}/Kivy.app')
+        if kivy_app_at_app_dir.exists():
+            self.logger.info('Kivy found in Applications dir...')
+            buildops.file_copytree('/Applications/Kivy.app', kivy_app)
+            return
+
+        if not kivy_dmg.exists():
+            self.logger.info('Downloading kivy...')
+            try:
+                buildops.download(
+                    f'https://kivy.org/downloads/{current_kivy_vers}/',
+                     'Kivy.dmg',
+                      cwd=self.kivy_app_dir,
+                )
+            except urllib.error.URLError:
+                self.logger.error(
+                    "Unable to download the Kivy App. "
+                    "Check osx.kivy_version in your buildozer.spec, and "
+                    "verify Kivy servers are accessible. "
+                    "https://kivy.org/downloads/")
+                buildops.file_remove(kivy_dmg)
+                sys.exit(1)
+
+        self.logger.info('Extracting and installing Kivy...')
+        check_call(('hdiutil', 'attach', str(kivy_dmg)))
+        buildops.file_copytree(kivy_app_at_dmg, kivy_app)
 
     def ensure_kivyapp(self):
         self.logger.info('check if Kivy.app exists in local dir')
-        kivy_app_dir = join(self.buildozer.platform_dir, 'kivy-sdk-packager-master', 'osx')
+        kivy_app = self.kivy_app_dir / 'Kivy.app'
 
-        if exists(join(kivy_app_dir, 'Kivy.app')):
-            self.logger.info('Kivy.app found at ' + kivy_app_dir)
+        if kivy_app.exists():
+            self.logger.info('Kivy.app found at {}'.format(str(self.kivy_app_dir)))
         else:
-            self.download_kivy(kivy_app_dir)
+            self.download_kivy()
 
     def check_requirements(self):
         self.ensure_sdk()
@@ -93,19 +105,21 @@ class TargetOSX(Target):
         author = bc.getdefault('app', 'author', '')
 
         self.logger.info('Create {}.app'.format(package_name))
-        cwd = join(self.buildozer.platform_dir, 'kivy-sdk-packager-master', 'osx')
-        osx_deps = open(join(cwd, 'requirements.txt')).read()
+        osx_deps = ( self.kivy_app_dir / "requirements.txt" ).read_text()
+
         app_deps += osx_deps
         # remove kivy from app_deps
-        app_deps = [a for a in app_deps.split('\n') if not a.startswith('#') and a not in ['kivy', '']]
+        app_deps = [a for a in app_deps.split('\n') if
+                    not a.startswith('#') and a not in ['kivy', '']]
 
-        cmd = [
-            'Kivy.app/Contents/Resources/script',
-            '-m', 'pip', 'install',
-             ]
+        cmd = [ 'Kivy.app/Contents/Resources/script', '-m', 'pip', 'install' ]
         cmd.extend(app_deps)
-        check_output(cmd, cwd=cwd)
 
+        self.logger.debug('Runing command - {}'.format(cmd))
+        check_output(cmd, cwd=self.kivy_app_dir)
+
+
+        # TODO(butuzov): why does it fail without modules from previous call?
         cmd = [
             sys.executable,
             'package_app.py',
@@ -121,21 +135,25 @@ class TargetOSX(Target):
         if author:
             cmd.append('--author={}'.format(author))
 
-        check_output(cmd, cwd=cwd)
+        self.logger.debug('Runing buildozer executing - {}'.format(cmd))
+        self.logger.debug(str(self.kivy_app_dir))
+        check_output(cmd, cwd=self.kivy_app_dir)
 
         self.logger.info('{}.app created.'.format(package_name))
         self.logger.info('Creating {}.dmg'.format(package_name))
+
         check_output(
             ('sh', '-x', 'create-osx-dmg.sh', package_name + '.app', package_name, '-s', '1'),
-            cwd=cwd)
+            cwd=self.kivy_app_dir)
         self.logger.info('{}.dmg created'.format(package_name))
         self.logger.info('moving {}.dmg to bin.'.format(package_name))
-        binpath = join(
-            self.buildozer.user_build_dir or
+        binpath = Path(self.buildozer.user_build_dir or
             dirname(abspath(self.buildozer.specfilename)), 'bin')
+
         buildops.file_copytree(
-            join(cwd, package_name + '.dmg'),
+            self.kivy_app_dir / '{}.dmg'.format(package_name),
             binpath)
+        self.logger.debug("Writing into {}".format(binpath))
         self.logger.info('All Done!')
 
     def install_platform(self):
