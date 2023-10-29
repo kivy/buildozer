@@ -171,7 +171,7 @@ If you need help, please feel free to seek assistance through our support channe
 Join the  [Kivy Users Google Group](https://groups.google.com/group/kivy-users).
 Participate in discussions on [Discord](https://chat.kivy.org).
 
-Additionally, for troubleshooting Android-related issues, you can utilize ADB to obtain logs for your application. Detailed instructions can be found in the [debugging on Android](https://python-for-android.readthedocs.io/en/stable/troubleshooting/?highlight=adb#debugging-on-android) documentation.
+Additionally, for troubleshooting Android-related issues, you can utilize ADB to obtain logs for your application. Detailed instructions can be found in the [debugging on Android](https://python-for-android.readthedocs.io/en/latest/troubleshooting/?highlight=adb#debugging-on-android) documentation.
 
 
 ## Contributing
