@@ -3,48 +3,21 @@ Logger
 ======
 
 Logger implementation used by Buildozer.
+The log itself is performed using rich and using the python logging framework.
 
-Supports colored output, where available.
+rich automatically Supports colored output, where available.
 """
 
-from os import environ
+import logging
+from rich.logging import RichHandler
+from rich import print
 from pprint import pformat
-import sys
+from rich.console import Console
 
-try:
-    # if installed, it can give color to Windows as well
-    import colorama
+console = Console(color_system="auto")
 
-    colorama.init()
-except ImportError:
-    colorama = None
-
-# set color codes
-if colorama:
-    RESET_SEQ = colorama.Fore.RESET + colorama.Style.RESET_ALL
-    COLOR_SEQ = lambda x: x  # noqa: E731
-    BOLD_SEQ = ""
-    if sys.platform == "win32":
-        BLACK = colorama.Fore.BLACK + colorama.Style.DIM
-    else:
-        BLACK = colorama.Fore.BLACK + colorama.Style.BRIGHT
-    RED = colorama.Fore.RED
-    BLUE = colorama.Fore.CYAN
-    USE_COLOR = "NO_COLOR" not in environ
-elif sys.platform != "win32":
-    RESET_SEQ = "\033[0m"
-    COLOR_SEQ = lambda x: "\033[1;{}m".format(30 + x)  # noqa: E731
-    BOLD_SEQ = "\033[1m"
-    BLACK = 0
-    RED = 1
-    BLUE = 4
-    USE_COLOR = "NO_COLOR" not in environ
-else:
-    RESET_SEQ = ""
-    COLOR_SEQ = ""
-    BOLD_SEQ = ""
-    RED = BLUE = BLACK = 0
-    USE_COLOR = False
+# Check if the console supports color for formatting
+USE_COLOR = console.color_system != None
 
 
 class Logger:
@@ -52,36 +25,79 @@ class Logger:
     INFO = 1
     DEBUG = 2
 
-    LOG_LEVELS_C = (RED, BLUE, BLACK)  # Map levels to colors
-    LOG_LEVELS_T = "EID"  # error, info, debug
+    LOG_LEVELS = {ERROR: logging.ERROR, INFO: logging.INFO, DEBUG: logging.DEBUG}
 
     log_level = ERROR
 
+    def __init__(self):
+        """
+        Initialize the Logger instance and configure rich logging settings.
+        """
+        self.handler = RichHandler(
+            rich_tracebacks=True, tracebacks_show_locals=True, console=console
+        )
+        self.handler.setFormatter(logging.Formatter("%(message)s"))
+        self.logger = logging.getLogger("rich")
+        self.logger.setLevel(logging.DEBUG)
+        self.logger.addHandler(self.handler)
+
     def log(self, level, msg):
+        """
+        Log a message with the specified log level.
+
+        Args:
+            level (int): Log level (ERROR, INFO, DEBUG).
+            msg (str): Message to log.
+        """
         if level > self.log_level:
             return
-        if USE_COLOR:
-            color = COLOR_SEQ(Logger.LOG_LEVELS_C[level])
-            print("".join((RESET_SEQ, color, "# ", msg, RESET_SEQ)))
-        else:
-            print("{} {}".format(Logger.LOG_LEVELS_T[level], msg))
+        self.logger.log(self.LOG_LEVELS[level], msg)
 
     def debug(self, msg):
+        """
+        Log a message with the DEBUG log level.
+
+        Args:
+            msg (str): Message to log.
+        """
         self.log(self.DEBUG, msg)
 
     def info(self, msg):
+        """
+        Log a message with the INFO log level.
+
+        Args:
+            msg (str): Message to log.
+        """
         self.log(self.INFO, msg)
 
     def error(self, msg):
+        """
+        Log a message with the ERROR log level.
+
+        Args:
+            msg (str): Message to log.
+        """
         self.log(self.ERROR, msg)
 
     def log_env(self, level, env):
-        """dump env into logger in readable format"""
+        """
+        Log the environment variables.
+
+        Args:
+            level (int): Log level (ERROR, INFO, DEBUG).
+            env (dict): Dictionary containing environment variables.
+        """
+
         self.log(level, "ENVIRONMENT:")
         for k, v in env.items():
             self.log(level, "    {} = {}".format(k, pformat(v)))
-
     @classmethod
     def set_level(cls, level):
-        """set minimum threshold for log messages"""
+        """
+        set minimum threshold for the logger.
+
+        Args:
+            level (int): Log level to set (ERROR, INFO, DEBUG).
+        """
         cls.log_level = level
