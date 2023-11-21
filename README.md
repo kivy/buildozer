@@ -69,7 +69,7 @@ A Dockerfile is available to use buildozer through a Docker environment.
 
 - Run with:
 
-      docker run --volume "$(pwd)":/home/user/hostcwd buildozer --version
+      docker run -it --volume "$(pwd)":/home/user/hostcwd buildozer --version
 
 
 ### Example Build with Caching
