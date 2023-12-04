@@ -32,7 +32,7 @@ is also available.
 
 
 .. note::
-   This tool is unrelated to the online build service, `buildozer.io <https://buildozer.io>`_.
+   This tool is unrelated to the online build service, `buildozer.io`.
 
 .. toctree::
    :maxdepth: 2

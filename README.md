@@ -21,7 +21,7 @@ build dependencies. For more information, see
 
 > [!NOTE]
 > This tool is unrelated to the online build service,
-> [buildozer.io](https://buildozer.io).
+> `buildozer.io`.
 
 [![Backers on Open Collective](https://opencollective.com/kivy/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/kivy/sponsors/badge.svg)](#sponsors)
