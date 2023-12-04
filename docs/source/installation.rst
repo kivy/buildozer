@@ -26,7 +26,7 @@ Android on Ubuntu 20.04 and 22.04 (64bit)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. note::
-  Later versions of Ubunti are expected to work. However only the  latest
+  Later versions of Ubuntu are expected to work. However only the latest
   `Long Term Support (LTS) release <https://ubuntu.com/about/release-cycle>`_
   is regularly tested.
 
