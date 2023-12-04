@@ -51,12 +51,19 @@ with io.open(join(curdir, "CHANGELOG.md"), encoding="utf-8") as fd:
 setup(
     name='buildozer',
     version=find_version('buildozer', '__init__.py'),
-    description='Generic Python packager for Android / iOS and Desktop',
+    description='Turns Python applications into binary packages ready for '
+        'installation on a number of platforms.',
     long_description=readme + "\n\n" + changelog,
     long_description_content_type='text/markdown',
     author='Mathieu Virbel',
     author_email='mat@kivy.org',
     url='https://github.com/kivy/buildozer',
+    project_urls={
+        'Website': "https://kivy.org",
+        'Documentation': "https://buildozer.readthedocs.io/en/stable/#",
+        'Source': "https://github.com/kivy/buildozer",
+        'Bug Reports': "https://github.com/kivy/buildozer/issues",
+    },
     license='MIT',
     packages=[
         'buildozer', 'buildozer.targets', 'buildozer.libs', 'buildozer.scripts'
