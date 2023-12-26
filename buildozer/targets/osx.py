@@ -48,7 +48,7 @@ class TargetOSX(Target):
                 self.logger.info('Downloading kivy...')
                 try:
                     buildops.download(
-                        f'https://kivy.org/downloads/{current_kivy_vers}/Kivy.dmg',
+                        f'https://kivy.org/downloads/{current_kivy_vers}/',
                         'Kivy.dmg',
                         cwd=cwd
                     )
