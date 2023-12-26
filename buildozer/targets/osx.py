@@ -131,9 +131,11 @@ class TargetOSX(Target):
         binpath = join(
             self.buildozer.user_build_dir or
             dirname(abspath(self.buildozer.specfilename)), 'bin')
-        buildops.file_copytree(
+        buildops.file_copy(
             join(cwd, package_name + '.dmg'),
-            binpath)
+            join(binpath, package_name + '.dmg')
+        )
+
         self.logger.info('All Done!')
 
     def install_platform(self):
