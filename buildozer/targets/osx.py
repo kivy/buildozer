@@ -30,7 +30,7 @@ class TargetOSX(Target):
         self.logger.info('kivy-sdk-packager does not exist, clone it')
         platdir = self.buildozer.platform_dir
         buildops.download(
-            'https://github.com/kivy/kivy-sdk-packager/archive/master.zip',
+            'https://github.com/kivy/kivy-sdk-packager/archive/',
             'master.zip',
             cwd=platdir)
         buildops.file_extract(
@@ -48,7 +48,7 @@ class TargetOSX(Target):
                 self.logger.info('Downloading kivy...')
                 try:
                     buildops.download(
-                        f'https://kivy.org/downloads/{current_kivy_vers}/Kivy.dmg',
+                        f'https://kivy.org/downloads/{current_kivy_vers}/',
                         'Kivy.dmg',
                         cwd=cwd
                     )
