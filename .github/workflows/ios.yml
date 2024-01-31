@@ -15,8 +15,7 @@ jobs:
     - uses: actions/checkout@v4
     - name: Setup environment
       run: |
-        pip install -e .
-        pip install Cython==0.29.36 cookiecutter pbxproj
+        pip install .[ios]
     - name: Check buildozer installation
       run: |
         buildozer --help

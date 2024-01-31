@@ -27,7 +27,6 @@ install it on Python {}.{}.
     sys.exit(1)
 
 
-
 def find_version(*file_paths):
     # Open in Latin-1 so that we avoid encoding errors.
     # Use codecs.open for Python 2 compatibility
@@ -52,21 +51,42 @@ with io.open(join(curdir, "CHANGELOG.md"), encoding="utf-8") as fd:
 setup(
     name='buildozer',
     version=find_version('buildozer', '__init__.py'),
-    description='Generic Python packager for Android / iOS and Desktop',
+    description='Turns Python applications into binary packages ready for '
+        'installation on a number of platforms.',
     long_description=readme + "\n\n" + changelog,
     long_description_content_type='text/markdown',
     author='Mathieu Virbel',
     author_email='mat@kivy.org',
     url='https://github.com/kivy/buildozer',
+    project_urls={
+        'Website': "https://kivy.org",
+        'Documentation': "https://buildozer.readthedocs.io/en/stable/#",
+        'Source': "https://github.com/kivy/buildozer",
+        'Bug Reports': "https://github.com/kivy/buildozer/issues",
+    },
     license='MIT',
     packages=[
         'buildozer', 'buildozer.targets', 'buildozer.libs', 'buildozer.scripts'
-        ],
+    ],
     package_data={'buildozer': ['default.spec']},
     include_package_data=True,
-    install_requires=['pexpect', 'virtualenv', 'sh'],
+    install_requires=[
+        'pexpect',
+        # Cython is required by both kivy-ios and python-for-android.
+        # However, python-for-android does not include it in its dependencies
+        # and kivy-ios's dependencies are not always checked, so it is included
+        # here.
+        # Restricted version because python-for-android's recipes can't handle
+        # later versions.
+        'cython<3.0'
+    ],
+    extras_require={
+        'test': ['pytest'],
+        'docs': ['sphinx'],
+        'ios': ['kivy-ios'],
+    },
     classifiers=[
-        'Development Status :: 5 - Production/Stable', 
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
         'Programming Language :: Python :: 3',
@@ -74,7 +94,6 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
-
     ],
     entry_points={
         'console_scripts': [

@@ -1,34 +1,38 @@
-.. Buildozer documentation master file, created by
-   sphinx-quickstart on Sun Apr 20 16:56:31 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to Buildozer's documentation!
 =====================================
 
-Buildozer is a tool that aim to package mobiles application easily. It
-automates the entire build process, download the prerequisites like
-python-for-android, Android SDK, NDK, etc.
+Buildozer is a development tool for turning Python
+applications into binary packages ready for installation on any of a number of
+platforms, including mobile devices. It automates the entire build process.
 
-Buildozer manages a file named `buildozer.spec` in your application directory,
-describing your application requirements and settings such as title, icon,
-included modules etc. It will use the specification file to create a package
-for Android, iOS, and more.
+The app developer provides a single "buildozer.spec" file, which describes the
+application's requirements and settings, such as title and icons. Buildozer can
+then create installable packages for Android, iOS, Windows, macOS and/or Linux.
 
-Currently, Buildozer supports packaging for:
+Buildozer has features to make
+building apps using the `Kivy framework <https://kivy.org/doc/stable/>`_ easier,
+but it can be used independently - even with other GUI frameworks.
 
-- Android: via `Python for Android
-  <https://github.com/kivy/python-for-android>`_. You must have a Linux or OSX
-  computer to be able to compile for Android.
+.. note::
+   python-for-android only runs on Linux or macOS. (On Windows, a Linux emulator is
+   required.)
 
-- iOS: via `Kivy iOS <https://github.com/kivy/kivy-ios>`_. You must have an OSX
-  computer to be able to compile for iOS.
+   Kivy for iOS only runs on macOS.
 
-- Supporting others platform is in the roadmap (such as .exe for Windows, .dmg
-  for OSX, etc.)
+Buildozer is managed by the `Kivy Team <https://kivy.org/about.html>`_. It relies
+on its sibling projects:
+`python-for-android <https://python-for-android.readthedocs.io/en/latest/>`_ for
+Android packaging, and
+`Kivy for iOS <https://github.com/kivy/kivy-ios/>`_ for iOS packaging.
 
-If you have any questions about Buildozer, please refer to the `Kivy's user
-mailing list <https://groups.google.com/forum/#!forum/kivy-users>`_.
+Buildozer is released and distributed under the terms of the MIT license. You should have received a
+copy of the MIT license alongside your distribution. Our
+`latest license <https://github.com/kivy/buildozer/blob/master/LICENSE>`_
+is also available.
+
+
+.. note::
+   This tool is unrelated to the online build service, `buildozer.io`.
 
 .. toctree::
    :maxdepth: 2
@@ -36,12 +40,8 @@ mailing list <https://groups.google.com/forum/#!forum/kivy-users>`_.
    installation
    quickstart
    specifications
+   recipes
+   faq
    contribute
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   contact
 

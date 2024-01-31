@@ -2,7 +2,11 @@
 #
 # Build with:
 # docker build --tag=kivy/buildozer .
-# 
+#
+# Or for macOS using Docker Desktop:
+#
+# docker buildx build --platform=linux/amd64 -t kivy/buildozer .
+#
 # In order to give the container access to your current working directory
 # it must be mounted using the --volume option.
 # Run with (e.g. `buildozer --version`):
@@ -24,7 +28,7 @@
 # Or simply recreate the directory from the host with:
 # rm -rf ~/.buildozer && mkdir ~/.buildozer
 
-FROM ubuntu:20.04
+FROM ubuntu:latest
 
 ENV USER="user"
 ENV HOME_DIR="/home/${USER}"
@@ -55,7 +59,7 @@ RUN apt update -qq > /dev/null \
     libltdl-dev \
     libssl-dev \
     libtool \
-    openjdk-13-jdk \
+    openjdk-17-jdk \
     patch \
     pkg-config \
     python3-pip \
@@ -76,6 +80,6 @@ WORKDIR ${WORK_DIR}
 COPY --chown=user:user . ${SRC_DIR}
 
 # installs buildozer and dependencies
-RUN pip3 install --user --upgrade Cython==0.29.36 wheel pip virtualenv ${SRC_DIR}
+RUN pip3 install --user --upgrade "Cython<3.0" wheel pip ${SRC_DIR}
 
 ENTRYPOINT ["buildozer"]
