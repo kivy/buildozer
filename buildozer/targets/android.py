@@ -33,7 +33,7 @@ from sys import platform, executable
 from time import sleep
 import traceback
 
-from distutils.version import LooseVersion
+import packaging
 import pexpect
 
 import buildozer.buildops as buildops
@@ -1306,7 +1306,9 @@ class TargetAndroid(Target):
             pass
 
         build_tools_versions = os.listdir(join(self.android_sdk_dir, "build-tools"))
-        build_tools_versions = sorted(build_tools_versions, key=LooseVersion)
+        build_tools_versions = sorted(
+            build_tools_versions, key=packaging.version.parse
+        )
         build_tools_version = build_tools_versions[-1]
         gradle_files = ["build.gradle", "gradle", "gradlew"]
         is_gradle_build = build_tools_version >= "25.0" and any(
