@@ -64,7 +64,8 @@ class TargetOSX(Target):
             self.logger.info('Extracting and installing Kivy...')
             check_call(('hdiutil', 'attach', cwd + '/Kivy.dmg'))
             buildops.file_copytree(
-                '/Volumes/Kivy/Kivy.app', cwd+'/Kivy.app')
+                '/Volumes/Kivy/Kivy.app', cwd + '/Kivy.app'
+            )
 
     def ensure_kivyapp(self):
         self.logger.info('check if Kivy.app exists in local dir')
