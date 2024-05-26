@@ -6,7 +6,9 @@ jobs:
     runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
-        runs_on: [macos-latest, apple-silicon-m1]
+        # macos-latest (ATM macos-14) runs on Apple Silicon,
+        # macos-13 runs on Intel
+        runs_on: [macos-latest, macos-13]
     steps:
     - name: Setup python
       uses: actions/setup-python@v4
