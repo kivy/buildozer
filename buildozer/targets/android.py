@@ -33,7 +33,7 @@ from sys import platform, executable
 from time import sleep
 import traceback
 
-import packaging
+import packaging.version
 import pexpect
 
 import buildozer.buildops as buildops
