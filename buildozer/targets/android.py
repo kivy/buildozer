@@ -11,7 +11,7 @@ from platform import uname
 WSL = 'microsoft' in uname()[2].lower()
 
 ANDROID_API = '33'
-ANDROID_MINAPI = '21'
+ANDROID_MINAPI = '24'
 APACHE_ANT_VERSION = '1.9.4'
 
 # This constant should *not* be updated, it is used only in the case
