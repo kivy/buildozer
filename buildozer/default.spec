@@ -55,7 +55,7 @@ requirements = python3,kivy
 #icon.filename = %(source.dir)s/data/icon.png
 
 # (list) Supported orientations
-# Valid options are: landscape, portrait, portrait-reverse or landscape-reverse
+# Valid options are: landscape, portrait, portrait-reverse, landscape-reverse, or all
 orientation = portrait
 
 # (list) List of services to declare
