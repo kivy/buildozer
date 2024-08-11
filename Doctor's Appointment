@@ -1,0 +1,152 @@
+```python
+import sqlite3
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
+from kivy.uix.scrollview import ScrollView
+
+# الاتصال بقاعدة البيانات وإنشاء الجداول
+conn = sqlite3.connect('clinic.db')
+c = conn.cursor()
+
+c.execute('''
+CREATE TABLE IF NOT EXISTS patients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    age INTEGER,
+    gender TEXT,
+    contact TEXT
+)
+''')
+
+c.execute('''
+CREATE TABLE IF NOT EXISTS appointments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    patient_id INTEGER,
+    date TEXT NOT NULL,
+    time TEXT NOT NULL,
+    reason TEXT,
+    FOREIGN KEY(patient_id) REFERENCES patients(id)
+)
+''')
+
+class ClinicApp(App):
+    def build(self):
+        # التخطيط الأساسي
+        self.layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+
+        # حقول إدخال البيانات الخاصة بالمرضى
+        self.name_input = TextInput(hint_text='اسم المريض', multiline=False)
+        self.age_input = TextInput(hint_text='العمر', multiline=False)
+        self.gender_input = TextInput(hint_text='الجنس', multiline=False)
+        self.contact_input = TextInput(hint_text='التواصل', multiline=False)
+
+        # زر لإضافة المريض
+        self.add_patient_button = Button(text='إضافة مريض', size_hint=(1, 0.2))
+        self.add_patient_button.bind(on_press=self.add_patient)
+
+        # حقول إدخال البيانات الخاصة بالمواعيد
+        self.patient_id_input = TextInput(hint_text='رقم المريض', multiline=False)
+        self.date_input = TextInput(hint_text='التاريخ (YYYY-MM-DD)', multiline=False)
+        self.time_input = TextInput(hint_text='الوقت (HH:MM)', multiline=False)
+        self.reason_input = TextInput(hint_text='السبب', multiline=False)
+
+        # زر لإضافة الموعد
+        self.add_appointment_button = Button(text='إضافة موعد', size_hint=(1, 0.2))
+        self.add_appointment_button.bind(on_press=self.add_appointment)
+
+        # زر عرض المواعيد
+        self.view_appointments_button = Button(text='عرض المواعيد', size_hint=(1, 0.2))
+        self.view_appointments_button.bind(on_press=self.view_appointments)
+
+        # زر عرض المرضى
+        self.view_patients_button = Button(text='عرض المرضى', size_hint=(1, 0.2))
+        self.view_patients_button.bind(on_press=self.view_patients)
+
+        # إضافة جميع العناصر إلى التخطيط
+        self.layout.add_widget(self.name_input)
+        self.layout.add_widget(self.age_input)
+        self.layout.add_widget(self.gender_input)
+        self.layout.add_widget(self.contact_input)
+        self.layout.add_widget(self.add_patient_button)
+        self.layout.add_widget(self.patient_id_input)
+        self.layout.add_widget(self.date_input)
+        self.layout.add_widget(self.time_input)
+        self.layout.add_widget(self.reason_input)
+        self.layout.add_widget(self.add_appointment_button)
+        self.layout.add_widget(self.view_appointments_button)
+        self.layout.add_widget(self.view_patients_button)
+
+        return self.layout
+
+    def add_patient(self, instance):
+        # إضافة مريض جديد إلى قاعدة البيانات
+        name = self.name_input.text
+        age = self.age_input.text
+        gender = self.gender_input.text
+        contact = self.contact_input.text
+
+        c.execute("INSERT INTO patients (name, age, gender, contact) VALUES (?, ?, ?, ?)", (name, age, gender, contact))
+        conn.commit()
+        self.name_input.text = self.age_input.text = self.gender_input.text = self.contact_input.text = ""
+        print("تم إضافة المريض بنجاح!")
+
+    def add_appointment(self, instance):
+        # إضافة موعد جديد إلى قاعدة البيانات
+        patient_id = self.patient_id_input.text
+        date = self.date_input.text
+        time = self.time_input.text
+        reason = self.reason_input.text
+
+        c.execute("INSERT INTO appointments (patient_id, date, time, reason) VALUES (?, ?, ?, ?)", (patient_id, date, time, reason))
+        conn.commit()
+        self.patient_id_input.text = self.date_input.text = self.time_input.text = self.reason_input.text = ""
+        print("تم إضافة الموعد بنجاح!")
+
+    def view_appointments(self, instance):
+        # عرض جميع المواعيد
+        c.execute('''
+        SELECT a.id, p.name, a.date, a.time, a.reason FROM appointments a
+        JOIN patients p ON a.patient_id = p.id
+        ''')
+        appointments = c.fetchall()
+
+        self.display_results("المواعيد", appointments)
+
+    def view_patients(self, instance):
+        # عرض جميع المرضى
+        c.execute("SELECT * FROM patients")
+        patients = c.fetchall()
+
+        self.display_results("المرضى", patients)
+
+    def display_results(self, title, results):
+        # نافذة لعرض النتائج
+        result_layout = BoxLayout(orientation='vertical', size_hint_y=None)
+        result_layout.bind(minimum_height=result_layout.setter('height'))
+
+        result_layout.add_widget(Label(text=title, font_size=20, size_hint_y=None, height=40))
+
+        for result in results:
+            result_layout.add_widget(Label(text=str(result), size_hint_y=None, height=30))
+
+        scroll_view = ScrollView(size_hint=(1, None), size=(self.layout.width, 400))
+        scroll_view.add_widget(result_layout)
+
+        self.layout.clear_widgets()
+        self.layout.add_widget(scroll_view)
+
+        back_button = Button(text='رجوع', size_hint=(1, 0.2))
+        back_button.bind(on_press=self.reset_view)
+        self.layout.add_widget(back_button)
+
+    def reset_view(self, instance):
+        # إعادة بناء الواجهة بعد عرض النتائج
+        self.layout.clear_widgets()
+        self.build()
+
+if __name__ == '__main__':
+    ClinicApp().run()
+```
