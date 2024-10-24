@@ -1,0 +1,78 @@
+from kivy.app import App
+from kivy.uix.widget import Widget
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.image import Image
+from kivy.clock import Clock
+from kivy.animation import Animation
+
+class Player:
+    def __init__(self, name, pos, speed):
+        self.name = name
+        self.pos = pos
+        self.speed = speed
+        self.electric_said = 0  # عدد مرات قول كهربا
+
+class ElectricGame(Widget):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.players = []
+        self.create_players()
+        
+        # إعداد خلفية اللعبة
+        self.background = Image(source='background.png', size=self.size)  # خلفية اللعبة
+        self.add_widget(self.background)
+
+        # إعداد زر بدء اللعبة
+        self.start_button = Button(text="ابدأ اللعبة", size_hint=(None, None), size=(150, 50), pos=(300, 50))
+        self.start_button.bind(on_press=self.start_game)
+        self.add_widget(self.start_button)
+
+    def create_players(self):
+        # إنشاء شخصيات متعددة
+        self.players.append(Player("لاعب 1", (100, 100), 5))
+        self.players.append(Player("لاعب 2", (300, 300), 6))
+        self.players.append(Player("لاعب 3", (500, 500), 4))
+
+    def start_game(self, instance):
+        self.clear_widgets()
+        self.show_character_scene()
+
+    def show_character_scene(self):
+        # إعداد مشهد الشخصية
+        self.character = Image(source='character_desk.png', size=(150, 200), pos=(100, 100))  # صورة الشخصية
+        self.add_widget(self.character)
+
+        self.coffee_cup = Image(source='coffee_cup.png', size=(50, 50), pos=(160, 150))  # كوب الناس كافيه
+        self.add_widget(self.coffee_cup)
+
+        self.desk = Image(source='desk.png', size=(200, 100), pos=(100, 80))  # المكتب
+        self.add_widget(self.desk)
+
+        # رسالة كتابة الواجب
+        self.label = Label(text="تكتب واجب الدرس...", pos=(100, 50), size_hint=(None, None), size=(200, 50))
+        self.add_widget(self.label)
+
+        # زر لاستدعاء باقي الشخصيات
+        self.call_button = Button(text="استدعاء الأصدقاء", size_hint=(None, None), size=(150, 50), pos=(300, 200))
+        self.call_button.bind(on_press=self.call_friends)
+        self.add_widget(self.call_button)
+
+    def call_friends(self, instance):
+        # حركة لتظهر أن الشخصية تترك المكتب وتجرى
+        animation = Animation(pos=(400, 100), duration=1)  # حركة الشخصية
+        animation.bind(on_complete=self.start_game_play)
+        animation.start(self.character)
+
+    def start_game_play(self, *args):
+        # هنا يمكن أن تنتقل إلى لعبة كهربا
+        self.clear_widgets()
+        self.add_widget(Label(text="لنبدأ لعبة كهربا!", size_hint=(None, None), size=(400, 100), pos=(100, 200)))
+        # يمكنك هنا بدء لعبة كهربا مع اللاعبين
+
+class ElectricApp(App):
+    def build(self):
+        return ElectricGame()
+
+if __name__ == '__main__':
+    ElectricApp().run()
