@@ -1,0 +1,153 @@
+import pygame
+
+# Initialize Pygame
+pygame.init()
+
+# Set up the display
+screen_width, screen_height = 300, 500  # Increased height for "Play Again" button and start screen
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption("Tic-Tac-Toe")
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+GRAY = (200, 200, 200)
+
+# Board variables
+board = [['' for _ in range(3)] for _ in range(3)]
+current_player = 'X'
+game_over = False
+winner = None
+winning_line = None
+start_game = False  # Flag to start the game
+player1_name = "Jugador 1"
+player2_name = "Jugador 2"
+player1_symbol = 'X'
+player2_symbol = 'O'
+player1_wins = 0
+player2_wins = 0
+winning_limit = 5  # Define the limit for the "ultimate winner"
+
+# Function to draw the board and symbols
+def draw_board():
+    # Draw grid lines
+    for i in range(1, 3):
+        pygame.draw.line(screen, BLACK, (i * 100, 0), (i * 100, 300), 5)  # Vertical lines
+        pygame.draw.line(screen, BLACK, (0, i * 100), (300, i * 100), 5)  # Horizontal lines
+    
+    # Draw Xs and Os
+    for row in range(3):
+        for col in range(3):
+            if board[row][col] == 'X':
+                pygame.draw.line(screen, RED, (col * 100 + 10, row * 100 + 10), 
+                                 (col * 100 + 90, row * 100 + 90), 5)
+                pygame.draw.line(screen, RED, (col * 100 + 90, row * 100 + 10), 
+                                 (col * 100 + 10, row * 100 + 90), 5)
+            elif board[row][col] == 'O':
+                pygame.draw.circle(screen, BLUE, (col * 100 + 50, row * 100 + 50), 40, 5)
+
+    # Draw the winner line if there is one
+    if winning_line:
+        pygame.draw.line(screen, GREEN, winning_line[0], winning_line[1], 5)
+
+    # Draw the winner or tie message
+    font = pygame.font.Font(None, 50)
+    if winner:
+        if player1_wins >= winning_limit:
+            text = font.render(f"{player1_name} es el ganador definitivo!", True, BLACK)
+        elif player2_wins >= winning_limit:
+            text = font.render(f"{player2_name} es el ganador definitivo!", True, BLACK)
+        else:
+            text = font.render(f"{winner} wins!", True, BLACK)
+        screen.blit(text, (screen_width // 4 - 30, 320))
+    elif game_over and not winner:
+        text = font.render("Empate!", True, BLACK)
+        screen.blit(text, (screen_width // 4, 320))
+
+    # Draw the "Play Again" button
+    if game_over:
+        pygame.draw.rect(screen, GRAY, (50, 400, 200, 40))
+        font = pygame.font.Font(None, 36)
+        text = font.render("Play Again", True, BLACK)
+        screen.blit(text, (screen_width // 4 + 10, 405))
+
+    # Display player wins
+    font = pygame.font.Font(None, 36)
+    wins_text = font.render(f"{player1_name}: {player1_wins} vs {player2_name}: {player2_wins}", True, BLACK)
+    screen.blit(wins_text, (50, 360))
+
+# Function to check for a winner and return the winning line
+def check_winner():
+    global winner, winning_line, game_over, player1_wins, player2_wins
+    # Check rows, columns, and diagonals
+    for i in range(3):
+        if board[i][0] == board[i][1] == board[i][2] != '':
+            winner = player1_name if board[i][0] == player1_symbol else player2_name
+            winning_line = ((0, i * 100 + 50), (300, i * 100 + 50))  # Horizontal line
+            game_over = True
+        if board[0][i] == board[1][i] == board[2][i] != '':
+            winner = player1_name if board[0][i] == player1_symbol else player2_name
+            winning_line = ((i * 100 + 50, 0), (i * 100 + 50, 300))  # Vertical line
+            game_over = True
+
+    if board[0][0] == board[1][1] == board[2][2] != '':
+        winner = player1_name if board[0][0] == player1_symbol else player2_name
+        winning_line = ((0, 0), (300, 300))  # Diagonal from top-left to bottom-right
+        game_over = True
+    if board[0][2] == board[1][1] == board[2][0] != '':
+        winner = player1_name if board[0][2] == player1_symbol else player2_name
+        winning_line = ((300, 0), (0, 300))  # Diagonal from top-right to bottom-left
+        game_over = True
+
+    # Check for a tie
+    if all(cell != '' for row in board for cell in row) and not winner:
+        game_over = True
+
+    # Update the wins count
+    if winner == player1_name:
+        player1_wins += 1
+    elif winner == player2_name:
+        player2_wins += 1
+
+# Function to reset the game
+def reset_game():
+    global board, current_player, game_over, winner, winning_line
+    board = [['' for _ in range(3)] for _ in range(3)]
+    current_player = player1_symbol
+    game_over = False
+    winner = None
+    winning_line = None
+
+# Game loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = event.pos
+
+            # If game over and click on "Play Again" button
+            if game_over and 50 <= mouse_x <= 250 and 400 <= mouse_y <= 440:
+                if player1_wins >= winning_limit or player2_wins >= winning_limit:
+                    player1_wins, player2_wins = 0, 0  # Reset wins count
+                reset_game()
+            elif not game_over:
+                row = mouse_y // 100
+                col = mouse_x // 100
+                
+                # Check if the click is within the game board area and if the cell is empty
+                if row < 3 and col < 3 and board[row][col] == '':
+                    board[row][col] = current_player
+                    check_winner()  # Check for a winner after each move
+                    current_player = player2_symbol if current_player == player1_symbol else player1_symbol
+
+    # Draw the board and symbols
+    screen.fill(WHITE)
+    draw_board()
+    pygame.display.update()
+
+pygame.quit()
