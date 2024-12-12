@@ -1,0 +1,74 @@
+import pygame
+import sys
+import random
+
+# Инициализация Pygame
+pygame.init()
+
+# Константы экрана
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+FPS = 60
+
+# Цвета
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+PURPLE = (128, 0, 128)
+CYAN = (0, 255, 255)
+ORANGE = (255, 165, 0)
+BLACK = (0, 0, 0)
+GRAY = (200, 200, 200)
+
+# Инициализация окна
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Game with Shop and Power-ups")
+
+# Игроки
+characters = [
+    {"name": "Default", "color": BLUE, "speed": 4, "price": 0},
+    {"name": "Fast", "color": GREEN, "speed": 6, "price": 50},
+    {"name": "Strong", "color": PURPLE, "speed": 4, "price": 50},
+]
+
+# Усиления
+power_ups = [
+    {"name": "Shield", "duration": 5, "effect": "invulnerability"},
+    {"name": "Speed Boost", "duration": 5, "effect": "speed"},
+    {"name": "Double Damage", "duration": 5, "effect": "damage"},
+]
+
+# Состояние магазина
+shop_open = False
+
+# Инициализация игрока
+player_index = 0
+player = characters[player_index]
+player_size = 50
+player_x = SCREEN_WIDTH // 2
+player_y = SCREEN_HEIGHT - player_size
+player_speed = player["speed"]
+player_energy = 100
+
+# Враги
+enemy_size = 50
+enemy_list = [{"x": random.randint(0, SCREEN_WIDTH - enemy_size), "y": random.randint(-600, 0), "speed": random.randint(3, 7)} for _ in range(5)]
+
+# Усиления на карте
+active_power_ups = []
+power_up_timer = 0
+
+# Снаряды
+bullets = []
+
+# Валюта
+coins = 0
+
+# Очки
+score = 0
+font = pygame.font.Font(None, 36)
+
+# Функция для отображения текста
+def draw_text(surface, text, font,
