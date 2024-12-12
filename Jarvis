@@ -1,0 +1,78 @@
+import speech_recognition as sr
+import pyttsx3
+import openai
+import os
+import datetime
+
+# Initialize the speech engine
+engine = pyttsx3.init()
+engine.setProperty("rate", 150)  # Speed of speech
+engine.setProperty("volume", 1)  # Volume (0 to 1)
+
+# Set OpenAI API key (get one from https://platform.openai.com/)
+openai.api_key = "your_openai_api_key"
+
+def speak(text):
+    """Convert text to speech"""
+    engine.say(text)
+    engine.runAndWait()
+
+def listen():
+    """Listen for user input"""
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        audio = recognizer.listen(source)
+
+    try:
+        command = recognizer.recognize_google(audio).lower()
+        print(f"You said: {command}")
+        return command
+    except sr.UnknownValueError:
+        speak("Sorry, I didn't understand that.")
+        return ""
+    except sr.RequestError:
+        speak("Network error.")
+        return ""
+
+def chat_with_openai(prompt):
+    """Send a prompt to OpenAI and get a response"""
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response['choices'][0]['message']['content']
+    except Exception as e:
+        return f"Error: {e}"
+
+def handle_command(command):
+    """Process commands"""
+    if "time" in command:
+        current_time = datetime.datetime.now().strftime("%I:%M %p")
+        speak(f"The time is {current_time}")
+    elif "date" in command:
+        current_date = datetime.datetime.now().strftime("%B %d, %Y")
+        speak(f"Today's date is {current_date}")
+    elif "open" in command:
+        app_name = command.replace("open", "").strip()
+        speak(f"Opening {app_name}")
+        os.system(f"start {app_name}")  # Works for Windows
+    elif "search" in command:
+        query = command.replace("search", "").strip()
+        response = chat_with_openai(query)
+        speak(response)
+    else:
+        response = chat_with_openai(command)
+        speak(response)
+
+# Main loop
+if __name__ == "__main__":
+    speak("Hello, I am your assistant. How can I help you?")
+    while True:
+        command = listen()
+        if "exit" in command or "stop" in command:
+            speak("Goodbye!")
+            break
+        elif command:
+            handle_command(command)
