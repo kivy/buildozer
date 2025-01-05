@@ -77,6 +77,10 @@ docker buildx build --platform=linux/amd64 -t kivy/buildozer .
 docker run --volume "$(pwd)":/home/user/hostcwd kivy/buildozer --version
 ```
 
+Note that the Docker image will preferentially try to use the `python` command from 
+`venv/bin/python`. If this command is symlinked to a Python version not present
+in the Docker image (currently, >python3.10), then all commands will fail.
+
 > [!WARNING]  
 > [DockerHub](https://hub.docker.com/) contains an obsolete Docker image for
 > Buildozer. It is deprecated. Build your own.
