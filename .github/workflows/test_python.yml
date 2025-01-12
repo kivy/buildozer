@@ -32,9 +32,23 @@ jobs:
       run: tox
     - name: Coveralls
       env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        COVERALLS_SERVICE_NAME: github
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        COVERALLS_SERVICE_NAME: github-actions
+        COVERALLS_FLAG_NAME: python-${{ matrix.python }}-${{ matrix.os }}
+        COVERALLS_PARALLEL: true
       run: coveralls
+
+  Coveralls:
+    needs: Tests
+    runs-on: ubuntu-latest
+    container: python:3-slim
+    steps:
+    - name: Finished
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        pip install coveralls
+        coveralls --finish
 
   Docker:
     runs-on: ubuntu-latest
@@ -55,4 +69,3 @@ jobs:
       run: sphinx-build -b linkcheck docs/source docs/build
     - name: Generate documentation
       run: sphinx-build docs/source docs/build
-
