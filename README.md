@@ -35,6 +35,7 @@ build dependencies. For more information, see
 [![Android](https://github.com/kivy/buildozer/workflows/Android/badge.svg)](https://github.com/kivy/buildozer/actions?query=workflow%3AAndroid)
 [![iOS](https://github.com/kivy/buildozer/workflows/iOS/badge.svg)](https://github.com/kivy/buildozer/actions?query=workflow%3AiOS)
 [![Coverage Status](https://coveralls.io/repos/github/kivy/buildozer/badge.svg)](https://coveralls.io/github/kivy/buildozer)
+[![Docker](https://github.com/kivy/buildozer/actions/workflows/docker.yml/badge.svg)](https://github.com/kivy/buildozer/actions/workflows/docker.yml)
 
 
 ## Installation
@@ -68,7 +69,7 @@ docker build --tag=kivy/buildozer .
 For macOS, build with:
 
 ```bash
-docker buildx build --platform=linux/amd64 -t kivy/buildozer .
+docker buildx build --platform=linux/amd64 --tag=kivy/buildozer .
 ```
 
 - Run with:
@@ -76,10 +77,6 @@ docker buildx build --platform=linux/amd64 -t kivy/buildozer .
 ```bash
 docker run --volume "$(pwd)":/home/user/hostcwd kivy/buildozer --version
 ```
-
-> [!WARNING]  
-> [DockerHub](https://hub.docker.com/) contains an obsolete Docker image for
-> Buildozer. It is deprecated. Build your own.
 
 ### Example Build with Caching
 - Build and keep downloaded SDK and NDK in `~/.buildozer` directory: 
@@ -94,9 +91,6 @@ docker run -v $HOME/.buildozer:/home/user/.buildozer -v $(pwd):/home/user/hostcw
 Use [ArtemSBulgakov/buildozer-action@v1](https://github.com/ArtemSBulgakov/buildozer-action)
 to build your packages automatically on push or pull request.
 See [full workflow example](https://github.com/ArtemSBulgakov/buildozer-action#full-workflow).
-
-> [!WARNING]  
-> This GitHub action may use an obsolete version of Buildozer; use with caution.
 
 ## Usage
 
