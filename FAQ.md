@@ -21,7 +21,7 @@ but it can be used independently - even with other GUI frameworks.
 
 Instructions on how to write your own recipes is available in the
 [Kivy for iOS](https://github.com/kivy/kivy-ios/) and
-[python-for-android documentation](https://python-for-android.readthedocs.io/en/latest/recipes/).
+[python-for-android documentation](https://python-for-android.readthedocs.io/en/latest/recipes.html).
 
 Instructions on how to test your own recipes from Buildozer is available in the
 [Buildozer Contribution Guidelines](CONTRIBUTING.md).

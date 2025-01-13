@@ -27,7 +27,7 @@ who wants to use the same library.
 
 More instructions on how to write your own recipes is available in the
 `Kivy for iOS <https://github.com/kivy/kivy-ios/>`_ and
-`python-for-android documentation <https://python-for-android.readthedocs.io/en/latest/recipes/>`_.
+`python-for-android documentation <https://python-for-android.readthedocs.io/en/latest/recipes.html>`_.
 
 Instructions on how to test your own recipes from Buildozer is available in the
 `latest Buildozer Contribution Guidelines <https://github.com/kivy/buildozer/blob/master/CONTRIBUTING.md>`_.

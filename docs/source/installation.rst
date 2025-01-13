@@ -117,7 +117,7 @@ Alternatively, the Android SDK license can be automatically accepted - see `buil
 python-for-android related errors
 """""""""""""""""""""""""""""""""
 See the dedicated `p4a troubleshooting documentation
-<https://python-for-android.readthedocs.io/en/latest/troubleshooting/>`_.
+<https://python-for-android.readthedocs.io/en/latest/troubleshooting.html>`_.
 
 
 Targeting IOS
