@@ -85,6 +85,12 @@ docker run --volume "$(pwd)":/home/user/hostcwd kivy/buildozer --version
 docker run -v $HOME/.buildozer:/home/user/.buildozer -v $(pwd):/home/user/hostcwd kivy/buildozer android debug
 ```
 
+The image is published to both Docker Hub and GitHub Container Registry and can be pulled from both:
+
+```bash
+docker pull kivy/buildozer:latest
+docker pull ghcr.io/kivy/buildozer:latest
+```
 
 ## Buildozer GitHub action
 
