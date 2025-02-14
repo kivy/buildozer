@@ -1,0 +1,75 @@
+import speech_recognition as sr
+import pyttsx3
+import openai  # Use OpenAI GPT API for advanced responses
+import os
+from elevenlabs import generate, play  # For advanced voice cloning
+import pickle  # For memory storage
+
+# Set OpenAI API Key
+openai.api_key = "YOUR_OPENAI_API_KEY"
+
+def speak(text):
+    """Convert text to speech using ElevenLabs voice cloning."""
+    audio = generate(text=text, voice="Jarvis")  # Use ElevenLabs API for realistic voice
+    play(audio)
+
+def listen():
+    """Capture and recognize speech using Google Speech Recognition."""
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+    
+    try:
+        text = recognizer.recognize_google(audio, language="hi-en")  # Hindi + English
+        print(f"User: {text}")
+        return text
+    except sr.UnknownValueError:
+        print("Could not understand audio.")
+        return ""
+    except sr.RequestError:
+        print("Could not request results, check internet connection.")
+        return ""
+
+def save_memory(conversation):
+    """Save conversation history to a file."""
+    with open("memory.pkl", "wb") as f:
+        pickle.dump(conversation, f)
+
+def load_memory():
+    """Load conversation history from a file."""
+    if os.path.exists("memory.pkl"):
+        with open("memory.pkl", "rb") as f:
+            return pickle.load(f)
+    return []
+
+def chat_with_ai(text, conversation):
+    """Generate AI response using OpenAI GPT-4 model."""
+    conversation.append({"role": "user", "content": text})
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are an AI assistant like Jarvis from Iron Man. You can provide relationship advice, flirt, have casual conversations, and share knowledge on study, national and international affairs, army, navy, and other defense-related topics."}
+        ] + conversation
+    )
+    reply = response["choices"][0]["message"]["content"]
+    print(f"Jarvis: {reply}")
+    conversation.append({"role": "assistant", "content": reply})
+    save_memory(conversation)
+    return reply
+
+def main():
+    """Main function to run the voice assistant."""
+    conversation = load_memory()
+    while True:
+        user_input = listen()
+        if "exit" in user_input.lower():
+            speak("Goodbye!")
+            break
+        if user_input:
+            response = chat_with_ai(user_input, conversation)
+            speak(response)
+
+if __name__ == "__main__":
+    main()
