@@ -145,3 +145,6 @@ Section [app]
 
   Defaults to false, your application will be listed as a Home App (launcher app) if true.
 
+- `display_cutout`: String, display-cutout mode to be used.
+
+  Defaults to `never`. Application will render around the cutout (notch) if set to either `default`, `shortEdges`.
