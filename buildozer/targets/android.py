@@ -870,6 +870,13 @@ class TargetAndroid(Target):
         if self.buildozer.config.getbooldefault('app', 'android.home_app', False):
             cmd.append("--home-app")
 
+        # Enable display-cutout for Android devices
+        display_cutout = self.buildozer.config.getdefault('app', 'android.display_cutout', 'never').lower()
+        if display_cutout in {'default', 'shortedges'}:
+            if display_cutout == 'shortedges':
+                display_cutout = 'shortEdges'
+            cmd.append("--display-cutout={}".format(display_cutout))
+
         # support for recipes in a local directory within the project
         if local_recipes:
             cmd.append('--local-recipes')

@@ -318,6 +318,12 @@ android.allow_backup = True
 # (str) The format used to package the app for debug mode (apk or aar).
 # android.debug_artifact = apk
 
+# (str) A display cutout is an area on some devices that extends into the display surface.
+# It allows for an edge-to-edge experience while providing space for important sensors on the front of the device.
+# Available options for Android API >= 28 are "default, shortEdges, never" and defaults to never.
+# Android documentation: https://developer.android.com/develop/ui/views/layout/display-cutout
+#android.display_cutout = never
+
 #
 # Python for android (p4a) specific
 #
