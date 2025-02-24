@@ -871,7 +871,7 @@ class TargetAndroid(Target):
             cmd.append("--home-app")
 
         # Enable display-cutout for Android devices
-        display_cutout = self.buildozer.config.getdefault('app', 'android.display_cutout', 'never').lower()
+        display_cutout = self.buildozer.config.getdefault('app', 'android.display_cutout', 'never')
         if display_cutout in {'default', 'shortedges', 'shortEdges'}:
             if display_cutout == 'shortedges':
                 display_cutout = 'shortEdges'
