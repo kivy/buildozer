@@ -24,10 +24,15 @@ If there are multiple versions of Java installed, select `*17-openjdk*` using::
     sudo update-alternatives --config java
     sudo update-alternatives --config javac
 
-Install Rust as some features depend on Rust. Accept the default option.
-Note that the Rust on-screen instructions specify to add `. "$HOME/.cargo/env"` to `~/.bashrc`, and to open a new shell::
+Install Rust, and accept the default option::
 
     curl https://sh.rustup.rs -sSf | sh
+
+Note that the Rust on-screen instructions specify to add::
+
+    . "$HOME/.cargo/env"
+
+to ~/.bashrc, and to open a new shell.
 
 Activate an existing Python virtual environment, or create and activate a new Python virtual environment. This is a Python 3.12 requirement::
 
