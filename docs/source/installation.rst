@@ -1,26 +1,43 @@
 Installation
 ============
 
-Buildozer is tested on Python 3.8 and above.
+Buildozer is tested on Python 3.9 and above.
 Depending the platform you want to target, you might need more tools installed.
 Buildozer tries to give you hints or tries to install few things for
 you, but it doesn't cover every situation.
 
-First, install the buildozer project.
-
-The most-recently released version can be installed with::
-
-    pip install --user --upgrade buildozer
-
-Add the `--user` option if you are not using a virtual environment (not recommended).
-
-If you would like to install the latest version still under development::
-
-    pip install https://github.com/kivy/buildozer/archive/master.zip
-
-
 Targeting Android
 -----------------
+
+Android on Ubuntu 24.04
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Install the system packages on which a Buildozer build may depend::
+
+    sudo apt install -y git zip unzip openjdk-17-jdk python3-pip \
+    python3-virtualenv autoconf libtool pkg-config zlib1g-dev \
+    libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev \
+    libssl-dev automake autopoint gettext
+
+If there are multiple versions of Java installed, select `*17-openjdk*` using::
+
+    sudo update-alternatives --config java
+    sudo update-alternatives --config javac
+
+Install Rust as some features depend on Rust. Accept the default option.
+Note that the Rust on-screen instructions specify to add `. "$HOME/.cargo/env"` to `~/.bashrc`, and to open a new shell::
+
+    curl https://sh.rustup.rs -sSf | sh
+
+Activate an existing Python virtual environment, or create and activate a new Python virtual environment. This is a Python 3.12 requirement::
+
+    virtualenv venv
+    source venv/bin/activate
+
+Install Buildozer and it's required Python packages::
+
+    pip install buildozer, setuptools, cython==0.29.34
+
 
 Android on Ubuntu 20.04 and 22.04 (64bit)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,23 +62,20 @@ Then install the buildozer project with::
 
     pip3 install --user --upgrade buildozer
 
-
-Android on Windows 10 or 11
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Buildozer on Windows 10 or 11
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To use Buildozer on Windows, you need first to enable Windows Subsystem for Linux (WSL) and
 `install a Linux distribution <https://docs.microsoft.com/en-us/windows/wsl/install>`_.
 
-These instructions were tested with WSL 1 and Ubuntu 18.04 LTS, and WSL2 with Ubuntu 20.04 and 22.04.
+These instructions were tested with WSL2 with Ubuntu 20.04, 22.04, and 24.04. WSL1 has a known fatal issue.
 
-After installing WSL and Ubuntu on your Windows machine, open Ubuntu, run the commands listed in the previous section,
+After installing WSL and Ubuntu on your Windows machine, open Ubuntu, follow the instructions above,
 and restart your WSL terminal to enable the path change.
 
-Copy your Kivy project directory from the Windows partition to the WSL partition.
+Copy your Kivy project directory from the Windows partition (under /mnt/c) to the WSL partition (under ~).
 
-.. warning::
-    It is important to use the WSL partition. The Android SDK for Linux does not work on Windows' NTFS drives.
-    This will lead to obscure failures.
+It is important to use the WSL partition. Builds are about 5 times faster than the Windows partition, and using an NTFS partition on a Linux system may lead to obscure Python issues.
 
 For debugging, WSL does not have direct access to USB. Copy the .apk file to the Windows partition and run ADB
 (Android Debug Bridge) from a Windows prompt. ADB is part of Android Studio, if you do not have this installed
@@ -74,6 +88,7 @@ you can install just the platform tools which also contain ADB.
 
 Before Using Buildozer
 ~~~~~~~~~~~~~~~~~~~~~~
+
 
 If you wish, clone your code to a new folder where the build process will run.
 
