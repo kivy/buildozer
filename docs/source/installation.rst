@@ -40,7 +40,7 @@ Note that the Rust on-screen instructions specify to add::
 to ~/.bashrc, and to open a new shell. Note the leading period above.
 
 Activate an existing Python virtual environment, or create and activate a new Python virtual environment. 
-This is a Python 3.12 requirement::
+Python 3.12 defaults to requiring a virtual environment::
 
     virtualenv venv
     source venv/bin/activate
