@@ -6,6 +6,8 @@ Depending the platform you want to target, you might need more tools installed.
 Buildozer tries to give you hints or tries to install few things for
 you, but it doesn't cover every situation.
 
+Buildozer runs on Linux and Macos, Windows users must install WSL to use Linux.
+
 Targeting Android
 -----------------
 
