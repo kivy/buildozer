@@ -22,6 +22,42 @@ If you would like to install the latest version still under development::
 Targeting Android
 -----------------
 
+Android on Debian 12 (Bookworm)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The below Installation and Build method uses a virtual python environment. 
+
+.. note::
+
+Debian Notes: 
+
+* `libncurses-dev` replaces `libncurses5-dev` and `libncursesw5-dev` (older OS versions)
+
+* `openjdk-17-jdk-headless`: Fixes the error "not found javac" 
+
+* `python3-sdl2`: Fixes errors like "clang ... error no input file ... " 
+
+* If in running `buildozer` you get *not found* errors from a missing package outside the python virtual env then delete the python virtual environment, add the missing package (apt install ...), and re-create the python virtual environment. 
+
+Additional installation required to support Android::
+
+    sudo apt update
+    sudo apt install git zip unzip openjdk-17-jdk-headless python3-pip autoconf libtool pkg-config zlib1g-dev \
+        python3-kivy autoconf-archive gnu-standards gettext python3-venv libffi-dev python3-sdl2 libncurses-dev libssl-dev
+
+After setting up the base OS, then install a virtual python envirtonment using Cython version 0.29.33 as
+
+    mkdir /path/to/your_venv
+
+    python3 -m venv /path/to/your_venv
+
+    cd /path/to/your_venv
+
+    source /path/to/your_venv/bin/activate
+
+    (venv) pip3 install --upgrade buildozer virtualenv Cython==0.29.33
+
+
 Android on Ubuntu 20.04 and 22.04 (64bit)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -33,7 +69,8 @@ Android on Ubuntu 20.04 and 22.04 (64bit)
 Additional installation required to support Android::
 
     sudo apt update
-    sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev automake
+    sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev \
+        libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev automake
 
     # add the following line at the end of your ~/.bashrc file
     export PATH=$PATH:~/.local/bin/
