@@ -2,13 +2,15 @@ Installation
 ============
 
 Buildozer can be installed on Linux or Macos, Windows users must install WSL to use Linux. 
-Target platforms are Android and iOS, iOS is only available for Buildozer MacOS installs. 
+Target platforms are Android and iOS, iOS is only available for MacOS installs. 
 After Buildozer installation read the Quickstart documentation.
 
+This page contains install instructions for targeting Android or iOS. The Android section contains instructions 
+for installing Buildozer on Ubuntu or on MacOS, also there are special notes for WSL users. Other Linux OS can 
+be used (for example Colab) but there are no instructions. The iOS section 
+contains instructions for installing kivy-ios on MacOS.
+
 Buildozer is tested on Python 3.8 and above. 
-Depending the platform you want to target, you might need more tools installed.
-Buildozer tries to give you hints or tries to install few things for
-you, but it doesn't cover every situation.
 
 Targeting Android
 -----------------
@@ -37,11 +39,12 @@ Note that the Rust on-screen instructions specify to add::
 
     . "$HOME/.cargo/env"
 
-to ~/.bashrc, and to open a new shell. Note the leading period above.
+to ~/.bashrc, and to open a new shell. The leading period in the line above above is important.
 
 Activate an existing Python virtual environment, or create and activate a new Python virtual environment. 
 Python 3.12 defaults to requiring a virtual environment::
 
+    cd
     virtualenv venv
     source venv/bin/activate
 
@@ -70,21 +73,15 @@ Then install the buildozer project with::
 
     pip3 install --user --upgrade buildozer
 
-Install on Windows
-~~~~~~~~~~~~~~~~~~
+Notes for WSL users
+~~~~~~~~~~~~~~~~~~~
 
-To use Buildozer on Windows, you need first to enable Windows Subsystem for Linux (WSL) and
-`install a Linux distribution <https://docs.microsoft.com/en-us/windows/wsl/install>`_.
+Legacy WSL1 users must upgrade to WSL2. WSL1 has a known fatal issue.
 
-These instructions were tested with WSL2 with Ubuntu 20.04, 22.04, and 24.04. WSL1 has a known fatal issue.
+Copy your Kivy project directory from the Windows file system (usually under /mnt/c) to the WSL file system (under ~).
 
-After installing WSL and Ubuntu on your Windows machine, open Ubuntu, follow the instructions above,
-and restart your WSL terminal to enable the path change.
-
-Copy your Kivy project directory from the Windows partition (under /mnt/c) to the WSL partition (under ~).
-
-It is important to use the WSL partition. Builds are about 5 times faster than the Windows partition, 
-and using an NTFS partition on a Linux system may cause some Python packages to behave as if they are 
+It is important to build on the WSL file system. Builds are about 5 times faster than the Windows file system, 
+and using an NTFS formatted disk on a Linux system may cause some Python packages to incorrectly behave as if they are 
 configured for Windows.
 
 For debugging, WSL does not have direct access to USB. Copy the .apk file to the Windows partition and run ADB
