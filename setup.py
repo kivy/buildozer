@@ -28,7 +28,6 @@ install it on Python {}.{}.
 
 
 def find_version(*file_paths):
-    # Open in Latin-1 so that we avoid encoding errors.
     # Use codecs.open for Python 2 compatibility
     with codecs.open(os.path.join(here, *file_paths), 'r', 'utf-8') as f:
         version_file = f.read()
