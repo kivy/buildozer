@@ -1,0 +1,99 @@
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.slider import Slider
+from kivy.uix.button import Button
+from kivy.uix.textinput import TextInput
+from kivy.uix.popup import Popup
+import matplotlib.pyplot as plt
+
+class PowerBalancer(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(orientation='vertical', **kwargs)
+
+        self.add_widget(Label(text='Total Demand (MW):'))
+        self.demand_input = TextInput(text='100', multiline=False)
+        self.add_widget(self.demand_input)
+    
+        self.sliders = {}
+        self.labels = {}
+        sources = ['Coal', 'Solar', 'Wind', 'Hydro', 'Oil']
+
+        for source in sources:
+            self.labels[source] = Label(text=f'{source} Capacity: 20%')
+            self.add_widget(self.labels[source])
+
+            self.sliders[source] = Slider(min=0, max=100, value=20)
+            self.sliders[source].bind(value=self.update_label(source))
+            self.add_widget(self.sliders[source])
+
+        self.result_label = Label(text='')
+        self.add_widget(self.result_label)
+
+        self.calc_btn = Button(text='Calculate Mix')
+        self.calc_btn.bind(on_press=self.calculate_mix)
+        self.add_widget(self.calc_btn)
+
+        self.chart_btn = Button(text='Show Pie Chart')
+        self.chart_btn.bind(on_press=self.show_pie_chart)
+        self.add_widget(self.chart_btn)
+
+    def show_error_popup(self, message):
+        popup = Popup(
+            title='Error',
+            content=Label(text=message),
+            size_hint=(None, None),
+            size=(400, 200)
+        )
+        popup.open()
+
+    def update_label(self, source):
+        return lambda instance, value: setattr(self.labels[source], 'text', f'{source} Capacity: {int(value)}%')
+
+    def calculate_mix(self, instance):
+        try:
+            total_demand = float(self.demand_input.text)
+            if total_demand <= 0:
+                self.show_error_popup("Total demand must be greater than 0")
+                return
+
+            capacities = {source: self.sliders[source].value for source in self.sliders}
+            total_pct = sum(capacities.values())
+
+            if total_pct == 0:
+                self.result_label.text = "All sources are at 0%. Adjust sliders."
+                self.show_error_popup("All sources are at 0%. Adjust sliders.")
+                return
+            
+            if total_pct > 100:
+                self.result_label.text = "Invalid percentage."
+                self.show_error_popup("Total capacity exceeds 100%! Adjust sliders.")
+                return
+
+            shares = {source: total_demand * (capacities[source] / total_pct) for source in capacities}
+            self.result_label.text = " | ".join([f"{source}: {shares[source]:.2f} MW" for source in shares])
+
+            self.shares = shares  # Store values for pie chart
+        except ValueError:
+            self.show_error_popup("Invalid input. Please enter a valid number for total demand.")
+            self.result_label.text = "Invalid input."
+
+    def show_pie_chart(self, instance):
+        if not hasattr(self, 'shares'):
+            self.result_label.text = "Run 'Calculate Mix' first!"
+            self.show_error_popup("Please calculate the power mix before showing the chart.")
+            return
+
+        plt.figure(figsize=(6, 6))
+        plt.pie(self.shares.values(), labels=self.shares.keys(), autopct='%1.1f%%', colors=['brown', 'gold', 'blue', 'green', 'gray'])
+        plt.title('Power Distribution')
+
+        plt.savefig("pie_chart.png")  # Save plot
+        plt.show()
+
+class PowerApp(App):
+    def build(self):
+        return PowerBalancer()
+
+if __name__ == '__main__':
+    PowerApp().run()
