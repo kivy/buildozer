@@ -1,0 +1,19 @@
+print("👋 Welcome! Let's create your CV.\n")
+
+# Ask user for basic info
+x = input("1-What's your name?\n ")
+y = input("2-What's your age?\n ")
+z = input("3-What's yor job?\n ")
+m = input("4-How many members  in your family?\n ")
+l = input("5-What's your pet name?\n ")
+a = input("6-Where are you fr0m?\n ")
+# Display the formatted CV
+print("\n✅ Your CV is completed. You can view it below:")
+print("=========================================")
+print(" Name: " + x)
+print(" Age: " + y)
+print(" Job: " + z)
+print(" family membrs: " + m)
+print(" Pet name: " + l)
+print(" country: " + a)
+print("=========================================")
