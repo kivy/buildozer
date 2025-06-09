@@ -1,5 +1,14 @@
+.. _recipes:
+
 Recipes
 =======
+
+..rst-class: lead
+
+    Compiling our python packages.
+
+Overview
+--------
 
 Python apps may depend on third party packages and extensions.
 

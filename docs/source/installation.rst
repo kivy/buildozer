@@ -1,3 +1,5 @@
+.. _installation:
+
 Installation
 ============
 
@@ -12,7 +14,7 @@ The most-recently released version can be installed with::
 
     pip install --user --upgrade buildozer
 
-Add the `--user` option if you are not using a virtual environment (not recommended).
+Add the :class:`--user` option if you are not using a virtual environment (not recommended).
 
 If you would like to install the latest version still under development::
 
@@ -70,7 +72,7 @@ you can install just the platform tools which also contain ADB.
 - Visit the `Android SDK Platform Tools <https://developer.android.com/tools/releases/platform-tools>`_ page, and
   select "Download SDK Platform-Tools for Windows".
 
-- Unzip the downloaded file to a new folder. For example, `C:\\platform-tools\\`
+- Unzip the downloaded file to a new folder. For example, :class:`C:\\platform-tools\\`
 
 Before Using Buildozer
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -78,7 +80,7 @@ Before Using Buildozer
 If you wish, clone your code to a new folder where the build process will run.
 
 You don't need to create a virtualenv for your code requirements. But just add these requirements to a configuration
-file called `buildozer.spec` as you will see in the following sections.
+file called :class:`buildozer.spec` as you will see in the following sections.
 
 Before running Buildozer in your code folder, remember to go into the Buildozer folder and activate the Buildozer
 virtualenv.
@@ -111,7 +113,7 @@ Buildozer didn't install a necessary package
 
 Then press "y" then enter to accept the license.
 
-Alternatively, the Android SDK license can be automatically accepted - see `build.spec` for details.
+Alternatively, the Android SDK license can be automatically accepted - see :class:`buildozer.spec` for details.
 
 
 python-for-android related errors
