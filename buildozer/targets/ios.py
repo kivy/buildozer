@@ -263,6 +263,48 @@ class TargetIos(Target):
                 'displayImageURL': display_image_url,
                 'fullSizeImageURL': full_size_image_url,
             }
+         # Permissions and their Justification Descriptions
+        local_network_usage_description = self.buildozer.config.getdefault(
+            "app", "ios.local_network_usage_description", None)
+        media_usage_description = self.buildozer.config.getdefault(
+            "app", "ios.media_usage_description", None)
+        camera_usage_description = self.buildozer.config.getdefault(
+            "app", "ios.camera_usage_description", None)
+        viewcontroller_based_statusbar_appearance = self.buildozer.config.getdefault(
+            "app", "ios.viewcontroller_based_statusbar_appearance", None)
+
+
+        #types
+        custom_ext_types = self.buildozer.config.getdefault("app", "ios.app_extensions", None)
+
+        if media_usage_description:
+            plist['NSAppleMusicUsageDescription'] = media_usage_description
+        if local_network_usage_description:
+            plist['NSLocalNetworkUsageDescription'] = local_network_usage_description
+        if camera_usage_description:
+            plist['NSCameraUsageDescription'] = camera_usage_description
+        if viewcontroller_based_statusbar_appearance:
+            plist['UIViewControllerBasedStatusBarAppearance'] = viewcontroller_based_statusbar_appearance
+        if custom_ext_types:
+            import ast
+            custom_ext_types = ast.literal_eval(custom_ext_types)
+            for ext in custom_ext_types:
+                plist["UTExportedTypeDeclarations"] = [{
+                    'UTTypeConformsTo': ext[1],
+                    'UTTypeIdentifier': ext[2],
+                    'UTTypeDescription': ext[3],
+                    'UTTypeIconFile': ext[4],
+                    'UTTypeReferenceURL': ext[5],
+                    'UTTypeTagSpecification':{'public.filename-extension': ext[0]},}]
+                plist["CFBundleDocumentTypes"] =  [{
+                    "CFBundleTypeName": ext[3],
+                    "CFBundleTypeIconFile": ext[4],
+                    "CFBundleTypeRole": "Editor",
+                    "LSHandlerRank": "Owner",
+                    "LSItemContentTypes": [ext[2]],}]
+            plist["LSSupportsOpeningDocumentsInPlace"] = "NO"
+            plist["UISupportsDocumentBrowser"] = "NO"
+
 
         # ok, write the modified plist.
         self.dump_plist_to_file(plist, plist_rfn)
