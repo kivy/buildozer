@@ -1,0 +1,46 @@
+# ağa_kamalov_currency_converter.py
+
+from kivy.app import App
+from kivy.uix.label import Label
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
+from kivy.clock import Clock
+
+class CurrencyApp(App):
+    def build(self):
+        self.animation_index = 0
+        self.name_text = "Ağa Kamalov tərəfindən hazırlandı"
+        self.animated_label = Label(text="", font_size='20sp', size_hint=(1, 0.2))
+
+        self.input = TextInput(hint_text="Məbləği daxil edin (USD)", multiline=False, input_filter='float')
+        self.convert_button = Button(text="Çevir (AZN)", on_press=self.convert)
+        self.output = Label(text="Nəticə burada görünəcək", font_size='18sp')
+
+        layout = BoxLayout(orientation='vertical', padding=20, spacing=10)
+        layout.add_widget(self.animated_label)
+        layout.add_widget(self.input)
+        layout.add_widget(self.convert_button)
+        layout.add_widget(self.output)
+
+        Clock.schedule_interval(self.animate_text, 0.1)
+
+        return layout
+
+    def animate_text(self, dt):
+        if self.animation_index < len(self.name_text):
+            self.animated_label.text += self.name_text[self.animation_index]
+            self.animation_index += 1
+        else:
+            Clock.unschedule(self.animate_text)
+
+    def convert(self, instance):
+        try:
+            usd = float(self.input.text)
+            azn = usd * 1.7  # USD → AZN kursu (sabit)
+            self.output.text = f"{usd:.2f} USD = {azn:.2f} AZN"
+        except:
+            self.output.text = "Xahiş olunur düzgün məbləğ daxil edin."
+
+if __name__ == '__main__':
+    CurrencyApp().run()
