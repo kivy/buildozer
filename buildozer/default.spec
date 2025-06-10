@@ -401,6 +401,22 @@ ios.codesign.allowed = false
 # (str) The development team to use for signing the release version
 #ios.codesign.development_team.release = <hexstring>
 
+# (str) Justification text to be provided for being able to select media
+#ios.media_usage_description = "<APP> needs to access your media in order to <Do X and Y and Z> "
+
+# (str) Justification text to be provided for being able to use local network
+#ios.local_network_usage_description = "<App> needs permissions to <Do X and Y and Z> in your Local Area Network"
+
+# (str) Camera Usage justification string.
+#ios.camera_usage_description = "<App> uses Camera to do <X and Y and Z>"
+
+
+# (bool) Allow StatusBar to be controlled by API
+# ios.viewcontroller_based_statusbar_appearance = False
+
+# (str) A Xml String specifying a extension type.
+#ios.app_extensions = [["7zip", "zip"],  ["public.zip-archive"], "org.kivy.myappextensionfile", "<MyCuston> Extension File", "${MACOSX_BUNDLE_ICON_FILE}", "http://mysite.com/myapp/extensions.html"],
+
 # (str) URL pointing to .ipa file to be installed
 # This option should be defined along with `display_image_url` and `full_size_image_url` options.
 #ios.manifest.app_url =
