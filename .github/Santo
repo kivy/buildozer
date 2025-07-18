@@ -1,0 +1,126 @@
+import math
+
+def work_energy_power():
+    print("📘 Welcome to Work, Energy & Power Calculator")
+    print("Select an option:")
+    print("1. Calculate Work Done (W = F × d × cosθ)")
+    print("2. Calculate Kinetic Energy (KE = ½mv²)")
+    print("3. Calculate Potential Energy (PE = mgh)")
+    print("4. Calculate Power (P = Work / Time)")
+    print("5. Exit")
+
+    while True:
+        choice = input("\nEnter your choice (1-5): ")
+
+        if choice == '1':
+            F = float(input("Enter force (N): "))
+            d = float(input("Enter displacement (m): "))
+            angle = float(input("Enter angle between force & displacement (in degrees): "))
+            theta = math.radians(angle)  # Convert degrees to radians
+            W = F * d * math.cos(theta)
+            print(f"➡️ Work Done = {W:.2f} Joules")
+
+        elif choice == '2':
+            m = float(input("Enter mass (kg): "))
+            v = float(input("Enter velocity (m/s): "))
+            KE = 0.5 * m * v**2
+            print(f"➡️ Kinetic Energy = {KE:.2f} Joules")
+
+        elif choice == '3':
+            m = float(input("Enter mass (kg): "))
+            h = float(input("Enter height (m): "))
+            g = 9.8  # gravitational acceleration
+            PE = m * g * h
+            print(f"➡️ Potential Energy = {PE:.2f} Joules")
+
+        elif choice == '4':
+            work = float(input("Enter work done (Joules): "))
+            time = float(input("Enter time (seconds): "))
+            power = work / time
+            print(f"➡️ Power = {power:.2f} Watts")
+
+        elif choice == '5':
+            print("🛑 Exiting Work, Energy & Power Calculator. Goodbye!")
+            break
+
+        else:
+            print("❌ Invalid choice. Please try again.")
+
+# Run the program
+work_energy_power()
+import math
+
+def units_and_measurements():
+    print("Welcome to Units and Measurements Tool")
+    print("Choose an option:")
+    print("1. Convert Units (meter <-> centimeter <-> kilometer)")
+    print("2. Count Significant Figures")
+    print("3. Calculate Percentage Error")
+    print("4. Convert to Scientific Notation")
+    print("5. Exit")
+
+    while True:
+        choice = input("\nEnter your choice (1–5): ")
+
+        if choice == '1':
+            print("a) meter to centimeter")
+            print("b) centimeter to meter")
+            print("c) kilometer to meter")
+            print("d) meter to kilometer")
+            sub = input("Choose conversion (a/b/c/d): ")
+            try:
+                val = float(input("Enter value: "))
+            except ValueError:
+                print("Invalid numeric value!")
+                continue
+            if sub == 'a':
+                print(f"{val} m = {val * 100:.2f} cm")
+            elif sub == 'b':
+                print(f"{val} cm = {val / 100:.2f} m")
+            elif sub == 'c':
+                print(f"{val} km = {val * 1000:.2f} m")
+            elif sub == 'd':
+                print(f"{val} m = {val / 1000:.2f} km")
+            else:
+                print("Invalid choice.")
+
+        elif choice == '2':
+            number = input("Enter a number: ").strip()
+            # Improved significant figures counter
+            if '.' in number:
+                s = number.replace('.', '')
+                digits = len(s.lstrip('0')) if s.lstrip('0') else 0
+            else:
+                s = number.lstrip('0')
+                digits = len(s.rstrip('0')) if s.rstrip('0') else 0
+            print(f"Significant figures = {digits}")
+
+        elif choice == '3':
+            try:
+                measured = float(input("Enter measured value: "))
+                actual = float(input("Enter actual value: "))
+            except ValueError:
+                print("Invalid numeric value!")
+                continue
+            if actual == 0:
+                print("Actual value cannot be 0.")
+                continue
+            error = abs((measured - actual) / actual) * 100
+            print(f"Percentage Error = {error:.2f}%")
+
+        elif choice == '4':
+            try:
+                num = float(input("Enter a number: "))
+                sci = "{:.2e}".format(num)
+                print(f"Scientific Notation: {sci}")
+            except ValueError:
+                print("Invalid numeric value!")
+
+        elif choice == '5':
+            print("Exiting Units & Measurements Tool. Goodbye!")
+            break
+
+        else:
+            print("Invalid choice. Please try again.")
+
+units_and_measurements()
