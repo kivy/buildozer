@@ -1,0 +1,401 @@
+# snake_kivy.py
+# Snake game for Pydroid 3 (mobile) with slower snake speed (0.18s per move)
+
+import os
+import random
+from kivy.app import App
+from kivy.core.audio import SoundLoader
+from kivy.clock import Clock
+from kivy.core.window import Window
+from kivy.properties import NumericProperty, ListProperty, BooleanProperty
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.graphics import Color, Rectangle, Ellipse
+from kivy.lang import Builder
+
+# --- SETTINGS ---
+MOVE_INTERVAL = 0.18  # 👈 slower snake speed
+GRID_COLS = 20
+HIGH_SCORE_FILE = "highscore.txt"
+MUSIC_FILE = "bg_music.mp3"
+
+Window.fullscreen = True  # Fullscreen for mobile
+
+
+def load_high_score():
+    try:
+        if os.path.exists(HIGH_SCORE_FILE):
+            with open(HIGH_SCORE_FILE, "r") as f:
+                return int(f.read().strip() or 0)
+    except Exception:
+        pass
+    return 0
+
+
+def save_high_score(score):
+    try:
+        with open(HIGH_SCORE_FILE, "w") as f:
+            f.write(str(int(score)))
+    except Exception:
+        pass
+
+
+class MenuScreen(Screen):
+    high_score = NumericProperty(0)
+
+    def on_enter(self):
+        self.high_score = load_high_score()
+
+
+class GameOverScreen(Screen):
+    last_score = NumericProperty(0)
+    high_score = NumericProperty(0)
+
+    def on_enter(self):
+        self.high_score = load_high_score()
+
+
+class GameScreen(Screen):
+    score = NumericProperty(0)
+    playing = BooleanProperty(False)
+    snake = ListProperty()
+    direction = ListProperty([1, 0])
+    cols = NumericProperty(GRID_COLS)
+    rows = NumericProperty(0)
+    cell = NumericProperty(0)
+    apple = ListProperty([0, 0])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.calculate_grid()
+        Window.bind(on_resize=lambda *a: self.calculate_grid())
+        self._clock_ev = None
+        self._touch_start = None
+
+        self.sound = None
+        if os.path.exists(MUSIC_FILE):
+            try:
+                self.sound = SoundLoader.load(MUSIC_FILE)
+                if self.sound:
+                    self.sound.loop = True
+            except Exception:
+                self.sound = None
+
+    def calculate_grid(self):
+        w, h = Window.size
+        self.cell = max(10, int(w / self.cols))
+        self.rows = max(10, int(h / self.cell))
+        if self.cell * self.rows > h:
+            self.cell = int(h / self.rows)
+
+    def start_game(self):
+        self.calculate_grid()
+        mid_x = self.cols // 2
+        mid_y = self.rows // 2
+        self.snake = [(mid_x - 1, mid_y), (mid_x, mid_y)]
+        self.direction = [1, 0]
+        self.score = 0
+        self.place_apple()
+        self.playing = True
+        if self._clock_ev:
+            self._clock_ev.cancel()
+        self._clock_ev = Clock.schedule_interval(self.update, MOVE_INTERVAL)
+        if self.sound:
+            try:
+                self.sound.play()
+            except Exception:
+                pass
+        self.ids.score_label.text = f"Score: {self.score}"
+
+    def stop_game(self):
+        self.playing = False
+        if self._clock_ev:
+            self._clock_ev.cancel()
+            self._clock_ev = None
+        if self.sound:
+            try:
+                self.sound.stop()
+            except Exception:
+                pass
+
+    def place_apple(self):
+        empty = [(x, y) for x in range(self.cols) for y in range(self.rows) if (x, y) not in self.snake]
+        if not empty:
+            self.apple = [-1, -1]
+            return
+        self.apple = random.choice(empty)
+
+    def update(self, dt):
+        if not self.playing:
+            return
+        dx, dy = self.direction
+        head_x, head_y = self.snake[-1]
+        new_head = (head_x + dx, head_y + dy)
+        if new_head[0] < 0 or new_head[0] >= self.cols or new_head[1] < 0 or new_head[1] >= self.rows:
+            self.game_over()
+            return
+        if new_head in self.snake:
+            self.game_over()
+            return
+        self.snake.append(new_head)
+        if new_head[0] == self.apple[0] and new_head[1] == self.apple[1]:
+            self.score += 1
+            self.ids.score_label.text = f"Score: {self.score}"
+            self.place_apple()
+        else:
+            self.snake.pop(0)
+        self.draw()
+
+    def draw(self):
+        self.canvas.clear()
+        with self.canvas:
+            Color(0, 0, 0)
+            Rectangle(pos=self.pos, size=Window.size)
+            Color(0.06, 0.06, 0.06)
+            for x in range(self.cols):
+                for y in range(self.rows):
+                    if (x + y) % 2 == 0:
+                        Rectangle(pos=(x * self.cell, y * self.cell), size=(self.cell - 1, self.cell - 1))
+            if self.apple[0] >= 0:
+                ax, ay = self.apple
+                cx = ax * self.cell + self.cell * 0.5
+                cy = ay * self.cell + self.cell * 0.5
+                Color(1, 0, 0)
+                Ellipse(pos=(cx - self.cell * 0.4, cy - self.cell * 0.4), size=(self.cell * 0.8, self.cell * 0.8))
+                Color(0.1, 0.6, 0.1)
+                Ellipse(pos=(cx + self.cell * 0.05, cy + self.cell * 0.25), size=(self.cell * 0.25, self.cell * 0.15))
+            for i, (sx, sy) in enumerate(self.snake):
+                xpix = sx * self.cell
+                ypix = sy * self.cell
+                if i == len(self.snake) - 1:
+                    Color(0.1, 0.9, 0.1)
+                else:
+                    Color(0.05, 0.7, 0.05)
+                Rectangle(pos=(xpix + 1, ypix + 1), size=(self.cell - 2, self.cell - 2))
+            if self.snake:
+                hx, hy = self.snake[-1]
+                hxpix = hx * self.cell
+                hypix = hy * self.cell
+                cx = hxpix + self.cell * 0.5
+                cy = hypix + self.cell * 0.6
+                eye_offset_x = self.cell * 0.18
+                eye_offset_y = self.cell * 0.05
+                eye_size = self.cell * 0.16
+                Color(1, 1, 1)
+                Ellipse(pos=(cx - eye_offset_x - eye_size / 2, cy + eye_offset_y - eye_size / 2),
+                        size=(eye_size, eye_size))
+                Ellipse(pos=(cx + eye_offset_x - eye_size / 2, cy + eye_offset_y - eye_size / 2),
+                        size=(eye_size, eye_size))
+                Color(0, 0, 0)
+                pupil_size = eye_size * 0.45
+                Ellipse(pos=(cx - eye_offset_x - pupil_size / 2, cy + eye_offset_y - pupil_size / 2),
+                        size=(pupil_size, pupil_size))
+                Ellipse(pos=(cx + eye_offset_x - pupil_size / 2, cy + eye_offset_y - pupil_size / 2),
+                        size=(pupil_size, pupil_size))
+
+    def game_over(self):
+        self.stop_game()
+        hs = load_high_score()
+        if self.score > hs:
+            save_high_score(self.score)
+        sm = App.get_running_app().root
+        go_screen = sm.get_screen('gameover')
+        go_screen.last_score = self.score
+        sm.current = 'gameover'
+
+    def on_touch_down(self, touch):
+        self._touch_start = touch.pos
+        return super().on_touch_down(touch)
+
+    def on_touch_up(self, touch):
+        if not self._touch_start or not self.playing:
+            return super().on_touch_up(touch)
+        sx, sy = self._touch_start
+        ex, ey = touch.pos
+        dx = ex - sx
+        dy = ey - sy
+        thresh = max(30, Window.width * 0.05)
+        if abs(dx) > abs(dy) and abs(dx) > thresh:
+            if dx > 0:
+                self.set_direction(1, 0)
+            else:
+                self.set_direction(-1, 0)
+        elif abs(dy) > thresh:
+            if dy > 0:
+                self.set_direction(0, 1)
+            else:
+                self.set_direction(0, -1)
+        self._touch_start = None
+        return super().on_touch_up(touch)
+
+    def on_key_down(self, keycode, modifiers):
+        if keycode[1] == 'up':
+            self.set_direction(0, 1)
+        elif keycode[1] == 'down':
+            self.set_direction(0, -1)
+        elif keycode[1] == 'left':
+            self.set_direction(-1, 0)
+        elif keycode[1] == 'right':
+            self.set_direction(1, 0)
+
+    def set_direction(self, dx, dy):
+        cur_dx, cur_dy = self.direction
+        if (dx == -cur_dx and dy == -cur_dy):
+            return
+        self.direction = [dx, dy]
+
+
+KV = """
+ScreenManager:
+    MenuScreen:
+        name: 'menu'
+    GameScreen:
+        name: 'game'
+    GameOverScreen:
+        name: 'gameover'
+
+<MenuScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(20)
+        spacing: dp(10)
+        canvas.before:
+            Color:
+                rgba: (0,0,0,1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: "SNAKE"
+            font_size: '48sp'
+            size_hint_y: 0.2
+            color: (0.9, 0.95, 0.9, 1)
+        Label:
+            text: "High Score: " + str(root.high_score)
+            font_size: '20sp'
+            size_hint_y: 0.12
+            color: (0.8,0.8,0.8,1)
+        Widget:
+            size_hint_y: 0.1
+        GridLayout:
+            cols:1
+            size_hint_y: 0.4
+            spacing: dp(10)
+            Button:
+                text: "Play"
+                font_size: '20sp'
+                on_release:
+                    app.root.get_screen('game').start_game()
+                    app.root.current = 'game'
+            Button:
+                text: "Quit"
+                font_size: '20sp'
+                on_release: app.stop()
+            Button:
+                text: "Reset High Score"
+                font_size: '16sp'
+                on_release:
+                    import os
+                    if os.path.exists('%s'): os.remove('%s')
+                    root.on_enter()
+        Widget:
+            size_hint_y: 0.1
+
+<GameScreen>:
+    FloatLayout:
+        canvas.before:
+            Color:
+                rgba: (0,0,0,1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            id: score_label
+            text: "Score: 0"
+            size_hint: (0.3, 0.08)
+            pos_hint: {'x':0.02, 'top':1}
+            font_size: '18sp'
+            color: (1,1,1,1)
+        Button:
+            text: "Quit"
+            size_hint: (0.18, 0.08)
+            pos_hint: {'right':1, 'top':1}
+            on_release:
+                root.stop_game()
+                app.root.current = 'menu'
+        Button:
+            text: "Pause"
+            size_hint: (0.18, 0.08)
+            pos_hint: {'right':0.78, 'top':1}
+            on_release:
+                if root.playing: root.stop_game()
+                else: root.start_game()
+
+<GameOverScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(24)
+        spacing: dp(12)
+        canvas.before:
+            Color:
+                rgba: (0,0,0,1)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: "Game Over"
+            font_size: '36sp'
+            size_hint_y: 0.2
+            color: (1,1,1,1)
+        Label:
+            text: "Score: " + str(root.last_score)
+            font_size: '22sp'
+            size_hint_y: 0.12
+            color: (0.9,0.9,0.9,1)
+        Label:
+            text: "High Score: " + str(root.high_score)
+            font_size: '18sp'
+            size_hint_y: 0.12
+            color: (0.8,0.8,0.8,1)
+        Widget:
+            size_hint_y: 0.1
+        GridLayout:
+            cols:1
+            size_hint_y: 0.4
+            spacing: dp(10)
+            Button:
+                text: "Restart"
+                font_size: '18sp'
+                on_release:
+                    app.root.get_screen('game').start_game()
+                    app.root.current = 'game'
+            Button:
+                text: "Menu"
+                font_size: '18sp'
+                on_release:
+                    app.root.current = 'menu'
+            Button:
+                text: "Quit"
+                font_size: '18sp'
+                on_release:
+                    app.stop()
+        Widget:
+            size_hint_y: 0.08
+""" % (HIGH_SCORE_FILE, HIGH_SCORE_FILE)
+
+
+class SnakeApp(App):
+    def build(self):
+        self.title = "Snake"
+        sm = Builder.load_string(KV)
+        return sm
+
+    def on_stop(self):
+        try:
+            gs = self.root.get_screen('game')
+            gs.stop_game()
+        except Exception:
+            pass
+
+
+if __name__ == '__main__':
+    SnakeApp().run()
