@@ -1,0 +1,105 @@
+import datetime
+
+class CarMaintenance: def init(self): self.records = []  # список всех записей
+
+def add_record(self, mileage, oil_change=False, filter_change=False, fuel_liters=0,
+               parts_bought=None, parts_replaced=None, tools=None,
+               first_aid=False, fire_extinguisher=False, triangle=False):
+    record = {
+        "date": datetime.date.today().strftime("%Y-%m-%d"),
+        "mileage": mileage,
+        "oil_change": oil_change,
+        "filter_change": filter_change,
+        "fuel_liters": fuel_liters,
+        "parts_bought": parts_bought if parts_bought else [],
+        "parts_replaced": parts_replaced if parts_replaced else [],
+        "tools": tools if tools else [],
+        "first_aid": first_aid,
+        "fire_extinguisher": fire_extinguisher,
+        "triangle": triangle
+    }
+    self.records.append(record)
+    print("Запись добавлена! ✅")
+
+def show_records(self):
+    if not self.records:
+        print("Нет записей!")
+        return
+    for r in self.records:
+        print(f"Дата: {r['date']} | Пробег: {r['mileage']} км")
+        print(f"  Масло менялось: {r['oil_change']} | Фильтр менялся: {r['filter_change']} | Топливо: {r['fuel_liters']} л")
+        print(f"  Купленные запчасти: {', '.join(r['parts_bought']) if r['parts_bought'] else 'Нет'}")
+        print(f"  Заменённые запчасти: {', '.join(r['parts_replaced']) if r['parts_replaced'] else 'Нет'}")
+        print(f"  Инструменты в машине: {', '.join(r['tools']) if r['tools'] else 'Нет'}")
+        print(f"  Аварийное оборудование -> Аптечка: {r['first_aid']} | Огнетушитель: {r['fire_extinguisher']} | Треугольник: {r['triangle']}")
+        print("-")
+
+def last_oil_change(self):
+    for r in reversed(self.records):
+        if r["oil_change"]:
+            return f"Последняя замена масла была на пробеге {r['mileage']} км ({r['date']})"
+    return "Замены масла ещё не было."
+
+def last_filter_change(self):
+    for r in reversed(self.records):
+        if r["filter_change"]:
+            return f"Последняя замена фильтра была на пробеге {r['mileage']} км ({r['date']})"
+    return "Замены фильтра ещё не было."
+
+def main(): car = CarMaintenance() while True: print("\n--- Car Maintenance Tracker ---") print("1. Добавить запись") print("2. Показать все записи") print("3. Последняя замена масла") print("4. Последняя замена фильтра") print("5. Выйти")
+
+choice = input("Выберите действие: ")
+
+    if choice == "1":
+        mileage = int(input("Введите пробег (км): "))
+        oil = input("Менялось масло? (y/n): ").lower() == "y"
+        flt = input("Менялся фильтр? (y/n): ").lower() == "y"
+        fuel = float(input("Заправлено топлива (л): "))
+
+        parts_bought = input("Какие запчасти были куплены (через запятую, если есть): ").split(",") if input("Есть купленные запчасти? (y/n): ").lower() == "y" else []
+        parts_replaced = input("Какие запчасти были заменены (через запятую, если есть): ").split(",") if input("Есть заменённые запчасти? (y/n): ").lower() == "y" else []
+        tools = input("Какие инструменты есть в машине (через запятую, если есть): ").split(",") if input("Есть инструменты? (y/n): ").lower() == "y" else []
+
+        first_aid = input("Есть аптечка? (y/n): ").lower() == "y"
+        fire_extinguisher = input("Есть огнетушитель? (y/n): ").lower() == "y"
+        triangle = input("Есть аварийный треугольник? (y/n): ").lower() == "y"
+
+        car.add_record(mileage, oil, flt, fuel, parts_bought, parts_replaced, tools, first_aid, fire_extinguisher, triangle)
+
+    elif choice == "2":
+        car.show_records()
+
+    elif choice == "3":
+        print(car.last_oil_change())
+
+    elif choice == "4":
+        print(car.last_filter_change())
+
+    elif choice == "5":
+        print("Выход...")
+        break
+
+    else:
+        print("Неверный выбор!")
+
+if name == "main": main()
+
+pip install kivy kivymd
+
+from kivy.app import App
+from kivy.uix.label import Label
+
+class MyApp(App):
+    def build(self):
+        return Label(text="Car Maintenance Tracker 🚗")
+
+MyApp().run()
+pip install plyer
+
+from plyer import notification
+
+notification.notify(
+    title="Напоминание 🚗",
+    message="Пора заменить масло!",
+    timeout=10
+)
