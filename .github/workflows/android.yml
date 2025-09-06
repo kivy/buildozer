@@ -38,7 +38,9 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       # Required by some p4a recipes, but not
       # installed by p4a on Linux.
-      run: sudo apt -y install automake        
+      run: |
+        sudo apt update
+        sudo apt -y install automake libltdl-dev
     - name: Debug Build
       run: |
         touch main.py
