@@ -53,7 +53,7 @@ Install Buildozer and it's required Python packages::
     pip install buildozer, setuptools, cython==0.29.34
 
 
-Install on Ubuntu 20.04 and 22.04 (64bit)
+Install on Ubuntu 22.04 and 24.04 (64bit)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Install the system packages on which a Buildozer build may depend::
