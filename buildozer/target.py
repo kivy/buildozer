@@ -114,7 +114,7 @@ class Target:
             error("")
             error("ERROR: Trying to release a package that starts with org.test")
             error("")
-            error("The package.domain org.test is, as the name intented, a test.")
+            error("The package.domain org.test is, as the name intended, a test.")
             error("Once you published an application with org.test,")
             error("you cannot change it, it will be part of the identifier")
             error("for Google Play / App Store / etc.")
