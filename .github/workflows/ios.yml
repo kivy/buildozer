@@ -6,15 +6,15 @@ jobs:
     runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
-        # macos-latest (ATM macos-14) runs on Apple Silicon,
+        # macos-latest (ATM macos-15) runs on Apple Silicon,
         # macos-13 runs on Intel
         runs_on: [macos-latest, macos-13]
     steps:
     - name: Setup python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.x'
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Setup environment
       run: |
         pip install .[ios]
