@@ -28,7 +28,7 @@
 # Or simply recreate the directory from the host with:
 # rm -rf ~/.buildozer && mkdir ~/.buildozer
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ENV USER="user"
 ENV HOME_DIR="/home/${USER}"
