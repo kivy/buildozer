@@ -10,7 +10,7 @@
 # In order to give the container access to your current working directory
 # it must be mounted using the --volume option.
 # Run with (e.g. `buildozer --version`):
-# docker run \
+# docker run --interactive --tty --rm \
 #   --volume "$HOME/.buildozer":/home/user/.buildozer \
 #   --volume "$PWD":/home/user/hostcwd \
 #   kivy/buildozer --version
@@ -70,19 +70,16 @@ RUN apt update -qq > /dev/null \
     zip \
     zlib1g-dev
 
-# prepares non root env
-RUN useradd --create-home --shell /bin/bash ${USER}
-# with sudo access and no password
-RUN usermod -append --groups sudo ${USER}
-RUN echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+# Create home directory and virtual environment
+RUN mkdir -p ${HOME_DIR} \
+    && python3 -m venv ${HOME_DIR}/.venv
 
-USER ${USER}
 WORKDIR ${WORK_DIR}
-COPY --chown=user:user . ${SRC_DIR}
+COPY . ${SRC_DIR}
+COPY --chmod=755 entrypoint.sh /usr/local/bin/entrypoint.sh
 
 # installs buildozer and dependencies from a virtual environment
 ENV PATH="${HOME_DIR}/.venv/bin:${PATH}"
-RUN python3 -m venv ${HOME_DIR}/.venv && \
-    pip3 install --upgrade "Cython<3.0" wheel pip ${SRC_DIR}
+RUN pip install --upgrade "Cython<3.0" wheel pip ${SRC_DIR}
 
-ENTRYPOINT ["buildozer"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

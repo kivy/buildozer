@@ -56,7 +56,9 @@ jobs:
           tags: ${{ env.DOCKERHUB_IMAGE }}:latest
       # Run the locally built image to test it
       - name: Docker run
-        run: docker run ${{ env.DOCKERHUB_IMAGE }} --version
+        run: |
+          docker run ${{ env.DOCKERHUB_IMAGE }} --version
+          docker run --rm --volume "$PWD":/home/user/hostcwd ${{ env.DOCKERHUB_IMAGE }} init
 
   update-readme:
     runs-on: ubuntu-24.04
