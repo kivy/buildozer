@@ -10,24 +10,28 @@ jobs:
            - '3.9'
            - '3.10'
            - '3.11'
+           - '3.12'
+           - '3.13'
+           - '3.14'
         os:
           - 'ubuntu-latest'
-          - 'macOs-latest'
+          - 'macos-latest'
         architecture:
           - 'x64'
 
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Setup python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python }}
+        allow-prereleases: true
 
     - name: Requirements
       run: |
-        pip install -U coveralls setuptools tox>=2.0
+        pip install --upgrade coveralls setuptools tox>=2.0
     - name: Tox
       run: tox
     - name: Coveralls
@@ -53,7 +57,7 @@ jobs:
   Docker:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Docker build
       run: docker build --tag=kivy/buildozer .
     - name: Docker run
@@ -62,7 +66,7 @@ jobs:
   Documentation:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Requirements
       run: pip install -U sphinx sphinxawesome_theme
     - name: Check links

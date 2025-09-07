@@ -14,15 +14,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - name: Setup python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: '3.x'
     - name: Setup Java
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         java-version: '17'
         distribution: 'temurin'
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Setup environment
       run: |
         pip install .
@@ -38,7 +38,9 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       # Required by some p4a recipes, but not
       # installed by p4a on Linux.
-      run: sudo apt -y install automake        
+      run: |
+        sudo apt update
+        sudo apt -y install automake libltdl-dev
     - name: Debug Build
       run: |
         touch main.py

@@ -22,15 +22,15 @@ Init and build for Android
    at least change the :class:`title`, :class:`package.name` and :class:`package.domain` in the
    :class:`[app]` section.
 
-#. Start a Android/debug build with::
+#. Start an Android/debug build with::
 
     buildozer -v android debug
 
 #. Now it's time for a coffee / tea, or a dinner if you have a slow computer.
    The first build will be slow, as it will download the Android SDK, NDK, and
-   others tools needed for the compilation.
-   Don't worry, thoses files will be saved in a global directory and will be
-   shared across the different project you'll manage with Buildozer.
+   other tools needed for the compilation.
+   Don't worry, those files will be saved in a global directory and will be
+   shared across the different projects you'll manage with Buildozer.
 
 #. At the end, you should have an APK or AAB file in the :class:`bin/` directory.
 
