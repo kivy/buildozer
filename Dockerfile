@@ -28,7 +28,7 @@
 # Or simply recreate the directory from the host with:
 # rm -rf ~/.buildozer && mkdir ~/.buildozer
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ENV USER="user"
 ENV HOME_DIR="/home/${USER}"
@@ -64,6 +64,7 @@ RUN apt update -qq > /dev/null \
     pkg-config \
     python3-pip \
     python3-setuptools \
+    python3-venv \
     sudo \
     unzip \
     zip \
@@ -79,7 +80,9 @@ USER ${USER}
 WORKDIR ${WORK_DIR}
 COPY --chown=user:user . ${SRC_DIR}
 
-# installs buildozer and dependencies
-RUN pip3 install --user --upgrade "Cython<3.0" wheel pip ${SRC_DIR}
+# installs buildozer and dependencies from a virtual environment
+ENV PATH="${HOME_DIR}/.venv/bin:${PATH}"
+RUN python3 -m venv ${HOME_DIR}/.venv && \
+    pip3 install --upgrade "Cython<3.0" wheel pip ${SRC_DIR}
 
 ENTRYPOINT ["buildozer"]
