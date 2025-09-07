@@ -68,7 +68,7 @@ jobs:
     steps:
     - uses: actions/checkout@v5
     - name: Requirements
-      run: pip install --upgrade sphinx
+      run: pip install -U sphinx sphinxawesome_theme
     - name: Check links
       run: sphinx-build -b linkcheck docs/source docs/build
     - name: Generate documentation

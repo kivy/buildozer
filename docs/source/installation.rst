@@ -1,3 +1,5 @@
+.. _installation:
+
 Installation
 ============
 
@@ -91,7 +93,7 @@ you can install just the platform tools which also contain ADB.
 - Visit the `Android SDK Platform Tools <https://developer.android.com/tools/releases/platform-tools>`_ page, and
   select "Download SDK Platform-Tools for Windows".
 
-- Unzip the downloaded file to a new folder. For example, `C:\\platform-tools\\`
+- Unzip the downloaded file to a new folder. For example, :class:`C:\\platform-tools\\`
 
 
 Install on macOS
