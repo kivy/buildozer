@@ -75,14 +75,19 @@ docker buildx build --platform=linux/amd64 --tag=kivy/buildozer .
 - Run with:
 
 ```bash
-docker run --volume "$(pwd)":/home/user/hostcwd kivy/buildozer --version
+docker run --interactive --tty --rm \
+    --volume "$PWD":/home/user/hostcwd \
+   kivy/buildozer --version
 ```
 
 ### Example Build with Caching
 - Build and keep downloaded SDK and NDK in `~/.buildozer` directory: 
 
 ```bash
-docker run -v $HOME/.buildozer:/home/user/.buildozer -v $(pwd):/home/user/hostcwd kivy/buildozer android debug
+docker run --interactive --tty --rm \
+    --volume "$HOME/.buildozer":/home/user/.buildozer \
+    --volume "$PWD":/home/user/hostcwd \
+    kivy/buildozer android debug
 ```
 
 The image is published to both Docker Hub and GitHub Container Registry and can be pulled from both:
