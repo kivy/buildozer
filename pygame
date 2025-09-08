@@ -1,0 +1,320 @@
+import pygame
+import sys
+import math
+
+# Initialize pygame
+pygame.init()
+
+# Screen dimensions
+WIDTH, HEIGHT = 900, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Ab Kya Karen? - Decision Making Game")
+
+# Colors
+BACKGROUND = (25, 25, 40)
+TEXT_COLOR = (255, 255, 255)
+BUTTON_COLOR = (70, 130, 180)
+BUTTON_HOVER = (100, 149, 237)
+BUTTON_ACTIVE = (30, 144, 255)
+PLAYER_COLOR = (64, 224, 208)
+PATH_COLOR = (50, 50, 70)
+HIGHLIGHT = (255, 215, 0)
+
+# Fonts
+title_font = pygame.font.SysFont("Arial", 48, bold=True)
+font = pygame.font.SysFont("Arial", 24)
+small_font = pygame.font.SysFont("Arial", 20)
+
+# Game states
+class GameState:
+    def __init__(self):
+        self.current_scene = "start"
+        self.score = 0
+        self.choices = []
+        self.current_question = 0
+        self.show_result = False
+        self.result_text = ""
+        self.result_timer = 0
+
+game_state = GameState()
+
+# Questions and choices
+questions = [
+    {
+        "question": "Aap game development seekhna chahte hain. Ab kya karen?",
+        "choices": [
+            "Online tutorials dekhen",
+            "College jaake course karen",
+            "Khud se practice karen",
+            "Game development job dhundhen"
+        ],
+        "results": [
+            "Aapne online tutorials dekhna shuru kiya. Acchi shuruat!",
+            "College jaane se aapko structured milta hai. Badhiya!",
+            "Practice se aapki skills improve hoti hain. Shandaar!",
+            "Bina experience ke job dhundhna mushkil hai. Koshish jari rakhen!"
+        ]
+    },
+    {
+        "question": "Aapko ek complex coding problem mili hai. Ab kya karen?",
+        "choices": [
+            "Internet pe solution dhundhen",
+            "Khud se solve karne ki koshish karen",
+            "Forums pe help maangen",
+            "Problem ko chhote parts mein break karen"
+        ],
+        "results": [
+            "Internet se solution dhundhna aapko short-term help dega.",
+            "Khud se solve karne se aapki problem-solving skills improve hoti hain.",
+            "Forums pe help maangne se aapko guidance milti hai.",
+            "Problem ko chhote parts mein break karna sabse effective tareeka hai!"
+        ]
+    },
+    {
+        "question": "Aapka code kaam nahi kar raha. Ab kya karen?",
+        "choices": [
+            "Debugger use karen",
+            "Print statements add karen",
+            "Break leke fresh mind se sochten",
+            "Dusre developer se help maangen"
+        ],
+        "results": [
+            "Debugger use karna professional approach hai.",
+            "Print statements add karna quick solution hai.",
+            "Break lena aksar helpful hota hai. Fresh mind better solutions nikalta hai.",
+            "Dusre developer se help maangna aapka time bachata hai."
+        ]
+    }
+]
+
+class Button:
+    def __init__(self, x, y, width, height, text, action=None):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text
+        self.action = action
+        self.hovered = False
+        
+    def draw(self, surface):
+        color = BUTTON_HOVER if self.hovered else BUTTON_COLOR
+        pygame.draw.rect(surface, color, self.rect, border_radius=12)
+        pygame.draw.rect(surface, TEXT_COLOR, self.rect, 2, border_radius=12)
+        
+        text_surf = font.render(self.text, True, TEXT_COLOR)
+        text_rect = text_surf.get_rect(center=self.rect.center)
+        surface.blit(text_surf, text_rect)
+        
+    def check_hover(self, pos):
+        self.hovered = self.rect.collidepoint(pos)
+        
+    def check_click(self, pos, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.rect.collidepoint(pos):
+                if self.action:
+                    self.action()
+                return True
+        return False
+
+def start_game():
+    game_state.current_scene = "game"
+    game_state.current_question = 0
+    game_state.score = 0
+    game_state.choices = []
+    game_state.show_result = False
+
+def next_question():
+    if game_state.current_question < len(questions) - 1:
+        game_state.current_question += 1
+        game_state.show_result = False
+    else:
+        game_state.current_scene = "end"
+
+def choose_option(option_index):
+    game_state.choices.append(option_index)
+    game_state.show_result = True
+    game_state.result_text = questions[game_state.current_question]["results"][option_index]
+    game_state.result_timer = 180  # 3 seconds at 60 FPS
+
+def draw_start_screen():
+    # Draw background with subtle animation
+    time = pygame.time.get_ticks() / 1000
+    for i in range(50):
+        x = (WIDTH // 50) * i
+        y = HEIGHT // 2 + math.sin(time + i * 0.2) * 20
+        pygame.draw.circle(screen, (70, 70, 100), (x, y), 3)
+    
+    # Draw title
+    title_text = title_font.render("Ab Kya Karen?", True, TEXT_COLOR)
+    screen.blit(title_text, (WIDTH//2 - title_text.get_width()//2, 100))
+    
+    # Draw description
+    desc_text = font.render("Ek interactive decision-making game", True, TEXT_COLOR)
+    screen.blit(desc_text, (WIDTH//2 - desc_text.get_width()//2, 180))
+    
+    # Draw instructions
+    instructions = [
+        "Is game mein aapko alag-alag situations ka samna karna hoga",
+        "Har situation mein aapko choice karni hogi ki aage kya karna hai",
+        "Apne hisaab se sabse behtar option chunen",
+        "Chalo shuru karten hain!"
+    ]
+    
+    for i, line in enumerate(instructions):
+        text = small_font.render(line, True, TEXT_COLOR)
+        screen.blit(text, (WIDTH//2 - text.get_width()//2, 230 + i*30))
+    
+    # Draw start button
+    start_button = Button(WIDTH//2 - 100, 400, 200, 60, "Shuru Karien", start_game)
+    start_button.check_hover(pygame.mouse.get_pos())
+    start_button.draw(screen)
+    
+    return start_button
+
+def draw_game_screen():
+    # Draw background
+    for i in range(20):
+        pygame.draw.line(screen, (40, 40, 60), (0, i*30), (WIDTH, i*30), 1)
+        pygame.draw.line(screen, (40, 40, 60), (i*45, 0), (i*45, HEIGHT), 1)
+    
+    # Draw question
+    question_data = questions[game_state.current_question]
+    question_text = font.render(question_data["question"], True, TEXT_COLOR)
+    screen.blit(question_text, (WIDTH//2 - question_text.get_width()//2, 80))
+    
+    # Draw choices
+    buttons = []
+    for i, choice in enumerate(question_data["choices"]):
+        button = Button(WIDTH//2 - 200, 150 + i*70, 400, 60, choice, 
+                       lambda idx=i: choose_option(idx))
+        button.check_hover(pygame.mouse.get_pos())
+        button.draw(screen)
+        buttons.append(button)
+    
+    # Draw progress
+    progress_text = small_font.render(
+        f"Question {game_state.current_question + 1} of {len(questions)}", 
+        True, TEXT_COLOR
+    )
+    screen.blit(progress_text, (WIDTH//2 - progress_text.get_width()//2, HEIGHT - 50))
+    
+    # Draw result if shown
+    if game_state.show_result:
+        # Draw overlay
+        overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 180))
+        screen.blit(overlay, (0, 0))
+        
+        # Draw result box
+        result_rect = pygame.Rect(WIDTH//2 - 250, HEIGHT//2 - 100, 500, 200)
+        pygame.draw.rect(screen, (50, 50, 70), result_rect, border_radius=15)
+        pygame.draw.rect(screen, HIGHLIGHT, result_rect, 3, border_radius=15)
+        
+        # Draw result text
+        result_lines = []
+        line = ""
+        for word in game_state.result_text.split():
+            test_line = line + word + " "
+            if small_font.size(test_line)[0] < 450:
+                line = test_line
+            else:
+                result_lines.append(line)
+                line = word + " "
+        result_lines.append(line)
+        
+        for i, text_line in enumerate(result_lines):
+            text = small_font.render(text_line, True, TEXT_COLOR)
+            screen.blit(text, (WIDTH//2 - text.get_width()//2, HEIGHT//2 - 70 + i*30))
+        
+        # Draw next button
+        next_btn = Button(WIDTH//2 - 100, HEIGHT//2 + 50, 200, 50, "Aage Badhen", next_question)
+        next_btn.check_hover(pygame.mouse.get_pos())
+        next_btn.draw(screen)
+        buttons.append(next_btn)
+        
+        # Decrease timer
+        game_state.result_timer -= 1
+        if game_state.result_timer <= 0:
+            next_question()
+    
+    return buttons
+
+def draw_end_screen():
+    # Draw background
+    for i in range(100):
+        x = random.randint(0, WIDTH)
+        y = random.randint(0, HEIGHT)
+        pygame.draw.circle(screen, (70, 70, 100), (x, y), 2)
+    
+    # Draw title
+    title_text = title_font.render("Game Samapt!", True, TEXT_COLOR)
+    screen.blit(title_text, (WIDTH//2 - title_text.get_width()//2, 100))
+    
+    # Draw summary
+    summary_text = font.render("Aapne ye decisions liyen:", True, TEXT_COLOR)
+    screen.blit(summary_text, (WIDTH//2 - summary_text.get_width()//2, 180))
+    
+    # Draw choices
+    for i, choice_idx in enumerate(game_state.choices):
+        choice_text = small_font.render(
+            f"{i+1}. {questions[i]['choices'][choice_idx]}", 
+            True, TEXT_COLOR
+        )
+        screen.blit(choice_text, (WIDTH//2 - choice_text.get_width()//2, 220 + i*30))
+    
+    # Draw restart button
+    restart_btn = Button(WIDTH//2 - 100, 400, 200, 60, "Phir Se Khelen", start_game)
+    restart_btn.check_hover(pygame.mouse.get_pos())
+    restart_btn.draw(screen)
+    
+    # Draw quote
+    quote_text = small_font.render(
+        "Har decision aapko naye anubhav deta hai!", 
+        True, HIGHLIGHT
+    )
+    screen.blit(quote_text, (WIDTH//2 - quote_text.get_width()//2, HEIGHT - 50))
+    
+    return [restart_btn]
+
+# Main game loop
+clock = pygame.time.Clock()
+running = True
+
+while running:
+    mouse_pos = pygame.mouse.get_pos()
+    
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            
+        if game_state.current_scene == "start":
+            start_button = draw_start_screen()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if start_button.check_click(mouse_pos, event):
+                    pass  # Button action is handled in the class
+        
+        elif game_state.current_scene == "game":
+            buttons = draw_game_screen()
+            if event.type == pygame.MOUSEBUTTONDOWN and not game_state.show_result:
+                for button in buttons:
+                    button.check_click(mouse_pos, event)
+        
+        elif game_state.current_scene == "end":
+            buttons = draw_end_screen()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for button in buttons:
+                    button.check_click(mouse_pos, event)
+    
+    # Draw the appropriate screen
+    screen.fill(BACKGROUND)
+    
+    if game_state.current_scene == "start":
+        draw_start_screen()
+    elif game_state.current_scene == "game":
+        draw_game_screen()
+    elif game_state.current_scene == "end":
+        draw_end_screen()
+    
+    pygame.display.flip()
+    clock.tick(60)
+
+pygame.quit()
+sys.exit()
