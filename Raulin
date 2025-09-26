@@ -1,0 +1,304 @@
+import React, { useState, useCallback, useMemo } from 'react';
+import { Loader2, Camera, Video, Wand2, X, AlertTriangle, Download, Send } from 'lucide-react';
+
+// --- Constantes de Configuración de la IA y API ---
+const MODEL_NAME = 'imagen-3.0-generate-002';
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:predict`;
+const API_KEY = ""; // La clave se inyectará automáticamente en el entorno de Canvas.
+
+// --- Componente de Botón de Estilo Android ---
+const MobileButton = ({ children, onClick, disabled = false, className = '' }) => (
+    <button
+        onClick={onClick}
+        disabled={disabled}
+        className={`
+            w-full py-3 px-4 rounded-xl font-bold transition-all duration-300
+            shadow-lg transform active:scale-[0.98]
+            ${disabled
+                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                : 'bg-indigo-600 hover:bg-indigo-700 text-white active:bg-indigo-800'
+            }
+            ${className}
+        `}
+    >
+        {children}
+    </button>
+);
+
+// --- Componente principal de la Aplicación ---
+const App = () => {
+    const [prompt, setPrompt] = useState('Un majestuoso campo de lavanda al atardecer, estilo de pintura al óleo, alta definición');
+    const [generatedImageUrl, setGeneratedImageUrl] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [statusMessage, setStatusMessage] = useState('Ingresa una descripción para crear tu mundo.');
+    const [view, setView] = useState('generator'); // 'generator' o 'montage'
+
+    // --- Lógica de la API para Generación de Imágenes (con Backoff) ---
+    const generateImage = useCallback(async () => {
+        if (!prompt.trim()) {
+            setError('Por favor, introduce una descripción detallada.');
+            return;
+        }
+
+        setError(null);
+        setIsLoading(true);
+        setGeneratedImageUrl('');
+        setStatusMessage('Generando imagen...');
+
+        const maxRetries = 5;
+        let delay = 1000;
+
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                const payload = {
+                    instances: { prompt: prompt },
+                    parameters: { "sampleCount": 1 }
+                };
+
+                const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    // Try to parse error message if available
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || `Error HTTP: ${response.status}`);
+                }
+
+                const result = await response.json();
+                const base64Data = result?.predictions?.[0]?.bytesBase64Encoded;
+
+                if (base64Data) {
+                    setGeneratedImageUrl(`data:image/png;base64,${base64Data}`);
+                    setStatusMessage('¡Tu nuevo mundo ha sido creado!');
+                    break; // Salir del bucle si es exitoso
+                } else {
+                    throw new Error('La respuesta de la IA no contenía datos de imagen.');
+                }
+            } catch (err) {
+                console.error(`Intento ${attempt + 1} fallido:`, err.message);
+                if (attempt === maxRetries - 1) {
+                    setError(`Error al generar la imagen. Inténtalo de nuevo. (${err.message})`);
+                    setStatusMessage('Error en la generación.');
+                }
+                // Aplicar backoff exponencial
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+            }
+        }
+        setIsLoading(false);
+    }, [prompt]);
+
+    // --- Componente de la Galería de Resultados ---
+    const ResultDisplay = () => (
+        <div className="mt-6">
+            <h2 className="text-xl font-semibold mb-3 text-indigo-400">Resultado</h2>
+            <div className="bg-gray-800 p-2 rounded-xl shadow-2xl min-h-[250px] flex items-center justify-center">
+                {isLoading ? (
+                    <div className="text-center p-6">
+                        <Loader2 className="h-8 w-8 text-indigo-400 animate-spin mx-auto" />
+                        <p className="mt-3 text-gray-400 font-medium">{statusMessage}</p>
+                    </div>
+                ) : generatedImageUrl ? (
+                    <img
+                        src={generatedImageUrl}
+                        alt="Imagen generada por IA"
+                        className="rounded-lg max-h-[400px] w-full object-contain"
+                    />
+                ) : (
+                    <div className="text-center p-6 text-gray-500">
+                        <Camera className="h-10 w-10 mx-auto mb-2" />
+                        <p>{statusMessage}</p>
+                    </div>
+                )}
+            </div>
+
+            {error && (
+                <div className="mt-4 p-3 bg-red-900/50 border border-red-700 rounded-lg flex items-center text-sm">
+                    <AlertTriangle className="h-5 w-5 text-red-400 mr-2" />
+                    <span className="text-red-300">{error}</span>
+                </div>
+            )}
+
+            {generatedImageUrl && (
+                <div className="mt-4 flex space-x-3">
+                    <MobileButton className="bg-green-600 hover:bg-green-700 flex items-center justify-center" onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = generatedImageUrl;
+                        link.download = 'crea_mundos_ia_imagen.png';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }}>
+                        <Download className="w-5 h-5 mr-2" /> Descargar
+                    </MobileButton>
+                </div>
+            )}
+        </div>
+    );
+
+    // --- Componente de Sugerencias de Ambientes ---
+    const EnvironmentSuggestions = () => {
+        const categories = useMemo(() => [
+            { name: 'Ciudades del Mundo', icon: '🏙️', prompts: ['Tokio cyberpunk bajo la lluvia', 'Callejón histórico de Roma al amanecer', 'Rascacielos de Nueva York envueltos en niebla'] },
+            { name: 'Campos y Naturaleza', icon: '🌳', prompts: ['Bosque mágico iluminado por luciérnagas', 'Cascada oculta en una jungla tropical, plano amplio', 'Desierto de Marte con una base futurista'] },
+            { name: 'Ambientes Fantásticos', icon: '🔮', prompts: ['Castillo flotante en un cielo violeta', 'Templo submarino con criaturas bioluminiscentes', 'Planeta alienígena con doble sol y flora extraña'] },
+        ], []);
+
+        return (
+            <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-3 text-gray-300 flex items-center">
+                    <Wand2 className="w-5 h-5 mr-2 text-indigo-400" />
+                    Sugerencias de Ambientes
+                </h3>
+                {categories.map((cat) => (
+                    <div key={cat.name} className="mb-4">
+                        <p className="text-sm font-medium text-gray-400 mb-2">{cat.icon} {cat.name}</p>
+                        <div className="flex flex-wrap gap-2">
+                            {cat.prompts.map((p) => (
+                                <button
+                                    key={p}
+                                    onClick={() => setPrompt(p)}
+                                    className="px-3 py-1 text-xs rounded-full bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors"
+                                >
+                                    {p.split(',')[0]}...
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+    // --- Vista del Generador de Imágenes ---
+    const GeneratorView = () => (
+        <>
+            <div className="p-4 bg-gray-900 border-b border-gray-800">
+                <h1 className="text-2xl font-extrabold text-white">CreaMundos IA</h1>
+                <p className="text-sm text-gray-400">Genera ambientes de fantasía y realidad con IA.</p>
+            </div>
+
+            <div className="p-4 flex-grow overflow-y-auto">
+                <h2 className="text-xl font-semibold mb-3 text-indigo-400">1. Describe tu Escena</h2>
+                <div className="relative mb-4">
+                    <textarea
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        placeholder="Ejemplo: Un majestuoso campo de lavanda al atardecer, estilo de pintura al óleo, alta definición..."
+                        rows="4"
+                        className="w-full p-3 pr-10 bg-gray-700 text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none border border-gray-600"
+                        disabled={isLoading}
+                    />
+                    {prompt && !isLoading && (
+                        <button
+                            onClick={() => setPrompt('')}
+                            className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
+                    )}
+                </div>
+
+                <MobileButton onClick={generateImage} disabled={isLoading || !prompt.trim()} className="mb-6">
+                    {isLoading ? 'Creando...' : (
+                        <span className="flex items-center justify-center">
+                            <Wand2 className="w-5 h-5 mr-2" /> Generar Imagen (IA)
+                        </span>
+                    )}
+                </MobileButton>
+
+                <EnvironmentSuggestions />
+                <ResultDisplay />
+            </div>
+
+            <MobileNavigation view={view} setView={setView} />
+        </>
+    );
+
+    // --- Vista de la Herramienta de Montaje de Video (Conceptual) ---
+    const MontageView = () => (
+        <>
+            <div className="p-4 bg-gray-900 border-b border-gray-800">
+                <h1 className="text-2xl font-extrabold text-white">Montaje de Video (Futuro)</h1>
+                <p className="text-sm text-gray-400">Planifica tu secuencia animada.</p>
+            </div>
+
+            <div className="p-4 flex-grow overflow-y-auto">
+                <div className="p-6 bg-gray-800 rounded-xl shadow-lg text-center">
+                    <Video className="h-10 w-10 text-indigo-400 mx-auto mb-3" />
+                    <h3 className="text-xl font-bold text-white mb-2">Función en Desarrollo</h3>
+                    <p className="text-gray-400 mb-4">
+                        Esta herramienta combinaría múltiples imágenes generadas por IA (como las de la pestaña 'Generador')
+                        para crear un **montaje de video animado**.
+                    </p>
+                    <ul className="text-left text-gray-400 text-sm space-y-2 list-disc list-inside">
+                        <li>**Transición de Escena:** De "Ciudad" a "Naturaleza".</li>
+                        <li>**Efectos de Cámara:** Zoom suave o paneo.</li>
+                        <li>**Música de Fondo:** Añadida automáticamente por IA.</li>
+                    </ul>
+                    <MobileButton onClick={() => setView('generator')} className="mt-6">
+                        Volver al Generador de Imágenes
+                    </MobileButton>
+                </div>
+            </div>
+
+            <MobileNavigation view={view} setView={setView} />
+        </>
+    );
+
+
+    // --- Componente de Navegación Inferior (Barra Android) ---
+    const MobileNavigation = ({ view, setView }) => {
+        const navItems = [
+            { id: 'generator', icon: Wand2, label: 'Generador', color: 'text-indigo-400' },
+            { id: 'montage', icon: Video, label: 'Montaje Video', color: 'text-gray-400' },
+        ];
+
+        return (
+            <div className="flex h-16 bg-gray-900 border-t border-gray-700 shadow-xl">
+                {navItems.map((item) => {
+                    const isActive = view === item.id;
+                    const Icon = item.icon;
+                    return (
+                        <button
+                            key={item.id}
+                            onClick={() => setView(item.id)}
+                            className={`flex-1 flex flex-col items-center justify-center text-xs font-medium transition-colors ${
+                                isActive ? 'text-indigo-400' : 'text-gray-500 hover:text-white'
+                            }`}
+                        >
+                            <Icon className={`w-6 h-6 ${isActive ? item.color : ''}`} />
+                            <span className="mt-1">{item.label}</span>
+                        </button>
+                    );
+                })}
+            </div>
+        );
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-900 text-white flex flex-col font-sans max-w-lg mx-auto shadow-2xl">
+            {/* Contenedor principal que simula la pantalla de Android */}
+            <style>{`
+                /* Fuente Inter para una apariencia moderna */
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+                body {
+                    font-family: 'Inter', sans-serif;
+                    background-color: #111827; /* Fondo fuera del contenedor de la app */
+                }
+                /* Asegurar que la altura del cuerpo se ajuste para el modo móvil */
+                html, body, #root, .min-h-screen {
+                    min-height: 100vh;
+                }
+            `}</style>
+
+            {view === 'generator' ? <GeneratorView /> : <MontageView />}
+        </div>
+    );
+};
+
+export default App;
