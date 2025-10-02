@@ -65,7 +65,7 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v5
-      - uses: peter-evans/dockerhub-description@v4
+      - uses: peter-evans/dockerhub-description@v5
         if: ${{ env.SHOULD_PUBLISH == 'true' }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
