@@ -7,10 +7,12 @@ name: Android Integration
 jobs:
   Integration:
     strategy:
+      fail-fast: false
       matrix:
         os:
           - 'ubuntu-latest'
-          - 'macOs-latest'
+          - 'macos-latest'
+          - 'macos-26'
     runs-on: ${{ matrix.os }}
     steps:
     - name: Setup python

@@ -4,6 +4,7 @@ jobs:
   Tests:
     name: base
     strategy:
+      fail-fast: false
       matrix:
         python:
            - '3.8'
@@ -18,12 +19,16 @@ jobs:
           - 'macos-latest'
         architecture:
           - 'x64'
+        include:
+          - python: '3.x'
+            os: 'macos-26'
+            architecture: 'x64'
 
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v5
 
-    - name: Setup python
+    - name: "Setup Python ${{ matrix.python }} on ${{ matrix.os }} (${{ matrix.architecture }} vs. ${{ runner.arch }})"
       uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python }}

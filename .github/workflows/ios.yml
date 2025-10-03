@@ -5,15 +5,17 @@ jobs:
     name: "Integration (${{ matrix.runs_on }}, ${{ matrix.python }})"
     runs-on: ${{ matrix.runs_on }}
     strategy:
+      fail-fast: false
       matrix:
-        # macos-latest (ATM macos-15) runs on Apple Silicon,
-        # macos-13 runs on Intel
-        runs_on: [macos-latest, macos-13]
+        # macos-15-intel runs on Intel.
+        # All others run on Apple Silicon (ARM).
+        runs_on: [macos-latest, macos-15-intel, macos-26]
+        python: [3.x]
     steps:
-    - name: Setup python
+    - name: "Setup Python ${{ matrix.python }} on ${{ matrix.runs_on }} (${{ runner.arch }})"
       uses: actions/setup-python@v6
       with:
-        python-version: '3.x'
+        python-version: ${{ matrix.python }}
     - uses: actions/checkout@v5
     - name: Setup environment
       run: |
