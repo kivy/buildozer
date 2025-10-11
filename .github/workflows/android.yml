@@ -10,10 +10,10 @@ jobs:
       matrix:
         os:
           - 'ubuntu-latest'
-          - 'macOs-latest'
+          - 'macos-latest'
     runs-on: ${{ matrix.os }}
     steps:
-    - name: Setup python
+    - name: Setup Python
       uses: actions/setup-python@v6
       with:
         python-version: '3.x'
@@ -28,14 +28,14 @@ jobs:
         pip install .
     - run: buildozer --help
     - run: buildozer init
-    - name: SDK, NDK and p4a download
+    - name: SDK, NDK, and p4a download
       run: |
         sed -i.bak "s/# android.accept_sdk_license = False/android.accept_sdk_license = True/" buildozer.spec
         sed -i.bak "s/#p4a.branch = master/p4a.branch = develop/" buildozer.spec
         buildozer android p4a -- --help
     # Install OS specific dependencies
     - name: Install Linux dependencies
-      if: matrix.os == 'ubuntu-latest'
+      if: runner.os == 'Linux'
       # Required by some p4a recipes, but not
       # installed by p4a on Linux.
       run: |
