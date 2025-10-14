@@ -199,6 +199,12 @@ class TargetAndroid(Target):
         android_sdk_dir = self.android_sdk_dir
         kwargs['cwd'] = kwargs.get('cwd', android_sdk_dir)
         command = [self.sdkmanager_path, f"--sdk_root={android_sdk_dir}", *args]
+        
+        http_proxy = os.environ.get('HTTP_PROXY', os.environ.get('http_proxy'))
+        if http_proxy:
+            host, port = http_proxy.split(':')[-2:]
+            host = host.strip('/')
+            command.extend(['--proxy=http', f'--proxy_host={host}', f'--proxy_port={port}'])
 
         if kwargs.pop('return_child', False):
             return buildops.cmd_expect(
