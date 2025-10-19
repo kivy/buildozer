@@ -44,15 +44,12 @@ jobs:
             ${{ env.DOCKERHUB_IMAGE }}:latest
             ${{ env.GHCR_IMAGE }}:latest
           platforms: linux/amd64,linux/arm64
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_IMAGE }}:latest
-          cache-to: ${{ env.SHOULD_PUBLISH == 'true' && format('type=registry,ref={0}:latest,mode=max', env.DOCKERHUB_IMAGE) || '' }}
 
       - name: Local Build for Testing
         uses: docker/build-push-action@v6
         with:
           # Load image into local Docker daemon
           load: true
-          cache-from: type=registry,ref=${{ env.DOCKERHUB_IMAGE }}:latest
           tags: ${{ env.DOCKERHUB_IMAGE }}:latest
       # Run the locally built image to test it
       - name: Docker run
