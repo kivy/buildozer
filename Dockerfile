@@ -79,7 +79,8 @@ COPY . ${SRC_DIR}
 COPY --chmod=755 entrypoint.sh /usr/local/bin/entrypoint.sh
 
 # installs buildozer and dependencies from a virtual environment
-ENV PATH="${HOME_DIR}/.venv/bin:${PATH}"
+ENV VIRTUAL_ENV="${HOME_DIR}/.venv"
+ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 RUN pip install --upgrade "Cython<3.0" wheel pip ${SRC_DIR}
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
