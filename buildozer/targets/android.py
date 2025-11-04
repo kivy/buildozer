@@ -199,7 +199,7 @@ class TargetAndroid(Target):
         android_sdk_dir = self.android_sdk_dir
         kwargs['cwd'] = kwargs.get('cwd', android_sdk_dir)
         command = [self.sdkmanager_path, f"--sdk_root={android_sdk_dir}", *args]
-        
+
         # Attempt to pass proxy settings to sdkmanager command using the --proxy, --proxy_host,
         # and --proxy_port arguments by checking common environment variables for proxy settings.
         # Sdkmanager only supports proxy types `http` and `socks`, so even if proxy url is https,
@@ -210,7 +210,7 @@ class TargetAndroid(Target):
                 try:
                     host, port = proxy.split(':')[-2:]
                     host = host.strip('/')
-                    command.extend([f'--proxy=http', f'--proxy_host={host}', f'--proxy_port={port}'])
+                    command.extend(['--proxy=http', f'--proxy_host={host}', f'--proxy_port={port}'])
                     break
                 except:
                     pass
