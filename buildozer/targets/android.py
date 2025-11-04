@@ -205,11 +205,9 @@ class TargetAndroid(Target):
         # Sdkmanager only supports proxy types `http` and `socks`, so even if proxy url is https,
         # only pass host and port with `http` type.
         for key in ['HTTP_PROXY', 'http_proxy', 'HTTPS_PROXY', 'https_proxy']:
-            proxy = os.environ.get(key)
             try:
-                host, port = proxy.split(':')[-2:]
-                host = host.strip('/')
-                command.extend(['--proxy=http', f'--proxy_host={host}', f'--proxy_port={port}'])
+                host, port = os.environ.get(key).split(':')[-2:]
+                command.extend(['--proxy=http', f'--proxy_host={host.strip("/")}', f'--proxy_port={port}'])
                 break
             except:
                 pass
