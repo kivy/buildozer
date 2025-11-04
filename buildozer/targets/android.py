@@ -10,8 +10,8 @@ if sys.platform == 'win32' and not os.getenv("KIVY_WIN32_ANDROID_EXPERIMENTAL"):
 from platform import uname
 WSL = 'microsoft' in uname()[2].lower()
 
-ANDROID_API = '31'
-ANDROID_MINAPI = '21'
+ANDROID_API = '33'
+ANDROID_MINAPI = '24'
 APACHE_ANT_VERSION = '1.9.4'
 
 # This constant should *not* be updated, it is used only in the case
@@ -329,11 +329,9 @@ class TargetAndroid(Target):
         returncode = self._p4a(
             ["aab", "-h"],
             break_on_error=False,
+            show_output=False,
             env=self.buildozer.environ).return_code
-        if returncode == 0:
-            return True
-        else:
-            return False
+        return returncode == 0
 
     def _set_win32_java_home(self):
         if 'JAVA_HOME' in self.buildozer.environ:
