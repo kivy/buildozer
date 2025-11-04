@@ -206,14 +206,13 @@ class TargetAndroid(Target):
         # only pass host and port with `http` type.
         for key in ['HTTP_PROXY', 'http_proxy', 'HTTPS_PROXY', 'https_proxy']:
             proxy = os.environ.get(key)
-            if proxy:
-                try:
-                    host, port = proxy.split(':')[-2:]
-                    host = host.strip('/')
-                    command.extend(['--proxy=http', f'--proxy_host={host}', f'--proxy_port={port}'])
-                    break
-                except:
-                    pass
+            try:
+                host, port = proxy.split(':')[-2:]
+                host = host.strip('/')
+                command.extend(['--proxy=http', f'--proxy_host={host}', f'--proxy_port={port}'])
+                break
+            except:
+                pass
 
         if kwargs.pop('return_child', False):
             return buildops.cmd_expect(
