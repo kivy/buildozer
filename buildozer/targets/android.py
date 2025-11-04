@@ -200,6 +200,18 @@ class TargetAndroid(Target):
         kwargs['cwd'] = kwargs.get('cwd', android_sdk_dir)
         command = [self.sdkmanager_path, f"--sdk_root={android_sdk_dir}", *args]
 
+        # Attempt to pass proxy settings to sdkmanager command using the --proxy, --proxy_host,
+        # and --proxy_port arguments by checking common environment variables for proxy settings.
+        # Sdkmanager only supports proxy types `http` and `socks`, so even if proxy url is https,
+        # only pass host and port with `http` type.
+        for key in ['HTTP_PROXY', 'http_proxy', 'HTTPS_PROXY', 'https_proxy']:
+            try:
+                host, port = os.environ.get(key).split(':')[-2:]
+                command.extend(['--proxy=http', f'--proxy_host={host.strip("/")}', f'--proxy_port={port}'])
+                break
+            except:
+                pass
+
         if kwargs.pop('return_child', False):
             return buildops.cmd_expect(
                 command, env=self.buildozer.environ, **kwargs)
