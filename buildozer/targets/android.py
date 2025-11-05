@@ -31,7 +31,6 @@ import shlex
 from shutil import which
 from sys import platform, executable
 from time import sleep
-import traceback
 
 import packaging.version
 import pexpect
@@ -286,10 +285,7 @@ class TargetAndroid(Target):
 
     def check_requirements(self):
         if platform in ('win32', 'cygwin'):
-            try:
-                self._set_win32_java_home()
-            except:
-                traceback.print_exc()
+            self._set_win32_java_home()
             self.adb_executable = join(self.android_sdk_dir, 'platform-tools',
                                 'adb.exe')
             self.javac_cmd = self._locate_java('javac.exe')
@@ -533,10 +529,7 @@ class TargetAndroid(Target):
                 *args)))
             return parse("0")
         for v in os.listdir(join(*args)):
-            try:
-                versions.append(parse(v))
-            except:
-                pass
+            versions.append(parse(v))
         if not versions:
             self.logger.error(
                 'Unable to find the latest version for {}'.format(join(*args)))
@@ -1314,14 +1307,6 @@ class TargetAndroid(Target):
 
         self.execute_build_package(build_cmd)
 
-        try:
-            self.buildozer.hook("android_pre_build_apk")
-            self.execute_build_package(build_cmd)
-            self.buildozer.hook("android_post_build_apk")
-        except:
-            # maybe the hook fail because the apk is not
-            pass
-
         build_tools_versions = os.listdir(join(self.android_sdk_dir, "build-tools"))
         build_tools_versions = sorted(
             build_tools_versions, key=packaging.version.parse
@@ -1411,11 +1396,7 @@ class TargetAndroid(Target):
 
         # recreate the project.properties
         with io.open(project_fn, 'w', encoding='utf-8') as fd:
-
-            try:
-                fd.writelines((line.decode('utf-8') for line in content))
-            except:
-                fd.writelines(content)
+            fd.writelines(content)
             if content and not content[-1].endswith(u'\n'):
                 fd.write(u'\n')
             for index, ref in enumerate(references):
