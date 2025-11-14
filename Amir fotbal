@@ -1,0 +1,351 @@
+import pygame
+import sys
+import random
+import math
+from collections import deque
+
+pygame.init()
+
+# ---------- Config ----------
+WIDTH, HEIGHT = 720, 420
+FPS = 60
+
+# Colors
+GREEN  = (20, 120, 20)
+DARKG  = (15, 95, 15)
+WHITE  = (255, 255, 255)
+BLACK  = (0, 0, 0)
+GRAY   = (180, 180, 180)
+YELLOW = (255, 215, 0)
+RED    = (220, 40, 40)
+BLUE   = (60, 120, 240)
+CYAN   = (40, 220, 220)
+
+# Field
+CENTER = (WIDTH // 2, HEIGHT // 2)
+GOAL_W, GOAL_H = 120, 14
+PADDLE_W, PADDLE_H = 120, 12
+BALL_SIZE = 16
+
+# Powerups
+POWER_DURATION = 5.0    # seconds
+POWER_SPAWN_TIME = 10.0 # seconds
+
+# ---------- Screen & Fonts ----------
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Advanced Mini Football")
+clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 28)
+big_font = pygame.font.SysFont(None, 48)
+small_font = pygame.font.SysFont(None, 22)
+
+# ---------- UI Buttons (touch) ----------
+BTN_W, BTN_H, MARGIN = 110, 42, 10
+btn_left  = pygame.Rect(MARGIN, HEIGHT - BTN_H - MARGIN, BTN_W, BTN_H)
+btn_right = pygame.Rect(BTN_W + 2*MARGIN, HEIGHT - BTN_H - MARGIN, BTN_W, BTN_H)
+btn_pause = pygame.Rect(WIDTH - BTN_W - MARGIN, HEIGHT - BTN_H - MARGIN, BTN_W, BTN_H)
+
+move_left = False
+move_right = False
+paused = False
+
+# ---------- Game Objects ----------
+player = pygame.Rect(WIDTH//2 - PADDLE_W//2, HEIGHT - 28, PADDLE_W, PADDLE_H)
+enemy  = pygame.Rect(WIDTH//2 - PADDLE_W//2, 14, PADDLE_W, PADDLE_H)
+ball   = pygame.Rect(WIDTH//2 - BALL_SIZE//2, HEIGHT//2 - BALL_SIZE//2, BALL_SIZE, BALL_SIZE)
+
+ball_speed = [random.choice([-4, 4]), random.choice([-5, -4, 4, 5])]
+ball_trail = deque(maxlen=10)  # particle trail
+
+player_score = 0
+enemy_score  = 0
+best_player  = 0
+
+match_time = 60  # seconds per match
+time_left  = match_time
+last_time_update = pygame.time.get_ticks()
+
+# Difficulty
+enemy_speed = 4.2
+enemy_react_delay = 0.08  # seconds lag to feel human
+enemy_target_x = enemy.centerx
+last_enemy_update = pygame.time.get_ticks()
+
+# Powerups
+active_power = None      # 'speed' or 'shield'
+power_end_time = 0
+power_spawn_timer = POWER_SPAWN_TIME
+power_rect = None
+shield_active_player = False
+shield_active_enemy  = False
+
+# ---------- Helper Functions ----------
+def draw_field():
+    screen.fill(GREEN)
+    # grass bands
+    for i in range(0, HEIGHT, 18):
+        pygame.draw.rect(screen, DARKG if (i//18)%2==0 else GREEN, (0, i, WIDTH, 18))
+    # center line and circle
+    pygame.draw.line(screen, WHITE, (0, HEIGHT//2), (WIDTH, HEIGHT//2), 2)
+    pygame.draw.circle(screen, WHITE, CENTER, 60, 2)
+    pygame.draw.circle(screen, WHITE, CENTER, 4)
+
+    # penalty boxes
+    pygame.draw.rect(screen, WHITE, (WIDTH//2 - 160, 0, 320, 90), 2)
+    pygame.draw.rect(screen, WHITE, (WIDTH//2 - 160, HEIGHT-90, 320, 90), 2)
+
+    # goals
+    goal_top = pygame.Rect(WIDTH//2 - GOAL_W//2, 0, GOAL_W, GOAL_H)
+    goal_bot = pygame.Rect(WIDTH//2 - GOAL_W//2, HEIGHT - GOAL_H, GOAL_W, GOAL_H)
+    pygame.draw.rect(screen, WHITE, goal_top, 2)
+    pygame.draw.rect(screen, WHITE, goal_bot, 2)
+
+def draw_ui():
+    # paddles
+    pygame.draw.rect(screen, BLUE, player, border_radius=6)
+    pygame.draw.rect(screen, RED, enemy, border_radius=6)
+
+    # shields
+    if shield_active_player:
+        pygame.draw.rect(screen, CYAN, player.inflate(10, 6), 2, border_radius=8)
+    if shield_active_enemy:
+        pygame.draw.rect(screen, CYAN, enemy.inflate(10, 6), 2, border_radius=8)
+
+    # ball trail
+    for i, (x, y) in enumerate(ball_trail):
+        alpha = 255 * (i+1) // len(ball_trail)
+        trail_color = (255, 255, 255)
+        pygame.draw.circle(screen, trail_color, (int(x), int(y)), max(2, BALL_SIZE//2 - i))
+
+    # ball
+    pygame.draw.ellipse(screen, WHITE, ball)
+
+    # scores and timer
+    score_text = big_font.render(f"{player_score} : {enemy_score}", True, WHITE)
+    time_text  = font.render(f"Time: {max(0, int(time_left))}s", True, WHITE)
+    best_text  = small_font.render(f"Best: {best_player}", True, WHITE)
+    screen.blit(score_text, (WIDTH//2 - score_text.get_width()//2, 6))
+    screen.blit(time_text, (10, 10))
+    screen.blit(best_text, (10, 36))
+
+    # powerup
+    if power_rect:
+        pygame.draw.rect(screen, YELLOW, power_rect, border_radius=6)
+        ptxt = small_font.render("PWR", True, BLACK)
+        screen.blit(ptxt, (power_rect.x + power_rect.w//2 - ptxt.get_width()//2,
+                           power_rect.y + power_rect.h//2 - ptxt.get_height()//2))
+
+    # touch buttons
+    pygame.draw.rect(screen, GRAY, btn_left, border_radius=6)
+    pygame.draw.rect(screen, GRAY, btn_right, border_radius=6)
+    pygame.draw.rect(screen, GRAY, btn_pause, border_radius=6)
+    screen.blit(small_font.render("LEFT", True, BLACK), (btn_left.x+30, btn_left.y+12))
+    screen.blit(small_font.render("RIGHT", True, BLACK), (btn_right.x+24, btn_right.y+12))
+    screen.blit(small_font.render("PAUSE", True, BLACK), (btn_pause.x+26, btn_pause.y+12))
+
+def reset_ball(scored_by_player=True):
+    global ball_speed, ball
+    ball.center = CENTER
+    ang = random.uniform(0.35, 0.85) * (math.pi/2)  # moderate angle
+    dir_y = -1 if scored_by_player else 1
+    dir_x = random.choice([-1, 1])
+    speed_mag = 6 if active_power == 'speed' else 5
+    ball_speed = [dir_x * speed_mag * math.cos(ang), dir_y * speed_mag * math.sin(ang)]
+
+def spawn_power():
+    global power_rect
+    w, h = 60, 30
+    x = random.randint(40, WIDTH - 40 - w)
+    y = random.randint(90, HEIGHT - 90 - h)
+    power_rect = pygame.Rect(x, y, w, h)
+
+def activate_power(kind, who='player'):
+    global active_power, power_end_time, shield_active_player, shield_active_enemy
+    active_power = kind
+    power_end_time = pygame.time.get_ticks() + int(POWER_DURATION * 1000)
+    if kind == 'shield':
+        if who == 'player':
+            shield_active_player = True
+        else:
+            shield_active_enemy = True
+
+def update_power():
+    global active_power, power_rect, shield_active_player, shield_active_enemy
+    if active_power and pygame.time.get_ticks() > power_end_time:
+        if active_power == 'shield':
+            shield_active_player = False
+            shield_active_enemy  = False
+        active_power = None
+    # spawn timer
+    global power_spawn_timer
+    power_spawn_timer -= 1 / FPS
+    if power_spawn_timer <= 0 and not power_rect:
+        spawn_power()
+        power_spawn_timer = POWER_SPAWN_TIME
+
+def handle_collisions():
+    global player_score, enemy_score, best_player, ball_speed, power_rect
+    # side walls
+    if ball.left <= 0 or ball.right >= WIDTH:
+        ball_speed[0] *= -1
+
+    # goals (top/bottom)
+    top_goal = pygame.Rect(WIDTH//2 - GOAL_W//2, 0, GOAL_W, GOAL_H)
+    bot_goal = pygame.Rect(WIDTH//2 - GOAL_W//2, HEIGHT - GOAL_H, GOAL_W, GOAL_H)
+
+    if ball.colliderect(top_goal) and ball_speed[1] < 0:
+        player_score += 1
+        if player_score > best_player: best_player = player_score
+        reset_ball(scored_by_player=True)
+
+    if ball.colliderect(bot_goal) and ball_speed[1] > 0:
+        enemy_score += 1
+        reset_ball(scored_by_player=False)
+
+    # paddles
+    if ball.colliderect(player) and ball_speed[1] > 0:
+        bx = (ball.centerx - player.centerx) / (player.w/2)
+        ball_speed[0] = max(-7, min(7, ball_speed[0] + bx * 2.0))
+        ball_speed[1] *= -1
+        # slight acceleration
+        ball_speed[0] *= 1.02
+        ball_speed[1] *= 1.03
+
+    if ball.colliderect(enemy) and ball_speed[1] < 0:
+        bx = (ball.centerx - enemy.centerx) / (enemy.w/2)
+        ball_speed[0] = max(-7, min(7, ball_speed[0] + bx * 2.0))
+        ball_speed[1] *= -1
+        ball_speed[0] *= 1.02
+        ball_speed[1] *= 1.03
+
+    # power pickup
+    if power_rect and ball.colliderect(power_rect):
+        kind = random.choice(['speed', 'shield'])
+        who = 'player' if ball_speed[1] < 0 else 'enemy'
+        activate_power(kind, who=who)
+        power_rect = None
+
+def update_enemy():
+    # AI with slight delay and prediction
+    global enemy_target_x, last_enemy_update
+    now = pygame.time.get_ticks()
+    if (now - last_enemy_update) / 1000.0 >= enemy_react_delay:
+        last_enemy_update = now
+        # predict ball future x when reaching enemy's y
+        if ball_speed[1] < 0:
+            t = (ball.centery - enemy.centery) / -ball_speed[1] if ball_speed[1] != 0 else 0.0
+            future_x = ball.centerx + ball_speed[0] * t
+            # reflect on walls
+            while future_x < 0 or future_x > WIDTH:
+                if future_x < 0:
+                    future_x = -future_x
+                if future_x > WIDTH:
+                    future_x = 2*WIDTH - future_x
+            enemy_target_x = future_x
+        else:
+            enemy_target_x = WIDTH//2
+
+    # move towards target
+    if enemy.centerx < enemy_target_x - 4:
+        enemy.move_ip(enemy_speed, 0)
+    elif enemy.centerx > enemy_target_x + 4:
+        enemy.move_ip(-enemy_speed, 0)
+
+    # clamp
+    if enemy.left < 0: enemy.left = 0
+    if enemy.right > WIDTH: enemy.right = WIDTH
+
+def update_time():
+    global time_left, paused
+    now = pygame.time.get_ticks()
+    # decrease once per second
+    global last_time_update
+    if not paused and now - last_time_update >= 1000:
+        time_left = max(0, time_left - 1)
+        last_time_update = now
+
+def draw_end():
+    # match end banner
+    msg = "You Win!" if player_score > enemy_score else ("Draw" if player_score == enemy_score else "You Lose")
+    banner = big_font.render(msg, True, WHITE)
+    sub = font.render("Tap PAUSE to restart", True, WHITE)
+    screen.blit(banner, (WIDTH//2 - banner.get_width()//2, HEIGHT//2 - 26))
+    screen.blit(sub, (WIDTH//2 - sub.get_width()//2, HEIGHT//2 + 12))
+
+def restart_match():
+    global player_score, enemy_score, time_left, ball, ball_speed, active_power
+    global shield_active_player, shield_active_enemy, power_rect, power_spawn_timer
+    player_score = 0
+    enemy_score  = 0
+    time_left = match_time
+    ball.center = CENTER
+    ball_speed[:] = [random.choice([-4, 4]), random.choice([-5, -4, 4, 5])]
+    active_power = None
+    shield_active_player = False
+    shield_active_enemy  = False
+    power_rect = None
+    power_spawn_timer = POWER_SPAWN_TIME
+
+# ---------- Main Loop ----------
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit(); sys.exit()
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mx, my = pygame.mouse.get_pos()
+            if btn_left.collidepoint(mx, my):  move_left = True
+            if btn_right.collidepoint(mx, my): move_right = True
+            if btn_pause.collidepoint(mx, my):
+                if time_left == 0:
+                    restart_match()
+                paused = not paused
+
+        if event.type == pygame.MOUSEBUTTONUP:
+            move_left = False
+            move_right = False
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                if time_left == 0:
+                    restart_match()
+                paused = not paused
+
+    # keyboard support
+    keys = pygame.key.get_pressed()
+    if (keys[pygame.K_LEFT] or move_left) and not paused:
+        player.move_ip(-6 if not active_power == 'speed' else -8, 0)
+    if (keys[pygame.K_RIGHT] or move_right) and not paused:
+        player.move_ip(6 if not active_power == 'speed' else 8, 0)
+
+    # clamp player
+    if player.left < 0: player.left = 0
+    if player.right > WIDTH: player.right = WIDTH
+
+    # update
+    if not paused and time_left > 0:
+        # trail update
+        ball_trail.append(ball.center)
+
+        # ball movement
+        ball.move_ip(ball_speed[0], ball_speed[1])
+
+        # ceiling/floor simple bounce if not goals
+        if ball.top < 0: ball.top = 0
+        if ball.bottom > HEIGHT: ball.bottom = HEIGHT
+
+        handle_collisions()
+        update_enemy()
+        update_power()
+        update_time()
+
+    # draw
+    draw_field()
+    draw_ui()
+
+    # end-state
+    if time_left == 0:
+        draw_end()
+
+    pygame.display.flip()
+    clock.tick(FPS)
