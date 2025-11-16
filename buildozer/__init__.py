@@ -382,7 +382,9 @@ class Buildozer:
 
         for root, dirs, files in walk(source_dir, followlinks=True):
             # avoid hidden directory
-            if True in [x.startswith('.') for x in root.split(sep)]:
+            rel_path = root[len(source_dir):].lstrip(sep)
+            if rel_path and True in [x.startswith('.')
+                                     for x in rel_path.split(sep)]:
                 continue
 
             # need to have sort-of normalization. Let's say you want to exclude
