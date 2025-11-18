@@ -13,6 +13,7 @@ import urllib.error
 import buildozer.buildops as buildops
 from buildozer.target import Target
 
+KIVY_VERSION = '2.3.1'
 
 class TargetOSX(Target):
 
@@ -38,7 +39,8 @@ class TargetOSX(Target):
         buildops.file_remove(join(platdir, 'master.zip'))
 
     def download_kivy(self, cwd):
-        current_kivy_vers = self.buildozer.config.get('app', 'osx.kivy_version')
+        current_kivy_vers = self.buildozer.config.getdefault('app', 'osx.kivy_version',
+                                                             KIVY_VERSION)
 
         if exists('/Applications/Kivy.app'):
             self.logger.info('Kivy found in Applications dir...')

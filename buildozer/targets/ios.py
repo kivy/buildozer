@@ -142,7 +142,7 @@ class TargetIos(Target):
 
     @property
     def code_signing_allowed(self):
-        allowed = self.buildozer.config.getboolean("app", "ios.codesign.allowed")
+        allowed = self.buildozer.config.getbooldefault("app", "ios.codesign.allowed", False)
         allowed = "YES" if allowed else "NO"
         return f"CODE_SIGNING_ALLOWED={allowed}"
 
@@ -436,7 +436,7 @@ class TargetIos(Target):
     def check_configuration_tokens(self):
         errors = []
         config = self.buildozer.config
-        if not config.getboolean('app', 'ios.codesign.allowed'):
+        if not config.getbooldefault('app', 'ios.codesign.allowed', False):
             return
         identity_debug = config.getdefault('app', 'ios.codesign.debug', '')
         identity_release = config.getdefault('app', 'ios.codesign.release',

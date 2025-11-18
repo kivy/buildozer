@@ -8,6 +8,7 @@ Generic Python packager for Android / iOS. Desktop later.
 
 __version__ = '1.5.1.dev0'
 
+import json
 from fnmatch import fnmatch
 import os
 from os import environ, walk, sep, listdir
@@ -705,11 +706,61 @@ class Buildozer:
     def cmd_init(self, *args):
         '''Create an initial buildozer.spec in the current directory
         '''
-        if exists('buildozer.spec'):
+        def_spec = 'default.spec'
+        exit_code = 1
+        largs = [x.lower() for x in args]
+        new_spec = 'buildozer.spec'
+        options = ('android', 'ios', 'osx')
+        script_path = dirname(__file__)
+
+        if largs:
+            if largs[0] in options:
+                if exists(new_spec):
+                    buildops.file_copy(new_spec, f'{new_spec}.bak')
+                    print(f'Made a backup of {new_spec} as {new_spec}.bak!')
+                else:
+                    buildops.file_copy(join(script_path, def_spec), new_spec)
+                    print(f'File {new_spec} created, ready to customize!')
+
+                with open(new_spec, encoding='utf-8') as f:
+                    old_spec = f.read()
+
+                inject_before = old_spec.find('\n[buildozer]\n')
+
+                with open(join(script_path, f"default-{largs[0]}.json"), encoding='utf-8') as f:
+                    default_json = json.load(f)
+
+                with open(new_spec, 'w', encoding='utf-8') as f:
+                    f.write(old_spec[:inject_before-1])
+
+                    for app_key, app_value in default_json.items():
+                        if f"[{app_key}]" not in old_spec[:inject_before]:
+                            f.write(f"\n[{app_key}]\n")
+
+                        for key, value in default_json[app_key].items():
+                            if key not in old_spec[:inject_before]:
+                                f.write('\n')
+
+                                for doc in value['doc']:
+                                    f.write(f"# {doc}\n")
+
+                                f.write(f"#{key} = {value.get('default', '')}\n")
+
+                    f.write(old_spec[inject_before:])
+
+                print(f'Modified {new_spec} for use with {largs[0]}!')
+                exit_code = 0
+            else:
+                print("ERROR: Valid target must be one of the following: "
+                      f"{', '.join(options[:-1])} or {options[-1]}.")
+        elif exists(new_spec):
             print('ERROR: You already have a buildozer.spec file.')
-            exit(1)
-        buildops.file_copy(join(dirname(__file__), 'default.spec'), 'buildozer.spec')
-        print('File buildozer.spec created, ready to customize!')
+        else:
+            buildops.file_copy(join(script_path, def_spec), new_spec)
+            print(f'File {new_spec} created, ready to customize!')
+            exit_code = 0
+
+        exit(exit_code)
 
     def cmd_distclean(self, *args):
         '''Clean the whole Buildozer environment.

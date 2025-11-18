@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from unittest import mock
@@ -22,8 +23,8 @@ def patch_logger_error():
     return mock.patch("buildozer.logger.Logger.error")
 
 
-def default_specfile_path():
-    return os.path.join(os.path.dirname(buildozer_module.__file__), "default.spec")
+def default_specfile_path(default='default.spec'):
+    return os.path.join(os.path.dirname(buildozer_module.__file__), default)
 
 
 def init_buildozer(temp_dir, target, options=None):
@@ -41,10 +42,18 @@ def init_buildozer(temp_dir, target, options=None):
     if options is None:
         options = {}
 
-    spec_path = os.path.join(temp_dir.name, "buildozer.spec")
+    spec_path = os.path.join(temp_dir.name, 'buildozer.spec')
 
-    with open(default_specfile_path()) as f:
+    with open(default_specfile_path(), encoding='utf-8') as f:
         default_spec = f.readlines()
+
+    for platform in ('android', 'ios', 'osx'):
+        """
+        Test to see if the json files are valid. If it fails,
+        the problem is within the json file itself.
+        """
+        with open(default_specfile_path(f'default-{platform}.json'), encoding='utf-8') as f:
+            json.load(f)
 
     spec = []
     for line in default_spec:
@@ -56,7 +65,7 @@ def init_buildozer(temp_dir, target, options=None):
 
         spec.append(line)
 
-    with open(spec_path, "w") as f:
+    with open(spec_path, "w", encoding='utf-8') as f:
         f.writelines(spec)
 
     return Buildozer(filename=spec_path, target=target)

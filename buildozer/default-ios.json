@@ -1,0 +1,128 @@
+{
+    "app": {
+        "ios.app_extensions": {
+            "doc": [
+                "(list) A Xml String specifying a extension type",
+                "[[\"7zip\", \"zip\"], [\"public.zip-archive\"], \"org.kivy.myappextension\"",
+                "    \"file\", \"<MyCustom> Extension File\", \"${MACOSX_BUNDLE_ICON_FILE}\"",
+                "    \"http://mysite.com/myapp/extensions.html\"]"
+            ]
+        },
+        "ios.camera_usage_description": {
+            "doc": [
+                "(str) Camera Usage justification string",
+                "\"<App> uses Camera to do <X and Y and Z>\""
+            ]
+        },
+        "ios.codesign.allowed": {
+            "doc": [
+                "(bool) Whether or not to sign the code"
+            ],
+            "default": "false"
+        },
+        "ios.codesign.debug": {
+            "doc": [
+                "(str) Name of the certificate to use for signing the debug version",
+                "Get a list of available identities: buildozer ios list_identities"
+            ],
+            "default": "\"iPhone Developer: <lastname> <firstname> (<hexstring>)\""
+        },
+        "ios.codesign.development_team.debug": {
+            "doc": [
+                "(str) The development team to use for signing the debug version"
+            ],
+            "default": "<hexstring>"
+        },
+        "ios.codesign.development_team.release": {
+            "doc": [
+                "(str) The development team to use for signing the release version"
+            ],
+            "default": "<hexstring>"
+        },
+        "ios.codesign.release": {
+            "doc": [
+                "(str) Name of the certificate to use for signing the release version"
+            ],
+            "default": "%(ios.codesign.debug)s"
+        },
+        "ios.ios_deploy_branch": {
+            "doc": [
+                "(str) ios-deploy branch"
+            ],
+            "default": "1.12.2"
+        },
+        "ios.ios_deploy_dir": {
+            "doc": [
+                "(str) ios-deploy directory"
+            ],
+            "default": "../ios_deploy"
+        },
+        "ios.ios_deploy_url": {
+            "doc": [
+                "(str) ios-deploy branch"
+            ],
+            "default": "https://github.com/phonegap/ios-deploy"
+        },
+        "ios.kivy_ios_branch": {
+            "doc": [
+                "(str) Branch to use"
+            ],
+            "default": "master"
+        },
+        "ios.kivy_ios_dir": {
+            "doc": [
+                "(str) Path to a custom kivy-ios folder"
+            ],
+            "default": "ios.kivy_ios_dir = ../kivy-ios"
+        },
+        "ios.kivy_ios_url": {
+            "doc": [
+                "(str) Source for kivy-ios"
+            ],
+            "default": "https://github.com/kivy/kivy-ios"
+        },
+        "ios.local_network_usage_description": {
+            "doc": [
+                "(str) Justification text to be provided for being able to use local network",
+                "\"<App> needs permissions to <Do X and Y and Z>\" in your Local Area Network"
+            ]
+        },
+        "ios.manifest.app_url": {
+            "doc": [
+                "(str) URL pointing to .ipa file to be installed",
+                "This option should be defined along with `display_image_url` and `full_size_image_url` options"
+            ]
+        },
+        "ios.manifest.display_image_url": {
+            "doc": [
+                "(str) URL pointing to an icon (57x57px) to be displayed during download",
+                "This option should be defined along with `app_url` and `full_size_image_url` options"
+            ]
+        },
+        "ios.manifest.full_size_image_url": {
+            "doc": [
+                "(str) URL pointing to a large icon (512x512px) to be used by iTunes",
+                "This option should be defined along with `app_url` and `display_image_url` options"
+            ]
+        },
+        "ios.media_usage_description": {
+            "doc": [
+                "(str) Justification text to be provided for being able to select media",
+                "\"<APP> needs to access your media in order to <Do X and Y and Z>\""
+            ]
+        },
+        "ios.viewcontroller_based_statusbar_appearance": {
+            "doc": [
+                "(bool) Allow StatusBar to be controlled by API"
+            ],
+            "default": "False"
+        },
+        "orientation": {
+            "doc": [
+                "(list) Supported orientations",
+                "Valid options are: landscape, portrait, portrait-reverse, landscape-reverse"
+            ],
+            "default": "portrait"
+        }
+    }
+}
