@@ -15,7 +15,9 @@ from buildozer.target import Target
 
 KIVY_VERSION = '2.3.1'
 
+
 class TargetOSX(Target):
+
     targetname = "osx"
 
     def ensure_sdk(self):
