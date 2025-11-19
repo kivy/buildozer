@@ -731,7 +731,7 @@ class Buildozer:
                     default_json = json.load(f)
 
                 with open(new_spec, 'w', encoding='utf-8') as f:
-                    f.write(old_spec[:inject_before-1])
+                    f.write(old_spec[:inject_before - 1])
 
                     for app_key, app_value in default_json.items():
                         if f"[{app_key}]" not in old_spec[:inject_before]:
