@@ -14,9 +14,15 @@ Init and build for Android
    line like :class:`__version__ = "1.0.3"` in your :class:`main.py`. Ensure you have one at
    the start of your application. It is not mandatory but heavily advised.
 
-#. Create a :class:`buildozer.spec` file, with::
+#. Create a minimal :class:`buildozer.spec` file, with::
 
     buildozer init
+
+#. Cross-platform initialization::
+
+    buildozer init android
+    buildozer init ios
+    buildozer init osx
 
 #. Edit the :class:`buildozer.spec` according to the :ref:`specifications`. You should
    at least change the :class:`title`, :class:`package.name` and :class:`package.domain` in the
