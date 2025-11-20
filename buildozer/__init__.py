@@ -6,7 +6,7 @@ Generic Python packager for Android / iOS. Desktop later.
 
 '''
 
-__version__ = '1.5.1.dev0'
+__version__ = '1.5.2.dev0'
 
 import json
 from fnmatch import fnmatch

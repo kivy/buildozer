@@ -5,10 +5,8 @@ Buildozer
 import sys
 from setuptools import setup
 from os.path import dirname, join
-import codecs
 import os
 import re
-import io
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -30,7 +28,7 @@ install it on Python {}.{}.
 def find_version(*file_paths):
     # Open in Latin-1 so that we avoid encoding errors.
     # Use codecs.open for Python 2 compatibility
-    with codecs.open(os.path.join(here, *file_paths), 'r', 'utf-8') as f:
+    with open(os.path.join(here, *file_paths), encoding='utf-8') as f:
         version_file = f.read()
 
     # The version line must have the form
@@ -43,9 +41,9 @@ def find_version(*file_paths):
 
 
 curdir = dirname(__file__)
-with io.open(join(curdir, "README.md"), encoding="utf-8") as fd:
+with open(join(curdir, "README.md"), encoding="utf-8") as fd:
     readme = fd.read()
-with io.open(join(curdir, "CHANGELOG.md"), encoding="utf-8") as fd:
+with open(join(curdir, "CHANGELOG.md"), encoding="utf-8") as fd:
     changelog = fd.read()
 
 setup(
@@ -68,7 +66,8 @@ setup(
     packages=[
         'buildozer', 'buildozer.targets', 'buildozer.libs', 'buildozer.scripts'
     ],
-    package_data={'buildozer': ['default.spec', 'default-*.json']},
+    package_data={'buildozer': ['default.spec', 'default-android.json',
+                                'default-ios.json', 'default-osx.json']},
     include_package_data=True,
     install_requires=[
         'pexpect',
@@ -79,7 +78,7 @@ setup(
         # here.
         # Restricted version because python-for-android's recipes can't handle
         # later versions.
-        'cython<3.0'
+        'cython<3.12'
     ],
     extras_require={
         'test': ['pytest'],
@@ -95,6 +94,9 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
     ],
     entry_points={
         'console_scripts': [
