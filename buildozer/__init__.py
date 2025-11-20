@@ -712,8 +712,12 @@ class Buildozer:
         new_spec = 'buildozer.spec'
         options = ('android', 'ios', 'osx')
         script_path = dirname(__file__)
+        ignore_doc = False
 
         if largs:
+            if len(largs) > 1:
+                ignore_doc = largs[1].lower().replace('--', '') in ('no-docs', 'no-comments')
+
             if largs[0] in options:
                 if exists(new_spec):
                     buildops.file_copy(new_spec, f'{new_spec}.bak')
@@ -741,8 +745,9 @@ class Buildozer:
                             if key not in old_spec[:inject_before]:
                                 f.write('\n')
 
-                                for doc in value['doc']:
-                                    f.write(f"# {doc}\n")
+                                if not ignore_doc:
+                                    for doc in value['doc']:
+                                        f.write(f"# {doc}\n")
 
                                 f.write(f"#{key} = {value.get('default', '')}\n")
 

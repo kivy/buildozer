@@ -18,10 +18,12 @@ Init and build for Android
 
     buildozer init
 
-#. Cross-platform initialization::
+#. Cross-platform initialization with :class:`buildozer.spec`::
 
     buildozer init android
+    buildozer init android --no-comments
     buildozer init ios
+    buildozer init ios --no-docs
     buildozer init osx
 
 #. Edit the :class:`buildozer.spec` according to the :ref:`specifications`. You should
