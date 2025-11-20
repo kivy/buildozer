@@ -1,0 +1,10 @@
+{
+    "app": {
+        "osx.kivy_version": {
+            "doc": [
+                "Kivy version to use"
+            ],
+            "default": "2.3.1"
+        }
+    }
+}

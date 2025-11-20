@@ -1,0 +1,502 @@
+{
+    "app": {
+        "android.aars": {
+            "doc": [
+                "(list) Android AAR archives to add"
+            ]
+        },
+        "android.accept_sdk_license": {
+            "doc": [
+                "(bool) If True, then automatically accept SDK license agreements",
+                "This is intended for automation only. If set to False"
+            ],
+            "default": "False"
+        },
+        "android.activity_class_name": {
+            "doc": [
+                "(str) Full name including package path of the Java class that implements Android Activity",
+                "use that parameter together with android.entrypoint to set custom Java class instead of PythonActivity"
+            ],
+            "default": "org.kivy.android.PythonActivity"
+        },
+        "android.adb_args": {
+            "doc": [
+                "(str) Android additional adb arguments"
+            ],
+            "default": "-H host.docker.internal"
+        },
+        "android.add_activities": {
+            "doc": [
+                "(list) Java classes to add as activities to the manifest"
+            ],
+            "default": "com.example.ExampleActivity"
+        },
+        "android.add_assets": {
+            "doc": [
+                "(list) Put these files or directories in the apk assets directory.",
+                "Either form may be used, and assets need not be in \"source.include_exts\".",
+                "  Example one: `android.add_assets = source_asset_relative_path`",
+                "  Example two: `android.add_assets = source_asset_path:destination_asset_relative_path`"
+            ]
+        },
+        "android.add_compile_options": {
+            "doc": [
+                "(list) add java compile options",
+                "This can for example be necessary when importing certain java libraries using the \"android.gradle_dependencies\" option",
+                "See https://developer.android.com/studio/write/java8-support for further information"
+            ],
+            "default": "\"sourceCompatibility = 1.8\", \"targetCompatibility = 1.8\""
+        },
+        "android.add_gradle_repositories": {
+            "doc": [
+                "(list) Gradle repositories to add {can be necessary for some android.gradle_dependencies}",
+                "    Example: `android.gradle_repositories = \"maven { url \"https://repo.spring.io/release\" }\"`"
+            ]
+        },
+        "android.add_jars": {
+            "doc": [
+                "(list) List of Java .jar files to add to the libs so that pyjnius can access their classes",
+                "Don't add jars that you do not need, since extra jars can slow down the build process",
+                "Allows wildcards matching: OUYA-ODK/libs/*.jar"
+            ],
+            "default": "foo.jar, bar.jar, path/to/more/*.jar"
+        },
+        "android.add_libs_arm64_v8a": {
+            "doc": [
+                "(list) Android additional libraries to copy into libs/arm64_v8a"
+            ],
+            "default": "libs/android-v8/*.so"
+        },
+        "android.add_libs_armeabi": {
+            "doc": [
+                "(list) Android additional libraries to copy into libs/armeabi"
+            ],
+            "default": "libs/android/*.so"
+        },
+        "android.add_libs_armeabi_v7a": {
+            "doc": [
+                "(list) Android additional libraries to copy into libs/armeabi_v7a"
+            ],
+            "default": "libs/android-v7/*.so"
+        },
+        "android.add_libs_mips": {
+            "doc": [
+                "(list) Android additional libraries to copy into libs/mips"
+            ],
+            "default": "libs/android-mips/*.so"
+        },
+        "android.add_libs_x86": {
+            "doc": [
+                "(list) Android additional libraries to copy into libs/x86"
+            ],
+            "default": "libs/android-x86/*.so"
+        },
+        "android.add_packaging_options": {
+            "doc": [
+                "(list) packaging options to add",
+                "See: https://developer.android.com/reference/tools/gradle-api/7.1/com/android/build/api/dsl/PackagingOptions",
+                "Can be necessary to solve conflicts in { gradle_dependencies }",
+                "Please enclose in double quotes!",
+                "  Example: `android.add_packaging_options = \"exclude \"META-INF/common.kotlin_module\"",
+                "exclude \"META-INF/*.kotlin_module\"\"`"
+            ]
+        },
+        "android.add_resources": {
+            "doc": [
+                "(list) Put these files or directories in the apk res directory.",
+                "The option may be used in three ways, the value may contain one, zero or \":\"",
+                "1) A file to add to resources, legal resource names contain [\"a-z\",\"0-9\",\"_\"]",
+                "  `android.add_resources = my_icons/all-inclusive.png:drawable/all_inclusive.png`",
+                "2) A directory, here  \"legal_icons\" must contain resources of one kind",
+                "  `android.add_resources = legal_icons:drawable`",
+                "3) A directory, here \"legal_resources\" must contain one or more directories,",
+                "  each of a resource kind:  drawable, xml, etc..",
+                "Example: `android.add_resources = legal_resources`"
+            ]
+        },
+        "android.add_src": {
+            "doc": [
+                "(list) List of Java files to add to the android project (can be java or a directory containing the files)"
+            ]
+        },
+        "android.api": {
+            "doc": [
+                "(int) Target Android API, should be as high as possible"
+            ],
+            "default": "35"
+        },
+        "android.ant_path": {
+            "doc": [
+                "(str) ANT directory (if empty, it will be automatically downloaded)"
+            ]
+        },
+        "android.apptheme": {
+            "doc": [
+                "(str) Android app theme, default is ok for Kivy-based app"
+            ],
+            "default": "@android:style/Theme.NoTitleBar"
+        },
+        "android.archs": {
+            "doc": [
+                "(list) The Android archs to build for, choices: `armeabi-v7a, arm64-v8a, x86, x86_64`"
+            ],
+            "default": "arm64-v8a, armeabi-v7a"
+        },
+        "android.allow_backup": {
+            "doc": [
+                "(bool) Enables Android auto-backup feature (Android API >=23)"
+            ],
+            "default": "True"
+        },
+        "android.backup_rules": {
+            "doc": [
+                "(str) XML file for custom backup rules (see official auto backup documentation)"
+            ]
+        },
+        "android.blacklist_src": {
+            "doc": [
+                "(str) Path to a custom blacklist file"
+            ]
+        },
+        "android.copy_libs": {
+            "doc": [
+                "(bool) Copy library instead of making a libpymodules.so"
+            ],
+            "default": "True"
+        },
+        "android.debug_artifact": {
+            "doc": [
+                "(str) The format used to package the app for debug mode (apk or aar)"
+            ],
+            "default": "apk"
+        },
+        "android.display_cutout": {
+            "doc": [
+                "(str) A display cutout is an area on some devices that extends into the display surface.",
+                "It allows for an edge-to-edge experience while providing space for important sensors on the front of the device.",
+                "Available options for Android API >= 28 are \"default, shortEdges, never\" and defaults to never.",
+                "See: https://developer.android.com/develop/ui/views/layout/display-cutout"
+            ],
+            "default": "never"
+        },
+        "android.enable_androidx": {
+            "doc": [
+                "(bool) Enable AndroidX support. Enable when \"android.gradle_dependencies\"",
+                "contains an \"androidx\" package, or any package from Kotlin source.",
+                "Require target API level 28 or higher"
+            ],
+            "default": "True"
+        },
+        "android.entrypoint": {
+            "doc": [
+                "(str) Android entry point, default is ok for Kivy-based application"
+            ],
+            "default": "org.kivy.android.PythonActivity"
+        },
+        "android.extra_manifest_application_arguments": {
+            "doc": [
+                "(str) Extra xml to write directly inside the <manifest><application> tag of AndroidManifest.xml",
+                "use that parameter to provide a filename from where to load your custom XML arguments"
+            ],
+            "default": "./src/android/extra_manifest_application_arguments.xml"
+        },
+        "android.extra_manifest_xml": {
+            "doc": [
+                "(str) Extra xml to write directly inside the <manifest> element of AndroidManifest.xml",
+                "use that parameter to provide a filename from where to load your custom XML code"
+            ],
+            "default": "./src/android/extra_manifest.xml"
+        },
+        "android.features": {
+            "doc": [
+                "(list) features (adds uses-feature -tags to manifest)"
+            ],
+            "default": "android.hardware.usb.host"
+        },
+        "android.gradle_dependencies": {
+            "doc": [
+                "(list) Gradle dependencies to add"
+            ]
+        },
+        "android.home_app": {
+            "doc": [
+                "(bool) If True, your application will be listed as a home app (launcher app)"
+            ],
+            "default": "False"
+        },
+        "android.library_references": {
+            "doc": [
+                "(list) Android library project to add (will be added in the { project.properties } automatically)"
+            ]
+        },
+        "android.logcat_filters": {
+            "doc": [
+                "(str) Android logcat filters to use"
+            ],
+            "default": "*:S python:D"
+        },
+        "android.logcat_pid_only": {
+            "doc": [
+                "(bool) Android logcat only display log for activity's pid"
+            ],
+            "default": "False"
+        },
+        "android.manifest.intent_filters": {
+            "doc": [
+                "(str) XML file to include as an intent filters in <activity> tag"
+            ]
+        },
+        "android.manifest.launch_mode": {
+            "doc": [
+                "(str) launchMode to set for the main activity"
+            ],
+            "default": "standard"
+        },
+        "android.manifest.orientation": {
+            "doc": [
+                "(str) screenOrientation to set for the main activity",
+                "See: https://developer.android.com/guide/topics/manifest/activity-element"
+            ],
+            "default": "fullSensor"
+        },
+        "android.manifest_placeholders": {
+            "doc": [
+                "(str) If you need to insert variables into your `AndroidManifest.xml` file,",
+                "you can do so with the manifestPlaceholders property.",
+                "This property takes a map of key-value pairs. (via a string)",
+                "  Example: `android.manifest_placeholders = [myCustomUrl:\"org.kivy.customurl\"]`"
+            ],
+            "default": "[:]"
+        },
+        "android.meta_data": {
+            "doc": [
+                "(list) Android application meta-data to set (key=value format)"
+            ]
+        },
+        "android.minapi": {
+            "doc": [
+                "(int) Minimum API your APK / AAB will support"
+            ],
+            "default": "24"
+        },
+        "android.ndk": {
+            "doc": [
+                "(str) Android NDK version to use"
+            ],
+            "default": "25b"
+        },
+        "android.ndk_api": {
+            "doc": [
+                "(int) Android NDK API to use",
+                "This is the minimum API your app will support, it should usually match android.minapi"
+            ],
+            "default": "21"
+        },
+        "android.ndk_path": {
+            "doc": [
+                "(str) Android NDK directory (if empty, it will be automatically downloaded)"
+            ]
+        },
+        "android.no-byte-compile-python": {
+            "doc": [
+                "(bool) Skip byte compile for .py files"
+            ],
+            "default": "False"
+        },
+        "android.numeric_version": {
+            "doc": [
+                "(int) Overrides automatic versionCode computation (used in build.gradle)",
+                "This is not the same as app version and should only be edited if you know what you're doing"
+            ],
+            "default": "1"
+        },
+        "android.ouya.category": {
+            "doc": [
+                "(str) OUYA Console category. Should be one of `GAME or APP`",
+                "If you leave this blank, OUYA support will not be enabled"
+            ],
+            "default": "GAME"
+        },
+        "android.ouya.icon.filename": {
+            "doc": [
+                "(str) Filename of OUYA Console icon. It must be a `732x412` PNG-image"
+            ],
+            "default": "%(source.dir)s/data/ouya_icon.png"
+        },
+        "android.permissions": {
+            "doc": [
+                "(list) Permissions",
+                "(See https://python-for-android.readthedocs.io/en/latest/buildoptions.html for all the supported syntaxes and properties)"
+            ],
+            "default": "android.permission.INTERNET, (name=android.permission.WRITE_EXTERNAL_STORAGE;maxSdkVersion=18)"
+        },
+        "android.presplash_color": {
+            "doc": [
+                "(string) Presplash background color (for android toolchain)",
+                "Supported formats are: #RRGGBB #AARRGGBB or one of the following names:",
+                "  red, blue, green, black, white, gray, cyan, magenta, yellow, lightgray,",
+                "  darkgray, grey, lightgrey, darkgrey, aqua, fuchsia, lime, maroon, navy,",
+                "  olive, purple, silver, teal"
+            ],
+            "default": "#FFFFFF"
+        },
+        "android.presplash_lottie": {
+            "doc": [
+                "(string) Presplash animation using Lottie format",
+                "Lottie files can be created using various tools, like Adobe After Effect or Synfig"
+            ],
+            "default": "path/to/lottie/file.json"
+        },
+        "android.release_artifact": {
+            "doc": [
+                "(str) The format used to package the app for release mode (aab or apk or aar)"
+            ],
+            "default": "aab"
+        },
+        "android.res_xml": {
+            "doc": [
+                "(list) Copy these files to src/main/res/xml/ (used with intent-filters..)"
+            ],
+            "default": "path/to/file.xml"
+        },
+        "android.sdk": {
+            "doc": [
+                "(int) Android SDK version to use"
+            ],
+            "default": "20"
+        },
+        "android.sdk_path": {
+            "doc": [
+                "(str) Android SDK directory (if empty, it will be automatically downloaded)"
+            ]
+        },
+        "android.service_class_name": {
+            "doc": [
+                "(str) Full name including package path of the Java class that implements Python Service",
+                "use that parameter to set custom Java class which extends PythonService"
+            ],
+            "default": "org.kivy.android.PythonService"
+        },
+        "android.skip_update": {
+            "doc": [
+                "(bool) If True, then skip trying to update the Android SDK",
+                "This can be useful to avoid excess Internet downloads or save time when an update is due and you just want to test/build your package"
+            ],
+            "default": "False"
+        },
+        "android.uses_library": {
+            "doc": [
+                "(list) Android shared libraries which will be added to `AndroidManifest.xml` using <uses-library> tag"
+            ]
+        },
+        "android.wakelock": {
+            "doc": [
+                "(bool) Indicate whether the screen should stay on"
+            ],
+            "default": "False"
+        },
+        "android.whitelist": {
+            "doc": [
+                "(list) Pattern to whitelist for the whole project"
+            ]
+        },
+        "android.whitelist_src": {
+            "doc": [
+                "(str) Path to a custom whitelist file"
+            ]
+        },
+        "icon.adaptive_background.filename": {
+            "doc": [
+                "(str) Adaptive icon of the application (used if Android API level is 26+ at runtime)"
+            ],
+            "default": "%(source.dir)s/data/icon_bg.png"
+        },
+        "icon.adaptive_foreground.filename": {
+            "doc": [
+                "(str) Adaptive icon of the application (used if Android API level is 26+ at runtime)"
+            ],
+            "default": "%(source.dir)s/data/icon_fg.png"
+        },
+        "orientation": {
+            "doc": [
+                "(list) Supported orientations",
+                "Valid options are: landscape, portrait, portrait-reverse, landscape-reverse"
+            ],
+            "default": "portrait"
+        },
+        "p4a.branch": {
+            "doc": [
+                "(str) python-for-android branch to use, defaults to master"
+            ],
+            "default": "master"
+        },
+        "p4a.bootstrap": {
+            "doc": [
+                "(str) Bootstrap to use for android builds",
+                "Run \"buildozer android p4a -- bootstraps\" for a list of valid values."
+            ],
+            "default": "sdl2"
+        },
+        "p4a.commit": {
+            "doc": [
+                "(str) python-for-android specific commit to use, defaults to HEAD, must be within p4a.branch"
+            ],
+            "default": "HEAD"
+        },
+        "p4a.extra_args": {
+            "doc": [
+                "(str) Extra command line arguments to pass when invoking pythonforandroid.toolchain"
+            ]
+        },
+        "p4a.fork": {
+            "doc": [
+                "(str) python-for-android fork to use in case if p4a.url is not specified, defaults to upstream (kivy)"
+            ],
+            "default": "kivy"
+        },
+        "p4a.hook": {
+            "doc": [
+                "(str) Filename to the hook for p4a"
+            ]
+        },
+        "p4a.local_recipes": {
+            "doc": [
+                "(str) The directory in which python-for-android should look for your own build recipes (if any)"
+            ]
+        },
+        "p4a.port": {
+            "doc": [
+                "(int) port number to specify an explicit --port= p4a argument (eg for bootstrap flask)"
+            ]
+        },
+        "p4a.setup_py": {
+            "doc": [
+                "Control passing the --use-setup-py vs --ignore-setup-py to p4a",
+                "\"in the future\" --use-setup-py is going to be the default behaviour in p4a, right now it is not",
+                "Setting this to false will pass --ignore-setup-py, true will pass --use-setup-py",
+                "NOTE: this is general setuptools integration, having pyproject.toml is enough, no need to generate",
+                "setup.py if you're using Poetry, but you need to add \"toml\" to source.include_exts."
+            ],
+            "default": "False"
+        },
+        "p4a.source_dir": {
+            "doc": [
+                "(str) python-for-android git clone directory"
+            ]
+        },
+        "p4a.url": {
+            "doc": [
+                "(str) python-for-android URL to use for checkout"
+            ]
+        },
+        "services": {
+            "doc": [
+                "(list) List of Android services (name:python_script)",
+                "Format: CLASS_NAME:SCRIPT.py[:type]",
+                "Type options: :foreground or :foreground:sticky. Default is background",
+                "Bound services are unsupported",
+                "  Example: `MyService:service.py,AnotherService:background.py:foreground`"
+            ]
+        }
+    }
+}
