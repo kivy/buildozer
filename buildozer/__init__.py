@@ -708,15 +708,13 @@ class Buildozer:
         '''
         def_spec = 'default.spec'
         exit_code = 1
-        largs = [x.lower() for x in args]
+        largs = [x.lower().replace('--', '') for x in args]
         new_spec = 'buildozer.spec'
         options = ('android', 'ios', 'osx')
         script_path = dirname(__file__)
-        ignore_doc = False
 
         if largs:
-            if len(largs) > 1:
-                ignore_doc = largs[1].lower().replace('--', '') in ('no-docs', 'no-comments')
+            ignore_doc = len(largs) > 1 and largs[1] in ('no-docs', 'no-comments')
 
             if largs[0] in options:
                 if exists(new_spec):

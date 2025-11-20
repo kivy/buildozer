@@ -65,7 +65,7 @@ def init_buildozer(temp_dir, target, options=None):
 
         spec.append(line)
 
-    with open(spec_path, "w", encoding='utf-8') as f:
+    with open(spec_path, 'w', encoding='utf-8') as f:
         f.writelines(spec)
 
     return Buildozer(filename=spec_path, target=target)
