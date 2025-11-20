@@ -22,7 +22,7 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Setup environment
       run: |
         pip install .
