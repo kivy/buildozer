@@ -68,7 +68,7 @@ setup(
     packages=[
         'buildozer', 'buildozer.targets', 'buildozer.libs', 'buildozer.scripts'
     ],
-    package_data={'buildozer': ['default.spec']},
+    package_data={'buildozer': ['default.spec', 'default-*.json']},
     include_package_data=True,
     install_requires=[
         'pexpect',
