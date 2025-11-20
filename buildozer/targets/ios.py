@@ -123,7 +123,7 @@ class TargetIos(Target):
         self.ios_dir = self.install_or_update_repo('kivy-ios', platform='ios')
         self.ios_deploy_dir = self.install_or_update_repo('ios-deploy',
                                                           platform='ios',
-                                                          branch='1.7.0',
+                                                          branch='1.12.2',
                                                           owner='phonegap')
 
     def toolchain(self, cmd, **kwargs):
