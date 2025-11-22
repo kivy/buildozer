@@ -1,0 +1,93 @@
+import tkinter as tk
+from tkinter import messagebox
+
+# Dummy users
+users = {"admin": "1234"}
+
+# Student database (in-memory)
+students = []
+
+# -------------------- LOGIN WINDOW --------------------
+def login():
+    username = entry_user.get()
+    password = entry_pass.get()
+
+    if username in users and users[username] == password:
+        messagebox.showinfo("Success", "Login Successful!")
+        login_window.destroy()
+        open_dashboard()
+    else:
+        messagebox.showerror("Error", "Invalid Username or Password")
+
+# -------------------- ADD STUDENT --------------------
+def add_student():
+    name = entry_name.get()
+    course = entry_course.get()
+
+    if name == "" or course == "":
+        messagebox.showwarning("Error", "Please enter all details")
+        return
+
+    students.append({"Name": name, "Course": course})
+    messagebox.showinfo("Success", "Student Added Successfully!")
+    entry_name.delete(0, tk.END)
+    entry_course.delete(0, tk.END)
+
+# -------------------- VIEW STUDENT LIST --------------------
+def view_students():
+    student_window = tk.Toplevel()
+    student_window.title("Student List")
+
+    tk.Label(student_window, text="Name", font=("Arial", 12, "bold")).grid(row=0, column=0, padx=10)
+    tk.Label(student_window, text="Course", font=("Arial", 12, "bold")).grid(row=0, column=1, padx=10)
+
+    for i, s in enumerate(students):
+        tk.Label(student_window, text=s["Name"]).grid(row=i+1, column=0, padx=10)
+        tk.Label(student_window, text=s["Course"]).grid(row=i+1, column=1, padx=10)
+
+# -------------------- DASHBOARD --------------------
+def open_dashboard():
+    global entry_name, entry_course
+
+    dashboard = tk.Tk()
+    dashboard.title("Coaching Classes Dashboard")
+    dashboard.geometry("400x300")
+
+    tk.Label(dashboard, text="Coaching Classes Application", font=("Arial", 16, "bold")).pack(pady=10)
+
+    # Add student section
+    frame = tk.Frame(dashboard)
+    frame.pack(pady=10)
+
+    tk.Label(frame, text="Student Name").grid(row=0, column=0)
+    entry_name = tk.Entry(frame)
+    entry_name.grid(row=0, column=1)
+
+    tk.Label(frame, text="Course").grid(row=1, column=0)
+    entry_course = tk.Entry(frame)
+    entry_course.grid(row=1, column=1)
+
+    tk.Button(dashboard, text="Add Student", command=add_student, width=20).pack(pady=5)
+    tk.Button(dashboard, text="View Students", command=view_students, width=20).pack(pady=5)
+    tk.Button(dashboard, text="Exit", command=dashboard.destroy, width=20).pack(pady=5)
+
+    dashboard.mainloop()
+
+# -------------------- LOGIN WINDOW DESIGN --------------------
+login_window = tk.Tk()
+login_window.title("Coaching Classes Login")
+login_window.geometry("300x200")
+
+tk.Label(login_window, text="Login", font=("Arial", 18, "bold")).pack(pady=10)
+
+tk.Label(login_window, text="Username").pack()
+entry_user = tk.Entry(login_window)
+entry_user.pack()
+
+tk.Label(login_window, text="Password").pack()
+entry_pass = tk.Entry(login_window, show="*")
+entry_pass.pack()
+
+tk.Button(login_window, text="Login", command=login, width=15).pack(pady=10)
+
+login_window.mainloop()
