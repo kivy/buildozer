@@ -303,12 +303,6 @@ class TestCopyApplicationSources(unittest.TestCase):
             f.write(content)
         return filepath
 
-    # def create_dir(self, relpath):
-    #     """Helper to create a directory in source_dir."""
-    #     dirpath = os.path.join(self.source_dir, relpath)
-    #     os.makedirs(dirpath, exist_ok=True)
-    #     return dirpath
-
     @mock.patch('buildozer.buildops')
     def test_ignore_hidden_files_and_directories_in_source(self,
                                                            mock_buildops):
