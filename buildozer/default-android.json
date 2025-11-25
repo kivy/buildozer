@@ -50,7 +50,7 @@
         "android.add_gradle_repositories": {
             "doc": [
                 "(list) Gradle repositories to add {can be necessary for some android.gradle_dependencies}",
-                "    Example: `android.gradle_repositories = \"maven { url \"https://repo.spring.io/release\" }\"`"
+                "  Example: `android.gradle_repositories = \"maven { url \"https://repo.spring.io/release\" }\"`"
             ]
         },
         "android.add_jars": {
@@ -98,7 +98,7 @@
                 "Can be necessary to solve conflicts in { gradle_dependencies }",
                 "Please enclose in double quotes!",
                 "  Example: `android.add_packaging_options = \"exclude \"META-INF/common.kotlin_module\"",
-                "exclude \"META-INF/*.kotlin_module\"\"`"
+                "    exclude \"META-INF/*.kotlin_module\"\"`"
             ]
         },
         "android.add_resources": {

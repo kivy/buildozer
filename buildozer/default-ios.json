@@ -18,7 +18,7 @@
             "doc": [
                 "(bool) Whether or not to sign the code"
             ],
-            "default": "false"
+            "default": "False"
         },
         "ios.codesign.debug": {
             "doc": [
@@ -73,7 +73,7 @@
             "doc": [
                 "(str) Path to a custom kivy-ios folder"
             ],
-            "default": "ios.kivy_ios_dir = ../kivy-ios"
+            "default": "../kivy-ios"
         },
         "ios.kivy_ios_url": {
             "doc": [
