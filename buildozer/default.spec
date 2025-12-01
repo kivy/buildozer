@@ -123,3 +123,11 @@ warn_on_root = 1
 #        buildozer --profile demo android debug
 #
 #   Environment variable overrides have priority over profile overrides.
+#
+#   For more platform specific configuration please run one of the following commands
+#   so this file will be updated accordingly:
+#       buildozer init android
+#       buildozer init android --no-comments
+#       buildozer init ios
+#       buildozer init ios --no-docs
+#       buildozer init osx
