@@ -283,7 +283,7 @@
             "doc": [
                 "(str) Android NDK version to use"
             ],
-            "default": "25b"
+            "default": "28c"
         },
         "android.ndk_api": {
             "doc": [
