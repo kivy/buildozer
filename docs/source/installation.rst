@@ -49,7 +49,7 @@ latest fixes but is still in development. The develop version is required for ap
 Android Store.
 
 To use p4a master
-^^^^^^^^^^^^^^^^^
+"""""""""""""""""
 
 Activate an existing Python virtual environment, or create and activate a new Python virtual environment. 
 Python 3.12 defaults to requiring a virtual environment::
@@ -63,7 +63,7 @@ Install Buildozer and it's required Python packages::
     pip install buildozer, setuptools, cython==0.29.34
 
 To use p4a develop
-^^^^^^^^^^^^^^^^^^
+""""""""""""""""""
 
 Create and activate a new Python 3.14 virtual environment::
 
