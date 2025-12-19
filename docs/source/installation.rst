@@ -43,20 +43,50 @@ Note that the Rust on-screen instructions specify to add::
 
 to ~/.bashrc, and to open a new shell. The leading period in the line above above is important.
 
+Buildozer may use the master or develop versions of Python for Android. The master version is stable for 
+Python versions up to and including 3.12, the develop version requires Python 3.14 and contains the 
+latest fixes but is still in development. The develop version is required for apps submitted to the 
+Android Store.
+
+To use p4a master
+"""""""""""""""""
+
 Activate an existing Python virtual environment, or create and activate a new Python virtual environment. 
 Python 3.12 defaults to requiring a virtual environment::
 
     cd
-    virtualenv venv
-    source venv/bin/activate
+    virtualenv venv_p4a_master
+    source venv_p4a_master/bin/activate
 
 Install Buildozer and it's required Python packages::
 
     pip install buildozer, setuptools, cython==0.29.34
 
+To use p4a develop
+""""""""""""""""""
 
-Install on Ubuntu 22.04 and 24.04 (64bit)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Create and activate a new Python 3.14 virtual environment::
+
+    sudo add-apt-repository ppa:deadsnakes/ppa
+    sudo apt update
+    sudo apt install python3.14 python3.14-venv
+    python3.14 -m venv venv_p4a_develop
+    source venv_p4a_develop/bin/activate
+
+Install the master version of Buildozer and it's required Python packages::
+
+    pip install git+https://github.com/kivy/buildozer
+    pip install legacy-cgi setuptools cython==0.29.34
+
+In buildozer.spec set::
+
+    p4a.branch = develop
+    android.api = 36
+    android.ndk = 29
+
+
+Install on Ubuntu 22.04 (64bit)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Install the system packages on which a Buildozer build may depend::
 
