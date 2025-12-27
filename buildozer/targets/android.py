@@ -961,6 +961,12 @@ class TargetAndroid(Target):
             cmd.append('--extra-manifest-xml')
             cmd.append('{}'.format(open(extra_manifest_xml, 'rt').read()))
 
+        # support for extra-manifest-application
+        extra_manifest_application_xml = self.buildozer.config.getdefault(
+            'app', 'android.extra_manifest_application_xml', '')
+        if extra_manifest_application_xml:
+            cmd.append('--extra-manifest-application-xml={}'.format(open(extra_manifest_application_xml, 'rt').read()))
+
         # support for extra-manifest-application-arguments
         extra_manifest_application_arguments = self.buildozer.config.getdefault(
             'app', 'android.extra_manifest_application_arguments', '')
