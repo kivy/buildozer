@@ -1,0 +1,101 @@
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.uix.spinner import Spinner
+from kivy.clock import Clock
+from kivy.core.audio import SoundLoader
+from plyer import battery, notification
+
+class BatteryGuard(BoxLayout):
+
+    def __init__(self, **kwargs):
+        super().__init__(orientation='vertical', padding=20, spacing=20, **kwargs)
+
+        # تحميل صوت الإنذار
+        self.sound = SoundLoader.load("alarm.mp3")
+
+        self.notified = False
+        self.event = None
+
+        # ===== العنوان =====
+        self.add_widget(Label(
+            text="🔋 حارس الشحن الذكي",
+            font_size=26
+        ))
+
+        # ===== نسبة البطارية =====
+        self.level_label = Label(
+            text="--%",
+            font_size=42
+        )
+        self.add_widget(self.level_label)
+
+        # ===== اختيار نسبة التنبيه =====
+        self.spinner = Spinner(
+            text="100",
+            values=("80", "90", "100"),
+            size_hint=(1, None),
+            height=48
+        )
+        self.add_widget(self.spinner)
+
+        # ===== زر التشغيل =====
+        start_btn = Button(
+            text="تشغيل المراقبة",
+            background_color=(0, 0.6, 0, 1),
+            font_size=18
+        )
+        start_btn.bind(on_press=self.start_monitor)
+        self.add_widget(start_btn)
+
+        # ===== الحالة =====
+        self.status_label = Label(
+            text="🔴 متوقف",
+            font_size=16
+        )
+        self.add_widget(self.status_label)
+
+    def start_monitor(self, instance):
+        if not self.event:
+            self.event = Clock.schedule_interval(self.check_battery, 30)
+            self.status_label.text = "🟢 يعمل"
+
+    def check_battery(self, dt):
+        info = battery.status
+        if not info:
+            return
+
+        percent = info.get("percentage", 0)
+        charging = info.get("isCharging", False)
+
+        self.level_label.text = f"{percent}%"
+        limit = int(self.spinner.text)
+
+        # ===== شرط التنبيه =====
+        if percent >= limit and charging and not self.notified:
+            self.notified = True
+
+            # تشغيل صوت الإنذار
+            if self.sound:
+                self.sound.play()
+
+            # إشعار النظام
+            notification.notify(
+                title="🔔 تنبيه الشحن",
+                message="اكتمل شحن البطارية، يرجى فصل الشاحن",
+                timeout=10
+            )
+
+        # إعادة السماح بالتنبيه إذا انخفضت النسبة
+        if percent < limit:
+            self.notified = False
+            if self.sound:
+                self.sound.stop()
+
+class BatteryGuardApp(App):
+    def build(self):
+        return BatteryGuard()
+
+if __name__ == "__main__":
+    BatteryGuardApp().run()
