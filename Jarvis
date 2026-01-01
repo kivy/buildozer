@@ -1,0 +1,204 @@
+# ========================================
+# Jarvis AI Android App: All-in-One Code
+# Compatible with Buildozer
+# Includes GUI, AI logic, voice, memory, GPT4All placeholder
+# ========================================
+
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.textinput import TextInput
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+import threading
+import datetime
+import sqlite3
+import pyttsx3
+import speech_recognition as sr
+import wikipedia
+import sympy as sp
+
+# ================== CONFIG ==================
+MEMORY_DB = "jarvis_memory.db"
+emotion = "neutral"
+
+# ================== TTS ENGINE ==================
+engine = pyttsx3.init()
+engine.setProperty("rate", 170)
+
+# ================== PERMANENT MEMORY ==================
+conn = sqlite3.connect(MEMORY_DB, check_same_thread=False)
+c = conn.cursor()
+c.execute("""CREATE TABLE IF NOT EXISTS memory (
+                id INTEGER PRIMARY KEY,
+                question TEXT,
+                answer TEXT,
+                emotion TEXT,
+                timestamp TEXT
+            )""")
+conn.commit()
+
+def save_memory(q, a):
+    ts = datetime.datetime.now().isoformat()
+    c.execute("INSERT INTO memory (question, answer, emotion, timestamp) VALUES (?, ?, ?, ?)",
+              (q, a, emotion, ts))
+    conn.commit()
+
+def load_memory(n=5):
+    c.execute("SELECT question, answer FROM memory ORDER BY id DESC LIMIT ?", (n,))
+    return c.fetchall()
+
+# ================== EMOTION SIMULATION ==================
+def update_emotion(text):
+    global emotion
+    if any(w in text for w in ["thanks", "good", "nice"]):
+        emotion = "happy"
+    elif any(w in text for w in ["bad", "sad", "hate"]):
+        emotion = "sad"
+    elif any(w in text for w in ["angry", "stupid"]):
+        emotion = "angry"
+    else:
+        emotion = "neutral"
+
+def emotion_reply():
+    return {
+        "happy": "😊 I'm happy to help!",
+        "sad": "😔 I'll do my best to assist.",
+        "angry": "😠 Let's stay calm and solve this.",
+        "neutral": "🤖 Let me think."
+    }[emotion]
+
+# ================== VOICE FUNCTIONS ==================
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+def listen():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        r.adjust_for_ambient_noise(source)
+        audio = r.listen(source)
+    try:
+        return r.recognize_google(audio).lower()
+    except:
+        return ""
+
+# ================== REASONING MODULE ==================
+def reasoning_steps(question):
+    return ("Step 1: Understand the problem. "
+            "Step 2: Identify the domain. "
+            "Step 3: Recall relevant principles. "
+            "Step 4: Apply logic or formulas. "
+            "Step 5: Conclude with final answer. ")
+
+# ================== ENGINEERING MODULES ==================
+def detect_field(q):
+    q = q.lower()
+    if any(w in q for w in ["voltage", "current", "resistance", "circuit"]):
+        return "electrical"
+    if any(w in q for w in ["force", "velocity", "acceleration", "torque"]):
+        return "mechanical"
+    if any(w in q for w in ["stress", "beam", "concrete", "structure"]):
+        return "civil"
+    if any(w in q for w in ["code", "algorithm", "python", "ai"]):
+        return "computer"
+    if any(w in q for w in ["solve", "integrate", "differentiate"]):
+        return "math"
+    return "general"
+
+def electrical(q): return "Electrical principle: Ohm’s Law → V = I × R"
+def mechanical(q): return "Mechanical principle: Newton’s Second Law → F = m × a"
+def civil(q): return "Civil principle: Stress σ = F / A"
+def computer(q): return "Computer principle: Break problem into algorithms and logic."
+
+def math_solver(q):
+    try:
+        x = sp.symbols('x')
+        if "integrate" in q:
+            expr = sp.sympify(q.split("integrate")[-1])
+            return str(sp.integrate(expr, x))
+        if "differentiate" in q:
+            expr = sp.sympify(q.split("differentiate")[-1])
+            return str(sp.diff(expr, x))
+        if "solve" in q:
+            expr = sp.sympify(q.split("solve")[-1])
+            return str(sp.solve(expr, x))
+    except:
+        return "Unable to solve math expression."
+    return "Math module ready."
+
+def general_knowledge(q):
+    try:
+        return wikipedia.summary(q, sentences=2)
+    except:
+        return "Please ask a clearer question."
+
+# ================== GPT4All PLACEHOLDER ==================
+def llm_think(question):
+    # Replace with GPT4All integration for reasoning like ChatGPT
+    # Example:
+    # from gpt4all import GPT4All
+    # llm = GPT4All("model.bin")
+    # response = llm.generate(f"Q:{question}", max_tokens=200)
+    # return response['choices'][0]['text']
+    return None  # fallback to rule-based AI
+
+# ================== THINK FUNCTION ==================
+def think(question):
+    update_emotion(question)
+    llm_response = llm_think(question)
+    if llm_response:
+        save_memory(question, llm_response)
+        return llm_response
+
+    field = detect_field(question)
+    reasoning = reasoning_steps(question)
+    if field == "electrical": ans = electrical(question)
+    elif field == "mechanical": ans = mechanical(question)
+    elif field == "civil": ans = civil(question)
+    elif field == "computer": ans = computer(question)
+    elif field == "math": ans = math_solver(question)
+    else: ans = general_knowledge(question)
+
+    final_answer = f"{reasoning} Final Answer: {ans}"
+    save_memory(question, final_answer)
+    return final_answer
+
+# ================== KIVY GUI ==================
+class JarvisLayout(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.orientation = 'vertical'
+
+        # Chat display
+        self.chat = Label(text="Jarvis Activated", size_hint_y=0.8)
+        self.add_widget(self.chat)
+
+        # User input
+        self.user_input = TextInput(hint_text="Ask me...", size_hint_y=0.1, multiline=False)
+        self.add_widget(self.user_input)
+        self.user_input.bind(on_text_validate=self.ask_jarvis)
+
+        # Send button
+        self.send = Button(text="Send", size_hint_y=0.1, on_press=self.ask_jarvis)
+        self.add_widget(self.send)
+
+    def ask_jarvis(self, instance):
+        question = self.user_input.text
+        if not question.strip():
+            return
+        self.chat.text += f"\nYou: {question}"
+        self.user_input.text = ""
+        threading.Thread(target=self.get_response, args=(question,)).start()
+
+    def get_response(self, question):
+        response = think(question)
+        update_emotion(question)
+        self.chat.text += f"\nJarvis: {emotion_reply()} {response}"
+        speak(emotion_reply() + " " + response)
+
+class JarvisApp(App):
+    def build(self):
+        return JarvisLayout()
+
+if __name__ == "__main__":
+    JarvisApp().run()
