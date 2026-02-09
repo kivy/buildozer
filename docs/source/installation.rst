@@ -75,7 +75,7 @@ Create and activate a new Python 3.14 virtual environment::
 
 Install the master version of Buildozer and it's required Python packages::
 
-    pip install git+https://github.com/kivy/buildozer
+    pip install git+https://github.com/kivy/buildozer.git
     pip install legacy-cgi setuptools cython==0.29.34
 
 In buildozer.spec set::
