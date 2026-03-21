@@ -42,7 +42,24 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy
+requirements = python3,kivy==2.3.1
+
+# (list) Additional package index urls used for dependency resolution (currently Android only)
+# These indexes are searched in addition to the default PyPI index during Android builds.
+#  WARNING: Third party indexes are untrusted sources and may introduce supply chain risks,
+# including malicious, tampered, outdated, or incompatible packages.
+extra_index_urls = https://chaquo.com/pypi-13.1/, https://anshdadwal.is-a.dev/p4a-wheels/p4a/
+
+# (bool) Disable use of prebuilt binary packages when available (currently Android only)
+# If enabled, all dependencies are built from source even if prebuilt wheels exist.
+skip_prebuilt = False
+
+# (list) Packages allowed to use available prebuilt wheels (currently Android only)
+# Overrides recipe pinned versions and bypasses default version selection behavior
+# when a compatible prebuilt wheel is available in the index.
+# Example: if kivy==2.3.1 is requested but only `3.0.0` is available in prebuilt index,
+# this option allows using the prebuilt wheel instead of building from source.
+# use_prebuilt_version_for = numpy,kivy
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -366,7 +383,8 @@ android.allow_backup = True
 # (str) extra command line arguments to pass when invoking pythonforandroid.toolchain
 #p4a.extra_args =
 
-
+# (string) Directory where built wheel artifacts are stored (empty disables saving)
+# p4a.save_wheel_dir =
 
 #
 # iOS specific
