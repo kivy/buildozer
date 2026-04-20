@@ -58,9 +58,9 @@ Python 3.12 defaults to requiring a virtual environment::
     virtualenv venv_p4a_master
     source venv_p4a_master/bin/activate
 
-Install Buildozer and it's required Python packages::
+Install Buildozer and its required Python packages::
 
-    pip install buildozer, setuptools, cython==0.29.34
+    pip install buildozer setuptools cython==0.29.34
 
 To use p4a develop
 """"""""""""""""""
@@ -73,7 +73,7 @@ Create and activate a new Python 3.14 virtual environment::
     python3.14 -m venv venv_p4a_develop
     source venv_p4a_develop/bin/activate
 
-Install the master version of Buildozer and it's required Python packages::
+Install the master version of Buildozer and its required Python packages::
 
     pip install git+https://github.com/kivy/buildozer
     pip install legacy-cgi setuptools cython==0.29.34
