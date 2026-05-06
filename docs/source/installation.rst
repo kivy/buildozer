@@ -17,6 +17,52 @@ Buildozer is tested on Python 3.8 and above.
 Targeting Android
 -----------------
 
+Install on Ubuntu 26.04
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Install the system packages on which a Buildozer build may depend::
+
+    sudo apt update
+    sudo apt install -y git zip unzip openjdk-17-jdk python3-pip \
+    python3-virtualenv autoconf libtool pkg-config zlib1g-dev \
+    libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev \
+    libssl-dev automake autopoint gettext
+
+If there are multiple versions of Java installed, select `*17-openjdk*` using::
+
+    sudo update-alternatives --config java
+    sudo update-alternatives --config javac
+
+Install Rust, and accept the default option::
+
+    curl https://sh.rustup.rs -sSf | sh
+
+Note that the Rust on-screen instructions specify to add this line to ~/.bashrc, and to open a new shell.::
+
+    . "$HOME/.cargo/env"
+
+The leading period in the line above above is important.
+
+Optionally, create and activate a new Python 3.14 virtual environment::
+
+    sudo apt update
+    sudo apt install python3.14-venv
+    python3.14 -m venv venv_p4a_develop
+    source venv_p4a_develop/bin/activate
+
+Install the master version of Buildozer and it's required Python packages::
+
+    pip install git+https://github.com/kivy/buildozer
+    pip install legacy-cgi setuptools cython==0.29.34
+
+In buildozer.spec set::
+
+    p4a.branch = develop
+    android.api = 36
+    android.ndk = 29
+
+Note that these buildozer.spec changes are required (android.ndk = 28c is OK), the defaults in buildozer.spec are not available with Ubuntu 26.04's default Python 3.14. 
+
 Install on Ubuntu 24.04
 ~~~~~~~~~~~~~~~~~~~~~~~
 
