@@ -209,7 +209,7 @@ class TargetAndroid(Target):
                 host, port = os.environ.get(key).split(':')[-2:]
                 command.extend(['--proxy=http', f'--proxy_host={host.strip("/")}', f'--proxy_port={port}'])
                 break
-            except:
+            except Exception:
                 pass
 
         if kwargs.pop('return_child', False):
@@ -288,7 +288,7 @@ class TargetAndroid(Target):
         if platform in ('win32', 'cygwin'):
             try:
                 self._set_win32_java_home()
-            except:
+            except Exception:
                 traceback.print_exc()
             self.adb_executable = join(self.android_sdk_dir, 'platform-tools',
                                 'adb.exe')
@@ -535,7 +535,7 @@ class TargetAndroid(Target):
         for v in os.listdir(join(*args)):
             try:
                 versions.append(parse(v))
-            except:
+            except Exception:
                 pass
         if not versions:
             self.logger.error(
@@ -1320,7 +1320,7 @@ class TargetAndroid(Target):
             self.buildozer.hook("android_pre_build_apk")
             self.execute_build_package(build_cmd)
             self.buildozer.hook("android_post_build_apk")
-        except:
+        except Exception:
             # maybe the hook fail because the apk is not
             pass
 
@@ -1416,7 +1416,7 @@ class TargetAndroid(Target):
 
             try:
                 fd.writelines((line.decode('utf-8') for line in content))
-            except:
+            except Exception:
                 fd.writelines(content)
             if content and not content[-1].endswith(u'\n'):
                 fd.write(u'\n')
