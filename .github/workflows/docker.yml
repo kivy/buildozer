@@ -37,7 +37,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Push Multi-platform Image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           push: ${{ env.SHOULD_PUBLISH == 'true' }}
           tags: |
@@ -46,7 +46,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
       - name: Local Build for Testing
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           # Load image into local Docker daemon
           load: true
