@@ -83,7 +83,7 @@ setup(
     ],
     extras_require={
         'test': ['pytest'],
-        'docs': ['sphinx', 'sphinxawesome_theme>=5.3,<6'],
+        'docs': ['sphinx', 'sphinxawesome_theme>=6,<7'],
         'ios': ['kivy-ios'],
     },
     classifiers=[
