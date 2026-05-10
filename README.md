@@ -28,11 +28,11 @@ build dependencies. For more information, see
 [![GitHub contributors](https://img.shields.io/github/contributors-anon/kivy/buildozer)](https://github.com/kivy/buildozer/graphs/contributors)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
-![PyPI - Version](https://img.shields.io/pypi/v/buildozer)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/buildozer)
+[![PyPI - Version](https://img.shields.io/pypi/v/buildozer)](https://pypi.org/project/buildozer/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/buildozer)](https://pypi.org/project/buildozer/)
 
 [![Tests](https://github.com/kivy/buildozer/workflows/Tests/badge.svg)](https://github.com/kivy/buildozer/actions?query=workflow%3ATests)
-[![Android](https://github.com/kivy/buildozer/workflows/Android/badge.svg)](https://github.com/kivy/buildozer/actions?query=workflow%3AAndroid)
+[![Android](https://github.com/kivy/buildozer/actions/workflows/android.yml/badge.svg)](https://github.com/kivy/buildozer/actions/workflows/android.yml)
 [![iOS](https://github.com/kivy/buildozer/workflows/iOS/badge.svg)](https://github.com/kivy/buildozer/actions?query=workflow%3AiOS)
 [![Coverage Status](https://coveralls.io/repos/github/kivy/buildozer/badge.svg)](https://coveralls.io/github/kivy/buildozer)
 [![Docker](https://github.com/kivy/buildozer/actions/workflows/docker.yml/badge.svg)](https://github.com/kivy/buildozer/actions/workflows/docker.yml)
