@@ -441,8 +441,7 @@ class TestBuildOps(TestCase):
             "buildozer.buildops.LOGGER"
         ) as m_logger:
 
-            assert buildops.checkbin("Python", "python")
-            # Probably ^ == executable, but not always in the CI environment.
+            assert buildops.checkbin("Python", executable)
             m_logger.debug.assert_called()
             m_exit.assert_not_called()
             m_logger.error.assert_not_called()

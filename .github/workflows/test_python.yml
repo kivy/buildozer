@@ -4,6 +4,7 @@ jobs:
   Tests:
     name: base
     strategy:
+      fail-fast: false
       matrix:
         python:
            - '3.8'
