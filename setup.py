@@ -86,6 +86,7 @@ setup(
         'docs': ['sphinx', 'sphinxawesome_theme>=5.3,<6'],
         'ios': ['kivy-ios'],
     },
+    python_requires='>=3.8',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
@@ -95,6 +96,9 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
     ],
     entry_points={
         'console_scripts': [
