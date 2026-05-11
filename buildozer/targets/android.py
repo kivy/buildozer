@@ -40,7 +40,7 @@ import buildozer.buildops as buildops
 from buildozer.exceptions import BuildozerException
 from buildozer.logger import USE_COLOR
 from buildozer.target import Target
-from buildozer.libs.version import parse
+from packaging.version import parse
 
 
 # buildozer.spec tokens that used to exist but are now ignored

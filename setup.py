@@ -66,7 +66,7 @@ setup(
     },
     license='MIT',
     packages=[
-        'buildozer', 'buildozer.targets', 'buildozer.libs', 'buildozer.scripts'
+        'buildozer', 'buildozer.targets', 'buildozer.scripts'
     ],
     package_data={'buildozer': ['default.spec']},
     include_package_data=True,
