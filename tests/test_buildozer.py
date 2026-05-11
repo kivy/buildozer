@@ -3,6 +3,10 @@ import os
 import codecs
 import shutil
 import unittest
+import warnings
+
+import pytest
+
 import buildozer as buildozer_module
 from buildozer import Buildozer
 from io import StringIO
@@ -183,6 +187,225 @@ class TestBuildozer(unittest.TestCase):
         mock_open.assert_called_once()
 
 
+class TestBuildozerHelpers:
+    """Tests for pure-helper methods on the Buildozer class.
+
+    These methods either manipulate strings/lists, validate config, or
+    compose paths; they perform no subprocess, network, or filesystem I/O
+    (beyond os.path joins). A non-existent specfile keeps Buildozer.__init__
+    from invoking check_configuration_tokens during construction so each
+    test can drive the helper directly with a hand-built config.
+    """
+
+    SPECFILE = '/tmp/buildozer_helpers_does_not_exist.spec'
+
+    def _new_buildozer(self):
+        buildozer = Buildozer(self.SPECFILE)
+        config = buildozer.config
+        config.add_section('app')
+        config.set('app', 'title', 'Test App')
+        config.set('app', 'source.dir', '.')
+        config.set('app', 'package.name', 'testapp')
+        config.set('app', 'version', '0.1')
+        return buildozer
+
+    def test_check_configuration_tokens_happy_path(self):
+        buildozer = self._new_buildozer()
+        buildozer.check_configuration_tokens()
+
+    def test_check_configuration_tokens_collects_all_errors(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.set('app', 'title', '')
+        buildozer.config.set('app', 'source.dir', '')
+        buildozer.config.set('app', 'package.name', '')
+        buildozer.config.remove_option('app', 'version')
+        buildozer.config.set('app', 'orientation', 'sideways')
+        with mock.patch('sys.stdout', new_callable=StringIO) as out, \
+                pytest.raises(SystemExit) as ctx:
+            buildozer.check_configuration_tokens()
+        assert ctx.value.code == 1
+        output = out.getvalue()
+        assert '"title" is missing' in output
+        assert '"source.dir" is missing' in output
+        assert '"package.name" is missing' in output
+        assert '"version"' in output
+        assert 'sideways' in output
+
+    def test_check_configuration_tokens_package_name_starts_with_digit(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.set('app', 'package.name', '1myapp')
+        with mock.patch('sys.stdout', new_callable=StringIO) as out, \
+                pytest.raises(SystemExit):
+            buildozer.check_configuration_tokens()
+        assert 'may not start with a number' in out.getvalue()
+
+    def test_check_configuration_tokens_version_conflict(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.set('app', 'version.regex', r'__version__')
+        with mock.patch('sys.stdout', new_callable=StringIO) as out, \
+                pytest.raises(SystemExit):
+            buildozer.check_configuration_tokens()
+        assert (
+            'Conflict between "version" and "version.regex"' in out.getvalue()
+        )
+
+    def test_check_configuration_tokens_version_filename_missing(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.remove_option('app', 'version')
+        buildozer.config.set('app', 'version.regex', r'__version__')
+        with mock.patch('sys.stdout', new_callable=StringIO) as out, \
+                pytest.raises(SystemExit):
+            buildozer.check_configuration_tokens()
+        assert '"version.filename" is missing' in out.getvalue()
+
+    def test_migrate_configuration_tokens_renames_deprecated(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.set('app', 'android.p4a_dir', '/some/path')
+        buildozer.migrate_configuration_tokens()
+        assert not buildozer.config.has_option('app', 'android.p4a_dir')
+        assert buildozer.config.get('app', 'p4a.source_dir') == '/some/path'
+
+    def test_migrate_configuration_tokens_no_app_section_noop(self):
+        buildozer = Buildozer(self.SPECFILE)
+        buildozer.migrate_configuration_tokens()
+
+    def test_check_garden_requirements_no_warning_when_unset(self):
+        buildozer = self._new_buildozer()
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            buildozer.check_garden_requirements()
+        deprecations = [
+            w for w in caught if issubclass(w.category, DeprecationWarning)]
+        assert deprecations == []
+
+    def test_check_garden_requirements_warns_when_set(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.set('app', 'garden_requirements', 'somelib')
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            buildozer.check_garden_requirements()
+        deprecations = [
+            w for w in caught if issubclass(w.category, DeprecationWarning)]
+        assert len(deprecations) == 1
+        assert 'garden_requirements' in str(deprecations[0].message)
+
+    def test_get_version_explicit(self):
+        buildozer = self._new_buildozer()
+        assert buildozer.get_version() == '0.1'
+
+    def test_get_version_conflict(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.set('app', 'version.regex', r'__version__')
+        with pytest.raises(Exception) as ctx:
+            buildozer.get_version()
+        assert 'conflict' in str(ctx.value)
+
+    def test_get_version_regex_without_filename(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.remove_option('app', 'version')
+        buildozer.config.set('app', 'version.regex', r'__version__')
+        with pytest.raises(Exception) as ctx:
+            buildozer.get_version()
+        assert 'version.filename is missing' in str(ctx.value)
+
+    def test_get_version_filename_without_regex(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.remove_option('app', 'version')
+        buildozer.config.set('app', 'version.filename', '/no/such/file')
+        with pytest.raises(Exception) as ctx:
+            buildozer.get_version()
+        assert 'version.regex is missing' in str(ctx.value)
+
+    def test_get_version_from_regex(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.remove_option('app', 'version')
+        buildozer.config.set('app', 'version.filename', 'fakefile.py')
+        buildozer.config.set('app', 'version.regex', r'__version__ = "(.+)"')
+        with mock.patch(
+                'builtins.open',
+                mock.mock_open(read_data='__version__ = "1.2.3"')):
+            assert buildozer.get_version() == '1.2.3'
+
+    def test_get_version_regex_no_match(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.remove_option('app', 'version')
+        buildozer.config.set('app', 'version.filename', 'fakefile.py')
+        buildozer.config.set('app', 'version.regex', r'__version__ = "(.+)"')
+        with mock.patch(
+                'builtins.open',
+                mock.mock_open(read_data='nothing relevant here')), \
+                pytest.raises(Exception) as ctx:
+            buildozer.get_version()
+        assert 'Unable to find capture version' in str(ctx.value)
+
+    def test_get_version_nothing_set(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.remove_option('app', 'version')
+        with pytest.raises(Exception) as ctx:
+            buildozer.get_version()
+        assert 'Missing version or version.regex' in str(ctx.value)
+
+    def test_namify(self):
+        buildozer = self._new_buildozer()
+        assert buildozer.namify('Hello, World!') == 'Hello__World_'
+        assert buildozer.namify('valid-name_123') == 'valid-name_123'
+
+    def test_user_build_dir_unset(self):
+        buildozer = self._new_buildozer()
+        assert buildozer.user_build_dir is None
+
+    def test_user_build_dir_from_legacy_builddir(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.add_section('buildozer')
+        buildozer.config.set('buildozer', 'builddir', 'mybuild')
+        expected = os.path.realpath(os.path.join(
+            buildozer.root_dir, 'mybuild', '.buildozer'))
+        assert buildozer.user_build_dir == expected
+
+    def test_user_build_dir_from_modern_build_dir(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.add_section('buildozer')
+        buildozer.config.set('buildozer', 'build_dir', 'myroot')
+        expected = os.path.realpath(
+            os.path.join(buildozer.root_dir, 'myroot'))
+        assert buildozer.user_build_dir == expected
+
+    def test_buildozer_dir_default(self):
+        buildozer = self._new_buildozer()
+        assert buildozer.buildozer_dir == os.path.join(
+            buildozer.root_dir, '.buildozer')
+
+    def test_buildozer_dir_uses_user_build_dir(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.add_section('buildozer')
+        buildozer.config.set('buildozer', 'build_dir', 'myroot')
+        assert buildozer.buildozer_dir == buildozer.user_build_dir
+
+    def test_bin_dir_default(self):
+        buildozer = self._new_buildozer()
+        assert buildozer.bin_dir == os.path.join(buildozer.root_dir, 'bin')
+
+    def test_bin_dir_user(self):
+        buildozer = self._new_buildozer()
+        buildozer.user_bin_dir = '/custom/bin'
+        assert buildozer.bin_dir == '/custom/bin'
+
+    def test_global_packages_dir(self):
+        buildozer = self._new_buildozer()
+        buildozer.targetname = 'android'
+        assert buildozer.global_packages_dir == os.path.join(
+            os.path.expanduser('~'), '.buildozer', 'android', 'packages')
+
+    def test_package_full_name_with_domain(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.set('app', 'package.domain', 'org.example')
+        assert buildozer.package_full_name == 'org.example.testapp'
+
+    def test_package_full_name_no_domain(self):
+        buildozer = self._new_buildozer()
+        assert buildozer.package_full_name == 'testapp'
+
+
 class TestCopyApplicationSources(unittest.TestCase):
     """Tests for the _copy_application_sources method."""
 
@@ -333,15 +556,13 @@ class TestCopyApplicationSources(unittest.TestCase):
         copy_calls = mock_buildops.file_copy.call_args_list
         copied_files = [call[0][0] for call in copy_calls]
 
-        self.assertTrue(any('main.py' in f for f in copied_files))
-        self.assertTrue(any('visible' in f and 'code.py' in f
-                            for f in copied_files))
-        self.assertTrue(any('subdir' in f and 'code2.py' in f
-                            for f in copied_files))
-        self.assertFalse(any('.hidden' in f for f in copied_files))
-        self.assertFalse(any('secret.py' in f for f in copied_files))
-        self.assertFalse(any('.hidden_file.py' in f for f in copied_files))
-        self.assertFalse(any('.hidden2.py' in f for f in copied_files))
+        assert any('main.py' in f for f in copied_files)
+        assert any('visible' in f and 'code.py' in f for f in copied_files)
+        assert any('subdir' in f and 'code2.py' in f for f in copied_files)
+        assert not any('.hidden' in f for f in copied_files)
+        assert not any('secret.py' in f for f in copied_files)
+        assert not any('.hidden_file.py' in f for f in copied_files)
+        assert not any('.hidden2.py' in f for f in copied_files)
 
     @mock.patch('buildozer.buildops')
     def test_source_dir_with_hidden_parent(self, mock_buildops):
@@ -377,10 +598,10 @@ class TestCopyApplicationSources(unittest.TestCase):
         copied_files = [call[0][0] for call in copy_calls]
 
         # main.py should be copied (not in a hidden dir relative to source)
-        self.assertTrue(any('main.py' in f for f in copied_files))
+        assert any('main.py' in f for f in copied_files)
         # .sub_hidden/secret.py should NOT be copied
         # (hidden relative to source)
-        self.assertFalse(any('.sub_hidden' in f for f in copied_files))
+        assert not any('.sub_hidden' in f for f in copied_files)
 
     @mock.patch('buildozer.buildops')
     def test_include_extensions_filter(self, mock_buildops):
@@ -400,9 +621,9 @@ class TestCopyApplicationSources(unittest.TestCase):
         copy_calls = mock_buildops.file_copy.call_args_list
         copied_files = [call[0][0] for call in copy_calls]
 
-        self.assertTrue(any('main.py' in f for f in copied_files))
-        self.assertTrue(any('image.png' in f for f in copied_files))
-        self.assertFalse(any('doc.txt' in f for f in copied_files))
+        assert any('main.py' in f for f in copied_files)
+        assert any('image.png' in f for f in copied_files)
+        assert not any('doc.txt' in f for f in copied_files)
 
     @mock.patch('buildozer.buildops')
     def test_exclude_dirs_filter(self, mock_buildops):
@@ -423,11 +644,10 @@ class TestCopyApplicationSources(unittest.TestCase):
         copy_calls = mock_buildops.file_copy.call_args_list
         copied_files = [call[0][0] for call in copy_calls]
 
-        self.assertTrue(any('main.py' in f for f in copied_files))
-        self.assertTrue(any('src' in f and 'code.py' in f
-                            for f in copied_files))
-        self.assertFalse(any('tests' in f for f in copied_files))
-        self.assertFalse(any('venv' in f for f in copied_files))
+        assert any('main.py' in f for f in copied_files)
+        assert any('src' in f and 'code.py' in f for f in copied_files)
+        assert not any('tests' in f for f in copied_files)
+        assert not any('venv' in f for f in copied_files)
 
     @mock.patch('buildozer.buildops')
     def test_exclude_patterns(self, mock_buildops):
@@ -448,7 +668,7 @@ class TestCopyApplicationSources(unittest.TestCase):
         copy_calls = mock_buildops.file_copy.call_args_list
         copied_files = [call[0][0] for call in copy_calls]
 
-        self.assertTrue(any('main.py' in f for f in copied_files))
-        self.assertTrue(any('icon.png' in f for f in copied_files))
-        self.assertFalse(any('LICENSE' in f for f in copied_files))
-        self.assertFalse(any('photo.jpg' in f for f in copied_files))
+        assert any('main.py' in f for f in copied_files)
+        assert any('icon.png' in f for f in copied_files)
+        assert not any('LICENSE' in f for f in copied_files)
+        assert not any('photo.jpg' in f for f in copied_files)

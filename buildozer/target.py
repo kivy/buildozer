@@ -107,39 +107,47 @@ class Target:
         self.build_mode = 'debug'
         self.buildozer.build()
 
-    def cmd_release(self, *args):
+    def _check_package_domain(self, domain, override_env_var, body_lines):
+        if self.buildozer.config.get("app", "package.domain") != domain:
+            return
         error = self.logger.error
+        error("")
+        error("ERROR: Trying to release a package that starts with {}".format(domain))
+        error("")
+        for line in body_lines:
+            error(line)
+        error("")
+        if override_env_var not in os.environ:
+            exit(1)
+
+    def cmd_release(self, *args):
         self.buildozer.prepare_for_build()
-        if self.buildozer.config.get("app", "package.domain") == "org.test":
-            error("")
-            error("ERROR: Trying to release a package that starts with org.test")
-            error("")
-            error("The package.domain org.test is, as the name intended, a test.")
-            error("Once you published an application with org.test,")
-            error("you cannot change it, it will be part of the identifier")
-            error("for Google Play / App Store / etc.")
-            error("")
-            error("So change package.domain to anything else.")
-            error("")
-            error("If you messed up before, set the environment variable to force the build:")
-            error("export BUILDOZER_ALLOW_ORG_TEST_DOMAIN=1")
-            error("")
-            if "BUILDOZER_ALLOW_ORG_TEST_DOMAIN" not in os.environ:
-                exit(1)
-
-        if self.buildozer.config.get("app", "package.domain") == "org.kivy":
-            error("")
-            error("ERROR: Trying to release a package that starts with org.kivy")
-            error("")
-            error("The package.domain org.kivy is reserved for the Kivy official")
-            error("applications. Please use your own domain.")
-            error("")
-            error("If you are a Kivy developer, add an export in your shell")
-            error("export BUILDOZER_ALLOW_KIVY_ORG_DOMAIN=1")
-            error("")
-            if "BUILDOZER_ALLOW_KIVY_ORG_DOMAIN" not in os.environ:
-                exit(1)
-
+        self._check_package_domain(
+            "org.test",
+            "BUILDOZER_ALLOW_ORG_TEST_DOMAIN",
+            [
+                "The package.domain org.test is, as the name intended, a test.",
+                "Once you published an application with org.test,",
+                "you cannot change it, it will be part of the identifier",
+                "for Google Play / App Store / etc.",
+                "",
+                "So change package.domain to anything else.",
+                "",
+                "If you messed up before, set the environment variable to force the build:",
+                "export BUILDOZER_ALLOW_ORG_TEST_DOMAIN=1",
+            ],
+        )
+        self._check_package_domain(
+            "org.kivy",
+            "BUILDOZER_ALLOW_KIVY_ORG_DOMAIN",
+            [
+                "The package.domain org.kivy is reserved for the Kivy official",
+                "applications. Please use your own domain.",
+                "",
+                "If you are a Kivy developer, add an export in your shell",
+                "export BUILDOZER_ALLOW_KIVY_ORG_DOMAIN=1",
+            ],
+        )
         self.build_mode = 'release'
         self.buildozer.build()
 
