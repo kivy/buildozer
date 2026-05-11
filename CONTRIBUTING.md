@@ -18,6 +18,9 @@ cd buildozer
 python setup.py build
 pip install -e .
 ```
+
+Maintainers cutting a new release should follow [RELEASING.md](RELEASING.md).
+
 ---
 
 Buildozer uses python-for-android, that is architected to be extensible with 
