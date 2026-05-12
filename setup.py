@@ -2,35 +2,16 @@
 Buildozer
 '''
 
-import sys
 from setuptools import setup
 from os.path import dirname, join
-import codecs
 import os
 import re
-import io
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-CURRENT_PYTHON = sys.version_info[:2]
-REQUIRED_PYTHON = (3, 8)
-
-# This check and everything above must remain compatible with Python 2.7.
-if CURRENT_PYTHON < REQUIRED_PYTHON:
-    sys.stderr.write("""
-==========================
-Unsupported Python version
-==========================
-This version of buildozer requires Python {}.{}, but you're trying to
-install it on Python {}.{}.
-""".format(*(REQUIRED_PYTHON + CURRENT_PYTHON)))
-    sys.exit(1)
-
 
 def find_version(*file_paths):
-    # Open in Latin-1 so that we avoid encoding errors.
-    # Use codecs.open for Python 2 compatibility
-    with codecs.open(os.path.join(here, *file_paths), 'r', 'utf-8') as f:
+    with open(os.path.join(here, *file_paths), encoding='utf-8') as f:
         version_file = f.read()
 
     # The version line must have the form
@@ -43,9 +24,9 @@ def find_version(*file_paths):
 
 
 curdir = dirname(__file__)
-with io.open(join(curdir, "README.md"), encoding="utf-8") as fd:
+with open(join(curdir, "README.md"), encoding="utf-8") as fd:
     readme = fd.read()
-with io.open(join(curdir, "CHANGELOG.md"), encoding="utf-8") as fd:
+with open(join(curdir, "CHANGELOG.md"), encoding="utf-8") as fd:
     changelog = fd.read()
 
 setup(
@@ -86,14 +67,12 @@ setup(
         'docs': ['sphinx', 'sphinxawesome_theme>=5.3,<6'],
         'ios': ['kivy-ios'],
     },
-    python_requires='>=3.8',
+    python_requires='>=3.10',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
