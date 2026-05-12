@@ -12,7 +12,7 @@ for installing Buildozer on Ubuntu or on MacOS, also there are special notes for
 be used (for example Colab) but there are no instructions. The iOS section 
 contains instructions for installing kivy-ios on MacOS.
 
-Buildozer is tested on Python 3.8 and above. 
+Buildozer is tested on Python 3.10 and above.
 
 Targeting Android
 -----------------
