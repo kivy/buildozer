@@ -1,4 +1,5 @@
-from os import environ, unlink
+import io
+from os import environ, readlink, unlink
 from pathlib import Path
 import tarfile
 from queue import Queue
@@ -283,6 +284,43 @@ class TestBuildOps(TestCase):
             with open(text_file_path, "r") as uncompressed_file:
                 assert uncompressed_file.read() == "Text to tgz"
             m_logger.reset_mock()
+
+    @skipIf(platform == "win32", "Symlinks require admin on Windows")
+    def test_extract_tarball_preserves_symlinks(self):
+        with mock.patch(
+            "buildozer.buildops.LOGGER"
+        ) as m_logger, TemporaryDirectory() as base_dir:
+            m_logger.log_level = 2
+            m_logger.INFO = 1
+
+            tarfile_path = Path(base_dir) / "symlinks.tgz"
+            with tarfile.open(tarfile_path, "x:gz") as outfile:
+                payload = b"target content"
+                target_info = tarfile.TarInfo("target.txt")
+                target_info.size = len(payload)
+                outfile.addfile(target_info, io.BytesIO(payload))
+
+                rel_info = tarfile.TarInfo("rel_link")
+                rel_info.type = tarfile.SYMTYPE
+                rel_info.linkname = "target.txt"
+                outfile.addfile(rel_info)
+
+                abs_info = tarfile.TarInfo("abs_link")
+                abs_info.type = tarfile.SYMTYPE
+                abs_info.linkname = "/etc/hostname"
+                outfile.addfile(abs_info)
+
+            buildops.file_extract(tarfile_path, environ, cwd=base_dir)
+
+            assert (Path(base_dir) / "target.txt").is_file()
+
+            rel_path = Path(base_dir) / "rel_link"
+            assert rel_path.is_symlink()
+            assert readlink(rel_path) == "target.txt"
+
+            abs_path = Path(base_dir) / "abs_link"
+            assert abs_path.is_symlink()
+            assert readlink(abs_path) == "/etc/hostname"
 
     def test_cmd_unicode_decode(self):
         """

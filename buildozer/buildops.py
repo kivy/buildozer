@@ -122,8 +122,11 @@ def file_extract(archive, env, cwd="."):
         for extension in (".tgz", ".tar.gz", ".tbz2", ".tar.bz2")
     ):
         LOGGER.debug("Extracting {0} to {1}".format(archive, cwd))
+        extract_kwargs = {}
+        if hasattr(tarfile, "fully_trusted_filter"):
+            extract_kwargs["filter"] = "fully_trusted"
         with tarfile.open(path, "r") as compressed_file:
-            compressed_file.extractall(cwd)
+            compressed_file.extractall(cwd, **extract_kwargs)
         return
 
     if path.suffix == ".zip":
