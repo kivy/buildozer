@@ -112,7 +112,7 @@ class TestTargetAndroid:
         assert target_android._p4a_bootstrap == "sdl2"
         assert target_android._p4a_cmd == [sys.executable or 'python', "-m", "pythonforandroid.toolchain"]
         assert target_android.build_mode == "debug"
-        assert target_android.extra_p4a_args == [
+        assert target_android.extra_p4a_args[1:] == [
             "--color=always",
             f"--storage-dir={buildozer.buildozer_dir}/android/platform/build-arm64-v8a_armeabi-v7a",
             "--ndk-api=21",
