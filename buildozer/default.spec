@@ -48,7 +48,7 @@ requirements = python3,kivy==2.3.1
 # These indexes are searched in addition to the default PyPI index during Android builds.
 #  WARNING: Third party indexes are untrusted sources and may introduce supply chain risks,
 # including malicious, tampered, outdated, or incompatible packages.
-extra_index_urls = https://chaquo.com/pypi-13.1/, https://anshdadwal.is-a.dev/p4a-wheels/p4a/
+extra_index_urls = https://chaquo.com/pypi-13.1/
 
 # (bool) Disable use of prebuilt binary packages when available (currently Android only)
 # If enabled, all dependencies are built from source even if prebuilt wheels exist.
