@@ -109,7 +109,7 @@ class TargetAndroid(Target):
         if port is not None:
             self.extra_p4a_args.append(f"--port={port}")
 
-        setup_py = self.buildozer.config.getdefault('app', 'p4a.setup_py', False)
+        setup_py = self.buildozer.config.getbooldefault('app', 'p4a.setup_py', False)
         if setup_py:
             self.extra_p4a_args.append("--use-setup-py")
         else:
@@ -122,6 +122,22 @@ class TargetAndroid(Target):
 
         if self.logger.log_level >= 2:
             self.extra_p4a_args.append("--debug")
+
+        save_wheel_dir = self.buildozer.config.getdefault('app', "p4a.save_wheel_dir", "")
+        if save_wheel_dir != "":
+            self.extra_p4a_args.append(f"--save-wheel-dir={save_wheel_dir}")
+
+        extra_index_urls = self.buildozer.config.getlist('app', "extra_index_urls", "")
+        for index in extra_index_urls:
+            self.extra_p4a_args.append(f"--extra-index-url={index}")
+
+        use_prebuilt_version_for = self.buildozer.config.getlist('app', "use_prebuilt_version_for", "")
+        for _recipes in use_prebuilt_version_for:
+            self.extra_p4a_args.append(f"--use-prebuilt-version-for={_recipes}")
+
+        skip_prebuilt = self.buildozer.config.getbooldefault('app', 'skip_prebuilt', False)
+        if skip_prebuilt:
+            self.extra_p4a_args.append("--skip-prebuilt")
 
         user_extra_p4a_args = self.buildozer.config.getdefault('app', 'p4a.extra_args', "")
         self.extra_p4a_args.extend(shlex.split(user_extra_p4a_args))
