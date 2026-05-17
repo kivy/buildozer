@@ -81,7 +81,7 @@ class TestSpecParser(unittest.TestCase):
             "green",
         ]
         # Test with_values and section_sep
-        assert sp.getlistvalues("section2", "attribute4") == [
+        assert sp.getlist("section2", "attribute4", with_values=True) == [
             "red=1",
             "amber=",
             "green=3",
@@ -105,7 +105,7 @@ class TestSpecParser(unittest.TestCase):
             "small",
         ]
 
-        assert sp.getbooldefault("section1", "attribute3") is True
+        assert sp.getboolean("section1", "attribute3", fallback=False) is True
 
     def test_case_sensitivity(self):
         sp = SpecParser()

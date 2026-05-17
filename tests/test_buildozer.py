@@ -470,20 +470,20 @@ class TestCopyApplicationSources(unittest.TestCase):
         # Mock SpecParser to return our test config
         mock_spec_parser = mock.MagicMock()
 
-        def config_getdefault(*args):
-            key = args if len(args) == 3 else args[:2]
-            return config.get(key, args[-1] if len(args) == 3 else '')
+        def config_get(section, token, fallback=''):
+            return config.get((section, token, fallback),
+                              config.get((section, token), fallback))
 
-        def config_getlist(*args):
-            key = args if len(args) == 3 else args[:2]
-            result = config.get(key, args[-1] if len(args) == 3 else '')
+        def config_getlist(section, token, default=''):
+            result = config.get((section, token, default),
+                                config.get((section, token), default))
             # Ensure we return a list
             if isinstance(result, str):
                 return [result] if result else []
             return result if result else []
 
         mock_spec_parser.read = mock.Mock()
-        mock_spec_parser.getdefault = mock.Mock(side_effect=config_getdefault)
+        mock_spec_parser.get = mock.Mock(side_effect=config_get)
         mock_spec_parser.getlist = mock.Mock(side_effect=config_getlist)
 
         # Patch SpecParser constructor

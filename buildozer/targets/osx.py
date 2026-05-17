@@ -89,9 +89,9 @@ class TargetOSX(Target):
         domain = bcg('app', 'package.domain')
         title = bcg('app', 'title')
         app_deps = open('requirements.txt').read()
-        icon = bc.getdefault('app', 'icon.filename', '')
+        icon = bc.get('app', 'icon.filename', fallback='')
         version = self.buildozer.get_version()
-        author = bc.getdefault('app', 'author', '')
+        author = bc.get('app', 'author', fallback='')
 
         self.logger.info('Create {}.app'.format(package_name))
         cwd = join(self.buildozer.platform_dir, 'kivy-sdk-packager-master', 'osx')

@@ -51,12 +51,12 @@ class Buildozer:
 
         try:
             self.logger.set_level(
-                int(self.config.getdefault(
-                    'buildozer', 'log_level', '2')))
+                int(self.config.get(
+                    'buildozer', 'log_level', fallback='2')))
         except Exception:
             pass
 
-        self.user_bin_dir = self.config.getdefault('buildozer', 'bin_dir', None)
+        self.user_bin_dir = self.config.get('buildozer', 'bin_dir', fallback=None)
         if self.user_bin_dir:
             self.user_bin_dir = realpath(join(self.root_dir, self.user_bin_dir))
 
@@ -133,28 +133,28 @@ class Buildozer:
         '''
         self.logger.info('Check configuration tokens')
         self.migrate_configuration_tokens()
-        get = self.config.getdefault
+        get = self.config.get
         errors = []
         adderror = errors.append
-        if not get('app', 'title', ''):
+        if not get('app', 'title', fallback=''):
             adderror('[app] "title" is missing')
-        if not get('app', 'source.dir', ''):
+        if not get('app', 'source.dir', fallback=''):
             adderror('[app] "source.dir" is missing')
 
-        package_name = get('app', 'package.name', '')
+        package_name = get('app', 'package.name', fallback='')
         if not package_name:
             adderror('[app] "package.name" is missing')
         elif package_name[0] in map(str, range(10)):
             adderror('[app] "package.name" may not start with a number.')
 
-        version = get('app', 'version', '')
-        version_regex = get('app', 'version.regex', '')
+        version = get('app', 'version', fallback='')
+        version_regex = get('app', 'version.regex', fallback='')
         if not version and not version_regex:
             adderror('[app] One of "version" or "version.regex" must be set')
         if version and version_regex:
             adderror('[app] Conflict between "version" and "version.regex"'
                      ', only one can be used.')
-        if version_regex and not get('app', 'version.filename', ''):
+        if version_regex and not get('app', 'version.filename', fallback=''):
             adderror('[app] "version.filename" is missing'
                      ', required by "version.regex"')
 
@@ -360,7 +360,7 @@ class Buildozer:
 
     def _copy_application_sources(self):
         # XXX clean the inclusion/exclusion algo.
-        source_dir = realpath(expanduser(self.config.getdefault('app', 'source.dir', '.')))
+        source_dir = realpath(expanduser(self.config.get('app', 'source.dir', fallback='.')))
         include_exts = self.config.getlist('app', 'source.include_exts', '')
         exclude_exts = self.config.getlist('app', 'source.exclude_exts', '')
         exclude_dirs = self.config.getlist('app', 'source.exclude_dirs', '')
@@ -496,11 +496,11 @@ class Buildozer:
         """The user-provided build dir, if any."""
         # Check for a user-provided build dir
         # Check the (deprecated) builddir token, for backwards compatibility
-        build_dir = self.config.getdefault('buildozer', 'builddir', None)
+        build_dir = self.config.get('buildozer', 'builddir', fallback=None)
         if build_dir is not None:
             # for backwards compatibility, append .buildozer to builddir
             build_dir = join(build_dir, '.buildozer')
-        build_dir = self.config.getdefault('buildozer', 'build_dir', build_dir)
+        build_dir = self.config.get('buildozer', 'build_dir', fallback=build_dir)
 
         if build_dir is not None:
             build_dir = realpath(join(self.root_dir, expanduser(build_dir)))
@@ -550,8 +550,8 @@ class Buildozer:
 
     @property
     def package_full_name(self):
-        package_name = self.config.getdefault('app', 'package.name', '')
-        package_domain = self.config.getdefault('app', 'package.domain', '')
+        package_name = self.config.get('app', 'package.name', fallback='')
+        package_domain = self.config.get('app', 'package.domain', fallback='')
         if package_domain == '':
             return package_name
         return '{}.{}'.format(package_domain, package_name)
@@ -687,7 +687,7 @@ class Buildozer:
         '''If effective user id is 0, display a warning and require
         user input to continue (or to cancel)'''
 
-        warn_on_root = self.config.getdefault('buildozer', 'warn_on_root', '1')
+        warn_on_root = self.config.get('buildozer', 'warn_on_root', fallback='1')
         try:
             euid = os.geteuid() == 0
         except AttributeError:

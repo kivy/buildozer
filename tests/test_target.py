@@ -256,10 +256,10 @@ class TestPathOrGitUrl:
         overrides = overrides or {}
         target = _make_target(root_dir='/root')
 
-        def fake_getdefault(section, key, default=None):
-            return overrides.get(key, default)
+        def fake_get(section, key, fallback=None):
+            return overrides.get(key, fallback)
 
-        target.buildozer.config.getdefault.side_effect = fake_getdefault
+        target.buildozer.config.get.side_effect = fake_get
         return target
 
     def test_custom_dir_short_circuits(self):
@@ -281,7 +281,7 @@ class TestPathOrGitUrl:
         target.path_or_git_url('python-for-android')
         keys = [
             call.args[1]
-            for call in target.buildozer.config.getdefault.call_args_list
+            for call in target.buildozer.config.get.call_args_list
         ]
         assert 'python_for_android_dir' in keys
         assert 'python_for_android_branch' in keys
@@ -292,7 +292,7 @@ class TestPathOrGitUrl:
         target.path_or_git_url('python-for-android', squash_hyphen=False)
         keys = [
             call.args[1]
-            for call in target.buildozer.config.getdefault.call_args_list
+            for call in target.buildozer.config.get.call_args_list
         ]
         assert 'python-for-android_dir' in keys
 
@@ -301,7 +301,7 @@ class TestPathOrGitUrl:
         target.path_or_git_url('p4a', platform='android')
         keys = [
             call.args[1]
-            for call in target.buildozer.config.getdefault.call_args_list
+            for call in target.buildozer.config.get.call_args_list
         ]
         assert 'android.p4a_dir' in keys
         assert 'android.p4a_branch' in keys

@@ -227,16 +227,16 @@ class Target:
         if platform:
             key = "{}.{}".format(platform, key)
         config = self.buildozer.config
-        path = config.getdefault('app', '{}_dir'.format(key), None)
+        path = config.get('app', '{}_dir'.format(key), fallback=None)
 
         if path is not None:
             path = join(self.buildozer.root_dir, path)
             url = None
             branch = None
         else:
-            branch = config.getdefault('app', '{}_branch'.format(key), branch)
+            branch = config.get('app', '{}_branch'.format(key), fallback=branch)
             default_url = url_format.format(owner=owner, repo=repo, branch=branch)
-            url = config.getdefault('app', '{}_url'.format(key), default_url)
+            url = config.get('app', '{}_url'.format(key), fallback=default_url)
         return path, url, branch
 
     def install_or_update_repo(self, repo, **kwargs):
