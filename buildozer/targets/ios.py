@@ -148,7 +148,7 @@ class TargetIos(Target):
 
     @property
     def code_signing_development_team(self):
-        team = self.buildozer.config.getdefault("app", f"ios.codesign.development_team.{self.build_mode}", None)
+        team = self.buildozer.config.get("app", f"ios.codesign.development_team.{self.build_mode}", fallback=None)
         return f"DEVELOPMENT_TEAM={team}" if team else None
 
     def get_available_packages(self):
@@ -207,7 +207,7 @@ class TargetIos(Target):
 
     def _get_package(self):
         config = self.buildozer.config
-        package_domain = config.getdefault('app', 'package.domain', '')
+        package_domain = config.get('app', 'package.domain', fallback='')
         package = config.get('app', 'package.name')
         if package_domain:
             package = package_domain + '.' + package
@@ -247,9 +247,9 @@ class TargetIos(Target):
         self._create_icons()
 
         # Generate OTA distribution manifest if `app_url`, `display_image_url` and `full_size_image_url` are defined.
-        app_url = self.buildozer.config.getdefault("app", "ios.manifest.app_url", None)
-        display_image_url = self.buildozer.config.getdefault("app", "ios.manifest.display_image_url", None)
-        full_size_image_url = self.buildozer.config.getdefault("app", "ios.manifest.full_size_image_url", None)
+        app_url = self.buildozer.config.get("app", "ios.manifest.app_url", fallback=None)
+        display_image_url = self.buildozer.config.get("app", "ios.manifest.display_image_url", fallback=None)
+        full_size_image_url = self.buildozer.config.get("app", "ios.manifest.full_size_image_url", fallback=None)
 
         if any((app_url, display_image_url, full_size_image_url)):
 
@@ -264,17 +264,17 @@ class TargetIos(Target):
                 'fullSizeImageURL': full_size_image_url,
             }
         # Permissions and their Justification Descriptions
-        local_network_usage_description = self.buildozer.config.getdefault(
-            "app", "ios.local_network_usage_description", None)
-        media_usage_description = self.buildozer.config.getdefault(
-            "app", "ios.media_usage_description", None)
-        camera_usage_description = self.buildozer.config.getdefault(
-            "app", "ios.camera_usage_description", None)
-        viewcontroller_based_statusbar_appearance = self.buildozer.config.getdefault(
-            "app", "ios.viewcontroller_based_statusbar_appearance", None)
+        local_network_usage_description = self.buildozer.config.get(
+            "app", "ios.local_network_usage_description", fallback=None)
+        media_usage_description = self.buildozer.config.get(
+            "app", "ios.media_usage_description", fallback=None)
+        camera_usage_description = self.buildozer.config.get(
+            "app", "ios.camera_usage_description", fallback=None)
+        viewcontroller_based_statusbar_appearance = self.buildozer.config.get(
+            "app", "ios.viewcontroller_based_statusbar_appearance", fallback=None)
 
         # types
-        custom_ext_types = self.buildozer.config.getdefault("app", "ios.app_extensions", None)
+        custom_ext_types = self.buildozer.config.get("app", "ios.app_extensions", fallback=None)
 
         if media_usage_description:
             plist['NSAppleMusicUsageDescription'] = media_usage_description
@@ -352,7 +352,7 @@ class TargetIos(Target):
             cwd=build_dir)
 
         key = 'ios.codesign.{}'.format(self.build_mode)
-        ioscodesign = self.buildozer.config.getdefault('app', key, '')
+        ioscodesign = self.buildozer.config.get('app', key, fallback='')
         if not ioscodesign:
             self.logger.error('Cannot create the IPA package without'
                 ' signature. You must fill the "{}" token.'.format(key))
@@ -423,7 +423,7 @@ class TargetIos(Target):
             env=self.buildozer.environ)
 
     def _create_icons(self):
-        icon = self.buildozer.config.getdefault('app', 'icon.filename', '')
+        icon = self.buildozer.config.get('app', 'icon.filename', fallback='')
         if not icon:
             return
         icon_fn = join(self.buildozer.app_dir, icon)
@@ -438,9 +438,9 @@ class TargetIos(Target):
         config = self.buildozer.config
         if not config.getboolean('app', 'ios.codesign.allowed'):
             return
-        identity_debug = config.getdefault('app', 'ios.codesign.debug', '')
-        identity_release = config.getdefault('app', 'ios.codesign.release',
-                identity_debug)
+        identity_debug = config.get('app', 'ios.codesign.debug', fallback='')
+        identity_release = config.get('app', 'ios.codesign.release',
+                fallback=identity_debug)
         available_identities = self._get_available_identities()
 
         if not identity_debug:

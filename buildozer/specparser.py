@@ -83,30 +83,13 @@ class SpecParser(ConfigParser):
                     for key in values
                 ]
             return values if not strip else [x.strip() for x in values]
-        values = self.getdefault(section, token, None)
+        values = self.get(section, token, fallback=None)
         if values is None:
             return default
         values = values.split(split_char)
         if not values:
             return default
         return values if not strip else [x.strip() for x in values]
-
-    def getlistvalues(self, section, token, default=None):
-        """Convenience function.
-        Deprecated - call getlist directly."""
-        return self.getlist(section, token, default, with_values=True)
-
-    def getdefault(self, section, token, default=None):
-        """
-        Convenience function.
-        Deprecated - call get directly."""
-        return self.get(section, token, fallback=default)
-
-    def getbooldefault(self, section, token, default=False):
-        """
-        Convenience function.
-        Deprecated - call getboolean directly."""
-        return self.getboolean(section, token, fallback=default)
 
     def apply_profile(self, profile):
         """
