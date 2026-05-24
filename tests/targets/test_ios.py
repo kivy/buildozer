@@ -217,7 +217,9 @@ class TestTargetIos:
         assert m_dump_plist_to_file.call_args_list == [
             mock.call(
                 {
+                    "CFBundleDisplayName": "My Application",
                     "CFBundleIdentifier": "org.test.myapp",
+                    "CFBundleName": "My Application",
                     "CFBundleShortVersionString": "0.1",
                     "CFBundleVersion": "0.1.None",
                 },

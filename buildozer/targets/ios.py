@@ -236,9 +236,12 @@ class TargetIos(Target):
         plist_fn = '{}-Info.plist'.format(app_name.lower())
         plist_rfn = join(self.app_project_dir, plist_fn)
         version = self.buildozer.get_version()
+        title = self.buildozer.config.get('app', 'title')
         self.logger.info('Update Plist {}'.format(plist_fn))
         plist = self.load_plist_from_file(plist_rfn)
+        plist['CFBundleDisplayName'] = title
         plist['CFBundleIdentifier'] = self._get_package()
+        plist['CFBundleName'] = title
         plist['CFBundleShortVersionString'] = version
         plist['CFBundleVersion'] = '{}.{}'.format(version,
                 self.buildozer.build_id)
