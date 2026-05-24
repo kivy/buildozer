@@ -69,6 +69,10 @@ class Target:
                     result.append(last_command)
                     last_command = []
                 last_command.append(arg)
+                if arg == "p4a":
+                    while args:
+                        tmp = args.pop(0)
+                        last_command.append(tmp)
             else:
                 if not last_command:
                     self.logger.error('Argument passed without a command')
