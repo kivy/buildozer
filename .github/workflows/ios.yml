@@ -13,7 +13,7 @@ jobs:
         python: [3.x]
     steps:
     - name: "Setup Python ${{ matrix.python }} on ${{ matrix.runs_on }} (${{ runner.arch }})" 
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       with:
         python-version: '3.x'
     - uses: actions/checkout@v7
