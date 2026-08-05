@@ -54,13 +54,6 @@ setup(
     install_requires=[
         'pexpect',
         'packaging',
-        # Cython is required by both kivy-ios and python-for-android.
-        # However, python-for-android does not include it in its dependencies
-        # and kivy-ios's dependencies are not always checked, so it is included
-        # here.
-        # Restricted version because python-for-android's recipes can't handle
-        # later versions.
-        'cython<3.0'
     ],
     extras_require={
         'test': ['pytest'],
