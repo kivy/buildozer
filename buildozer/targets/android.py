@@ -10,7 +10,7 @@ if sys.platform == 'win32' and not os.getenv("KIVY_WIN32_ANDROID_EXPERIMENTAL"):
 from platform import uname
 WSL = 'microsoft' in uname()[2].lower()
 
-ANDROID_API = '33'
+ANDROID_API = '37'
 ANDROID_MINAPI = '24'
 APACHE_ANT_VERSION = '1.9.4'
 
@@ -18,7 +18,7 @@ APACHE_ANT_VERSION = '1.9.4'
 # that python-for-android cannot provide a recommendation, which in
 # turn only happens if the python-for-android is old and probably
 # doesn't support any newer NDK.
-DEFAULT_ANDROID_NDK_VERSION = '17c'
+DEFAULT_ANDROID_NDK_VERSION = '28c'
 
 import ast
 from glob import glob
