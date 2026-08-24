@@ -10,7 +10,7 @@ if sys.platform == 'win32' and not os.getenv("KIVY_WIN32_ANDROID_EXPERIMENTAL"):
 from platform import uname
 WSL = 'microsoft' in uname()[2].lower()
 
-ANDROID_API = '37'
+ANDROID_API = '36'
 ANDROID_MINAPI = '24'
 APACHE_ANT_VERSION = '1.9.4'
 
