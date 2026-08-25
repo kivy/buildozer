@@ -868,6 +868,12 @@ class TargetAndroid(Target):
             cmd.append("--service")
             cmd.append(service)
 
+        # support for native-service
+        nativeservices = self.buildozer.config.getlist('app', 'android.native_services', [])
+        for nativeservice in nativeservices:
+            cmd.append("--native-service")
+            cmd.append(nativeservice)
+
         # support for copy-libs
         if self.buildozer.config.getboolean('app', 'android.copy_libs', fallback=True):
             cmd.append("--copy-libs")
