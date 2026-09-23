@@ -239,6 +239,14 @@ class TestBuildozerHelpers:
             buildozer.check_configuration_tokens()
         assert 'may not start with a number' in out.getvalue()
 
+    def test_check_configuration_tokens_package_name_contains_space(self):
+        buildozer = self._new_buildozer()
+        buildozer.config.set('app', 'package.name', 'my app')
+        with mock.patch('sys.stdout', new_callable=StringIO) as out, \
+                pytest.raises(SystemExit):
+            buildozer.check_configuration_tokens()
+        assert 'must not contain spaces' in out.getvalue()
+
     def test_check_configuration_tokens_version_conflict(self):
         buildozer = self._new_buildozer()
         buildozer.config.set('app', 'version.regex', r'__version__')
