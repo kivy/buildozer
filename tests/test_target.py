@@ -133,6 +133,19 @@ class TestRunCommands:
             target.run_commands(['debug', '--', 'extra1', 'extra2'])
         m_debug.assert_called_once_with(['extra1', 'extra2'])
 
+    @pytest.mark.parametrize(
+        'p4a_args',
+        [
+            ['clean_recipe_build', 'pillow'],
+            ['--help'],
+        ],
+    )
+    def test_double_dash_is_not_forwarded_to_p4a(self, p4a_args):
+        target = _make_target()
+        target.cmd_p4a = mock.Mock(spec=lambda args: None)
+        target.run_commands(['p4a', '--', *p4a_args])
+        target.cmd_p4a.assert_called_once_with(p4a_args)
+
     def test_runs_config_check_once(self):
         target = _make_target()
         with mock.patch.object(target, 'cmd_debug', autospec=True), \
