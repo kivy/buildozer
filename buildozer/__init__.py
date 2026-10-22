@@ -146,6 +146,8 @@ class Buildozer:
             adderror('[app] "package.name" is missing')
         elif package_name[0] in map(str, range(10)):
             adderror('[app] "package.name" may not start with a number.')
+        elif any(c.isspace() for c in package_name):
+            adderror('[app] "package.name" must not contain spaces')
 
         version = get('app', 'version', fallback='')
         version_regex = get('app', 'version.regex', fallback='')
