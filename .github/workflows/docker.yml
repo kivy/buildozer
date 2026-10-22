@@ -12,7 +12,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 60
     permissions:
       contents: read
@@ -58,7 +58,7 @@ jobs:
           docker run --rm --volume "$PWD":/home/user/hostcwd ${{ env.DOCKERHUB_IMAGE }} init
 
   update-readme:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: build
     steps:
       - uses: actions/checkout@v7
