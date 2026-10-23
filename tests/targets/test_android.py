@@ -309,6 +309,87 @@ class TestTargetAndroid:
             ], env=mock.ANY)
         ]
 
+    @pytest.mark.parametrize("filename", [None, ""])
+    def test_execute_build_package_extra_manifest_application_xml_unset(self, filename):
+        """An absent or blank setting neither reads a file nor adds a p4a flag."""
+        target_android = init_target(self.temp_dir)
+        config = target_android.buildozer.config
+        if filename is None:
+            config.remove_option('app', 'android.extra_manifest_application_xml')
+        else:
+            config.set('app', 'android.extra_manifest_application_xml', filename)
+
+        with patch_target_android('_p4a') as m_p4a, \
+                mock.patch('buildozer.targets.android.open') as m_open:
+            target_android.execute_build_package([('debug',)])
+
+        m_open.assert_not_called()
+        assert m_p4a.call_args_list == [
+            mock.call([
+                'apk', '--bootstrap', 'sdl2', '--dist_name', 'myapp',
+                '--copy-libs', '--arch', 'arm64-v8a', '--arch', 'armeabi-v7a',
+            ], env=mock.ANY)
+        ]
+
+    @pytest.mark.parametrize("xml", [
+        '<provider android:name="androidx.core.content.FileProvider"\n'
+        '\tandroid:authorities="org.test.myapp.fileprovider"\n'
+        '\tandroid:exported="false" android:grantUriPermissions="true">\n'
+        '\t<meta-data android:name="android.support.FILE_PROVIDER_PATHS"\n'
+        '\t\tandroid:resource="@xml/file_paths" />\n'
+        '</provider>\n'
+        '<meta-data android:name="example" android:value=\'München &amp; spaces\' />\n',
+        '',
+    ], ids=['quoted-multiline', 'empty-file'])
+    def test_execute_build_package_extra_manifest_application_xml(self, xml):
+        """The file contents reach p4a as one unchanged argument, even if empty."""
+        xml_path = os.path.join(self.temp_dir.name, 'application children.xml')
+        with open(xml_path, 'w', encoding='utf-8') as fd:
+            fd.write(xml)
+        target_android = init_target(self.temp_dir, {
+            'android.extra_manifest_application_xml': xml_path,
+        })
+
+        with patch_target_android('_p4a') as m_p4a:
+            target_android.execute_build_package([('debug',)])
+
+        assert m_p4a.call_args_list == [
+            mock.call([
+                'apk', '--bootstrap', 'sdl2', '--dist_name', 'myapp',
+                '--copy-libs', '--extra-manifest-application-xml', xml,
+                '--arch', 'arm64-v8a', '--arch', 'armeabi-v7a',
+            ], env=mock.ANY)
+        ]
+
+    def test_execute_build_package_extra_manifest_options_together(self):
+        """Root XML, application attributes, and application children coexist."""
+        fragments = {
+            'extra_manifest_xml': '<queries><package android:name="org.example" /></queries>\n',
+            'extra_manifest_application_arguments': 'android:largeHeap="true"',
+            'extra_manifest_application_xml': '<provider android:name="org.example.Provider" />\n',
+        }
+        options = {}
+        for name, xml in fragments.items():
+            xml_path = os.path.join(self.temp_dir.name, name + '.xml')
+            with open(xml_path, 'w', encoding='utf-8') as fd:
+                fd.write(xml)
+            options['android.' + name] = xml_path
+        target_android = init_target(self.temp_dir, options)
+
+        with patch_target_android('_p4a') as m_p4a:
+            target_android.execute_build_package([('debug',)])
+
+        assert m_p4a.call_args_list == [
+            mock.call([
+                'apk', '--bootstrap', 'sdl2', '--dist_name', 'myapp',
+                '--copy-libs',
+                '--extra-manifest-xml', fragments['extra_manifest_xml'],
+                '--extra-manifest-application-arguments', fragments['extra_manifest_application_arguments'],
+                '--extra-manifest-application-xml', fragments['extra_manifest_application_xml'],
+                '--arch', 'arm64-v8a', '--arch', 'armeabi-v7a',
+            ], env=mock.ANY)
+        ]
+
     def test_numeric_version(self):
         """The `android.numeric_version` config should be passed to `build_package()`."""
         target_android = init_target(self.temp_dir, {
