@@ -20,7 +20,7 @@ jobs:
     - name: Setup Java
       uses: actions/setup-java@v6
       with:
-        java-version: '17'
+        java-version: '25'
         distribution: 'temurin'
     - uses: actions/checkout@v7
     - name: Setup environment
