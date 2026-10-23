@@ -154,17 +154,16 @@ fullscreen = 0
 # use that parameter to provide a filename from where to load your custom XML code
 #android.extra_manifest_xml = ./src/android/extra_manifest.xml
 
-# (str) Extra xml to write directly inside the <manifest><application> tag of AndroidManifest.xml
+# (str) Extra XML attributes for the <application> opening tag of AndroidManifest.xml
 # use that parameter to provide a filename from where to load your custom XML arguments:
 #android.extra_manifest_application_arguments = ./src/android/extra_manifest_application_arguments.xml
 
-# (str) Extra xml to write as a child element inside <manifest><application>, i.e.
-# a sibling of <activity>/<service>/etc -- as opposed to
-# android.extra_manifest_application_arguments above, which only supports attributes
-# on the <application> tag itself. Needed for e.g. a <provider> entry (such as a
-# FileProvider), which neither extra_manifest_xml nor
-# extra_manifest_application_arguments can express.
-# use that parameter to provide a filename from where to load your custom XML code:
+# (str) Extra XML elements to insert as children of <application> in AndroidManifest.xml
+# For example, use this to add a <provider> for a FileProvider.
+# This differs from the manifest-root XML and application-tag attributes above.
+# Provide a UTF-8 XML filename, relative to the working directory or absolute.
+# Requires python-for-android with support from https://github.com/kivy/python-for-android/pull/3377
+# Select a p4a branch containing that change, e.g. p4a.branch = develop.
 #android.extra_manifest_application_xml = ./src/android/extra_manifest_application_xml.xml
 
 # (str) Full name including package path of the Java class that implements Python Service
