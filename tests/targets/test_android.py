@@ -147,6 +147,26 @@ class TestTargetAndroid:
         assert m_cmd_expect.call_count == 1
         assert m_isfile.call_count == 1
 
+    @pytest.mark.parametrize("separator", [";", "/"])
+    def test_android_list_build_tools_versions(self, separator):
+        """Reads build-tools versions from both sdkmanager list formats.
+
+        Recent command-line tools (23.0) write "build-tools/36.1.0" where older
+        versions wrote "build-tools;36.1.0".
+        """
+        target_android = init_target(self.temp_dir)
+        listing = "\n".join([
+            "Installed packages:",
+            f"  build-tools{separator}36.1.0 | 36.1.0 | Android SDK Build-Tools 36.1",
+            f"  platforms{separator}android-34 | 3 | Android SDK Platform 34",
+            "Available Packages:",
+            f"  build-tools{separator}35.0.0 | 35.0.0 | Android SDK Build-Tools 35",
+            f"  build-tools{separator}36.1.0 | 36.1.0 | Android SDK Build-Tools 36.1",
+        ])
+        with mock.patch.object(target_android, "_sdkmanager", return_value=(listing, "", 0)):
+            versions = target_android._android_list_build_tools_versions()
+        assert [str(v) for v in versions] == ["36.1.0", "35.0.0", "36.1.0"]
+
     def test_check_requirements(self):
         """Basic tests for the check_requirements() method."""
         target_android = init_target(self.temp_dir)
