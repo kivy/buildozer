@@ -494,9 +494,12 @@ class TargetAndroid(Target):
         build_tools_versions = []
 
         for line in lines:
-            if not line.strip().startswith('build-tools;'):
+            # Recent command-line tools (23.0) list packages as "build-tools/36.1.0",
+            # older versions as "build-tools;36.1.0".
+            line = line.strip().replace('build-tools/', 'build-tools;', 1)
+            if not line.startswith('build-tools;'):
                 continue
-            package_name = line.strip().split(' ')[0]
+            package_name = line.split(' ')[0]
             assert package_name.count(';') == 1, (
                 'could not parse package "{}"'.format(package_name))
             version = package_name.split(';')[1]
