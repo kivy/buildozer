@@ -366,6 +366,26 @@ android.allow_backup = True
 # (str) extra command line arguments to pass when invoking pythonforandroid.toolchain
 #p4a.extra_args =
 
+# (str) Directory where built wheel artifacts are stored (empty disables saving)
+#p4a.save_wheel_dir =
+
+# (list) Additional package index urls used for dependency resolution
+# These indexes are searched in addition to the default PyPI index during Android builds.
+# WARNING: Third party indexes are untrusted sources and may introduce supply chain risks,
+# including malicious, tampered, outdated, or incompatible packages.
+#p4a.extra_index_urls = https://chaquo.com/pypi-13.1/
+
+# (bool) Disable use of prebuilt binary packages when available
+# If enabled, all dependencies are built from source even if prebuilt wheels exist.
+#p4a.skip_prebuilt = False
+
+# (list) Packages allowed to use available prebuilt wheels
+# Overrides recipe pinned versions and bypasses default version selection behavior
+# when a compatible prebuilt wheel is available in the index.
+# Example: if kivy==2.3.1 is requested but only `3.0.0` is available in prebuilt index,
+# this option allows using the prebuilt wheel instead of building from source.
+#p4a.use_prebuilt_version_for = numpy,kivy
+
 
 
 #
