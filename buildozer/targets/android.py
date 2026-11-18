@@ -123,6 +123,22 @@ class TargetAndroid(Target):
         if self.logger.log_level >= 2:
             self.extra_p4a_args.append("--debug")
 
+        save_wheel_dir = self.buildozer.config.get('app', 'p4a.save_wheel_dir', fallback="")
+        if save_wheel_dir:
+            self.extra_p4a_args.append(f"--save-wheel-dir={save_wheel_dir}")
+
+        extra_index_urls = self.buildozer.config.getlist('app', 'p4a.extra_index_urls', [])
+        for index in extra_index_urls:
+            self.extra_p4a_args.append(f"--extra-index-url={index}")
+
+        use_prebuilt_version_for = self.buildozer.config.getlist('app', 'p4a.use_prebuilt_version_for', [])
+        for recipe in use_prebuilt_version_for:
+            self.extra_p4a_args.append(f"--use-prebuilt-version-for={recipe}")
+
+        skip_prebuilt = self.buildozer.config.getboolean('app', 'p4a.skip_prebuilt', fallback=False)
+        if skip_prebuilt:
+            self.extra_p4a_args.append("--skip-prebuilt")
+
         user_extra_p4a_args = self.buildozer.config.get('app', 'p4a.extra_args', fallback="")
         self.extra_p4a_args.extend(shlex.split(user_extra_p4a_args))
 

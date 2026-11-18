@@ -521,3 +521,34 @@ class TestTargetAndroid:
                 ]
             )
         ]
+
+    def test_p4a_extra_options(self):
+        """Tests p4a wheel and prebuilt options."""
+        target_android = init_target(self.temp_dir, {
+            "p4a.save_wheel_dir": "/path/to/wheels",
+            "p4a.extra_index_urls": "https://example.com/simple,https://example2.com/simple",
+            "p4a.use_prebuilt_version_for": "numpy,kivy",
+            "p4a.skip_prebuilt": "True",
+        })
+        buildozer = target_android.buildozer
+        assert target_android.extra_p4a_args == [
+            "--color=always",
+            f"--storage-dir={buildozer.buildozer_dir}/android/platform/build-arm64-v8a_armeabi-v7a",
+            "--ndk-api=24",
+            "--ignore-setup-py",
+            "--debug",
+            "--save-wheel-dir=/path/to/wheels",
+            "--extra-index-url=https://example.com/simple",
+            "--extra-index-url=https://example2.com/simple",
+            "--use-prebuilt-version-for=numpy",
+            "--use-prebuilt-version-for=kivy",
+            "--skip-prebuilt",
+        ]
+
+        # Test when skip_prebuilt is False and save_wheel_dir is empty
+        target_android_no_skip = init_target(self.temp_dir, {
+            "p4a.skip_prebuilt": "False",
+            "p4a.save_wheel_dir": "",
+        })
+        assert "--skip-prebuilt" not in target_android_no_skip.extra_p4a_args
+        assert not any(arg.startswith("--save-wheel-dir") for arg in target_android_no_skip.extra_p4a_args)
