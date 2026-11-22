@@ -6,6 +6,7 @@ from unittest import mock
 import sys
 
 import pytest
+from packaging.version import parse
 
 from buildozer.targets.android import TargetAndroid
 from tests.targets.utils import (
@@ -215,6 +216,49 @@ class TestTargetAndroid:
         assert m_file_extract.call_args_list == [
             mock.call(archive, cwd=mock.ANY, env=mock.ANY)]
         assert sdk_dir.endswith(".buildozer/android/platform/android-sdk")
+
+    def _install_android_packages_with_cache(self, existing_dirs):
+        """
+        Run _install_android_packages() with a matching state.db entry, where
+        only the given SDK subdirectories exist. Returns the list of
+        sdkmanager calls.
+        """
+        target_android = init_target(self.temp_dir)
+        sdk_dir = target_android.android_sdk_dir
+        api = target_android.android_api
+        target_android.buildozer.state["android:sdk_installation"] = [
+            target_android.android_api, target_android.android_minapi,
+            target_android.android_ndk_version, target_android.android_sdk_dir,
+            target_android.android_ndk_dir,
+        ]
+        existing = [os.path.join(sdk_dir, d.format(api=api)) for d in existing_dirs]
+        with patch_buildops_file_exists() as m_file_exists, \
+                mock.patch.object(target_android, "_android_update_sdk") as m_update, \
+                mock.patch.object(target_android, "_sdkmanager") as m_sdkmanager, \
+                mock.patch.object(target_android, "_check_aidl"), \
+                mock.patch.object(
+                    target_android, "_android_list_build_tools_versions",
+                    return_value=[parse("30.0.0")]), \
+                mock.patch.object(
+                    target_android, "_read_version_subdir",
+                    return_value=parse("30.0.0")):
+            m_file_exists.side_effect = lambda path: path in existing
+            target_android._install_android_packages()
+        return m_update.call_args_list + m_sdkmanager.call_args_list
+
+    def test_install_android_packages_cached(self):
+        """A matching state.db entry skips the install if the SDK is there."""
+        calls = self._install_android_packages_with_cache(
+            ["platform-tools", "build-tools", "platforms/android-{api}"])
+        assert calls == []
+
+    def test_install_android_packages_cached_sdk_missing(self):
+        """A matching state.db entry is ignored if the SDK packages are gone,
+        e.g. docker with a wiped ~/.buildozer but a persisted project dir."""
+        calls = self._install_android_packages_with_cache([])
+        assert mock.call("platform-tools") in calls
+        api = init_target(self.temp_dir).android_api
+        assert mock.call("platforms;android-{}".format(api)) in calls
 
     def test_build_package(self):
         """Basic tests for the build_package() method."""

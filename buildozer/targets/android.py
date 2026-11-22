@@ -565,7 +565,19 @@ class TargetAndroid(Target):
             self.android_sdk_dir, self.android_ndk_dir
         ]
         if self.buildozer.state.get(cache_key, None) == cache_value:
-            return True
+            # the state db can outlive the SDK (e.g. a project dir mounted
+            # into a container whose ~/.buildozer is gone), so only trust it
+            # if the packages are still there
+            sdk_packages = [
+                join(self.android_sdk_dir, 'platform-tools'),
+                join(self.android_sdk_dir, 'build-tools'),
+                join(self.android_sdk_dir, 'platforms',
+                     'android-{}'.format(self.android_api)),
+            ]
+            if all(buildops.file_exists(path) for path in sdk_packages):
+                return True
+            self.logger.info(
+                'Android SDK packages are missing, installing them again')
 
         # 1. update the platform-tools package if needed
 
